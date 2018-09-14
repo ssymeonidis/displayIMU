@@ -113,7 +113,7 @@ void *sensor_data_run(void*)
     index      = sensor_buffer_index+1;
     if (index >= sensor_buffer_size)
       index    = 0; 
-    sscanf(socket_buffer, "%*f, %*d, %f, %f, %f, %*d, %f, %f, %f, %*d, %f, %f, %f", 
+    sscanf(socket_buffer, "%f, %f, %f, %f, %f, %f, %f, %f, %f", 
       &(sensor_buffer[index][0]), &(sensor_buffer[index][1]), &(sensor_buffer[index][2]),
       &(sensor_buffer[index][3]), &(sensor_buffer[index][4]), &(sensor_buffer[index][5]),
       &(sensor_buffer[index][6]), &(sensor_buffer[index][7]), &(sensor_buffer[index][8]));

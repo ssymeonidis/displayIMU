@@ -67,10 +67,11 @@ class GLWidget : public QGLWidget
     // internal functions
     void drawArrow(GLfloat faceColor[4], GLfloat scale, GLfloat angles[2]);
     void drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale);
+    void drawGrid();
 
     // internal colors
-    GLUquadricObj *obj;
-    QTimer* refresh_timer;
+    GLUquadricObj   *obj;
+    QTimer*         refresh_timer;
 
     // internal variables
     int     is_csv_file;
@@ -85,9 +86,10 @@ class GLWidget : public QGLWidget
     static const float cylinderRadius = 0.012;
 
     // colors
-    static float acclColor[4];
-    static float magColor[4];
-    static float gyroColor[4];
+    static float acclColor [4];
+    static float magColor  [4];
+    static float gyroColor [4];
+    static float gridColor [4];
 };
 
 #endif

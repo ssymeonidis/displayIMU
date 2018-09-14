@@ -1,25 +1,54 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'pixmap.h'
 **
-** Created by: The Qt Meta Object Compiler version 63 (Qt 4.8.6)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
 #include "pixmap.h"
+#include <QtCore/qbytearray.h>
+#include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'pixmap.h' doesn't include <QObject>."
-#elif Q_MOC_OUTPUT_REVISION != 63
-#error "This file was generated using the moc from 4.8.6. It"
+#elif Q_MOC_OUTPUT_REVISION != 67
+#error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
+struct qt_meta_stringdata_pixmap_t {
+    QByteArrayData data[8];
+    char stringdata0[75];
+};
+#define QT_MOC_LITERAL(idx, ofs, len) \
+    Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
+    qptrdiff(offsetof(qt_meta_stringdata_pixmap_t, stringdata0) + ofs \
+        - idx * sizeof(QByteArrayData)) \
+    )
+static const qt_meta_stringdata_pixmap_t qt_meta_stringdata_pixmap = {
+    {
+QT_MOC_LITERAL(0, 0, 6), // "pixmap"
+QT_MOC_LITERAL(1, 7, 10), // "paintEvent"
+QT_MOC_LITERAL(2, 18, 0), // ""
+QT_MOC_LITERAL(3, 19, 12), // "updateParams"
+QT_MOC_LITERAL(4, 32, 12), // "updateIndex1"
+QT_MOC_LITERAL(5, 45, 5), // "value"
+QT_MOC_LITERAL(6, 51, 12), // "updateIndex2"
+QT_MOC_LITERAL(7, 64, 10) // "updatePlay"
+
+    },
+    "pixmap\0paintEvent\0\0updateParams\0"
+    "updateIndex1\0value\0updateIndex2\0"
+    "updatePlay"
+};
+#undef QT_MOC_LITERAL
+
 static const uint qt_meta_data_pixmap[] = {
 
  // content:
-       6,       // revision
+       7,       // revision
        0,       // classname
        0,    0, // classinfo
        5,   14, // methods
@@ -29,27 +58,28 @@ static const uint qt_meta_data_pixmap[] = {
        0,       // flags
        0,       // signalCount
 
- // slots: signature, parameters, type, tag, flags
-       8,    7,    7,    7, 0x0a,
-      21,    7,    7,    7, 0x0a,
-      42,   36,    7,    7, 0x0a,
-      60,    7,    7,    7, 0x0a,
-      75,    7,    7,    7, 0x0a,
+ // slots: name, argc, parameters, tag, flags
+       1,    0,   39,    2, 0x0a /* Public */,
+       3,    0,   40,    2, 0x0a /* Public */,
+       4,    1,   41,    2, 0x0a /* Public */,
+       6,    0,   44,    2, 0x0a /* Public */,
+       7,    0,   45,    2, 0x0a /* Public */,
+
+ // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,    5,
+    QMetaType::Void,
+    QMetaType::Void,
 
        0        // eod
-};
-
-static const char qt_meta_stringdata_pixmap[] = {
-    "pixmap\0\0paintEvent()\0updateParams()\0"
-    "value\0updateIndex1(int)\0updateIndex2()\0"
-    "updatePlay()\0"
 };
 
 void pixmap::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Q_ASSERT(staticMetaObject.cast(_o));
         pixmap *_t = static_cast<pixmap *>(_o);
+        Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->paintEvent(); break;
         case 1: _t->updateParams(); break;
@@ -61,28 +91,21 @@ void pixmap::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
     }
 }
 
-const QMetaObjectExtraData pixmap::staticMetaObjectExtraData = {
-    0,  qt_static_metacall 
-};
-
 const QMetaObject pixmap::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_pixmap,
-      qt_meta_data_pixmap, &staticMetaObjectExtraData }
+    { &QWidget::staticMetaObject, qt_meta_stringdata_pixmap.data,
+      qt_meta_data_pixmap,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
-#ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &pixmap::getStaticMetaObject() { return staticMetaObject; }
-#endif //Q_NO_DATA_RELOCATION
 
 const QMetaObject *pixmap::metaObject() const
 {
-    return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
+    return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
 void *pixmap::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_pixmap))
+    if (!_clname) return Q_NULLPTR;
+    if (!strcmp(_clname, qt_meta_stringdata_pixmap.stringdata0))
         return static_cast<void*>(const_cast< pixmap*>(this));
     return QWidget::qt_metacast(_clname);
 }
@@ -95,6 +118,10 @@ int pixmap::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_c == QMetaObject::InvokeMetaMethod) {
         if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
+        _id -= 5;
+    } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
+        if (_id < 5)
+            *reinterpret_cast<int*>(_a[0]) = -1;
         _id -= 5;
     }
     return _id;

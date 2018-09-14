@@ -394,7 +394,7 @@ void updateMARG(float* g, float* a, float* m, float* E, float* A,
   twom_z     = 2.0 * m_z;
 
   /****************************************************************************
-  * dead recokon orientation w/ accelerometer & accelerometer
+  * dead recokon orientation w/ accelerometer & magnetometer 
   ****************************************************************************/
 
   if ((isGrad == 0 && isAccl != 0 && isMag != 0) || 

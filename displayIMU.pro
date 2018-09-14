@@ -18,7 +18,8 @@ SOURCES       = glwidget.cpp        \
                 dataread.cpp        \
                 framesPerSecond.cpp \
                 main.cpp 
-QT           += opengl
+QT           += opengl              \
+                widgets
 LIBS         += -lGLU  \
                 -lcsv  \
                 -lpthread

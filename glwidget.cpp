@@ -28,8 +28,9 @@
 #include "MARG.h"
 
 GLfloat GLWidget::acclColor[4] = {   1.0,    0.0,    0.0,    1.0};
-GLfloat GLWidget::magColor[4] =  {   0.0,    1.0,    0.0,    1.0};
+GLfloat GLWidget::magColor[4]  = {   0.0,    1.0,    0.0,    1.0};
 GLfloat GLWidget::gyroColor[4] = {   0.0,    0.0,    1.0,    1.0};
+GLfloat GLWidget::gridColor[4] = {   0.3,    0.3,    0.3,    1.0}; 
 
 GLWidget::GLWidget(int is_csv_file_in)
   : QGLWidget(QGLFormat(QGL::SampleBuffers), 0)
@@ -47,17 +48,9 @@ GLWidget::GLWidget(int is_csv_file_in)
   isMag      = true;
   isGyro     = false;
   isIMU      = false;
-  if (is_csv_file == 0) {
-    scaleAccl  = 12;
-    scaleMag   = 50;
-    scaleGyro  = 2; 
-    scaleIMU   = 10;
-  } else {
-    scaleAccl  = 15000;
-    scaleMag   = 3000;
-    scaleGyro  = 10000;
-    scaleIMU   = 10000;
-  }
+  scaleAccl  = 2500;
+  scaleMag   = 5000;
+  scaleGyro  = 200; 
 
   // create timer
   refresh_timer = new QTimer(this);
@@ -143,8 +136,11 @@ void GLWidget::initializeGL()
   glShadeModel(GL_SMOOTH);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  static GLfloat lightPosition[4] = { 0.5, 5.0, 7.0, 1.0 };
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+  static GLfloat lightPosition1[4] = {  0.5,  5.0,  7.0, 1.0 };
+  static GLfloat lightDiffuse1[4]  = {  0.5,  0.5,  0.5, 1.0 };
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
+  glLightfv(GL_LIGHT0, GL_AMBIENT,  lightDiffuse1);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE,  lightDiffuse1);
   glEnable(GL_BLEND); 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
   //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -167,6 +163,9 @@ void GLWidget::paintGL()
   glRotatef(xRot / 16.0, 1.0, 0.0, 0.0);
   glRotatef(yRot / 16.0, 0.0, 1.0, 0.0);
   glRotatef(zRot / 16.0, 0.0, 0.0, 1.0);
+
+  // draw reference grid
+  drawGrid(); 
 
   // draw accelerometer state
   if (isAccl == true) {
@@ -215,19 +214,9 @@ void GLWidget::paintGL()
       GLfloat vector2[3]    = {-0.0,  0.0,  1.0};
       drawVector(acclColor, vector2, 1.0);
       GLfloat vector3[3]    = {-1.0,  0.0,  0.0};
-      drawVector(magColor, vector3, 1.0);
+      drawVector(magColor,  vector3, 1.0);
     glPopMatrix();
   }
-
-  // draw the reference plane
-  GLfloat planeColor1[4] = {1.0, 0.0, 1.0, 0.05};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, planeColor1);
-  glBegin(GL_QUADS);
-    glVertex3f(-1.0, 0.0,  1.0);
-    glVertex3f(-1.0, 0.0, -1.0);
-    glVertex3f( 1.0, 0.0, -1.0);
-    glVertex3f( 1.0, 0.0,  1.0);
-  glEnd();
 
   // update debug params
   /*deltaGrav->setText(QString::number(delta_G));
@@ -309,4 +298,40 @@ void GLWidget::drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale
   // perform the draw
   float angle[2] = {t,p};
   drawArrow(faceColor, r, angle);
+  glBegin(GL_LINES);
+  glVertex3f( 0.0, 0.0,  0.0); 
+  glVertex3f( y/2, 0.0,  x/2);
+  glEnd();
+}
+
+
+void GLWidget::drawGrid()
+{
+  // draw the reference plane
+  GLfloat planeColor1[4] = {1.0, 0.0, 1.0, 1.0};
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, planeColor1);
+  glBegin(GL_LINES);
+    glVertex3f(-1.0, 0.0,  1.0); glVertex3f(-1.0, 0.0, -1.0);
+    glVertex3f(-0.8, 0.0,  1.0); glVertex3f(-0.8, 0.0, -1.0);
+    glVertex3f(-0.6, 0.0,  1.0); glVertex3f(-0.6, 0.0, -1.0);
+    glVertex3f(-0.4, 0.0,  1.0); glVertex3f(-0.4, 0.0, -1.0);
+    glVertex3f(-0.2, 0.0,  1.0); glVertex3f(-0.2, 0.0, -1.0);
+    glVertex3f( 0.0, 0.0,  1.0); glVertex3f(-0.0, 0.0, -1.0);
+    glVertex3f( 0.2, 0.0,  1.0); glVertex3f( 0.2, 0.0, -1.0);
+    glVertex3f( 0.4, 0.0,  1.0); glVertex3f( 0.4, 0.0, -1.0);
+    glVertex3f( 0.6, 0.0,  1.0); glVertex3f( 0.6, 0.0, -1.0);
+    glVertex3f( 0.8, 0.0,  1.0); glVertex3f( 0.8, 0.0, -1.0);
+    glVertex3f( 1.0, 0.0,  1.0); glVertex3f( 1.0, 0.0, -1.0);
+    glVertex3f( 1.0, 0.0, -1.0); glVertex3f(-1.0, 0.0, -1.0);
+    glVertex3f( 1.0, 0.0, -0.8); glVertex3f(-1.0, 0.0, -0.8);
+    glVertex3f( 1.0, 0.0, -0.6); glVertex3f(-1.0, 0.0, -0.6);
+    glVertex3f( 1.0, 0.0, -0.4); glVertex3f(-1.0, 0.0, -0.4);
+    glVertex3f( 1.0, 0.0, -0.2); glVertex3f(-1.0, 0.0, -0.2);
+    glVertex3f( 1.0, 0.0,  0.0); glVertex3f(-1.0, 0.0,  0.0);
+    glVertex3f( 1.0, 0.0,  0.2); glVertex3f(-1.0, 0.0,  0.2);
+    glVertex3f( 1.0, 0.0,  0.4); glVertex3f(-1.0, 0.0,  0.4);
+    glVertex3f( 1.0, 0.0,  0.6); glVertex3f(-1.0, 0.0,  0.6);
+    glVertex3f( 1.0, 0.0,  0.8); glVertex3f(-1.0, 0.0,  0.8);
+    glVertex3f( 1.0, 0.0,  1.0); glVertex3f(-1.0, 0.0,  1.0);
+  glEnd();
 }
