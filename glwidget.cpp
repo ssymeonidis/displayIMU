@@ -170,7 +170,7 @@ void GLWidget::paintGL()
   // draw accelerometer state
   if (isAccl == true) {
     if (is_csv_file == 0)
-      drawVector(acclColor, &(sensor_buffer[i][0]), scaleAccl);
+      drawVector(acclColor, &(sensor_buffer[i][3]), scaleAccl);
     else
       drawVector(acclColor, &(csv_buffer[i][4]), scaleAccl);
   }
@@ -186,7 +186,7 @@ void GLWidget::paintGL()
   // draw gyroscope state
   if (isGyro == true) {
     if (is_csv_file == 0) 
-      drawVector(gyroColor, &(sensor_buffer[i][3]), scaleGyro);
+      drawVector(gyroColor, &(sensor_buffer[i][0]), scaleGyro);
     else
       drawVector(gyroColor, &(csv_buffer[i][7]), scaleGyro);
   }

@@ -26,7 +26,6 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <errno.h>
-#include "framesPerSecond.h"
 #include "receive.h"
 
 // define the sensor data structure
@@ -102,9 +101,6 @@ void *sensor_data_run(void*)
   int   rc;
   int   index;
 
-  // create the fps counter
-  framesPerSecond fps;
-
   // main processing loop
   while(1) {
     // receive UDP data
@@ -115,7 +111,7 @@ void *sensor_data_run(void*)
     index      = sensor_buffer_index+1;
     if (index >= sensor_buffer_size)
       index    = 0; 
-    sscanf(socket_buffer, "%f, %f, %f, %f, %f, %f, %f, %f, %f", 
+    sscanf(socket_buffer, "%*f, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
       &(sensor_buffer[index][0]), &(sensor_buffer[index][1]), &(sensor_buffer[index][2]),
       &(sensor_buffer[index][3]), &(sensor_buffer[index][4]), &(sensor_buffer[index][5]),
       &(sensor_buffer[index][6]), &(sensor_buffer[index][7]), &(sensor_buffer[index][8]));
@@ -123,15 +119,15 @@ void *sensor_data_run(void*)
 
     // perform the specified IMU
     if (sensor_IMU_type == 1) {
-      displayIMU_corAll(&(sensor_buffer[index][3]),
-                        &(sensor_buffer[index][0]),
+      displayIMU_corAll(&(sensor_buffer[index][0]),
+                        &(sensor_buffer[index][3]),
                         &(sensor_buffer[index][6]),
-                        &(sensor_buffer_corrected[3]),
                         &(sensor_buffer_corrected[0]),
+                        &(sensor_buffer_corrected[3]),
                         &(sensor_buffer_corrected[6])); 
       displayIMU_estmAll(NULL,
-                 &(sensor_buffer_corrected[3]),
                  &(sensor_buffer_corrected[0]),
+                 &(sensor_buffer_corrected[3]),
                  &(sensor_buffer_corrected[6]),
                  &(sensor_buffer[index][9]),
                  &(sensor_buffer[index][12]),
@@ -158,8 +154,6 @@ void *sensor_data_run(void*)
     sensor_IMU_reset   = 0;
     sensor_IMU_calib   = 0; 
 
-    // update the frames per second
-    fps.get();
   }
 
   // exit function

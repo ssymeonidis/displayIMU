@@ -23,15 +23,13 @@
 #include "receive.h"
 #include "dataread.h"
 
-Window::Window(int is_csv_file_in, const char* video_path, int offset, float rate, int max_frame)
+Window::Window(int is_csv_file_in)
 {
   // save system state
   is_csv_file       = is_csv_file_in;
 
   // create display/video widgets
   glWidget          = new GLWidget(is_csv_file);
-  if (video_path != NULL)
-    video           = new pixmap(video_path, offset, rate, max_frame);
   displayIMU_getCalib(&calib);
   displayIMU_getConfig(&config);
 
@@ -398,15 +396,7 @@ Window::Window(int is_csv_file_in, const char* video_path, int offset, float rat
   mainLayout->addLayout(paramsLayout);
   mainLayout->addSpacerItem(new QSpacerItem(10,1));
   mainLayout->addLayout(biasLayout);
-  if (video_path != NULL) {
-    QVBoxLayout *windowLayout = new QVBoxLayout;
-    windowLayout->addLayout(mainLayout);
-    windowLayout->addWidget(video);
-    setLayout(windowLayout);
-    printf("new layout...\n");
-  } else {
-    setLayout(mainLayout);
-  }
+  setLayout(mainLayout);
 
   xSlider->setValue(15 * 16);
   ySlider->setValue(345 * 16);

@@ -22,51 +22,51 @@
 
 // define the calibration structure (values tuned for each unit)
 struct displayIMU_calib {
-  float    gBias[3];           // gyroscope biases
-  float    aBias[3];           // accelerometer biases
-  float    mBias[3];           // magnetometer biases
-  float    gScale[3];          // gyroscope scale factor
-  float    aMag;               // gravity magnitude
-  float    mMag;               // magnetic north magnitude  
-  float    mAng;               // magnetic north angle
+  float    gBias[3];        // gyroscope biases
+  float    aBias[3];        // accelerometer biases
+  float    mBias[3];        // magnetometer biases
+  float    gScale[3];       // gyroscope scale factor
+  float    aMag;            // gravity magnitude
+  float    mMag;            // magnetic north magnitude  
+  float    mAng;            // magnetic north angle
 };
 
 // define the configuration structure (values tuned for a part)
 struct displayIMU_config {
-  bool     isGyro;             // enable gyroscope data 
-  bool     isAccl;             // enable accelerometer data
-  bool     isMagn;             // enable magnetometer data
-  bool     isFltr;             // enable IMU filter
-  bool     isTear;             // enable application of ref
-  bool     isAcclEstm;         // enable acceleration estimate
-  bool     isAutocal;          // enable autocal data collect
-  float    aWeight;            // accelerometer filter weight
-  float    mWeight;            // magnetometer filter weight
-  float    acclAlpha;          // acceleration estimate alpha
-  float    autocalAlpha1;      // autocal "still" alpha
-  float    autocalAlpha2;      // autocal "continous" alpha
-  float    gAutocalThresh;     // gyroscope no motion threshold
+  bool     isGyro;          // enable gyroscope data 
+  bool     isAccl;          // enable accelerometer data
+  bool     isMagn;          // enable magnetometer data
+  bool     isFltr;          // enable IMU filter
+  bool     isTear;          // enable application of ref
+  bool     isAcclEstm;      // enable acceleration estimate
+  bool     isAutocal;       // enable autocal data collect
+  float    aWeight;         // accelerometer filter weight
+  float    mWeight;         // magnetometer filter weight
+  float    acclAlpha;       // acceleration estimate alpha
+  float    autocalAlpha1;   // autocal "still" alpha
+  float    autocalAlpha2;   // autocal "continous" alpha
+  float    gAutocalThresh;  // gyroscope no motion threshold
 };
 
 // define internal state struct (captures internal IMU state)
 struct displayIMU_state {
-  float    SEq[4];             // current quaterion
-  float    ref[4];             // "tear" reference 
-  float    a[3];               // last accelerometer input
-  float    A[3];               // last acceleration estimate
-  bool     isReset;            // reset signal
+  float    SEq[4];          // current quaterion
+  float    ref[4];          // "tear" reference 
+  float    a[3];            // last accelerometer input
+  float    A[3];            // last acceleration estimate
+  bool     isReset;         // reset signal
 };
 
 // define the auto_calib state (used to improve config struct)
 struct displayIMU_autocal {
-  float    gBias[3];           // gyroscope autocal estimate #1
-  float    gBiasCont[3];       // gyroscope autocal estimate #2
-  float    aMag;               // gravity magnitude estimate #1
-  float    aMagCont;           // gravity magnitude estimate #2
-  float    mMag;               // magnetic north magnitude estimate #1
-  float    mMagCont;           // magnetic north magnitude estimate #2
-  float    mAng;               // magnetic north angle estimate #1
-  float    mAngCont;           // magnetic north angle estiamte #2
+  float    gBias[3];        // gyroscope autocal estimate #1
+  float    gBiasCont[3];    // gyroscope autocal estimate #2
+  float    aMag;            // gravity magnitude estimate #1
+  float    aMagCont;        // gravity magnitude estimate #2
+  float    mMag;            // magnetic north magnitude estimate #1
+  float    mMagCont;        // magnetic north magnitude estimate #2
+  float    mAng;            // magnetic north angle estimate #1
+  float    mAngCont;        // magnetic north angle estiamte #2
 }; 
 
 // define the quality metrics structure (used for debugging)

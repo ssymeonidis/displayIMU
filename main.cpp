@@ -35,10 +35,6 @@ int main(int argc, char *argv[])
   float     accl_ref_vector[3];
   FILE*     fid;
   int       pass;
-  char*     video_path;
-  int       offset;
-  float     rate;
-  int       max_frame;
 
   // launch the readers
   if (argc < 2) {
@@ -52,24 +48,8 @@ int main(int argc, char *argv[])
   }
 
   // create the display
-  if (argc > 4)
-    video_path    = argv[4];
-  else
-    video_path    = NULL;
-  if (argc > 5)
-    offset        = atoi(argv[5]);
-  else
-    offset        = 0;
-  if (argc > 6)
-    rate          = atof(argv[6]);
-  else
-    rate          = 1.0; 
-  if (argc > 7)
-    max_frame     = atoi(argv[7]);
-  else
-    max_frame     = 1000;
   QApplication app(argc, argv);
-  Window window(is_csv_file, video_path, offset, rate, max_frame);
+  Window window(is_csv_file);
   window.resize(window.sizeHint());
   int desktopArea = QApplication::desktop()->width() *
                     QApplication::desktop()->height();

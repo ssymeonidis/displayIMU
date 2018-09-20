@@ -20,7 +20,6 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "pixmap.h"
 #include "glwidget.h"
 #include "MARG.h"
 #include <QWidget>
@@ -40,7 +39,7 @@ class Window : public QWidget
   Q_OBJECT
 
   public:
-    Window(int is_csv_file, const char* video_path, int offset, float rate, int max_frame);
+                  Window(int is_csv_file);
     void          setRefAccl(float* a);
     void          setParams(float* params);
 
@@ -68,7 +67,6 @@ class Window : public QWidget
 
     // internal objects/variables
     GLWidget*           glWidget;
-    pixmap*             video;
     QTimer*             refreshTimer;
     displayIMU_calib*   calib;
     displayIMU_config*  config;

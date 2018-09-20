@@ -49,25 +49,19 @@ OBJECTS_DIR   = ./
 ####### Files
 
 SOURCES       = glwidget.cpp \
-		pixmap.cpp \
 		window.cpp \
 		MARG.cpp \
 		receive.cpp \
 		dataread.cpp \
-		framesPerSecond.cpp \
 		main.cpp moc_glwidget.cpp \
-		moc_pixmap.cpp \
 		moc_window.cpp
 OBJECTS       = glwidget.o \
-		pixmap.o \
 		window.o \
 		MARG.o \
 		receive.o \
 		dataread.o \
-		framesPerSecond.o \
 		main.o \
 		moc_glwidget.o \
-		moc_pixmap.o \
 		moc_window.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
@@ -126,18 +120,14 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		displayIMU.pro glwidget.h \
-		pixmap.h \
 		window.h \
 		MARG.h \
 		receive.h \
-		dataread.h \
-		framesPerSecond.h glwidget.cpp \
-		pixmap.cpp \
+		dataread.h glwidget.cpp \
 		window.cpp \
 		MARG.cpp \
 		receive.cpp \
 		dataread.cpp \
-		framesPerSecond.cpp \
 		main.cpp
 QMAKE_TARGET  = displayIMU
 DESTDIR       = #avoid trailing-slash linebreak
@@ -306,8 +296,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents glwidget.h pixmap.h window.h MARG.h receive.h dataread.h framesPerSecond.h $(DISTDIR)/
-	$(COPY_FILE) --parents glwidget.cpp pixmap.cpp window.cpp MARG.cpp receive.cpp dataread.cpp framesPerSecond.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents glwidget.h window.h MARG.h receive.h dataread.h $(DISTDIR)/
+	$(COPY_FILE) --parents glwidget.cpp window.cpp MARG.cpp receive.cpp dataread.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -330,17 +320,13 @@ check: first
 
 compiler_rcc_make_all:
 compiler_rcc_clean:
-compiler_moc_header_make_all: moc_glwidget.cpp moc_pixmap.cpp moc_window.cpp
+compiler_moc_header_make_all: moc_glwidget.cpp moc_window.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_glwidget.cpp moc_pixmap.cpp moc_window.cpp
+	-$(DEL_FILE) moc_glwidget.cpp moc_window.cpp
 moc_glwidget.cpp: glwidget.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glwidget.h -o moc_glwidget.cpp
 
-moc_pixmap.cpp: pixmap.h
-	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include pixmap.h -o moc_pixmap.cpp
-
-moc_window.cpp: pixmap.h \
-		glwidget.h \
+moc_window.cpp: glwidget.h \
 		MARG.h \
 		window.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include window.h -o moc_window.cpp
@@ -361,19 +347,12 @@ compiler_clean: compiler_moc_header_clean
 
 glwidget.o: glwidget.cpp glwidget.h \
 		window.h \
-		pixmap.h \
 		MARG.h \
 		receive.h \
 		dataread.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glwidget.o glwidget.cpp
 
-pixmap.o: pixmap.cpp pixmap.h \
-		dataread.h \
-		MARG.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o pixmap.o pixmap.cpp
-
 window.o: window.cpp window.h \
-		pixmap.h \
 		glwidget.h \
 		MARG.h \
 		receive.h \
@@ -383,8 +362,7 @@ window.o: window.cpp window.h \
 MARG.o: MARG.cpp MARG.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MARG.o MARG.cpp
 
-receive.o: receive.cpp framesPerSecond.h \
-		receive.h \
+receive.o: receive.cpp receive.h \
 		MARG.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o receive.o receive.cpp
 
@@ -392,11 +370,7 @@ dataread.o: dataread.cpp dataread.h \
 		MARG.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dataread.o dataread.cpp
 
-framesPerSecond.o: framesPerSecond.cpp framesPerSecond.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o framesPerSecond.o framesPerSecond.cpp
-
 main.o: main.cpp window.h \
-		pixmap.h \
 		glwidget.h \
 		MARG.h \
 		receive.h \
@@ -405,9 +379,6 @@ main.o: main.cpp window.h \
 
 moc_glwidget.o: moc_glwidget.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_glwidget.o moc_glwidget.cpp
-
-moc_pixmap.o: moc_pixmap.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_pixmap.o moc_pixmap.cpp
 
 moc_window.o: moc_window.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_window.o moc_window.cpp
