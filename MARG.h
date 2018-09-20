@@ -17,48 +17,92 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _MARG_H
-#define _MARG_H
+#ifndef _DISPLAYIMU_H
+#define _DISPLAYIMU_H
 
-// tuning params
-extern float accl_scale;
-extern float mag_scale;
-extern float gyro_scale;
-extern float accl_alpha;
-extern float zeta;
+// define the calibration structure (values tuned for each unit)
+struct displayIMU_calib {
+  float    gBias[3];           // gyroscope biases
+  float    aBias[3];           // accelerometer biases
+  float    mBias[3];           // magnetometer biases
+  float    gScale[3];          // gyroscope scale factor
+  float    aMag;               // gravity magnitude
+  float    mMag;               // magnetic north magnitude  
+  float    mAng;               // magnetic north angle
+};
 
-// sensor biases
-extern float aBiasX;
-extern float aBiasY;
-extern float aBiasZ;
-extern float mBiasX;
-extern float mBiasY;
-extern float mBiasZ;
-extern float gBiasX;
-extern float gBiasY;
-extern float gBiasZ;
+// define the configuration structure (values tuned for a part)
+struct displayIMU_config {
+  bool     isGyro;             // enable gyroscope data 
+  bool     isAccl;             // enable accelerometer data
+  bool     isMagn;             // enable magnetometer data
+  bool     isFltr;             // enable IMU filter
+  bool     isTear;             // enable application of ref
+  bool     isAcclEstm;         // enable acceleration estimate
+  bool     isAutocal;          // enable autocal data collect
+  float    aWeight;            // accelerometer filter weight
+  float    mWeight;            // magnetometer filter weight
+  float    acclAlpha;          // acceleration estimate alpha
+  float    autocalAlpha1;      // autocal "still" alpha
+  float    autocalAlpha2;      // autocal "continous" alpha
+  float    gAutocalThresh;     // gyroscope no motion threshold
+};
 
-// calibration magnitudes/angles
-extern float G;
-extern float M;
-extern float ang;
+// define internal state struct (captures internal IMU state)
+struct displayIMU_state {
+  float    SEq[4];             // current quaterion
+  float    ref[4];             // "tear" reference 
+  float    a[3];               // last accelerometer input
+  float    A[3];               // last acceleration estimate
+  bool     isReset;            // reset signal
+};
 
-// debug values
-extern float delta_G;
-extern float delta_a;
-extern float delta_m;
-extern float delta_M;
-extern float delta_ang;
+// define the auto_calib state (used to improve config struct)
+struct displayIMU_autocal {
+  float    gBias[3];           // gyroscope autocal estimate #1
+  float    gBiasCont[3];       // gyroscope autocal estimate #2
+  float    aMag;               // gravity magnitude estimate #1
+  float    aMagCont;           // gravity magnitude estimate #2
+  float    mMag;               // magnetic north magnitude estimate #1
+  float    mMagCont;           // magnetic north magnitude estimate #2
+  float    mAng;               // magnetic north angle estimate #1
+  float    mAngCont;           // magnetic north angle estiamte #2
+}; 
 
-// disable controls
-extern int isAcclDisable;
-extern int isMagDisable;
-extern int isGyroDisable;
+// define the quality metrics structure (used for debugging)
+struct displayIMU_metrics {
+  float    delta_G;
+  float    delta_a;
+  float    delta_m;
+  float    delta_M;
+  float    delta_ang;
+};
 
-void initMARG(int is_csv_file);
-void refAcclMARG(float* a);
-void updateMARG(float* g, float* a, float* m, float* E, float* A, 
-                int isRef, int isReset, int isCalib);
+// data structure access functions
+void displayIMU_getCalib    (displayIMU_calib   **calib);
+void displayIMU_getConfig   (displayIMU_config  **config);
+void displayIMU_getAutocal  (displayIMU_autocal *autocal);
+void displayIMU_getState    (displayIMU_state   *state);
+
+// "tear" functions
+void displayIMU_setRef      ();
+void displayIMU_setRefAccl  (float* a);
+
+// raw data correction functions
+void displayIMU_corGyro     (float* g_raw, float* g);
+void displayIMU_corAccl     (float* a_raw, float* a);
+void displayIMU_corMagn     (float* m_raw, float* m);
+void displayIMU_corAll      (float* g_raw, float* a_raw, float* m_raw, 
+                             float* g,     float* a,     float* m);
+
+// general operation functions 
+#define displayIMU_ESTM_ARGS float* E, float* A, displayIMU_metrics* FOM 
+void displayIMU_init        ();
+void displayIMU_deadRecon   (float* a, float* m, float* E);
+void displayIMU_estmGyro    (float* t, float* g, displayIMU_ESTM_ARGS);
+void displayIMU_estmAccl    (float* t, float* a, displayIMU_ESTM_ARGS);
+void displayIMU_estmMagn    (float* t, float* m, displayIMU_ESTM_ARGS);
+void displayIMU_estmAll     (float* t, float* g, float* a, float* m,  
+                             displayIMU_ESTM_ARGS);
 
 #endif
-

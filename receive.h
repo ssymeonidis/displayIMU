@@ -20,13 +20,17 @@
 #ifndef _RECEIVE_H
 #define _RECEIVE_H
 
+// include statements
+#include "MARG.h"
+
 // define the sensor data structure
-extern const int        sensor_buffer_size;
-extern float            sensor_buffer[][15];
-extern int              sensor_buffer_index;
-extern int              sensor_IMU_reset;
-extern int              sensor_IMU_set_ref;
-extern int              sensor_IMU_calib;
+extern const int           sensor_buffer_size;
+extern float               sensor_buffer[][15];
+extern int                 sensor_buffer_index;
+extern displayIMU_metrics  sensor_buffer_metrics;
+extern int                 sensor_IMU_reset;
+extern int                 sensor_IMU_set_ref;
+extern int                 sensor_IMU_calib;
 
 void sensor_data_error(const char *msg);
 void sensor_data_init(int portno);

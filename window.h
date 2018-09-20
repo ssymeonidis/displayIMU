@@ -22,6 +22,7 @@
 
 #include "pixmap.h"
 #include "glwidget.h"
+#include "MARG.h"
 #include <QWidget>
 
 // QT class defintions
@@ -66,10 +67,12 @@ class Window : public QWidget
     QSlider*      createSlider();
 
     // internal objects/variables
-    GLWidget*     glWidget;
-    pixmap*       video;
-    QTimer*       refreshTimer;
-    int           is_csv_file;
+    GLWidget*           glWidget;
+    pixmap*             video;
+    QTimer*             refreshTimer;
+    displayIMU_calib*   calib;
+    displayIMU_config*  config;
+    int                 is_csv_file;
 
     // GUI objects 
     QSlider*      xSlider;

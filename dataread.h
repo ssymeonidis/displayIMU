@@ -20,13 +20,17 @@
 #ifndef _DATAREAD_H
 #define _DATAREAD_H
 
+// include statemeents
+#include "MARG.h"
+
 // define the sensor data structure
-extern const int        csv_buffer_size;
-extern float            csv_buffer[][16];
-extern int              csv_buffer_index;
-extern int              csv_IMU_set_ref;
-extern int              csv_IMU_reset;
-extern int              csv_IMU_calib;
+extern const int           csv_buffer_size;
+extern float               csv_buffer[][16];
+extern int                 csv_buffer_index;
+extern displayIMU_metrics  csv_buffer_metrics;
+extern int                 csv_IMU_set_ref;
+extern int                 csv_IMU_reset;
+extern int                 csv_IMU_calib;
 
 void csv_data_init(char* filename);
 void *csv_data_run(void* id);

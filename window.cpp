@@ -22,7 +22,6 @@
 #include "window.h"
 #include "receive.h"
 #include "dataread.h"
-#include "MARG.h"
 
 Window::Window(int is_csv_file_in, const char* video_path, int offset, float rate, int max_frame)
 {
@@ -33,6 +32,8 @@ Window::Window(int is_csv_file_in, const char* video_path, int offset, float rat
   glWidget          = new GLWidget(is_csv_file);
   if (video_path != NULL)
     video           = new pixmap(video_path, offset, rate, max_frame);
+  displayIMU_getCalib(&calib);
+  displayIMU_getConfig(&config);
 
   // create timer
   refreshTimer = new QTimer(this);
@@ -99,16 +100,16 @@ Window::Window(int is_csv_file_in, const char* video_path, int offset, float rat
   calibButton->setFixedSize(QSize(60, 29));
   acclRateText      = new QLabel();
   acclRateText->setText("Accl Beta");
-  acclRate          = new QLineEdit(QString::number(accl_scale));
+  acclRate          = new QLineEdit(QString::number(config->aWeight));
   magRateText       = new QLabel();
   magRateText->setText("Mag Beta");
-  magRate           = new QLineEdit(QString::number(mag_scale));
+  magRate           = new QLineEdit(QString::number(config->mWeight));
   acclAlphaText     = new QLabel();
   acclAlphaText->setText("Accl Alpha");
-  acclAlpha         = new QLineEdit(QString::number(accl_alpha)); 
+  acclAlpha         = new QLineEdit(QString::number(config->acclAlpha)); 
   zetaText          = new QLabel();
   zetaText->setText("Zeta");
-  zetaValue         = new QLineEdit(QString::number(zeta));
+  zetaValue         = new QLineEdit(QString::number(config->autocalAlpha2));
   yawText           = new QLabel();
   yawText->setText("yaw:");
   yaw               = new QLabel();
@@ -145,43 +146,43 @@ Window::Window(int is_csv_file_in, const char* video_path, int offset, float rat
   biasAcclXText     = new QLabel();
   biasAcclXText     = new QLabel();
   biasAcclXText->setText("Accl Bias X");
-  biasAcclX         = new QLineEdit(QString::number(aBiasX));
+  biasAcclX         = new QLineEdit(QString::number(calib->aBias[0]));
   biasAcclYText     = new QLabel();
   biasAcclYText->setText("Accl Bias Y");
-  biasAcclY         = new QLineEdit(QString::number(aBiasY));
+  biasAcclY         = new QLineEdit(QString::number(calib->aBias[1]));
   biasAcclZText     = new QLabel();
   biasAcclZText->setText("Accl Bias Z");
-  biasAcclZ         = new QLineEdit(QString::number(aBiasZ));
+  biasAcclZ         = new QLineEdit(QString::number(calib->aBias[2]));
   acclMagText       = new QLabel();
   acclMagText->setText("Accl Mag");
-  acclMag           = new QLineEdit(QString::number(G));
+  acclMag           = new QLineEdit(QString::number(calib->aMag));
   biasMagXText      = new QLabel();
   biasMagXText->setText("Mag Bias X");
-  biasMagX          = new QLineEdit(QString::number(mBiasX));
+  biasMagX          = new QLineEdit(QString::number(calib->mBias[0]));
   biasMagYText      = new QLabel();
   biasMagYText->setText("Mag Bias Y");
-  biasMagY          = new QLineEdit(QString::number(mBiasY));
+  biasMagY          = new QLineEdit(QString::number(calib->mBias[1]));
   biasMagZText      = new QLabel();
   biasMagZText->setText("Mag Bias Z");
-  biasMagZ          = new QLineEdit(QString::number(mBiasZ));
+  biasMagZ          = new QLineEdit(QString::number(calib->mBias[2]));
   magMagText        = new QLabel();
   magMagText->setText("Mag Mag");
-  magMag            = new QLineEdit(QString::number(M));
+  magMag            = new QLineEdit(QString::number(calib->mMag));
   magAngText        = new QLabel();
   magAngText->setText("Mag Angle");
-  magAng            = new QLineEdit(QString::number(ang));
+  magAng            = new QLineEdit(QString::number(calib->mAng));
   biasGyroXText     = new QLabel();
   biasGyroXText->setText("Gyro Bias X");
-  biasGyroX         = new QLineEdit(QString::number(gBiasX));
+  biasGyroX         = new QLineEdit(QString::number(calib->gBias[0]));
   biasGyroYText     = new QLabel();
   biasGyroYText->setText("Gyro Bias Y");
-  biasGyroY         = new QLineEdit(QString::number(gBiasY));
+  biasGyroY         = new QLineEdit(QString::number(calib->gBias[1]));
   biasGyroZText     = new QLabel();
   biasGyroZText->setText("Gyro Bias Z");
-  biasGyroZ         = new QLineEdit(QString::number(gBiasZ));
+  biasGyroZ         = new QLineEdit(QString::number(calib->gBias[2]));
   gyroRateText      = new QLabel();
   gyroRateText->setText("Gyro Rate");
-  gyroRate          = new QLineEdit(QString::number(gyro_scale));
+  gyroRate          = new QLineEdit(QString::number(calib->gScale[0]));
 
   connect(xSlider,      SIGNAL(valueChanged(int)),     glWidget, SLOT(setXRotation(int)));
   connect(glWidget,     SIGNAL(xRotationChanged(int)), xSlider,  SLOT(setValue(int)));
@@ -445,11 +446,7 @@ void Window::setParams(float* params)
 void Window::updateDebug()
 {
   int i;
-  deltaGrav->setText(QString::number(delta_G));
-  deltaNorm->setText(QString::number(delta_M));
-  deltaAng->setText(QString::number(delta_ang));
-  deltaAccl->setText(QString::number(delta_a));
-  deltaMag->setText(QString::number(delta_m));
+  displayIMU_metrics* metrics;
   if (is_csv_file == 0) {
     i = sensor_buffer_index;
     yaw->setText(QString::number(sensor_buffer[i][9]));
@@ -458,6 +455,7 @@ void Window::updateDebug()
     acclX->setText(QString::number(sensor_buffer[i][12]));
     acclY->setText(QString::number(sensor_buffer[i][13]));
     acclZ->setText(QString::number(sensor_buffer[i][14]));
+    metrics = &sensor_buffer_metrics;
   } else {
     i = csv_buffer_index;
     yaw->setText(QString::number(csv_buffer[i][9]));
@@ -466,7 +464,13 @@ void Window::updateDebug()
     acclX->setText(QString::number(csv_buffer[i][12]));
     acclY->setText(QString::number(csv_buffer[i][13]));
     acclZ->setText(QString::number(csv_buffer[i][14]));
+    metrics = &csv_buffer_metrics;
   }
+  deltaGrav->setText(QString::number(metrics->delta_G));
+  deltaNorm->setText(QString::number(metrics->delta_M));
+  deltaAng->setText(QString::number(metrics->delta_ang));
+  deltaAccl->setText(QString::number(metrics->delta_a));
+  deltaMag->setText(QString::number(metrics->delta_m));
 }
 
 
@@ -520,59 +524,61 @@ void Window::updateStateIMU()
   QString textGyro        = gyroScale->text(); 
   glWidget->scaleGyro     = textGyro.toFloat();
   if (isAccl->isChecked())
-    isAcclDisable         = 1;
+    config->isAccl        = 1;
   else
-    isAcclDisable         = 0;
+    config->isAccl        = 0;
   if (isMag->isChecked())
-    isMagDisable          = 1;
+    config->isMagn        = 1;
   else
-    isMagDisable          = 0;
+    config->isMagn        = 0;
   if (isGyro->isChecked())
-    isGyroDisable         = 1;
+    config->isGyro        = 1;
   else
-    isGyroDisable         = 0;
+    config->isGyro        = 0;
   QString textAcclRate    = acclRate->text();
-  accl_scale              = textAcclRate.toFloat();
+  config->aWeight         = textAcclRate.toFloat();
   QString textMagRate     = magRate->text();
-  mag_scale               = textMagRate.toFloat();
+  config->mWeight         = textMagRate.toFloat();
   QString textAcclAlpha   = acclAlpha->text(); 
-  accl_alpha              = textAcclAlpha.toFloat();
+  config->acclAlpha       = textAcclAlpha.toFloat();
   QString textZeta        = zetaValue->text(); 
-  zeta                    = textZeta.toFloat();
+  config->autocalAlpha1   = textZeta.toFloat();
   QString textBiasAcclX   = biasAcclX->text(); 
-  aBiasX                  = textBiasAcclX.toFloat();
+  calib->aBias[0]         = textBiasAcclX.toFloat();
   QString textBiasAcclY   = biasAcclY->text(); 
-  aBiasY                  = textBiasAcclY.toFloat();
+  calib->aBias[1]         = textBiasAcclY.toFloat();
   QString textBiasAcclZ   = biasAcclZ->text(); 
-  aBiasZ                  = textBiasAcclZ.toFloat();
+  calib->aBias[2]         = textBiasAcclZ.toFloat();
   QString textAcclMag     = acclMag->text(); 
-  G                       = textAcclMag.toFloat();
+  calib->aMag             = textAcclMag.toFloat();
   QString textBiasMagX    = biasMagX->text(); 
-  mBiasX                  = textBiasMagX.toFloat();
+  calib->mBias[0]         = textBiasMagX.toFloat();
   QString textBiasMagY    = biasMagY->text(); 
-  mBiasY                  = textBiasMagY.toFloat();
+  calib->mBias[1]         = textBiasMagY.toFloat();
   QString textBiasMagZ    = biasMagZ->text(); 
-  mBiasZ                  = textBiasMagZ.toFloat();
+  calib->mBias[2]         = textBiasMagZ.toFloat();
   QString textMagMag      = magMag->text();
-  M                       = textMagMag.toFloat();
+  calib->mMag             = textMagMag.toFloat();
   QString textMagAng      = magAng->text();
-  ang                     = textMagAng.toFloat();
+  calib->mAng             = textMagAng.toFloat();
   QString textBiasGyroX   = biasGyroX->text(); 
-  gBiasX                  = textBiasGyroX.toFloat();
+  calib->gBias[0]         = textBiasGyroX.toFloat();
   QString textBiasGyroY   = biasGyroY->text(); 
-  gBiasY                  = textBiasGyroY.toFloat();
+  calib->gBias[1]         = textBiasGyroY.toFloat();
   QString textBiasGyroZ   = biasGyroZ->text(); 
-  gBiasZ                  = textBiasGyroZ.toFloat();
+  calib->gBias[2]         = textBiasGyroZ.toFloat();
   QString textGyroRate    = gyroRate->text();
-  gyro_scale              = textGyroRate.toFloat();
+  calib->gScale[0]        = textGyroRate.toFloat();
+  calib->gScale[1]        = textGyroRate.toFloat();
+  calib->gScale[2]        = textGyroRate.toFloat();
 }
 
 
 void Window::updateViewUp()
 {  
-  glWidget->xRot       = 90 * 16;
-  glWidget->yRot       = 0;
-  glWidget->zRot       = 0;
+  glWidget->xRot          = 90 * 16;
+  glWidget->yRot          = 0;
+  glWidget->zRot          = 0;
   xSlider->setValue((int)glWidget->xRot);
   ySlider->setValue((int)glWidget->yRot);
   zSlider->setValue((int)glWidget->zRot);
@@ -631,7 +637,7 @@ void Window::updateRefAccl()
   refAcclVector[1]        = textRefAcclY.toFloat();
   QString textRefAcclZ    = refAcclZ->text();
   refAcclVector[2]        = textRefAcclZ.toFloat();
-  refAcclMARG(refAcclVector);
+  displayIMU_setRefAccl(refAcclVector);
 }
   
 

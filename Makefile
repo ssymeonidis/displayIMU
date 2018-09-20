@@ -52,7 +52,6 @@ SOURCES       = glwidget.cpp \
 		pixmap.cpp \
 		window.cpp \
 		MARG.cpp \
-		quatForwardUp.cpp \
 		receive.cpp \
 		dataread.cpp \
 		framesPerSecond.cpp \
@@ -63,7 +62,6 @@ OBJECTS       = glwidget.o \
 		pixmap.o \
 		window.o \
 		MARG.o \
-		quatForwardUp.o \
 		receive.o \
 		dataread.o \
 		framesPerSecond.o \
@@ -131,14 +129,12 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		pixmap.h \
 		window.h \
 		MARG.h \
-		quatForwardUp.h \
 		receive.h \
 		dataread.h \
 		framesPerSecond.h glwidget.cpp \
 		pixmap.cpp \
 		window.cpp \
 		MARG.cpp \
-		quatForwardUp.cpp \
 		receive.cpp \
 		dataread.cpp \
 		framesPerSecond.cpp \
@@ -310,8 +306,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents glwidget.h pixmap.h window.h MARG.h quatForwardUp.h receive.h dataread.h framesPerSecond.h $(DISTDIR)/
-	$(COPY_FILE) --parents glwidget.cpp pixmap.cpp window.cpp MARG.cpp quatForwardUp.cpp receive.cpp dataread.cpp framesPerSecond.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents glwidget.h pixmap.h window.h MARG.h receive.h dataread.h framesPerSecond.h $(DISTDIR)/
+	$(COPY_FILE) --parents glwidget.cpp pixmap.cpp window.cpp MARG.cpp receive.cpp dataread.cpp framesPerSecond.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -345,6 +341,7 @@ moc_pixmap.cpp: pixmap.h
 
 moc_window.cpp: pixmap.h \
 		glwidget.h \
+		MARG.h \
 		window.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include window.h -o moc_window.cpp
 
@@ -365,31 +362,29 @@ compiler_clean: compiler_moc_header_clean
 glwidget.o: glwidget.cpp glwidget.h \
 		window.h \
 		pixmap.h \
+		MARG.h \
 		receive.h \
-		dataread.h \
-		MARG.h
+		dataread.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glwidget.o glwidget.cpp
 
 pixmap.o: pixmap.cpp pixmap.h \
-		dataread.h
+		dataread.h \
+		MARG.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o pixmap.o pixmap.cpp
 
 window.o: window.cpp window.h \
 		pixmap.h \
 		glwidget.h \
+		MARG.h \
 		receive.h \
-		dataread.h \
-		MARG.h
+		dataread.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o window.o window.cpp
 
-MARG.o: MARG.cpp quatForwardUp.h \
-		MARG.h
+MARG.o: MARG.cpp MARG.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MARG.o MARG.cpp
 
-quatForwardUp.o: quatForwardUp.cpp quatForwardUp.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o quatForwardUp.o quatForwardUp.cpp
-
 receive.o: receive.cpp framesPerSecond.h \
+		receive.h \
 		MARG.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o receive.o receive.cpp
 
@@ -403,6 +398,7 @@ framesPerSecond.o: framesPerSecond.cpp framesPerSecond.h
 main.o: main.cpp window.h \
 		pixmap.h \
 		glwidget.h \
+		MARG.h \
 		receive.h \
 		dataread.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp

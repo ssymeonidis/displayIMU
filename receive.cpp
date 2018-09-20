@@ -27,21 +27,22 @@
 #include <pthread.h>
 #include <errno.h>
 #include "framesPerSecond.h"
-#include "MARG.h"
+#include "receive.h"
 
 // define the sensor data structure
-const int        sensor_buffer_size  = 100;
-float            sensor_buffer[sensor_buffer_size][15];
-int              sensor_buffer_index = 0;
-int              sensor_IMU_type     = 1; 
-int              sensor_IMU_reset    = 0;
-int              sensor_IMU_set_ref  = 0;
-int              sensor_IMU_calib    = 0;
+const int           sensor_buffer_size  = 100;
+float               sensor_buffer[sensor_buffer_size][15];
+int                 sensor_buffer_index = 0;
+displayIMU_metrics  sensor_buffer_metrics;
+int                 sensor_IMU_type     = 1; 
+int                 sensor_IMU_reset    = 0;
+int                 sensor_IMU_set_ref  = 0;
+int                 sensor_IMU_calib    = 0;
 
 // define internal/external variables
-int              sensor_data_socket;
-FILE*            sensor_file;
-const char*      sensor_filename     = "IMU.csv";
+int                 sensor_data_socket;
+FILE*               sensor_file;
+const char*         sensor_filename     = "IMU.csv";
 
 
 void sensor_data_error(const char *msg)
@@ -54,7 +55,7 @@ void sensor_data_error(const char *msg)
 void sensor_data_init(int portno)
 {
   // init IMU
-  initMARG(0);
+  displayIMU_init();
   sensor_file = fopen(sensor_filename, "w+");
   if (!sensor_file)
     fprintf(stderr, "Failed to open %s: %s\n", sensor_filename, strerror(errno)); 
@@ -97,6 +98,7 @@ void *sensor_data_run(void*)
 {
   // define the variables
   char  socket_buffer[256];
+  float sensor_buffer_corrected[9];
   int   rc;
   int   index;
 
@@ -121,14 +123,19 @@ void *sensor_data_run(void*)
 
     // perform the specified IMU
     if (sensor_IMU_type == 1) {
-      updateMARG(&(sensor_buffer[index][3]),
-                 &(sensor_buffer[index][0]),
-                 &(sensor_buffer[index][6]),
+      displayIMU_corAll(&(sensor_buffer[index][3]),
+                        &(sensor_buffer[index][0]),
+                        &(sensor_buffer[index][6]),
+                        &(sensor_buffer_corrected[3]),
+                        &(sensor_buffer_corrected[0]),
+                        &(sensor_buffer_corrected[6])); 
+      displayIMU_estmAll(NULL,
+                 &(sensor_buffer_corrected[3]),
+                 &(sensor_buffer_corrected[0]),
+                 &(sensor_buffer_corrected[6]),
                  &(sensor_buffer[index][9]),
                  &(sensor_buffer[index][12]),
-                 sensor_IMU_set_ref,
-                 sensor_IMU_reset,
-                 sensor_IMU_calib);
+                 &sensor_buffer_metrics);
       fprintf(sensor_file, "%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,",
               sensor_buffer[index][6],
               sensor_buffer[index][7],

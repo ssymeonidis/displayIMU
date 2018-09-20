@@ -18,7 +18,6 @@
 */
 
 #include "dataread.h"
-#include "MARG.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,21 +26,22 @@
 #include <csv.h>
 
 // define the sensor data structure
-const int    csv_buffer_size     = 500000;
-float        csv_buffer[csv_buffer_size][16];
-int          csv_buffer_index    = 0;
+const int           csv_buffer_size     = 500000;
+float               csv_buffer[csv_buffer_size][16];
+int                 csv_buffer_index    = 0;
+displayIMU_metrics  csv_buffer_metrics;
 
 // define control constants
-int          csv_IMU_reset       = 1;
-int          csv_IMU_set_ref     = 0;
-int          csv_IMU_calib       = 0;
-int          csv_IMU_first_run   = 1;
+int                 csv_IMU_reset       = 1;
+int                 csv_IMU_set_ref     = 0;
+int                 csv_IMU_calib       = 0;
+int                 csv_IMU_first_run   = 1;
 
 // define internal/external variables
-FILE*        output_file;
-const char*  output_file_ext     = ".IMU.csv";
-int          fieldCur            = 0;
-int          indexMax            = 0;
+FILE*               output_file;
+const char*         output_file_ext     = ".IMU.csv";
+int                 fieldCur            = 0;
+int                 indexMax            = 0;
 
 
 void cvs_field(void *s, size_t, void*) {
@@ -60,7 +60,7 @@ void cvs_EOL(int, void*) {
 void csv_data_init(char* filename)
 {
   // configure IMU and data output
-  initMARG(1);
+  displayIMU_init();
   char output_file_name[200];
   strcpy(output_file_name, filename);
   strcat(output_file_name, output_file_ext);
@@ -103,6 +103,7 @@ void csv_data_init(char* filename)
 
 void *csv_data_run(void*)
 {
+  float csv_buffer_corrected[15];
   while(1) {
     //usleep(500000);
     usleep(30000);
@@ -116,14 +117,19 @@ void *csv_data_run(void*)
     } else  {
       csv_buffer_index++;
     }
-    updateMARG(&(csv_buffer[csv_buffer_index][7]),
-               &(csv_buffer[csv_buffer_index][4]),
-               &(csv_buffer[csv_buffer_index][1]),
+    displayIMU_corAll(&(csv_buffer[csv_buffer_index][7]),
+                      &(csv_buffer[csv_buffer_index][4]),
+                      &(csv_buffer[csv_buffer_index][1]),
+                      &(csv_buffer_corrected[7]),
+                      &(csv_buffer_corrected[4]),
+                      &(csv_buffer_corrected[1]));
+    displayIMU_estmAll(NULL,
+               &(csv_buffer_corrected[7]),
+               &(csv_buffer_corrected[4]),
+               &(csv_buffer_corrected[1]),
                &(csv_buffer[csv_buffer_index][10]),
                &(csv_buffer[csv_buffer_index][13]),
-               csv_IMU_set_ref,
-               csv_IMU_reset,
-               csv_IMU_calib);
+               &csv_buffer_metrics);
     if (csv_IMU_first_run != 0) {
       fprintf(output_file, "%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,",
               csv_buffer[csv_buffer_index][0],
