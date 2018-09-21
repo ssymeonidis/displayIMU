@@ -112,25 +112,25 @@ void *sensor_data_run(void*)
     if (index >= sensor_buffer_size)
       index    = 0; 
     sscanf(socket_buffer, "%*f, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
-      &(sensor_buffer[index][0]), &(sensor_buffer[index][1]), &(sensor_buffer[index][2]),
-      &(sensor_buffer[index][3]), &(sensor_buffer[index][4]), &(sensor_buffer[index][5]),
-      &(sensor_buffer[index][6]), &(sensor_buffer[index][7]), &(sensor_buffer[index][8]));
+      &sensor_buffer[index][0], &sensor_buffer[index][1], &sensor_buffer[index][2],
+      &sensor_buffer[index][3], &sensor_buffer[index][4], &sensor_buffer[index][5],
+      &sensor_buffer[index][6], &sensor_buffer[index][7], &sensor_buffer[index][8]);
     sensor_buffer_index = index;
 
     // perform the specified IMU
     if (sensor_IMU_type == 1) {
-      displayIMU_corAll(&(sensor_buffer[index][0]),
-                        &(sensor_buffer[index][3]),
-                        &(sensor_buffer[index][6]),
-                        &(sensor_buffer_corrected[0]),
-                        &(sensor_buffer_corrected[3]),
-                        &(sensor_buffer_corrected[6])); 
+      displayIMU_corAll(&sensor_buffer[index][0],
+                        &sensor_buffer[index][3],
+                        &sensor_buffer[index][6],
+                        &sensor_buffer_corrected[0],
+                        &sensor_buffer_corrected[3],
+                        &sensor_buffer_corrected[6]); 
       displayIMU_estmAll(NULL,
-                 &(sensor_buffer_corrected[0]),
-                 &(sensor_buffer_corrected[3]),
-                 &(sensor_buffer_corrected[6]),
-                 &(sensor_buffer[index][9]),
-                 &(sensor_buffer[index][12]),
+                 &sensor_buffer_corrected[0],
+                 &sensor_buffer_corrected[3],
+                 &sensor_buffer_corrected[6],
+                 &sensor_buffer[index][9],
+                 &sensor_buffer[index][12],
                  &sensor_buffer_metrics);
       fprintf(sensor_file, "%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,",
               sensor_buffer[index][6],
