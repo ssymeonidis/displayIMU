@@ -3,14 +3,12 @@ INCLUDEPATH  += ../shared
 
 HEADERS       = glwidget.h          \
                 window.h            \
-                MARG.h              \
-                receive.h           \
-                dataread.h
+                IMU.h               \
+                dataParse.h
 SOURCES       = glwidget.cpp        \
                 window.cpp          \
-                MARG.cpp            \
-                receive.cpp         \
-                dataread.cpp        \
+                IMU.cpp             \
+                dataParse.cpp       \
                 main.cpp 
 QT           += opengl              \
                 widgets

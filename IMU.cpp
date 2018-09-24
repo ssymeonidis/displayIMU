@@ -28,7 +28,7 @@
 // include statements 
 #include <math.h>            // sqrt/trig
 #include <string.h>          // memcopy
-#include "MARG.h"
+#include "IMU.h"
 
 // internally managed structures
 displayIMU_calib     calib;
@@ -114,22 +114,22 @@ void displayIMU_getConfig(displayIMU_config **config_pntr)
 
 
 /******************************************************************************
+* function to copy state structure
+******************************************************************************/
+
+void displayIMU_getState(displayIMU_state **state_pntr) 
+{
+  *state_pntr = &state;
+}
+
+
+/******************************************************************************
 * function to copy autocal structure 
 ******************************************************************************/
 
 void displayIMU_getAutocal(displayIMU_autocal *autocal_pntr) 
 {
   memcpy(autocal_pntr, &autocal, sizeof(displayIMU_autocal));
-}
-
-
-/******************************************************************************
-* function to copy state structure
-******************************************************************************/
-
-void displayIMU_getState(displayIMU_state *state_pntr) 
-{
-  memcpy(state_pntr, &state, sizeof(displayIMU_state));
 }
 
 

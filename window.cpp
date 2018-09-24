@@ -20,16 +20,12 @@
 #include <QtGui>
 #include <QtWidgets>
 #include "window.h"
-#include "receive.h"
-#include "dataread.h"
+#include "dataParse.h"
 
-Window::Window(int is_csv_file_in)
+Window::Window(int csv_file)
 {
-  // save system state
-  is_csv_file       = is_csv_file_in;
-
   // create display/video widgets
-  glWidget          = new GLWidget(is_csv_file);
+  glWidget          = new GLWidget();
   displayIMU_getCalib(&calib);
   displayIMU_getConfig(&config);
 
@@ -435,27 +431,15 @@ void Window::setParams(float* params)
 
 void Window::updateDebug()
 {
-  int i;
+  int i = buffer_index;
   displayIMU_metrics* metrics;
-  if (is_csv_file == 0) {
-    i = sensor_buffer_index;
-    yaw->setText(QString::number(sensor_buffer[i][9]));
-    pitch->setText(QString::number(sensor_buffer[i][10]));
-    roll->setText(QString::number(sensor_buffer[i][11]));
-    acclX->setText(QString::number(sensor_buffer[i][12]));
-    acclY->setText(QString::number(sensor_buffer[i][13]));
-    acclZ->setText(QString::number(sensor_buffer[i][14]));
-    metrics = &sensor_buffer_metrics;
-  } else {
-    i = csv_buffer_index;
-    yaw->setText(QString::number(csv_buffer[i][9]));
-    pitch->setText(QString::number(csv_buffer[i][10]));
-    roll->setText(QString::number(csv_buffer[i][11]));
-    acclX->setText(QString::number(csv_buffer[i][12]));
-    acclY->setText(QString::number(csv_buffer[i][13]));
-    acclZ->setText(QString::number(csv_buffer[i][14]));
-    metrics = &csv_buffer_metrics;
-  }
+  yaw->setText(QString::number(buffer[i][9]));
+  pitch->setText(QString::number(buffer[i][10]));
+  roll->setText(QString::number(buffer[i][11]));
+  acclX->setText(QString::number(buffer[i][12]));
+  acclY->setText(QString::number(buffer[i][13]));
+  acclZ->setText(QString::number(buffer[i][14]));
+  metrics = &FOM;
   deltaGrav->setText(QString::number(metrics->delta_G));
   deltaNorm->setText(QString::number(metrics->delta_M));
   deltaAng->setText(QString::number(metrics->delta_ang));
@@ -599,22 +583,22 @@ void Window::updateViewSide2()
 
 void Window::updateReference()
 {
-  sensor_IMU_set_ref   = 1;
-  csv_IMU_set_ref      = 1;
+  //sensor_IMU_set_ref   = 1;
+  //csv_IMU_set_ref      = 1;
 }
 
 
 void Window::updateResetIMU()
 {
-  sensor_IMU_reset     = 1;
-  csv_IMU_reset        = 1;
+  //sensor_IMU_reset     = 1;
+  //csv_IMU_reset        = 1;
 }
 
 
 void Window::updateCalibIMU()
 {
-  sensor_IMU_calib     = 1;
-  csv_IMU_calib        = 1;
+  //sensor_IMU_calib     = 1;
+  //csv_IMU_calib        = 1;
 }
 
 

@@ -81,8 +81,8 @@ struct displayIMU_metrics {
 // data structure access functions
 void displayIMU_getCalib    (displayIMU_calib   **calib);
 void displayIMU_getConfig   (displayIMU_config  **config);
+void displayIMU_getState    (displayIMU_state   **state);
 void displayIMU_getAutocal  (displayIMU_autocal *autocal);
-void displayIMU_getState    (displayIMU_state   *state);
 
 // "tear" functions
 void displayIMU_setRef      ();

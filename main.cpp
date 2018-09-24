@@ -19,37 +19,31 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <stdio.h>
 #include <pthread.h>
 #include "window.h"
-#include "receive.h"
-#include "dataread.h"
-#include <stdio.h>
+#include "dataParse.h"
 
 int main(int argc, char *argv[])
 {
   // initialize pthread variables
   int       data_thread_id;
   pthread_t data_thread;
-  int       is_csv_file;
   float     config_params[13];
   float     accl_ref_vector[3];
   FILE*     fid;
   int       pass;
 
-  // launch the readers
-  if (argc < 2) {
-    sensor_data_init(5555);
-    pthread_create(&data_thread, NULL, sensor_data_run, &data_thread_id);
-    is_csv_file = 0;
-  } else {
-    csv_data_init(argv[1]);
-    pthread_create(&data_thread, NULL, csv_data_run, &data_thread_id);
-    is_csv_file = 1;
-  }
+  // launch data parser
+  if (argc < 2) 
+    data_init_UDP(5555);
+  else
+    data_init_CSV(argv[1]);
+  pthread_create(&data_thread, NULL, data_run, &data_thread_id);
 
   // create the display
   QApplication app(argc, argv);
-  Window window(is_csv_file);
+  Window window(true);
   window.resize(window.sizeHint());
   int desktopArea = QApplication::desktop()->width() *
                     QApplication::desktop()->height();

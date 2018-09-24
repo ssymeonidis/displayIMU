@@ -21,7 +21,7 @@
 #define WINDOW_H
 
 #include "glwidget.h"
-#include "MARG.h"
+#include "IMU.h"
 #include <QWidget>
 
 // QT class defintions
@@ -39,7 +39,7 @@ class Window : public QWidget
   Q_OBJECT
 
   public:
-                  Window(int is_csv_file);
+                  Window(int csv_file);
     void          setRefAccl(float* a);
     void          setParams(float* params);
 

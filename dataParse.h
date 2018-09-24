@@ -17,22 +17,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _DATAREAD_H
-#define _DATAREAD_H
+#ifndef _RECEIVE_H
+#define _RECEIVE_H
 
-// include statemeents
-#include "MARG.h"
+// include statements
+#include "IMU.h"
 
 // define the sensor data structure
-extern const int           csv_buffer_size;
-extern float               csv_buffer[][16];
-extern int                 csv_buffer_index;
-extern displayIMU_metrics  csv_buffer_metrics;
-extern int                 csv_IMU_set_ref;
-extern int                 csv_IMU_reset;
-extern int                 csv_IMU_calib;
+extern const int           buffer_size;
+extern float               buffer[][15];
+extern int                 buffer_index;
+extern displayIMU_metrics  FOM;
 
-void csv_data_init(char* filename);
-void *csv_data_run(void* id);
+// access functions
+void data_init_UDP(int portno);
+void data_init_CSV(const char* filename);
+void *data_run(void* id);
 
 #endif

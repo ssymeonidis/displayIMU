@@ -50,16 +50,14 @@ OBJECTS_DIR   = ./
 
 SOURCES       = glwidget.cpp \
 		window.cpp \
-		MARG.cpp \
-		receive.cpp \
-		dataread.cpp \
+		IMU.cpp \
+		dataParse.cpp \
 		main.cpp moc_glwidget.cpp \
 		moc_window.cpp
 OBJECTS       = glwidget.o \
 		window.o \
-		MARG.o \
-		receive.o \
-		dataread.o \
+		IMU.o \
+		dataParse.o \
 		main.o \
 		moc_glwidget.o \
 		moc_window.o
@@ -121,13 +119,11 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		displayIMU.pro glwidget.h \
 		window.h \
-		MARG.h \
-		receive.h \
-		dataread.h glwidget.cpp \
+		IMU.h \
+		dataParse.h glwidget.cpp \
 		window.cpp \
-		MARG.cpp \
-		receive.cpp \
-		dataread.cpp \
+		IMU.cpp \
+		dataParse.cpp \
 		main.cpp
 QMAKE_TARGET  = displayIMU
 DESTDIR       = #avoid trailing-slash linebreak
@@ -296,8 +292,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents glwidget.h window.h MARG.h receive.h dataread.h $(DISTDIR)/
-	$(COPY_FILE) --parents glwidget.cpp window.cpp MARG.cpp receive.cpp dataread.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents glwidget.h window.h IMU.h dataParse.h $(DISTDIR)/
+	$(COPY_FILE) --parents glwidget.cpp window.cpp IMU.cpp dataParse.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -327,7 +323,7 @@ moc_glwidget.cpp: glwidget.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glwidget.h -o moc_glwidget.cpp
 
 moc_window.cpp: glwidget.h \
-		MARG.h \
+		IMU.h \
 		window.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include window.h -o moc_window.cpp
 
@@ -347,34 +343,27 @@ compiler_clean: compiler_moc_header_clean
 
 glwidget.o: glwidget.cpp glwidget.h \
 		window.h \
-		MARG.h \
-		receive.h \
-		dataread.h
+		IMU.h \
+		dataParse.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glwidget.o glwidget.cpp
 
 window.o: window.cpp window.h \
 		glwidget.h \
-		MARG.h \
-		receive.h \
-		dataread.h
+		IMU.h \
+		dataParse.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o window.o window.cpp
 
-MARG.o: MARG.cpp MARG.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o MARG.o MARG.cpp
+IMU.o: IMU.cpp IMU.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o IMU.o IMU.cpp
 
-receive.o: receive.cpp receive.h \
-		MARG.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o receive.o receive.cpp
-
-dataread.o: dataread.cpp dataread.h \
-		MARG.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dataread.o dataread.cpp
+dataParse.o: dataParse.cpp dataParse.h \
+		IMU.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dataParse.o dataParse.cpp
 
 main.o: main.cpp window.h \
 		glwidget.h \
-		MARG.h \
-		receive.h \
-		dataread.h
+		IMU.h \
+		dataParse.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 moc_glwidget.o: moc_glwidget.cpp 

@@ -23,21 +23,16 @@
 #include <math.h>
 #include "glwidget.h"
 #include "window.h"
-#include "receive.h"
-#include "dataread.h"
-#include "MARG.h"
+#include "dataParse.h"
+#include "IMU.h"
 
 GLfloat GLWidget::acclColor[4] = {   1.0,    0.0,    0.0,    1.0};
 GLfloat GLWidget::magColor[4]  = {   0.0,    1.0,    0.0,    1.0};
 GLfloat GLWidget::gyroColor[4] = {   0.0,    0.0,    1.0,    1.0};
 GLfloat GLWidget::gridColor[4] = {   0.3,    0.3,    0.3,    1.0}; 
 
-GLWidget::GLWidget(int is_csv_file_in)
-  : QGLWidget(QGLFormat(QGL::SampleBuffers), 0)
+GLWidget::GLWidget() : QGLWidget(QGLFormat(QGL::SampleBuffers), 0)
 {
-  // capture csv state
-  is_csv_file  = is_csv_file_in;
-
   // initialize internal display variables
   xRot       = 0;
   yRot       = 0;
@@ -150,11 +145,7 @@ void GLWidget::initializeGL()
 void GLWidget::paintGL()
 {
   // initializing the variables
-  int i;
-  if (is_csv_file == 0)
-    i = sensor_buffer_index;
-  else
-    i = csv_buffer_index;
+  int i = buffer_index;
 
   // setup camera
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -168,53 +159,32 @@ void GLWidget::paintGL()
   drawGrid(); 
 
   // draw accelerometer state
-  if (isAccl == true) {
-    if (is_csv_file == 0)
-      drawVector(acclColor, &(sensor_buffer[i][3]), scaleAccl);
-    else
-      drawVector(acclColor, &(csv_buffer[i][4]), scaleAccl);
-  }
+  if (isAccl == true) 
+    drawVector(acclColor, &(buffer[i][3]), scaleAccl);
 
   // draw magnetometer state
-  if (isMag == true) {
-    if (is_csv_file == 0) 
-      drawVector(magColor, &(sensor_buffer[i][6]), scaleMag);
-    else
-      drawVector(magColor, &(csv_buffer[i][1]), scaleMag);
-  }
+  if (isMag == true) 
+    drawVector(magColor, &(buffer[i][6]), scaleMag);
 
   // draw gyroscope state
-  if (isGyro == true) {
-    if (is_csv_file == 0) 
-      drawVector(gyroColor, &(sensor_buffer[i][0]), scaleGyro);
-    else
-      drawVector(gyroColor, &(csv_buffer[i][7]), scaleGyro);
-  }
+  if (isGyro == true) 
+    drawVector(gyroColor, &(buffer[i][0]), scaleGyro);
 
   // draw imu state
   if (isIMU == true) {
     glPushMatrix();
-      if (is_csv_file == 0) {
-        glRotatef(sensor_buffer[i][11], 1.0, 0.0, 0.0);
-        glRotatef(sensor_buffer[i][10], 0.0, 0.0, 1.0);
-        glRotatef(sensor_buffer[i][9],  0.0, 1.0, 0.0);
-        glTranslatef( sensor_buffer[i][12]/scaleIMU,
-                      sensor_buffer[i][14]/scaleIMU,
-                      sensor_buffer[i][13]/scaleIMU);
-      } else {
-        glRotatef(csv_buffer[i][12], 1.0, 0.0, 0.0);
-        glRotatef(csv_buffer[i][11], 0.0, 0.0, 1.0);
-        glRotatef(csv_buffer[i][10], 0.0, 1.0, 0.0);
-        glTranslatef( csv_buffer[i][13]/scaleIMU,
-                      csv_buffer[i][15]/scaleIMU,
-                      csv_buffer[i][14]/scaleIMU);
-      }
-      GLfloat vector1[3]    = { 0.0,  1.0,  0.0};
-      drawVector(gyroColor, vector1, 1.0);
-      GLfloat vector2[3]    = {-0.0,  0.0,  1.0};
-      drawVector(acclColor, vector2, 1.0);
-      GLfloat vector3[3]    = {-1.0,  0.0,  0.0};
-      drawVector(magColor,  vector3, 1.0);
+    glRotatef(buffer[i][11], 1.0, 0.0, 0.0);
+    glRotatef(buffer[i][10], 0.0, 0.0, 1.0);
+    glRotatef(buffer[i][9],  0.0, 1.0, 0.0);
+    glTranslatef(buffer[i][12]/scaleIMU,
+                 buffer[i][14]/scaleIMU,
+                 buffer[i][13]/scaleIMU);
+    GLfloat vector1[3]    = { 0.0,  1.0,  0.0};
+    drawVector(gyroColor, vector1, 1.0);
+    GLfloat vector2[3]    = {-0.0,  0.0,  1.0};
+    drawVector(acclColor, vector2, 1.0);
+    GLfloat vector3[3]    = {-1.0,  0.0,  0.0};
+    drawVector(magColor,  vector3, 1.0);
     glPopMatrix();
   }
 

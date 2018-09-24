@@ -21,7 +21,7 @@
 #define FILE_UTILS_H
 
 // include statements
-#include "MARG.h"
+#include "IMU.h"
 
 int displayIMU_readConfig(char* filename, displayIMU_config *config);
 int displayIMU_writeConfig(char* filename, displayIMU_config *config);
