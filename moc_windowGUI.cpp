@@ -1,16 +1,16 @@
 /****************************************************************************
-** Meta object code from reading C++ file 'window.h'
+** Meta object code from reading C++ file 'windowGUI.h'
 **
 ** Created by: The Qt Meta Object Compiler version 67 (Qt 5.5.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
 
-#include "window.h"
+#include "windowGUI.h"
 #include <QtCore/qbytearray.h>
 #include <QtCore/qmetatype.h>
 #if !defined(Q_MOC_OUTPUT_REVISION)
-#error "The header file 'window.h' doesn't include <QObject>."
+#error "The header file 'windowGUI.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
 #error "This file was generated using the moc from 5.5.1. It"
 #error "cannot be used with the include files from this version of Qt."
@@ -18,35 +18,35 @@
 #endif
 
 QT_BEGIN_MOC_NAMESPACE
-struct qt_meta_stringdata_Window_t {
+struct qt_meta_stringdata_WindowGUI_t {
     QByteArrayData data[15];
-    char stringdata0[202];
+    char stringdata0[205];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
-    qptrdiff(offsetof(qt_meta_stringdata_Window_t, stringdata0) + ofs \
+    qptrdiff(offsetof(qt_meta_stringdata_WindowGUI_t, stringdata0) + ofs \
         - idx * sizeof(QByteArrayData)) \
     )
-static const qt_meta_stringdata_Window_t qt_meta_stringdata_Window = {
+static const qt_meta_stringdata_WindowGUI_t qt_meta_stringdata_WindowGUI = {
     {
-QT_MOC_LITERAL(0, 0, 6), // "Window"
-QT_MOC_LITERAL(1, 7, 11), // "updateDebug"
-QT_MOC_LITERAL(2, 19, 0), // ""
-QT_MOC_LITERAL(3, 20, 15), // "updateCheckAccl"
-QT_MOC_LITERAL(4, 36, 14), // "updateCheckMag"
-QT_MOC_LITERAL(5, 51, 15), // "updateCheckGyro"
-QT_MOC_LITERAL(6, 67, 14), // "updateCheckIMU"
-QT_MOC_LITERAL(7, 82, 14), // "updateStateIMU"
-QT_MOC_LITERAL(8, 97, 12), // "updateViewUp"
-QT_MOC_LITERAL(9, 110, 15), // "updateViewSide1"
-QT_MOC_LITERAL(10, 126, 15), // "updateViewSide2"
-QT_MOC_LITERAL(11, 142, 15), // "updateReference"
-QT_MOC_LITERAL(12, 158, 14), // "updateResetIMU"
-QT_MOC_LITERAL(13, 173, 14), // "updateCalibIMU"
-QT_MOC_LITERAL(14, 188, 13) // "updateRefAccl"
+QT_MOC_LITERAL(0, 0, 9), // "WindowGUI"
+QT_MOC_LITERAL(1, 10, 11), // "updateDebug"
+QT_MOC_LITERAL(2, 22, 0), // ""
+QT_MOC_LITERAL(3, 23, 15), // "updateCheckAccl"
+QT_MOC_LITERAL(4, 39, 14), // "updateCheckMag"
+QT_MOC_LITERAL(5, 54, 15), // "updateCheckGyro"
+QT_MOC_LITERAL(6, 70, 14), // "updateCheckIMU"
+QT_MOC_LITERAL(7, 85, 14), // "updateStateIMU"
+QT_MOC_LITERAL(8, 100, 12), // "updateViewUp"
+QT_MOC_LITERAL(9, 113, 15), // "updateViewSide1"
+QT_MOC_LITERAL(10, 129, 15), // "updateViewSide2"
+QT_MOC_LITERAL(11, 145, 15), // "updateReference"
+QT_MOC_LITERAL(12, 161, 14), // "updateResetIMU"
+QT_MOC_LITERAL(13, 176, 14), // "updateCalibIMU"
+QT_MOC_LITERAL(14, 191, 13) // "updateRefAccl"
 
     },
-    "Window\0updateDebug\0\0updateCheckAccl\0"
+    "WindowGUI\0updateDebug\0\0updateCheckAccl\0"
     "updateCheckMag\0updateCheckGyro\0"
     "updateCheckIMU\0updateStateIMU\0"
     "updateViewUp\0updateViewSide1\0"
@@ -56,7 +56,7 @@ QT_MOC_LITERAL(14, 188, 13) // "updateRefAccl"
 };
 #undef QT_MOC_LITERAL
 
-static const uint qt_meta_data_Window[] = {
+static const uint qt_meta_data_WindowGUI[] = {
 
  // content:
        7,       // revision
@@ -102,10 +102,10 @@ static const uint qt_meta_data_Window[] = {
        0        // eod
 };
 
-void Window::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void WindowGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        Window *_t = static_cast<Window *>(_o);
+        WindowGUI *_t = static_cast<WindowGUI *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
         case 0: _t->updateDebug(); break;
@@ -127,26 +127,26 @@ void Window::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void
     Q_UNUSED(_a);
 }
 
-const QMetaObject Window::staticMetaObject = {
-    { &QWidget::staticMetaObject, qt_meta_stringdata_Window.data,
-      qt_meta_data_Window,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
+const QMetaObject WindowGUI::staticMetaObject = {
+    { &QWidget::staticMetaObject, qt_meta_stringdata_WindowGUI.data,
+      qt_meta_data_WindowGUI,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
-const QMetaObject *Window::metaObject() const
+const QMetaObject *WindowGUI::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *Window::qt_metacast(const char *_clname)
+void *WindowGUI::qt_metacast(const char *_clname)
 {
     if (!_clname) return Q_NULLPTR;
-    if (!strcmp(_clname, qt_meta_stringdata_Window.stringdata0))
-        return static_cast<void*>(const_cast< Window*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_WindowGUI.stringdata0))
+        return static_cast<void*>(const_cast< WindowGUI*>(this));
     return QWidget::qt_metacast(_clname);
 }
 
-int Window::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int WindowGUI::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QWidget::qt_metacall(_c, _id, _a);
     if (_id < 0)

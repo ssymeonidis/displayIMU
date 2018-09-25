@@ -17,19 +17,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+// include statements 
 #include <QtGui>
 #include <QtOpenGL>
 #include <QTimer>
 #include <math.h>
-#include "glwidget.h"
-#include "window.h"
+#include "glWidget.h"
+#include "windowGUI.h"
 #include "dataParse.h"
 #include "IMU.h"
 
+// colors for GUI elements
 GLfloat GLWidget::acclColor[4] = {   1.0,    0.0,    0.0,    1.0};
 GLfloat GLWidget::magColor[4]  = {   0.0,    1.0,    0.0,    1.0};
 GLfloat GLWidget::gyroColor[4] = {   0.0,    0.0,    1.0,    1.0};
 GLfloat GLWidget::gridColor[4] = {   0.3,    0.3,    0.3,    1.0}; 
+
+
+/******************************************************************************
+* constructor for the OpenGL sensor/IMU display widget
+******************************************************************************/
 
 GLWidget::GLWidget() : QGLWidget(QGLFormat(QGL::SampleBuffers), 0)
 {
@@ -54,6 +61,10 @@ GLWidget::GLWidget() : QGLWidget(QGLFormat(QGL::SampleBuffers), 0)
 }
 
 
+/******************************************************************************
+* placeholder for deconstructor
+******************************************************************************/
+
 GLWidget::~GLWidget()
 {
 }
@@ -71,6 +82,10 @@ QSize GLWidget::sizeHint() const
 }
 
 
+/******************************************************************************
+* utlility function for keeping angles between 0 and 360
+******************************************************************************/
+
 static void qNormalizeAngle(int &angle)
 {
   while (angle < 0)
@@ -79,6 +94,10 @@ static void qNormalizeAngle(int &angle)
     angle -= 360 * 16;
 }
 
+
+/******************************************************************************
+* QT slider control for setting x rotation
+******************************************************************************/
 
 void GLWidget::setXRotation(int angle)
 {
@@ -91,6 +110,10 @@ void GLWidget::setXRotation(int angle)
 }
 
 
+/******************************************************************************
+* QT slider control for setting y rotation
+******************************************************************************/
+
 void GLWidget::setYRotation(int angle)
 {
   qNormalizeAngle(angle);
@@ -101,6 +124,10 @@ void GLWidget::setYRotation(int angle)
   }
 }
 
+
+/******************************************************************************
+* QT slider control for setting z rotation
+******************************************************************************/
 
 void GLWidget::setZRotation(int angle)
 {
@@ -113,11 +140,19 @@ void GLWidget::setZRotation(int angle)
 }
 
 
+/******************************************************************************
+* function used by timer to update display
+******************************************************************************/
+
 void GLWidget::updateFrame()
 {
   updateGL();
 }
 
+
+/******************************************************************************
+* function used to initialize the real-time display
+******************************************************************************/
 
 void GLWidget::initializeGL()
 {
@@ -126,21 +161,22 @@ void GLWidget::initializeGL()
 
   // configure OpenGL
   glClearColor(0.0, 0.0, 0.0, 1.0);
-  //glEnable(GL_DEPTH_TEST);
-  //glEnable(GL_CULL_FACE);
   glShadeModel(GL_SMOOTH);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  static GLfloat lightPosition1[4] = {  0.5,  5.0,  7.0, 1.0 };
-  static GLfloat lightDiffuse1[4]  = {  0.5,  0.5,  0.5, 1.0 };
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
-  glLightfv(GL_LIGHT0, GL_AMBIENT,  lightDiffuse1);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE,  lightDiffuse1);
+  static GLfloat lightPosition[4] = {  0.5,  5.0,  7.0, 1.0 };
+  static GLfloat lightDiffuse[4]  = {  0.5,  0.5,  0.5, 1.0 };
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+  glLightfv(GL_LIGHT0, GL_AMBIENT,  lightDiffuse);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE,  lightDiffuse);
   glEnable(GL_BLEND); 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-  //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+
+/******************************************************************************
+* function used to update the real-time display
+******************************************************************************/
 
 void GLWidget::paintGL()
 {
@@ -197,6 +233,10 @@ void GLWidget::paintGL()
 }
 
 
+/******************************************************************************
+* function used to resize the real-time display
+******************************************************************************/
+
 void GLWidget::resizeGL(int width, int height)
 {
   int side = qMin(width, height);
@@ -209,11 +249,19 @@ void GLWidget::resizeGL(int width, int height)
 }
 
 
+/******************************************************************************
+* function used to capture mouse position for display rotation
+******************************************************************************/
+
 void GLWidget::mousePressEvent(QMouseEvent *event)
 {
   lastPos = event->pos();
 }
 
+
+/******************************************************************************
+* function used to rotate display when draging mouse across OpenGL window
+******************************************************************************/
 
 void GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
@@ -231,27 +279,36 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
 }
 
 
+/******************************************************************************
+* function used to draw an arrow (cylinders and disks make for more visible and
+* more plesant arrows than line draws)
+******************************************************************************/
+
 void GLWidget::drawArrow(GLfloat faceColor[4], GLfloat scale, GLfloat angles[2])
 {
   float cylinderHeight = arrowSize - coneHeight;
   glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, faceColor);
   glPushMatrix();
-    glRotatef(angles[1], 0.0, 1.0, 0.0);
-    glRotatef(angles[0], 1.0, 0.0, 0.0);
-    glScalef(1.0, 1.0, scale);
-    gluCylinder(obj,cylinderRadius,cylinderRadius,cylinderHeight,10,1);
-    glPushMatrix();
-      glRotatef(180.0, 0.0, 1.0, 0.0);
-      gluDisk(obj, 0, cylinderRadius, 10, 1);
-      glRotatef(180.0, 0.0, 1.0, 0.0);
-      glTranslatef(0, 0, cylinderHeight);
-      gluCylinder(obj, coneRadius, 0, coneHeight, 10, 1);
-      glRotatef(180.0, 0.0, 1.0, 0.0);
-      gluDisk(obj, cylinderRadius, coneRadius, 10, 1);
-    glPopMatrix();
+  glRotatef(angles[1], 0.0, 1.0, 0.0);
+  glRotatef(angles[0], 1.0, 0.0, 0.0);
+  glScalef(1.0, 1.0, scale);
+  gluCylinder(obj,cylinderRadius,cylinderRadius,cylinderHeight,10,1);
+  glPushMatrix();
+  glRotatef(180.0, 0.0, 1.0, 0.0);
+  gluDisk(obj, 0, cylinderRadius, 10, 1);
+  glRotatef(180.0, 0.0, 1.0, 0.0);
+  glTranslatef(0, 0, cylinderHeight);
+  gluCylinder(obj, coneRadius, 0, coneHeight, 10, 1);
+  glRotatef(180.0, 0.0, 1.0, 0.0);
+  gluDisk(obj, cylinderRadius, coneRadius, 10, 1);
+  glPopMatrix();
   glPopMatrix();
 }
 
+
+/******************************************************************************
+* function used to draw a vector (uses draw angle as basis function)
+******************************************************************************/
 
 void GLWidget::drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale)
 {
@@ -275,33 +332,37 @@ void GLWidget::drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale
 }
 
 
+/******************************************************************************
+* function used to grid (helps visualization of arrows under differen rotations
+******************************************************************************/
+
 void GLWidget::drawGrid()
 {
   // draw the reference plane
   GLfloat planeColor1[4] = {1.0, 0.0, 1.0, 1.0};
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, planeColor1);
   glBegin(GL_LINES);
-    glVertex3f(-1.0, 0.0,  1.0); glVertex3f(-1.0, 0.0, -1.0);
-    glVertex3f(-0.8, 0.0,  1.0); glVertex3f(-0.8, 0.0, -1.0);
-    glVertex3f(-0.6, 0.0,  1.0); glVertex3f(-0.6, 0.0, -1.0);
-    glVertex3f(-0.4, 0.0,  1.0); glVertex3f(-0.4, 0.0, -1.0);
-    glVertex3f(-0.2, 0.0,  1.0); glVertex3f(-0.2, 0.0, -1.0);
-    glVertex3f( 0.0, 0.0,  1.0); glVertex3f(-0.0, 0.0, -1.0);
-    glVertex3f( 0.2, 0.0,  1.0); glVertex3f( 0.2, 0.0, -1.0);
-    glVertex3f( 0.4, 0.0,  1.0); glVertex3f( 0.4, 0.0, -1.0);
-    glVertex3f( 0.6, 0.0,  1.0); glVertex3f( 0.6, 0.0, -1.0);
-    glVertex3f( 0.8, 0.0,  1.0); glVertex3f( 0.8, 0.0, -1.0);
-    glVertex3f( 1.0, 0.0,  1.0); glVertex3f( 1.0, 0.0, -1.0);
-    glVertex3f( 1.0, 0.0, -1.0); glVertex3f(-1.0, 0.0, -1.0);
-    glVertex3f( 1.0, 0.0, -0.8); glVertex3f(-1.0, 0.0, -0.8);
-    glVertex3f( 1.0, 0.0, -0.6); glVertex3f(-1.0, 0.0, -0.6);
-    glVertex3f( 1.0, 0.0, -0.4); glVertex3f(-1.0, 0.0, -0.4);
-    glVertex3f( 1.0, 0.0, -0.2); glVertex3f(-1.0, 0.0, -0.2);
-    glVertex3f( 1.0, 0.0,  0.0); glVertex3f(-1.0, 0.0,  0.0);
-    glVertex3f( 1.0, 0.0,  0.2); glVertex3f(-1.0, 0.0,  0.2);
-    glVertex3f( 1.0, 0.0,  0.4); glVertex3f(-1.0, 0.0,  0.4);
-    glVertex3f( 1.0, 0.0,  0.6); glVertex3f(-1.0, 0.0,  0.6);
-    glVertex3f( 1.0, 0.0,  0.8); glVertex3f(-1.0, 0.0,  0.8);
-    glVertex3f( 1.0, 0.0,  1.0); glVertex3f(-1.0, 0.0,  1.0);
+  glVertex3f(-1.0, 0.0,  1.0); glVertex3f(-1.0, 0.0, -1.0);
+  glVertex3f(-0.8, 0.0,  1.0); glVertex3f(-0.8, 0.0, -1.0);
+  glVertex3f(-0.6, 0.0,  1.0); glVertex3f(-0.6, 0.0, -1.0);
+  glVertex3f(-0.4, 0.0,  1.0); glVertex3f(-0.4, 0.0, -1.0);
+  glVertex3f(-0.2, 0.0,  1.0); glVertex3f(-0.2, 0.0, -1.0);
+  glVertex3f( 0.0, 0.0,  1.0); glVertex3f(-0.0, 0.0, -1.0);
+  glVertex3f( 0.2, 0.0,  1.0); glVertex3f( 0.2, 0.0, -1.0);
+  glVertex3f( 0.4, 0.0,  1.0); glVertex3f( 0.4, 0.0, -1.0);
+  glVertex3f( 0.6, 0.0,  1.0); glVertex3f( 0.6, 0.0, -1.0);
+  glVertex3f( 0.8, 0.0,  1.0); glVertex3f( 0.8, 0.0, -1.0);
+  glVertex3f( 1.0, 0.0,  1.0); glVertex3f( 1.0, 0.0, -1.0);
+  glVertex3f( 1.0, 0.0, -1.0); glVertex3f(-1.0, 0.0, -1.0);
+  glVertex3f( 1.0, 0.0, -0.8); glVertex3f(-1.0, 0.0, -0.8);
+  glVertex3f( 1.0, 0.0, -0.6); glVertex3f(-1.0, 0.0, -0.6);
+  glVertex3f( 1.0, 0.0, -0.4); glVertex3f(-1.0, 0.0, -0.4);
+  glVertex3f( 1.0, 0.0, -0.2); glVertex3f(-1.0, 0.0, -0.2);
+  glVertex3f( 1.0, 0.0,  0.0); glVertex3f(-1.0, 0.0,  0.0);
+  glVertex3f( 1.0, 0.0,  0.2); glVertex3f(-1.0, 0.0,  0.2);
+  glVertex3f( 1.0, 0.0,  0.4); glVertex3f(-1.0, 0.0,  0.4);
+  glVertex3f( 1.0, 0.0,  0.6); glVertex3f(-1.0, 0.0,  0.6);
+  glVertex3f( 1.0, 0.0,  0.8); glVertex3f(-1.0, 0.0,  0.8);
+  glVertex3f( 1.0, 0.0,  1.0); glVertex3f(-1.0, 0.0,  1.0);
   glEnd();
 }

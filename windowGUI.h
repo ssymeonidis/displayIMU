@@ -17,12 +17,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef WINDOW_H
-#define WINDOW_H
+#ifndef WINDOW_GUI_H
+#define WINDOW_GUI_H
 
-#include "glwidget.h"
-#include "IMU.h"
 #include <QWidget>
+#include "glWidget.h"
+#include "IMU.h"
 
 // QT class defintions
 class QTimer;
@@ -34,12 +34,12 @@ class QLineEdit;
 class QPushButton;
 
 // main class definition
-class Window : public QWidget
+class WindowGUI : public QWidget
 {
   Q_OBJECT
 
   public:
-                  Window(int csv_file);
+                  WindowGUI(const char* config_file, const char* calib_file);
     void          setRefAccl(float* a);
     void          setParams(float* params);
 

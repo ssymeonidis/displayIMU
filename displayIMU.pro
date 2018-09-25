@@ -1,12 +1,12 @@
 VPATH        += ../shared
 INCLUDEPATH  += ../shared
 
-HEADERS       = glwidget.h          \
-                window.h            \
+HEADERS       = glWidget.h          \
+                windowGUI.h         \
                 IMU.h               \
                 dataParse.h
-SOURCES       = glwidget.cpp        \
-                window.cpp          \
+SOURCES       = glWidget.cpp        \
+                windowGUI.cpp       \
                 IMU.cpp             \
                 dataParse.cpp       \
                 main.cpp 

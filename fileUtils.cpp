@@ -81,6 +81,11 @@ static const int line_size = 128;
 static char line[line_size];
 static char temp[line_size];
 
+
+/******************************************************************************
+* utility function - gets a line and seperates field from arguments
+******************************************************************************/
+
 int get_line(FILE *file, char** field, char** args)
 {
   fgets(line, line_size, file);
@@ -98,6 +103,11 @@ int get_line(FILE *file, char** field, char** args)
   return 0;
 } 
 
+
+/******************************************************************************
+* utility function - matches field string with respective enum type
+******************************************************************************/
+
 int get_field(char* field, const char* names[], int size)
 {
   int   i;
@@ -107,6 +117,11 @@ int get_field(char* field, const char* names[], int size)
   } 
   return -1; 
 }
+
+
+/******************************************************************************
+* utility function - gets an array of comma seperated floats 
+******************************************************************************/
 
 int get_floats(char* args, float* vals, int size)
 {
@@ -121,6 +136,11 @@ int get_floats(char* args, float* vals, int size)
   }  
   return size; 
 }
+
+
+/******************************************************************************
+* utility function - converts true/false string into boolean 
+******************************************************************************/
 
 int get_bool(char* args, bool* val)
 {
@@ -137,6 +157,11 @@ int get_bool(char* args, bool* val)
   return 0;
 }
 
+
+/******************************************************************************
+* utility function - writes json float array (includes brackets and commas)
+******************************************************************************/
+
 void write_floats(FILE* file, float* vals, int size)
 {
   fprintf(file, "[");
@@ -145,6 +170,11 @@ void write_floats(FILE* file, float* vals, int size)
   fprintf(file, "%f],\n", vals[size-1]); 
 }
 
+
+/******************************************************************************
+* utility function - write boolean string
+******************************************************************************/
+
 void write_bool(FILE* file, bool val)
 {
   if (val == true)
@@ -152,6 +182,11 @@ void write_bool(FILE* file, bool val)
   else
     fprintf(file, "false,\n");
 }
+
+
+/******************************************************************************
+* reads calibration json file into memory (structure)
+******************************************************************************/
 
 int displayIMU_readCalib(char* filename, displayIMU_calib *calib) 
 {
@@ -198,6 +233,11 @@ int displayIMU_readCalib(char* filename, displayIMU_calib *calib)
   return 0;   
 }
 
+
+/******************************************************************************
+* writes calibration structure to a json file
+******************************************************************************/
+
 int displayIMU_writeCalib(char* filename, displayIMU_calib *calib)
 {
   // define internal variables
@@ -219,6 +259,11 @@ int displayIMU_writeCalib(char* filename, displayIMU_calib *calib)
   fprintf(file, "  \"mAng\": %f\n", calib->mAng);
   fprintf(file, "}");
 }
+
+
+/******************************************************************************
+* reads configuration json file into memory (structure)
+******************************************************************************/
 
 int displayIMU_readConfig(char* filename, displayIMU_config *config)
 {
@@ -277,6 +322,11 @@ int displayIMU_readConfig(char* filename, displayIMU_config *config)
   return 0;  
 }
 
+
+/******************************************************************************
+* writes configuration structure to a json file
+******************************************************************************/
+
 int displayIMU_writeConfig(char* filename, displayIMU_config *config)
 {
   // define internal variables
@@ -304,4 +354,3 @@ int displayIMU_writeConfig(char* filename, displayIMU_config *config)
   fprintf(file, "  \"gAutocalThreah\": %f\n",   config->gAutocalThresh);
   fprintf(file, "}");
 }
-

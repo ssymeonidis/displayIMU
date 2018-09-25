@@ -19,10 +19,10 @@
 
 #include <QtGui>
 #include <QtWidgets>
-#include "window.h"
+#include "windowGUI.h"
 #include "dataParse.h"
 
-Window::Window(int csv_file)
+WindowGUI::WindowGUI(const char* config_file, const char* calib_file)
 {
   // create display/video widgets
   glWidget          = new GLWidget();
@@ -401,7 +401,7 @@ Window::Window(int csv_file)
 }
 
 
-void Window::setRefAccl(float* a)
+void WindowGUI::setRefAccl(float* a)
 {
   refAcclX->setText(QString::number(a[0]));
   refAcclY->setText(QString::number(a[1]));
@@ -410,7 +410,7 @@ void Window::setRefAccl(float* a)
 }
 
 
-void Window::setParams(float* params)
+void WindowGUI::setParams(float* params)
 {
   biasAcclX->setText(QString::number(params[0]));
   biasAcclY->setText(QString::number(params[1]));
@@ -429,7 +429,7 @@ void Window::setParams(float* params)
 }
 
 
-void Window::updateDebug()
+void WindowGUI::updateDebug()
 {
   int i = buffer_index;
   displayIMU_metrics* metrics;
@@ -448,7 +448,7 @@ void Window::updateDebug()
 }
 
 
-void Window::updateCheckAccl()
+void WindowGUI::updateCheckAccl()
 {
   if (acclCheckBox->isChecked() == true)
     isIMU->setChecked(false);
@@ -456,7 +456,7 @@ void Window::updateCheckAccl()
 }
 
 
-void Window::updateCheckMag()
+void WindowGUI::updateCheckMag()
 {
   if (magCheckBox->isChecked() == true)
     isIMU->setChecked(false);
@@ -464,7 +464,7 @@ void Window::updateCheckMag()
 }
 
 
-void Window::updateCheckGyro()
+void WindowGUI::updateCheckGyro()
 {
   if (gyroCheckBox->isChecked() == true)
     isIMU->setChecked(false);
@@ -472,7 +472,7 @@ void Window::updateCheckGyro()
 }
 
 
-void Window::updateCheckIMU()
+void WindowGUI::updateCheckIMU()
 {
   if (isIMU->isChecked() == true) {
     acclCheckBox->setChecked(false);
@@ -483,7 +483,7 @@ void Window::updateCheckIMU()
 }
 
 
-void Window::updateStateIMU()
+void WindowGUI::updateStateIMU()
 {
   glWidget->isIMU         = isIMU->isChecked();
   QString textIMU         = isIMUScale->text();
@@ -548,7 +548,7 @@ void Window::updateStateIMU()
 }
 
 
-void Window::updateViewUp()
+void WindowGUI::updateViewUp()
 {  
   glWidget->xRot          = 90 * 16;
   glWidget->yRot          = 0;
@@ -559,7 +559,7 @@ void Window::updateViewUp()
 }
   
 
-void Window::updateViewSide1()
+void WindowGUI::updateViewSide1()
 {  
   glWidget->xRot       = 0;
   glWidget->yRot       = 0;
@@ -570,7 +570,7 @@ void Window::updateViewSide1()
 }
   
 
-void Window::updateViewSide2()
+void WindowGUI::updateViewSide2()
 {  
   glWidget->xRot       = 0;
   glWidget->yRot       = 90 * 16;
@@ -581,28 +581,28 @@ void Window::updateViewSide2()
 }
 
 
-void Window::updateReference()
+void WindowGUI::updateReference()
 {
   //sensor_IMU_set_ref   = 1;
   //csv_IMU_set_ref      = 1;
 }
 
 
-void Window::updateResetIMU()
+void WindowGUI::updateResetIMU()
 {
   //sensor_IMU_reset     = 1;
   //csv_IMU_reset        = 1;
 }
 
 
-void Window::updateCalibIMU()
+void WindowGUI::updateCalibIMU()
 {
   //sensor_IMU_calib     = 1;
   //csv_IMU_calib        = 1;
 }
 
 
-void Window::updateRefAccl()
+void WindowGUI::updateRefAccl()
 {
   float refAcclVector[3];
   QString textRefAcclX    = refAcclX->text();
@@ -615,7 +615,7 @@ void Window::updateRefAccl()
 }
   
 
-QSlider *Window::createSlider()
+QSlider *WindowGUI::createSlider()
 {
   QSlider *slider = new QSlider(Qt::Vertical);
   slider->setRange(0, 360 * 16);
@@ -627,7 +627,7 @@ QSlider *Window::createSlider()
 }
 
 
-void Window::keyPressEvent(QKeyEvent *e)
+void WindowGUI::keyPressEvent(QKeyEvent *e)
 {
   if (e->key() == Qt::Key_Escape)
     close();

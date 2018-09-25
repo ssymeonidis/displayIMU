@@ -17,6 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+// include statements 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,9 +29,9 @@
 #include "dataParse.h"
 
 // define the sensor data structure
-const int           buffer_size  = 100;
+const int           buffer_size   = 100;
 float               buffer[buffer_size][15];
-int                 buffer_index = 0;
+int                 buffer_index  = 0;
 displayIMU_metrics  FOM;
 
 // define internal/external variables
@@ -41,6 +42,10 @@ FILE*               csv_file;
 FILE*               log_file;
 
 
+/******************************************************************************
+* utility function - displays error and exits program
+******************************************************************************/
+
 void data_error(const char *msg)
 {
   perror(msg);
@@ -48,7 +53,11 @@ void data_error(const char *msg)
 }
 
 
-void log_data(const char* filename)
+/******************************************************************************
+* used to initiate logging data to csv file
+******************************************************************************/
+
+void data_init_log(const char* filename)
 {
   log_file    = fopen(filename, "w+");
   if (!log_file)
@@ -57,6 +66,10 @@ void log_data(const char* filename)
   is_log_data = true;
 }
 
+
+/******************************************************************************
+* iniatilizes IMU and creates UDP server
+******************************************************************************/
 
 void data_init_UDP(int portno)
 {
@@ -84,6 +97,10 @@ void data_init_UDP(int portno)
 }
 
 
+/******************************************************************************
+* iniatilizes IMU and creates CSV file reader
+******************************************************************************/
+
 void data_init_CSV(const char* filename)
 {
   // init IMU and data_stream state
@@ -97,6 +114,10 @@ void data_init_CSV(const char* filename)
 }
 
 
+/******************************************************************************
+* main function for receiving/parsing data and updating IMU
+******************************************************************************/
+
 void *data_run(void*)
 {
   // define the variables
@@ -105,7 +126,7 @@ void *data_run(void*)
   float buffer_corrected[9];
   int   rc;
   int   index;
-int                 sensor_type   = 1; 
+  int   sensor_type   = 1; 
 
   // main processing loop
   while(1) {
@@ -118,7 +139,7 @@ int                 sensor_type   = 1;
       fgets(line, sizeof(line), csv_file);
       if (line == NULL)
         break;
-    } 
+    }
     
     // store the results into ring buffer
     index      = buffer_index+1;
@@ -166,7 +187,11 @@ int                 sensor_type   = 1;
   }
 
   // exit function
-  close(data_socket);
-  fclose(log_file);
+  if (is_csv_file == false)
+    close(data_socket);
+  else
+    fclose(csv_file);
+  if (is_log_data == true)
+    fclose(log_file);
   return NULL;
 }

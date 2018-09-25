@@ -30,6 +30,7 @@ extern int                 buffer_index;
 extern displayIMU_metrics  FOM;
 
 // access functions
+void data_init_log(const char* filename);
 void data_init_UDP(int portno);
 void data_init_CSV(const char* filename);
 void *data_run(void* id);
