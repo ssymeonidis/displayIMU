@@ -958,7 +958,7 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QLineEdit" name="gMag">
+   <widget class="QLineEdit" name="mMag">
     <property name="geometry">
      <rect>
       <x>1180</x>
@@ -1003,7 +1003,7 @@
      <string>gravity mag</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="gAng">
+   <widget class="QLineEdit" name="mAng">
     <property name="geometry">
      <rect>
       <x>1290</x>
@@ -1875,5 +1875,634 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>gBias0</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gBias1</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gBias2</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult0</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult1</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult2</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult3</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult4</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult5</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>191</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult7</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>221</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult6</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>221</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gMult8</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>221</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aBias0</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>291</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aBias1</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>291</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aBias2</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>291</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult0</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>351</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult1</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>351</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult2</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>351</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult3</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult4</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult5</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult6</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>411</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult7</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>411</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMult8</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>411</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mBias0</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>481</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mBias1</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>481</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mBias2</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>481</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult0</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>541</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult1</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>541</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult2</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>541</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult3</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult4</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult5</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>571</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult6</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>601</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult7</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>601</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMult8</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>601</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aMag</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1120</x>
+     <y>671</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mMag</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1230</x>
+     <y>671</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mAng</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calib_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1340</x>
+     <y>671</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>config_read()</slot>
+  <slot>calib_read()</slot>
+ </slots>
 </ui>

@@ -37,6 +37,10 @@ public:
   void initIMU(char* config_file, char* calib_file);
 
 private slots:
+  void config_read();
+  void config_write();
+  void calib_read();
+  void calib_write(); 
   void on_configOpen_clicked();
   void on_configSave_clicked();
   void on_calibOpen_clicked();
@@ -47,12 +51,6 @@ private:
   Ui::windowGUI      *ui;
   displayIMU_config  *config;
   displayIMU_calib   *calib;
-
-  //internal functions
-  void config_read();
-  void config_write();
-  void calib_read();
-  void calib_write(); 
 };
 
 #endif // WINDOWGUI_H
