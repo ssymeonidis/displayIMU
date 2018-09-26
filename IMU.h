@@ -38,16 +38,20 @@ struct displayIMU_config {
   bool     isGyro;          // enable gyroscope data
   bool     isAccl;          // enable accelerometer data
   bool     isMagn;          // enable magnetometer data
-  bool     isFltr;          // enable IMU filter
+  bool     isWeight;        // enable IMU weight 
   bool     isTear;          // enable application of ref
-  bool     isAcclEstm;      // enable acceleration estimate
+  bool     isMove;          // enable acceleration estimate
+  bool     isFOM;           // enable FOM calculation
+  bool     isFltr;          // enable "bad data" filtering 
   bool     isAutocal;       // enable autocal data collect
-  float    aWeight;         // accelerometer filter weight
-  float    mWeight;         // magnetometer filter weight
-  float    acclAlpha;       // acceleration estimate alpha
-  float    autocalAlpha1;   // autocal "still" alpha
-  float    autocalAlpha2;   // autocal "continous" alpha
-  float    gAutocalThresh;  // gyroscope no motion threshold
+  float    gThreshVal;      // no motion threshold value
+  float    gThreshTime;     // no motion threhsold time
+  float    aWeight;         // accelerometer IMU weight
+  float    aAlpha;          // accelerometer filter weight 
+  float    mWeight;         // magnetometer IMU weight
+  float    mAlpha;          // magnetometer filter weight 
+  float    moveAlpha;       // acceleration estimate alpha
+  float    autocalAlpha;    // autocal "still" alpha
 };
 
 // define internal state struct (captures internal IMU state)

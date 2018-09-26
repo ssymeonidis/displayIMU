@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1390</width>
-    <height>690</height>
+    <width>1400</width>
+    <height>770</height>
    </rect>
   </property>
   <property name="font">
@@ -104,7 +104,7 @@
       <x>710</x>
       <y>0</y>
       <width>20</width>
-      <height>621</height>
+      <height>701</height>
      </rect>
     </property>
     <property name="orientation">
@@ -160,7 +160,7 @@
     <property name="geometry">
      <rect>
       <x>430</x>
-      <y>230</y>
+      <y>280</y>
       <width>281</width>
       <height>16</height>
      </rect>
@@ -173,7 +173,7 @@
     <property name="geometry">
      <rect>
       <x>520</x>
-      <y>250</y>
+      <y>300</y>
       <width>121</width>
       <height>17</height>
      </rect>
@@ -191,8 +191,8 @@
    <widget class="QCheckBox" name="noGyro">
     <property name="geometry">
      <rect>
-      <x>430</x>
-      <y>290</y>
+      <x>730</x>
+      <y>40</y>
       <width>97</width>
       <height>22</height>
      </rect>
@@ -204,8 +204,8 @@
    <widget class="QCheckBox" name="noAccl">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>290</y>
+      <x>840</x>
+      <y>40</y>
       <width>97</width>
       <height>22</height>
      </rect>
@@ -217,8 +217,8 @@
    <widget class="QCheckBox" name="noMagn">
     <property name="geometry">
      <rect>
-      <x>620</x>
-      <y>290</y>
+      <x>940</x>
+      <y>40</y>
       <width>97</width>
       <height>22</height>
      </rect>
@@ -231,7 +231,7 @@
     <property name="geometry">
      <rect>
       <x>430</x>
-      <y>200</y>
+      <y>240</y>
       <width>71</width>
       <height>27</height>
      </rect>
@@ -244,7 +244,7 @@
     <property name="geometry">
      <rect>
       <x>530</x>
-      <y>200</y>
+      <y>240</y>
       <width>71</width>
       <height>27</height>
      </rect>
@@ -257,7 +257,7 @@
     <property name="geometry">
      <rect>
       <x>630</x>
-      <y>200</y>
+      <y>240</y>
       <width>71</width>
       <height>27</height>
      </rect>
@@ -366,8 +366,8 @@
    <widget class="QLineEdit" name="gBias0">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>20</y>
+      <x>1070</x>
+      <y>50</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -379,8 +379,8 @@
    <widget class="QLineEdit" name="gBias1">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>20</y>
+      <x>1180</x>
+      <y>50</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -392,8 +392,8 @@
    <widget class="QLineEdit" name="gBias2">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>20</y>
+      <x>1290</x>
+      <y>50</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -405,8 +405,8 @@
    <widget class="QLineEdit" name="gMult1">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>80</y>
+      <x>1180</x>
+      <y>110</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -418,8 +418,8 @@
    <widget class="QLineEdit" name="gMult2">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>80</y>
+      <x>1290</x>
+      <y>110</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -431,8 +431,8 @@
    <widget class="QLineEdit" name="gMult0">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>80</y>
+      <x>1070</x>
+      <y>110</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -444,8 +444,8 @@
    <widget class="QLineEdit" name="gMult5">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>110</y>
+      <x>1290</x>
+      <y>140</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -457,8 +457,8 @@
    <widget class="QLineEdit" name="gMult3">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>110</y>
+      <x>1070</x>
+      <y>140</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -470,8 +470,8 @@
    <widget class="QLineEdit" name="gMult4">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>110</y>
+      <x>1180</x>
+      <y>140</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -483,8 +483,8 @@
    <widget class="QLineEdit" name="gMult8">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>140</y>
+      <x>1290</x>
+      <y>170</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -496,8 +496,8 @@
    <widget class="QLineEdit" name="gMult6">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>140</y>
+      <x>1070</x>
+      <y>170</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -509,8 +509,8 @@
    <widget class="QLineEdit" name="gMult7">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>140</y>
+      <x>1180</x>
+      <y>170</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -522,8 +522,8 @@
    <widget class="QLabel" name="labelCalib1">
     <property name="geometry">
      <rect>
-      <x>1160</x>
-      <y>0</y>
+      <x>1170</x>
+      <y>30</y>
       <width>121</width>
       <height>20</height>
      </rect>
@@ -541,8 +541,8 @@
    <widget class="QLabel" name="labelCalib2">
     <property name="geometry">
      <rect>
-      <x>1100</x>
-      <y>60</y>
+      <x>1110</x>
+      <y>90</y>
       <width>231</width>
       <height>20</height>
      </rect>
@@ -560,8 +560,8 @@
    <widget class="QLineEdit" name="aBias1">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>210</y>
+      <x>1180</x>
+      <y>240</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -573,8 +573,8 @@
    <widget class="QLineEdit" name="aMult2">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>270</y>
+      <x>1290</x>
+      <y>300</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -586,8 +586,8 @@
    <widget class="QLineEdit" name="aMult7">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>330</y>
+      <x>1180</x>
+      <y>360</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -599,8 +599,8 @@
    <widget class="QLineEdit" name="aMult1">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>270</y>
+      <x>1180</x>
+      <y>300</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -612,8 +612,8 @@
    <widget class="QLineEdit" name="aMult0">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>270</y>
+      <x>1070</x>
+      <y>300</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -625,8 +625,8 @@
    <widget class="QLineEdit" name="aMult3">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>300</y>
+      <x>1070</x>
+      <y>330</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -638,8 +638,8 @@
    <widget class="QLabel" name="labelCalib4">
     <property name="geometry">
      <rect>
-      <x>1090</x>
-      <y>250</y>
+      <x>1100</x>
+      <y>280</y>
       <width>271</width>
       <height>20</height>
      </rect>
@@ -657,8 +657,8 @@
    <widget class="QLineEdit" name="aMult8">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>330</y>
+      <x>1290</x>
+      <y>360</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -670,8 +670,8 @@
    <widget class="QLineEdit" name="aBias2">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>210</y>
+      <x>1290</x>
+      <y>240</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -683,8 +683,8 @@
    <widget class="QLineEdit" name="aBias0">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>210</y>
+      <x>1070</x>
+      <y>240</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -696,8 +696,8 @@
    <widget class="QLineEdit" name="aMult5">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>300</y>
+      <x>1290</x>
+      <y>330</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -709,8 +709,8 @@
    <widget class="QLineEdit" name="aMult6">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>330</y>
+      <x>1070</x>
+      <y>360</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -722,8 +722,8 @@
    <widget class="QLabel" name="labelCalib3">
     <property name="geometry">
      <rect>
-      <x>1150</x>
-      <y>190</y>
+      <x>1160</x>
+      <y>220</y>
       <width>161</width>
       <height>20</height>
      </rect>
@@ -741,8 +741,8 @@
    <widget class="QLineEdit" name="aMult4">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>300</y>
+      <x>1180</x>
+      <y>330</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -754,8 +754,8 @@
    <widget class="QLineEdit" name="mBias1">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>400</y>
+      <x>1180</x>
+      <y>430</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -767,8 +767,8 @@
    <widget class="QLineEdit" name="mMult3">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>490</y>
+      <x>1070</x>
+      <y>520</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -780,8 +780,8 @@
    <widget class="QLineEdit" name="mMult2">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>460</y>
+      <x>1290</x>
+      <y>490</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -793,8 +793,8 @@
    <widget class="QLineEdit" name="mMult6">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>520</y>
+      <x>1070</x>
+      <y>550</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -806,8 +806,8 @@
    <widget class="QLineEdit" name="mMult1">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>460</y>
+      <x>1180</x>
+      <y>490</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -819,8 +819,8 @@
    <widget class="QLabel" name="labelCalib6">
     <property name="geometry">
      <rect>
-      <x>1090</x>
-      <y>440</y>
+      <x>1100</x>
+      <y>470</y>
       <width>261</width>
       <height>20</height>
      </rect>
@@ -838,8 +838,8 @@
    <widget class="QLineEdit" name="mBias0">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>400</y>
+      <x>1070</x>
+      <y>430</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -851,8 +851,8 @@
    <widget class="QLineEdit" name="mMult0">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>460</y>
+      <x>1070</x>
+      <y>490</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -864,8 +864,8 @@
    <widget class="QLineEdit" name="mBias2">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>400</y>
+      <x>1290</x>
+      <y>430</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -877,8 +877,8 @@
    <widget class="QLineEdit" name="mMult4">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>490</y>
+      <x>1180</x>
+      <y>520</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -890,8 +890,8 @@
    <widget class="QLabel" name="labelCalib5">
     <property name="geometry">
      <rect>
-      <x>1140</x>
-      <y>380</y>
+      <x>1150</x>
+      <y>410</y>
       <width>151</width>
       <height>20</height>
      </rect>
@@ -909,8 +909,8 @@
    <widget class="QLineEdit" name="mMult8">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>520</y>
+      <x>1290</x>
+      <y>550</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -922,8 +922,8 @@
    <widget class="QLineEdit" name="mMult5">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>490</y>
+      <x>1290</x>
+      <y>520</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -935,8 +935,8 @@
    <widget class="QLineEdit" name="mMult7">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>520</y>
+      <x>1180</x>
+      <y>550</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -961,8 +961,8 @@
    <widget class="QLineEdit" name="gMag">
     <property name="geometry">
      <rect>
-      <x>1170</x>
-      <y>590</y>
+      <x>1180</x>
+      <y>620</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -974,8 +974,8 @@
    <widget class="QLineEdit" name="aMag">
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>590</y>
+      <x>1070</x>
+      <y>620</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -987,8 +987,8 @@
    <widget class="QLabel" name="labelCalib7">
     <property name="geometry">
      <rect>
-      <x>1070</x>
-      <y>570</y>
+      <x>1080</x>
+      <y>600</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -1006,8 +1006,8 @@
    <widget class="QLineEdit" name="gAng">
     <property name="geometry">
      <rect>
-      <x>1280</x>
-      <y>590</y>
+      <x>1290</x>
+      <y>620</y>
       <width>101</width>
       <height>27</height>
      </rect>
@@ -1019,8 +1019,8 @@
    <widget class="QLabel" name="labelCalib8">
     <property name="geometry">
      <rect>
-      <x>1190</x>
-      <y>570</y>
+      <x>1200</x>
+      <y>600</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -1038,8 +1038,8 @@
    <widget class="QLabel" name="labelCalib9">
     <property name="geometry">
      <rect>
-      <x>1300</x>
-      <y>570</y>
+      <x>1310</x>
+      <y>600</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -1054,25 +1054,12 @@
      <string>field ang</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="aWeight">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>40</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.0</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="labelConfig1">
     <property name="geometry">
      <rect>
-      <x>870</x>
-      <y>40</y>
-      <width>161</width>
+      <x>730</x>
+      <y>140</y>
+      <width>121</width>
       <height>20</height>
      </rect>
     </property>
@@ -1083,15 +1070,15 @@
      </font>
     </property>
     <property name="text">
-     <string>accelerometer weight</string>
+     <string>gThreshVal</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelConfig">
     <property name="geometry">
      <rect>
-      <x>810</x>
+      <x>790</x>
       <y>0</y>
-      <width>151</width>
+      <width>171</width>
       <height>20</height>
      </rect>
     </property>
@@ -1102,180 +1089,20 @@
      </font>
     </property>
     <property name="text">
-     <string>Configuration State</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="mWeight">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>80</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.0</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelConfig2">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>80</y>
-      <width>161</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>magnetometer weight</string>
+     <string>Configuration Structure</string>
     </property>
    </widget>
    <widget class="Line" name="line_v2">
     <property name="geometry">
      <rect>
-      <x>1040</x>
+      <x>1050</x>
       <y>0</y>
       <width>20</width>
-      <height>621</height>
+      <height>701</height>
      </rect>
     </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelConfig3">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>120</y>
-      <width>161</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>acceleration alpha</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="acclAlpha">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>120</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.0</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelConfig6">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>240</y>
-      <width>161</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>autocal threshold</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="autocalAlpha1">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>160</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.0</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelConfig5">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>200</y>
-      <width>161</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>autocal alpha 2</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="labelConfig4">
-    <property name="geometry">
-     <rect>
-      <x>870</x>
-      <y>160</y>
-      <width>161</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>autocal alpha 1</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="autocalAlpha2">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>200</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.0</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="gAutocalThresh">
-    <property name="geometry">
-     <rect>
-      <x>730</x>
-      <y>240</y>
-      <width>131</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>1.0</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelGyroBias">
@@ -1586,10 +1413,435 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>10</y>
+      <y>0</y>
       <width>411</width>
-      <height>401</height>
+      <height>411</height>
      </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig_2">
+    <property name="geometry">
+     <rect>
+      <x>1150</x>
+      <y>0</y>
+      <width>151</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Calibration Structure</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="calibOpen">
+    <property name="geometry">
+     <rect>
+      <x>1130</x>
+      <y>670</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="calibSave">
+    <property name="geometry">
+     <rect>
+      <x>1250</x>
+      <y>670</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="noWeight">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>70</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>no weight</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="noTear">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>70</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>no tear</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="noMove">
+    <property name="geometry">
+     <rect>
+      <x>940</x>
+      <y>70</y>
+      <width>97</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>no move</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="noAutocal">
+    <property name="geometry">
+     <rect>
+      <x>940</x>
+      <y>100</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>no autocal</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="noFOM">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>100</y>
+      <width>101</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>no FOM</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="noFltr">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>100</y>
+      <width>91</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>no fltr</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="gThreshVal">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>160</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="gThreshTime">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>160</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig2">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>140</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>gThreshTime</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig4">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>200</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>aAlpha</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig3">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>200</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>aWeight</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="aWeight">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>220</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="aAlpha">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>220</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="mAlpha">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>280</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig6">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>260</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>mAlpha</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="mWeight">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>280</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig5">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>260</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>mWeight</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="autocalAlpha">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>340</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig8">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>320</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>autocalAlpha</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="configSave">
+    <property name="geometry">
+     <rect>
+      <x>910</x>
+      <y>670</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="configOpen">
+    <property name="geometry">
+     <rect>
+      <x>790</x>
+      <y>670</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="dispVectRaw">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>200</y>
+      <width>81</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Raw</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="dispVectCor">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>200</y>
+      <width>111</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Corrected</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="dispVectFltr">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>200</y>
+      <width>81</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Filtered</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="labelConfig7">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>320</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>moveAlpha</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="moveAlpha">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>340</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>1.0</string>
     </property>
    </widget>
   </widget>
@@ -1598,7 +1850,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1390</width>
+     <width>1400</width>
      <height>25</height>
     </rect>
    </property>

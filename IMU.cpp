@@ -515,7 +515,7 @@ inline void displayIMU_refAndEuler(float* E)
 
 inline void displayIMU_estmAccl(float* a, float* A)
 {
-  if (config.isAcclEstm == false)
+  if (config.isMove == false)
     return;
 
   // define internal varirables
@@ -529,7 +529,7 @@ inline void displayIMU_estmAccl(float* a, float* A)
                 -g[0]*SEq[3] + g[1]*SEq[2] - g[2]*SEq[1] + g[3]*SEq[0]};
  
   // remove the gravity from the accelerometer data
-  float alpha      = config.acclAlpha;
+  float alpha      = config.moveAlpha;
   if (state.isReset != 0) {
     A[0]           = a[0]-G[0];
     A[1]           = a[1]-G[1];

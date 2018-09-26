@@ -48,36 +48,44 @@ enum calib_enum {
 };
 
 // config struct parsing inputs
-static const int   config_size = 13;
+static const int   config_size = 17;
 static const char* config_name[] = {
   "isGyro", 
   "isAccl",
   "isMagn",
-  "isFltr",
+  "isWeight",
   "isTear",
-  "isAcclEstm",
+  "isMove",
+  "isFOM",
+  "isFltr",
   "isAutocal",
+  "gThreshVal",
+  "gThreshTime",
   "aWeight",
+  "aAlpha",
   "mWeight",
-  "acclAlpha",
-  "autocalAlpha1",
-  "autocalAlpha2",
-  "gAutocalThresh"
+  "mAlpha",
+  "moveAlpha",
+  "autocalAlpha"
 };
 enum config_enum {
   isGyro          = 0,
   isAccl          = 1,
   isMagn          = 2,
-  isFltr          = 3,
+  isWeight        = 3,
   isTear          = 4,
-  isAcclEstm      = 5,
-  isAutocal       = 6,
-  aWeight         = 7,
-  mWeight         = 8,
-  acclAlpha       = 9,
-  autocalAlpha1   = 10,
-  autocalAlpha2   = 11,
-  gAutocalThresh  = 12
+  isMove          = 5,
+  isFOM           = 6,
+  isFltr          = 7,
+  isAutocal       = 8,
+  gThreshVal      = 9,
+  gThreshTime     = 10,
+  aWeight         = 11,
+  aAlpha          = 12,
+  mWeight         = 13,
+  mAlpha          = 14,
+  moveAlpha       = 15,
+  autocalAlpha    = 16
 };
 
 // buffers used for parsing
@@ -170,8 +178,8 @@ void write_floats(FILE* file, float* vals, int size)
 {
   fprintf(file, "[");
   for (int i=0; i<size-1; i++)
-    fprintf(file, "%f, ", vals[i]);
-  fprintf(file, "%f],\n", vals[size-1]); 
+    fprintf(file, "%0.2f, ", vals[i]);
+  fprintf(file, "%0.2f],\n", vals[size-1]); 
 }
 
 
@@ -265,10 +273,10 @@ int displayIMU_writeCalib(char* filename, displayIMU_calib *calib)
   fprintf(file, "  \"aMult\": ");  write_floats(file, calib->aMult, 9);
   fprintf(file, "  \"mBias\": ");  write_floats(file, calib->mBias, 3);
   fprintf(file, "  \"mMult\": ");  write_floats(file, calib->mMult, 9);
-  fprintf(file, "  \"aMag\": %f,\n", calib->aMag);
-  fprintf(file, "  \"mMag\": %f,\n", calib->mMag);
-  fprintf(file, "  \"mAng\": %f\n",  calib->mAng);
-  fprintf(file, "}");
+  fprintf(file, "  \"aMag\": %0.2f,\n", calib->aMag);
+  fprintf(file, "  \"mMag\": %0.2f,\n", calib->mMag);
+  fprintf(file, "  \"mAng\": %0.2f\n",  calib->mAng);
+  fprintf(file, "}\n");
 
   // exit function
   fclose(file);
@@ -310,26 +318,32 @@ int displayIMU_readConfig(char* filename, displayIMU_config *config)
       get_bool(args, &config->isAccl);
     else if (type == isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == isFltr)
+    else if (type == isWeight)
       get_bool(args, &config->isFltr);
     else if (type == isTear)
       get_bool(args, &config->isTear);
-    else if (type == isAcclEstm)
-      get_bool(args, &config->isAcclEstm);
+    else if (type == isMove)
+      get_bool(args, &config->isMove);
+    else if (type == isFOM)
+      get_bool(args, &config->isFOM);
     else if (type == isAutocal)
       get_bool(args, &config->isAutocal);
+    else if (type == gThreshVal)
+      sscanf(args, "%f", &config->gThreshVal);
+    else if (type == gThreshTime)
+      sscanf(args, "%f", &config->gThreshTime);
     else if (type == aWeight)
       sscanf(args, "%f", &config->aWeight);
+    else if (type == aAlpha)
+      sscanf(args, "%f", &config->aAlpha);
     else if (type == mWeight)
       sscanf(args, "%f", &config->mWeight);
-    else if (type == acclAlpha)
-      sscanf(args, "%f", &config->acclAlpha);
-    else if (type == autocalAlpha1)
-      sscanf(args, "%f", &config->autocalAlpha1);
-    else if (type == autocalAlpha2)
-      sscanf(args, "%f", &config->autocalAlpha2);
-    else if (type == gAutocalThresh)
-      sscanf(args, "%f", &config->gAutocalThresh);
+    else if (type == mAlpha)
+      sscanf(args, "%f", &config->mAlpha);
+    else if (type == moveAlpha)
+      sscanf(args, "%f", &config->moveAlpha);
+    else if (type == autocalAlpha)
+      sscanf(args, "%f", &config->autocalAlpha);
   }
 
   // exit function
@@ -357,17 +371,21 @@ int displayIMU_writeConfig(char* filename, displayIMU_config *config)
   fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
   fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
-  fprintf(file, "  \"isFltr\": ");      write_bool(file, config->isFltr);
+  fprintf(file, "  \"isWeight\": ");    write_bool(file, config->isWeight);
   fprintf(file, "  \"isTear\": ");      write_bool(file, config->isTear);
-  fprintf(file, "  \"isAcclEstm\": ");  write_bool(file, config->isAcclEstm);
+  fprintf(file, "  \"isMove\": ");      write_bool(file, config->isMove);
+  fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
+  fprintf(file, "  \"isFltr\": ");      write_bool(file, config->isFltr);
   fprintf(file, "  \"isAutocal\": ");   write_bool(file, config->isAutocal);
-  fprintf(file, "  \"aWeight\": %f,\n",         config->aWeight);
-  fprintf(file, "  \"mWeight\": %f,\n",         config->mWeight);
-  fprintf(file, "  \"acclAlpha\": %f,\n",       config->acclAlpha);
-  fprintf(file, "  \"autocalAlpha1\": %f,\n",   config->autocalAlpha1);
-  fprintf(file, "  \"autocalAlpha2\": %f,\n",   config->autocalAlpha2);
-  fprintf(file, "  \"gAutocalThreah\": %f\n",   config->gAutocalThresh);
-  fprintf(file, "}");
+  fprintf(file, "  \"gThreshVal\": %0.2f,\n",      config->gThreshVal);
+  fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
+  fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
+  fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
+  fprintf(file, "  \"mWeight\": %0.2f,\n",         config->mWeight);
+  fprintf(file, "  \"mAlpha\": %0.2f,\n",          config->mAlpha);
+  fprintf(file, "  \"moveAlpha\": %0.2f,\n",       config->moveAlpha);
+  fprintf(file, "  \"autocalAlpha\": %0.2f,\n",    config->autocalAlpha);
+  fprintf(file, "}\n");
 
   // exit function
   fclose(file);

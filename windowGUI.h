@@ -32,8 +32,15 @@ class windowGUI : public QMainWindow {
   Q_OBJECT
 
 public:
-  windowGUI(char* config_file, char* calib_file);
+  explicit windowGUI(QWidget *parent = 0);
   ~windowGUI();
+  void initIMU(char* config_file, char* calib_file);
+
+private slots:
+  void on_configOpen_clicked();
+  void on_configSave_clicked();
+  void on_calibOpen_clicked();
+  void on_calibSave_clicked();
 
 private:
   // internal structures/classes
@@ -42,10 +49,10 @@ private:
   displayIMU_calib   *calib;
 
   //internal functions
-  void config_read(void);
-  void config_write(void);
-  void calib_read(void);
-  void calib_write(void); 
+  void config_read();
+  void config_write();
+  void calib_read();
+  void calib_write(); 
 };
 
 #endif // WINDOWGUI_H

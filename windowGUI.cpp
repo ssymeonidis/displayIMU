@@ -18,32 +18,42 @@
 */
 
 // include statements 
+#include <QFileDialog>
 #include "windowGUI.h"
 #include "ui_windowGUI.h"
 #include "fileUtils.h"
-#include <stdio.h>
 
 
 /******************************************************************************
-* constructor - iniatialize IMU structures and GUI
+* constructor - create GUI and allocate memory 
 ******************************************************************************/
 
-windowGUI::windowGUI(char* config_file, char* calib_file) 
+windowGUI::windowGUI(QWidget *parent) :
+  QMainWindow(parent),
+  ui(new Ui::windowGUI)
 {
   // create and place window widgets
-  ui = new Ui::windowGUI;
   ui->setupUi(this);
 
   // get pointers to IMU structures
   displayIMU_getConfig(&config);
   displayIMU_getCalib(&calib);
+}
 
-  // populate config structures
-  //if (config_file != NULL)   
-  //  displayIMU_readConfig(config_file, config);
+
+/******************************************************************************
+* iniatialize IMU structures and GUI elements 
+******************************************************************************/
+
+void windowGUI::initIMU(char* config_file, char* calib_file)
+{
+  if (config_file != NULL) {
+    displayIMU_readConfig(config_file, config);
+    config_write();
+  }
   if (calib_file  != NULL) {
     displayIMU_readCalib(calib_file, calib);
-    config_write();
+    calib_write();
   }
 }
 
@@ -59,10 +69,10 @@ windowGUI::~windowGUI()
 
 
 /******************************************************************************
-* utility function - writes contents of config structure to GUI 
+* utility function - writes contents of calib structure to GUI 
 ******************************************************************************/
 
-void windowGUI::config_write(void)
+void windowGUI::calib_write()
 {
   ui->gBias0->setText(QString::number(calib->gBias[0], 'f', 2));
   ui->gBias1->setText(QString::number(calib->gBias[1], 'f', 2));
@@ -103,4 +113,80 @@ void windowGUI::config_write(void)
   ui->aMag->setText(QString::number(calib->aMag, 'f', 2));
   ui->gMag->setText(QString::number(calib->mMag, 'f', 2));
   ui->gAng->setText(QString::number(calib->mAng, 'f', 2));
+}
+
+
+/******************************************************************************
+* utility function - writes contents of config structure to GUI 
+******************************************************************************/
+
+void windowGUI::config_write()
+{
+  ui->noGyro->setChecked(!config->isGyro);
+  ui->noAccl->setChecked(!config->isAccl);
+  ui->noMagn->setChecked(!config->isMagn);
+  ui->noWeight->setChecked(!config->isWeight);
+  ui->noTear->setChecked(!config->isTear);
+  ui->noMove->setChecked(!config->isMove);
+  ui->noFOM->setChecked(!config->isFOM);
+  ui->noFltr->setChecked(!config->isFltr);
+  ui->noAutocal->setChecked(!config->isAutocal);
+  ui->gThreshVal->setText(QString::number(config->gThreshVal, 'f', 2));
+  ui->gThreshTime->setText(QString::number(config->gThreshTime, 'f', 2));
+  ui->aWeight->setText(QString::number(config->aWeight, 'f', 2));
+  ui->aAlpha->setText(QString::number(config->aAlpha, 'f', 2));
+  ui->mWeight->setText(QString::number(config->mWeight, 'f', 2));
+  ui->mAlpha->setText(QString::number(config->mAlpha, 'f', 2));
+  ui->moveAlpha->setText(QString::number(config->moveAlpha, 'f', 2));
+  ui->autocalAlpha->setText(QString::number(config->autocalAlpha, 'f', 2)); 
+}
+
+
+/******************************************************************************
+* loads calib structure from json file
+******************************************************************************/
+
+void windowGUI::on_calibOpen_clicked()
+{
+  QString file = QFileDialog::getOpenFileName(this, ("Open File"), ".", 
+    ("json (*.json)"));
+  displayIMU_readCalib((char *)file.toStdString().c_str(), calib);
+  calib_write();
+}
+
+
+/******************************************************************************
+* saves config structure to json file
+******************************************************************************/
+
+void windowGUI::on_calibSave_clicked()
+{
+  QString file = QFileDialog::getSaveFileName(this, ("Save File"), ".",
+    ("json (*.json)"));
+  displayIMU_writeCalib((char *)file.toStdString().c_str(), calib);
+}
+
+
+/******************************************************************************
+* loads config structure from json file
+******************************************************************************/
+
+void windowGUI::on_configOpen_clicked()
+{
+  QString file = QFileDialog::getOpenFileName(this, ("Open File"), ".",
+    ("json (*.json)"));
+  displayIMU_readConfig((char *)file.toStdString().c_str(), config);
+  config_write();
+}
+
+
+/******************************************************************************
+* saves config structure to json file
+******************************************************************************/
+
+void windowGUI::on_configSave_clicked()
+{
+  QString file = QFileDialog::getSaveFileName(this, ("Save File"), ".",
+    ("json (*.json)"));
+  displayIMU_writeConfig((char *)file.toStdString().c_str(), config);
 }
