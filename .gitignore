@@ -1,10 +1,10 @@
 *.o
-*.old
 *.bak
 displayIMU
-old
 *.swp
 *.csv
 .~lock*
 *.txt
 noguiIMU
+*old
+*.user

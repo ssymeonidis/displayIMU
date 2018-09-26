@@ -23,9 +23,11 @@
 // define the calibration structure (values tuned for each unit)
 struct displayIMU_calib {
   float    gBias[3];        // gyroscope biases
+  float    gMult[9];        // gyroscope transform matrix 
   float    aBias[3];        // accelerometer biases
+  float    aMult[9];        // accelerometer transform matrix 
   float    mBias[3];        // magnetometer biases
-  float    gScale[3];       // gyroscope scale factor
+  float    mMult[9];        // magnetometer transform matrix
   float    aMag;            // gravity magnitude
   float    mMag;            // magnetic north magnitude  
   float    mAng;            // magnetic north angle
@@ -33,7 +35,7 @@ struct displayIMU_calib {
 
 // define the configuration structure (values tuned for a part)
 struct displayIMU_config {
-  bool     isGyro;          // enable gyroscope data 
+  bool     isGyro;          // enable gyroscope data
   bool     isAccl;          // enable accelerometer data
   bool     isMagn;          // enable magnetometer data
   bool     isFltr;          // enable IMU filter

@@ -31,12 +31,23 @@ int main(int argc, char *argv[])
   // define internal variables
   int           data_thread_id;
   pthread_t     data_thread;
+  char*         config;
+  char*         calib;
+
+  // parse command line arguments
+  if (argc < 3) {
+    config      = NULL;
+    calib       = NULL;
+  } else {
+    config      = NULL;
+    calib       = argv[2];
+  }
 
   // create the display
-  QApplication  app    (argc,    argv);
-  WindowGUI     window (argv[1], argv[2]);
-  window.resize(window.sizeHint());
-  window.show();  // window.showMaximized();
+  QApplication  app    (argc,   argv);
+  windowGUI     window (config, calib);
+  //window.resize(window.sizeHint());
+  window.show(); 
 
   // launch data parser (seperate thread)
   if (argc < 4) 

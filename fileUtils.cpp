@@ -23,24 +23,28 @@
 #include "fileUtils.h"
 
 // calib structure parsing inputs
-static const int   calib_size = 7;
+static const int   calib_size = 9;
 static const char* calib_name[] = {
   "gBias",
+  "gMult",
   "aBias",
+  "aMult",
   "mBias",
-  "gScale",
+  "mMult",
   "aMag",
   "mMag",
   "mAng"
 };
 enum calib_enum {
   gBias   = 0,
-  aBias   = 1,
-  mBias   = 2,
-  gScale  = 3,
-  aMag    = 4,
-  mMag    = 5,
-  mAng    = 6
+  gMult   = 1,
+  aBias   = 2,
+  aMult   = 3,
+  mBias   = 4,
+  mMult   = 5,
+  aMag    = 6,
+  mMag    = 7,
+  mAng    = 8
 };
 
 // config struct parsing inputs
@@ -204,9 +208,10 @@ int displayIMU_readCalib(char* filename, displayIMU_calib *calib)
 
   // main loop that parse json file line by line
   while (1) {
-
     // read line and parse field/args
     status = get_line(file, &field, &args);
+    if (status == 1)
+      continue;
     if (status > 1 || status < 0)
       break;
 
@@ -214,12 +219,16 @@ int displayIMU_readCalib(char* filename, displayIMU_calib *calib)
     type = get_field(field, calib_name, calib_size);
     if      (type == gBias) 
       get_floats(args, calib->gBias, 3);
+    else if (type == gMult)
+      get_floats(args, calib->gMult, 9);
     else if (type == aBias)
       get_floats(args, calib->aBias, 3);
+    else if (type == aMult)
+      get_floats(args, calib->aMult, 9);
     else if (type == mBias)
       get_floats(args, calib->mBias, 3);
-    else if (type == gScale)
-      get_floats(args, calib->gScale, 3);
+    else if (type == mMult)
+      get_floats(args, calib->mMult, 9);
     else if (type == aMag)
       sscanf(args, "%f", &calib->aMag);
     else if (type == mMag)
@@ -250,14 +259,20 @@ int displayIMU_writeCalib(char* filename, displayIMU_calib *calib)
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
-  fprintf(file, "  \"gBias\": ");   write_floats(file, calib->gBias,  3);
-  fprintf(file, "  \"aBias\": ");   write_floats(file, calib->aBias,  3);
-  fprintf(file, "  \"mBias\": ");   write_floats(file, calib->mBias,  3);
-  fprintf(file, "  \"gScale\": ");  write_floats(file, calib->gScale, 3);
+  fprintf(file, "  \"gBias\": ");  write_floats(file, calib->gBias, 3);
+  fprintf(file, "  \"gMult\": ");  write_floats(file, calib->gMult, 9);
+  fprintf(file, "  \"aBias\": ");  write_floats(file, calib->aBias, 3);
+  fprintf(file, "  \"aMult\": ");  write_floats(file, calib->aMult, 9);
+  fprintf(file, "  \"mBias\": ");  write_floats(file, calib->mBias, 3);
+  fprintf(file, "  \"mMult\": ");  write_floats(file, calib->mMult, 9);
   fprintf(file, "  \"aMag\": %f,\n", calib->aMag);
   fprintf(file, "  \"mMag\": %f,\n", calib->mMag);
-  fprintf(file, "  \"mAng\": %f\n", calib->mAng);
+  fprintf(file, "  \"mAng\": %f\n",  calib->mAng);
   fprintf(file, "}");
+
+  // exit function
+  fclose(file);
+  return 0;
 }
 
 
@@ -353,4 +368,8 @@ int displayIMU_writeConfig(char* filename, displayIMU_config *config)
   fprintf(file, "  \"autocalAlpha2\": %f,\n",   config->autocalAlpha2);
   fprintf(file, "  \"gAutocalThreah\": %f\n",   config->gAutocalThresh);
   fprintf(file, "}");
+
+  // exit function
+  fclose(file);
+  return 0;
 }

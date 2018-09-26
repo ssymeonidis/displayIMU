@@ -38,7 +38,7 @@ GLfloat GLWidget::gridColor[4] = {   0.3,    0.3,    0.3,    1.0};
 * constructor for the OpenGL sensor/IMU display widget
 ******************************************************************************/
 
-GLWidget::GLWidget() : QGLWidget(QGLFormat(QGL::SampleBuffers), 0)
+GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
   // initialize internal display variables
   xRot       = 0;

@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_OPENGL_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -m64 -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -m64 -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I../shared -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtOpenGL -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64
+INCPATH       = -I. -isystem /usr/include/x86_64-linux-gnu/qt5 -isystem /usr/include/x86_64-linux-gnu/qt5/QtOpenGL -isystem /usr/include/x86_64-linux-gnu/qt5/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt5/QtGui -isystem /usr/include/x86_64-linux-gnu/qt5/QtCore -I. -I. -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64
 QMAKE         = /usr/lib/x86_64-linux-gnu/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -52,12 +52,14 @@ SOURCES       = glWidget.cpp \
 		windowGUI.cpp \
 		IMU.cpp \
 		dataParse.cpp \
+		fileUtils.cpp \
 		main.cpp moc_glWidget.cpp \
 		moc_windowGUI.cpp
 OBJECTS       = glWidget.o \
 		windowGUI.o \
 		IMU.o \
 		dataParse.o \
+		fileUtils.o \
 		main.o \
 		moc_glWidget.o \
 		moc_windowGUI.o
@@ -120,10 +122,12 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		displayIMU.pro glWidget.h \
 		windowGUI.h \
 		IMU.h \
-		dataParse.h glWidget.cpp \
+		dataParse.h \
+		fileUtils.h glWidget.cpp \
 		windowGUI.cpp \
 		IMU.cpp \
 		dataParse.cpp \
+		fileUtils.cpp \
 		main.cpp
 QMAKE_TARGET  = displayIMU
 DESTDIR       = #avoid trailing-slash linebreak
@@ -152,7 +156,7 @@ first: all
 
 ####### Build rules
 
-$(TARGET):  $(OBJECTS)  
+$(TARGET): ui_windowGUI.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: displayIMU.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64/qmake.conf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -292,8 +296,9 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents glWidget.h windowGUI.h IMU.h dataParse.h $(DISTDIR)/
-	$(COPY_FILE) --parents glWidget.cpp windowGUI.cpp IMU.cpp dataParse.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents glWidget.h windowGUI.h IMU.h dataParse.h fileUtils.h $(DISTDIR)/
+	$(COPY_FILE) --parents glWidget.cpp windowGUI.cpp IMU.cpp dataParse.cpp fileUtils.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents windowGUI.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -320,34 +325,42 @@ compiler_moc_header_make_all: moc_glWidget.cpp moc_windowGUI.cpp
 compiler_moc_header_clean:
 	-$(DEL_FILE) moc_glWidget.cpp moc_windowGUI.cpp
 moc_glWidget.cpp: glWidget.h
-	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glWidget.h -o moc_glWidget.cpp
+	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glWidget.h -o moc_glWidget.cpp
 
 moc_windowGUI.cpp: IMU.h \
 		windowGUI.h
-	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/home/simeon.symeonidis/Projects/shared -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include windowGUI.h -o moc_windowGUI.cpp
+	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include windowGUI.h -o moc_windowGUI.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all:
+compiler_uic_make_all: ui_windowGUI.h
 compiler_uic_clean:
+	-$(DEL_FILE) ui_windowGUI.h
+ui_windowGUI.h: windowGUI.ui \
+		glWidget.h
+	/usr/lib/x86_64-linux-gnu/qt5/bin/uic windowGUI.ui -o ui_windowGUI.h
+
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
 compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: compiler_moc_header_clean 
+compiler_clean: compiler_moc_header_clean compiler_uic_clean 
 
 ####### Compile
 
-glWidget.o: glWidget.cpp windowGUI.h \
+glWidget.o: glWidget.cpp glWidget.h \
+		windowGUI.h \
 		IMU.h \
 		dataParse.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glWidget.o glWidget.cpp
 
 windowGUI.o: windowGUI.cpp windowGUI.h \
 		IMU.h \
-		dataParse.h
+		ui_windowGUI.h \
+		glWidget.h \
+		fileUtils.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o windowGUI.o windowGUI.cpp
 
 IMU.o: IMU.cpp IMU.h
@@ -356,6 +369,10 @@ IMU.o: IMU.cpp IMU.h
 dataParse.o: dataParse.cpp dataParse.h \
 		IMU.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dataParse.o dataParse.cpp
+
+fileUtils.o: fileUtils.cpp fileUtils.h \
+		IMU.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fileUtils.o fileUtils.cpp
 
 main.o: main.cpp windowGUI.h \
 		IMU.h \

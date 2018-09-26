@@ -1,17 +1,23 @@
-VPATH        += ../shared
-INCLUDEPATH  += ../shared
+QT           += core                \
+                gui                 \
+                opengl              \
+                widgets
 
-HEADERS       = glWidget.h          \
+HEADERS      += glWidget.h          \
                 windowGUI.h         \
                 IMU.h               \
-                dataParse.h
-SOURCES       = glWidget.cpp        \
+                dataParse.h         \
+                fileUtils.h
+
+SOURCES      += glWidget.cpp        \
                 windowGUI.cpp       \
                 IMU.cpp             \
                 dataParse.cpp       \
+                fileUtils.cpp       \
                 main.cpp 
-QT           += opengl              \
-                widgets
+
+FORMS        += windowGUI.ui
+
 LIBS         += -lGLU  \
                 -lcsv  \
                 -lpthread

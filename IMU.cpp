@@ -176,9 +176,9 @@ void displayIMU_setRefAccl(float* up)
 
 void displayIMU_corGyro(float* g_raw, float* g)
 {
-  g[0]      = (g_raw[0] - calib.gBias[0]) / calib.gScale[0];
-  g[1]      = (g_raw[1] - calib.gBias[1]) / calib.gScale[1];
-  g[2]      = (g_raw[2] - calib.gBias[2]) / calib.gScale[2];
+  g[0]      = (g_raw[0] - calib.gBias[0]) / calib.gMult[0];
+  g[1]      = (g_raw[1] - calib.gBias[1]) / calib.gMult[1];
+  g[2]      = (g_raw[2] - calib.gBias[2]) / calib.gMult[2];
 }
 
 
