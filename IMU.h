@@ -38,11 +38,10 @@ struct displayIMU_config {
   bool     isGyro;          // enable gyroscope data
   bool     isAccl;          // enable accelerometer data
   bool     isMagn;          // enable magnetometer data
-  bool     isWeight;        // enable IMU weight 
+  bool     isFltr;          // enable IMU weight 
   bool     isTear;          // enable application of ref
   bool     isMove;          // enable acceleration estimate
   bool     isFOM;           // enable FOM calculation
-  bool     isFltr;          // enable "bad data" filtering 
   bool     isAutocal;       // enable autocal data collect
   float    gThreshVal;      // no motion threshold value
   float    gThreshTime;     // no motion threhsold time

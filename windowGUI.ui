@@ -1464,7 +1464,7 @@
      <string>Save</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="noWeight">
+   <widget class="QCheckBox" name="noFltr">
     <property name="geometry">
      <rect>
       <x>730</x>
@@ -1474,7 +1474,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>no weight</string>
+     <string>no fltr</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="noTear">
@@ -1506,7 +1506,7 @@
    <widget class="QCheckBox" name="noAutocal">
     <property name="geometry">
      <rect>
-      <x>940</x>
+      <x>840</x>
       <y>100</y>
       <width>101</width>
       <height>22</height>
@@ -1527,19 +1527,6 @@
     </property>
     <property name="text">
      <string>no FOM</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="noFltr">
-    <property name="geometry">
-     <rect>
-      <x>840</x>
-      <y>100</y>
-      <width>91</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>no fltr</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="gThreshVal">
@@ -2493,6 +2480,262 @@
     <hint type="sourcelabel">
      <x>1340</x>
      <y>671</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noGyro</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>778</x>
+     <y>88</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noAccl</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>888</x>
+     <y>88</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noMagn</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>988</x>
+     <y>88</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noFltr</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>778</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noTear</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>888</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noMove</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>988</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noFOM</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>780</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>noAutocal</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>890</x>
+     <y>148</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gThreshVal</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>805</x>
+     <y>211</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>gThreshTime</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>975</x>
+     <y>211</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aWeight</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>805</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>aAlpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>975</x>
+     <y>271</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mWeight</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>805</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>mAlpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>975</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>moveAlpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>805</x>
+     <y>391</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>384</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>autocalAlpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>config_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>975</x>
+     <y>391</y>
     </hint>
     <hint type="destinationlabel">
      <x>699</x>

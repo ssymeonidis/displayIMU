@@ -48,16 +48,15 @@ enum calib_enum {
 };
 
 // config struct parsing inputs
-static const int   config_size = 17;
+static const int   config_size = 16;
 static const char* config_name[] = {
   "isGyro", 
   "isAccl",
   "isMagn",
-  "isWeight",
+  "isFltr",
   "isTear",
   "isMove",
   "isFOM",
-  "isFltr",
   "isAutocal",
   "gThreshVal",
   "gThreshTime",
@@ -72,20 +71,19 @@ enum config_enum {
   isGyro          = 0,
   isAccl          = 1,
   isMagn          = 2,
-  isWeight        = 3,
+  isFltr          = 3,
   isTear          = 4,
   isMove          = 5,
   isFOM           = 6,
-  isFltr          = 7,
-  isAutocal       = 8,
-  gThreshVal      = 9,
-  gThreshTime     = 10,
-  aWeight         = 11,
-  aAlpha          = 12,
-  mWeight         = 13,
-  mAlpha          = 14,
-  moveAlpha       = 15,
-  autocalAlpha    = 16
+  isAutocal       = 7,
+  gThreshVal      = 8,
+  gThreshTime     = 9,
+  aWeight         = 10,
+  aAlpha          = 11,
+  mWeight         = 12,
+  mAlpha          = 13,
+  moveAlpha       = 14,
+  autocalAlpha    = 15
 };
 
 // buffers used for parsing
@@ -318,7 +316,7 @@ int displayIMU_readConfig(char* filename, displayIMU_config *config)
       get_bool(args, &config->isAccl);
     else if (type == isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == isWeight)
+    else if (type == isFltr)
       get_bool(args, &config->isFltr);
     else if (type == isTear)
       get_bool(args, &config->isTear);
@@ -371,11 +369,10 @@ int displayIMU_writeConfig(char* filename, displayIMU_config *config)
   fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
   fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
-  fprintf(file, "  \"isWeight\": ");    write_bool(file, config->isWeight);
+  fprintf(file, "  \"isFltr\": ");      write_bool(file, config->isFltr);
   fprintf(file, "  \"isTear\": ");      write_bool(file, config->isTear);
   fprintf(file, "  \"isMove\": ");      write_bool(file, config->isMove);
   fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
-  fprintf(file, "  \"isFltr\": ");      write_bool(file, config->isFltr);
   fprintf(file, "  \"isAutocal\": ");   write_bool(file, config->isAutocal);
   fprintf(file, "  \"gThreshVal\": %0.2f,\n",      config->gThreshVal);
   fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);

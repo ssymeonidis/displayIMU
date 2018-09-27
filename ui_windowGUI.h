@@ -130,12 +130,11 @@ public:
     QLabel *labelConfig_2;
     QPushButton *calibOpen;
     QPushButton *calibSave;
-    QCheckBox *noWeight;
+    QCheckBox *noFltr;
     QCheckBox *noTear;
     QCheckBox *noMove;
     QCheckBox *noAutocal;
     QCheckBox *noFOM;
-    QCheckBox *noFltr;
     QLineEdit *gThreshVal;
     QLineEdit *gThreshTime;
     QLabel *labelConfig2;
@@ -504,9 +503,9 @@ public:
         calibSave = new QPushButton(centralWidget);
         calibSave->setObjectName(QStringLiteral("calibSave"));
         calibSave->setGeometry(QRect(1250, 670, 81, 27));
-        noWeight = new QCheckBox(centralWidget);
-        noWeight->setObjectName(QStringLiteral("noWeight"));
-        noWeight->setGeometry(QRect(730, 70, 97, 22));
+        noFltr = new QCheckBox(centralWidget);
+        noFltr->setObjectName(QStringLiteral("noFltr"));
+        noFltr->setGeometry(QRect(730, 70, 97, 22));
         noTear = new QCheckBox(centralWidget);
         noTear->setObjectName(QStringLiteral("noTear"));
         noTear->setGeometry(QRect(840, 70, 97, 22));
@@ -515,13 +514,10 @@ public:
         noMove->setGeometry(QRect(940, 70, 97, 22));
         noAutocal = new QCheckBox(centralWidget);
         noAutocal->setObjectName(QStringLiteral("noAutocal"));
-        noAutocal->setGeometry(QRect(940, 100, 101, 22));
+        noAutocal->setGeometry(QRect(840, 100, 101, 22));
         noFOM = new QCheckBox(centralWidget);
         noFOM->setObjectName(QStringLiteral("noFOM"));
         noFOM->setGeometry(QRect(730, 100, 101, 22));
-        noFltr = new QCheckBox(centralWidget);
-        noFltr->setObjectName(QStringLiteral("noFltr"));
-        noFltr->setGeometry(QRect(840, 100, 91, 22));
         gThreshVal = new QLineEdit(centralWidget);
         gThreshVal->setObjectName(QStringLiteral("gThreshVal"));
         gThreshVal->setGeometry(QRect(730, 160, 151, 27));
@@ -641,6 +637,22 @@ public:
         QObject::connect(aMag, SIGNAL(editingFinished()), windowGUI, SLOT(calib_read()));
         QObject::connect(mMag, SIGNAL(editingFinished()), windowGUI, SLOT(calib_read()));
         QObject::connect(mAng, SIGNAL(editingFinished()), windowGUI, SLOT(calib_read()));
+        QObject::connect(noGyro, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(noAccl, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(noMagn, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(noFltr, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(noTear, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(noMove, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(noFOM, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(noAutocal, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
+        QObject::connect(gThreshVal, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(gThreshTime, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(aWeight, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(aAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(mWeight, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(mAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(moveAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(autocalAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
 
         QMetaObject::connectSlotsByName(windowGUI);
     } // setupUi
@@ -740,12 +752,11 @@ public:
         labelConfig_2->setText(QApplication::translate("windowGUI", "Calibration Structure", 0));
         calibOpen->setText(QApplication::translate("windowGUI", "Open", 0));
         calibSave->setText(QApplication::translate("windowGUI", "Save", 0));
-        noWeight->setText(QApplication::translate("windowGUI", "no weight", 0));
+        noFltr->setText(QApplication::translate("windowGUI", "no fltr", 0));
         noTear->setText(QApplication::translate("windowGUI", "no tear", 0));
         noMove->setText(QApplication::translate("windowGUI", "no move", 0));
         noAutocal->setText(QApplication::translate("windowGUI", "no autocal", 0));
         noFOM->setText(QApplication::translate("windowGUI", "no FOM", 0));
-        noFltr->setText(QApplication::translate("windowGUI", "no fltr", 0));
         gThreshVal->setText(QApplication::translate("windowGUI", "1.0", 0));
         gThreshTime->setText(QApplication::translate("windowGUI", "1.0", 0));
         labelConfig2->setText(QApplication::translate("windowGUI", "gThreshTime", 0));

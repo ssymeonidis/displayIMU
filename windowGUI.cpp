@@ -67,11 +67,10 @@ void windowGUI::config_write()
   ui->noGyro->setChecked(!config->isGyro);
   ui->noAccl->setChecked(!config->isAccl);
   ui->noMagn->setChecked(!config->isMagn);
-  ui->noWeight->setChecked(!config->isWeight);
+  ui->noFltr->setChecked(!config->isFltr);
   ui->noTear->setChecked(!config->isTear);
   ui->noMove->setChecked(!config->isMove);
   ui->noFOM->setChecked(!config->isFOM);
-  ui->noFltr->setChecked(!config->isFltr);
   ui->noAutocal->setChecked(!config->isAutocal);
   ui->gThreshVal->setText(QString::number(config->gThreshVal, 'f', 2));
   ui->gThreshTime->setText(QString::number(config->gThreshTime, 'f', 2));
@@ -90,6 +89,21 @@ void windowGUI::config_write()
 
 void windowGUI::config_read()
 {
+  config->isGyro       = !ui->noGyro->isChecked();
+  config->isAccl       = !ui->noAccl->isChecked();
+  config->isMagn       = !ui->noMagn->isChecked();
+  config->isFltr       = !ui->noFltr->isChecked();
+  config->isTear       = !ui->noTear->isChecked();
+  config->isMove       = !ui->noMove->isChecked();
+  config->isFOM        = !ui->noFOM->isChecked();
+  config->gThreshVal   = ui->gThreshVal->text().toFloat();
+  config->gThreshTime  = ui->gThreshTime->text().toFloat();
+  config->aWeight      = ui->aWeight->text().toFloat();
+  config->aAlpha       = ui->aAlpha->text().toFloat();
+  config->mWeight      = ui->mWeight->text().toFloat();
+  config->mAlpha       = ui->mAlpha->text().toFloat();
+  config->moveAlpha    = ui->moveAlpha->text().toFloat();
+  config->autocalAlpha = ui->autocalAlpha->text().toFloat();
 }
 
 
