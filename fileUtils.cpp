@@ -96,7 +96,7 @@ static char temp[line_size];
 * utility function - gets a line and seperates field from arguments
 ******************************************************************************/
 
-int get_line(FILE *file, char** field, char** args)
+int displayIMU_getLine(FILE *file, char** field, char** args)
 {
   fgets(line, line_size, file);
   *field = strtok(line, ":"); 
@@ -215,7 +215,7 @@ int displayIMU_readCalib(char* filename, displayIMU_calib *calib)
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = get_line(file, &field, &args);
+    status = displayIMU_getLine(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
@@ -304,7 +304,7 @@ int displayIMU_readConfig(char* filename, displayIMU_config *config)
   while (1) {
 
     // read line and parse field/args
-    status = get_line(file, &field, &args);
+    status = displayIMU_getLine(file, &field, &args);
     if (status > 1 || status < 0)
       break;
 

@@ -38,6 +38,10 @@ windowGUI::windowGUI(QWidget *parent) :
   // get pointers to IMU structures
   displayIMU_getConfig(&config);
   displayIMU_getCalib(&calib);
+  
+  // initialize display parameters
+  load_json((char *)"displayIMU.json");
+  glWidget_update();
 }
 
 
@@ -214,6 +218,70 @@ void windowGUI::calib_read()
 
 
 /******************************************************************************
+* saves calib structure to json file
+******************************************************************************/
+
+void windowGUI::load_json(char* filename)
+{
+  // define internal variables
+  FILE*     file;
+  char*     field;
+  char*     args;
+  float     val;
+  int       status;
+
+  // open json file containing config struct
+  file = fopen(filename, "r");
+  if (file == NULL)
+    return;
+
+  // main loop that parse json file line by line
+  while (1) {
+
+    // read line and parse field/args
+    status = displayIMU_getLine(file, &field, &args);
+    if (status > 1 || status < 0)
+      break;
+
+    // extract arguments for the specified field
+    if        (strcmp(field, "gyro") == 0) {
+      sscanf(args, "%f", &val);
+      ui->dispScaleGyro->setText(QString::number(val, 'f', 2));
+    } else if (strcmp(field, "accl") == 0) {
+      sscanf(args, "%f", &val);
+      ui->dispScaleAccl->setText(QString::number(val, 'f', 2));
+    } else if (strcmp(field, "magn") == 0) {
+      sscanf(args, "%f", &val);
+      ui->dispScaleMagn->setText(QString::number(val, 'f', 2));
+    } else if (strcmp(field, "IMU") == 0) {
+      sscanf(args, "%f", &val);
+      ui->dispScaleIMU->setText(QString::number(val, 'f', 2));
+    }
+  }
+
+  // exit function
+  fclose(file);
+}
+
+
+/******************************************************************************
+* updates display scale for gyroscope
+******************************************************************************/
+
+void windowGUI::glWidget_update()
+{
+  ui->widget->scaleGyro = ui->dispScaleGyro->text().toFloat();
+  ui->widget->scaleAccl = ui->dispScaleAccl->text().toFloat();
+  ui->widget->scaleMagn = ui->dispScaleMagn->text().toFloat();
+  ui->widget->scaleIMU  = ui->dispScaleIMU->text().toFloat();
+  ui->widget->isGyro    = ui->dispEnableGyro->isChecked();
+  ui->widget->isAccl    = ui->dispEnableAccl->isChecked();
+  ui->widget->isMagn    = ui->dispEnableMagn->isChecked();
+  ui->widget->isIMU     = ui->dispEnableIMU->isChecked();
+}
+
+
+/******************************************************************************
 * loads config structure from json file
 ******************************************************************************/
 
@@ -262,3 +330,84 @@ void windowGUI::on_calibSave_clicked()
   displayIMU_writeCalib((char *)file.toStdString().c_str(), calib);
 }
 
+
+/******************************************************************************
+* enables display of gyroscope data
+******************************************************************************/
+
+void windowGUI::on_dispEnableGyro_clicked()
+{
+  ui->dispEnableIMU->setChecked(false);
+  glWidget_update();
+}
+
+
+/******************************************************************************
+* enables display of accelerometer data
+******************************************************************************/
+
+void windowGUI::on_dispEnableAccl_clicked()
+{
+  ui->dispEnableIMU->setChecked(false);
+  glWidget_update();
+}
+
+
+/******************************************************************************
+* enables display of accelerometer data
+******************************************************************************/
+
+void windowGUI::on_dispEnableMagn_clicked()
+{
+  ui->dispEnableIMU->setChecked(false);
+  glWidget_update();
+}
+
+
+/******************************************************************************
+* enables display of IMU results
+******************************************************************************/
+
+void windowGUI::on_dispEnableIMU_clicked()
+{
+  ui->dispEnableGyro->setChecked(false);
+  ui->dispEnableAccl->setChecked(false);
+  ui->dispEnableMagn->setChecked(false);
+  glWidget_update();
+}
+
+
+/******************************************************************************
+* change to top-down view
+******************************************************************************/
+
+void windowGUI::on_viewUp_clicked()
+{
+  ui->widget->xRot     = 90 * 16;
+  ui->widget->yRot     = 0;
+  ui->widget->zRot     = 0;
+}
+
+
+/******************************************************************************
+* change to side view
+******************************************************************************/
+
+void windowGUI::on_viewSide1_clicked()
+{
+  ui->widget->xRot     = 0;
+  ui->widget->yRot     = 0;
+  ui->widget->zRot     = 0;
+}
+
+
+/******************************************************************************
+* change to side view
+******************************************************************************/
+
+void windowGUI::on_viewSide2_clicked()
+{
+  ui->widget->xRot     = 0;
+  ui->widget->yRot     = 90 * 16;
+  ui->widget->zRot     = 0;
+}

@@ -24,6 +24,7 @@
 #include "IMU.h"
 
 // functions to read/write sturctures to json files 
+int displayIMU_getLine(FILE *file, char** field, char** args);
 int displayIMU_readConfig(char* filename, displayIMU_config *config);
 int displayIMU_writeConfig(char* filename, displayIMU_config *config);
 int displayIMU_readCalib(char* filename, displayIMU_calib *calib);

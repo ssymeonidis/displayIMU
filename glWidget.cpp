@@ -29,7 +29,7 @@
 
 // colors for GUI elements
 GLfloat GLWidget::acclColor[4] = {   1.0,    0.0,    0.0,    1.0};
-GLfloat GLWidget::magColor[4]  = {   0.0,    1.0,    0.0,    1.0};
+GLfloat GLWidget::magnColor[4] = {   0.0,    1.0,    0.0,    1.0};
 GLfloat GLWidget::gyroColor[4] = {   0.0,    0.0,    1.0,    1.0};
 GLfloat GLWidget::gridColor[4] = {   0.3,    0.3,    0.3,    1.0}; 
 
@@ -41,17 +41,17 @@ GLfloat GLWidget::gridColor[4] = {   0.3,    0.3,    0.3,    1.0};
 GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
 {
   // initialize internal display variables
-  xRot       = 0;
-  yRot       = 0;
+  xRot       = 120;
+  yRot       = 700;
   zRot       = 0;
 
   // initialize component state variables
   isAccl     = true;
-  isMag      = true;
+  isMagn     = true;
   isGyro     = false;
   isIMU      = false;
   scaleAccl  = 2500;
-  scaleMag   = 5000;
+  scaleMagn  = 5000;
   scaleGyro  = 200; 
 
   // create timer
@@ -199,8 +199,8 @@ void GLWidget::paintGL()
     drawVector(acclColor, &(buffer[i][3]), scaleAccl);
 
   // draw magnetometer state
-  if (isMag == true) 
-    drawVector(magColor, &(buffer[i][6]), scaleMag);
+  if (isMagn == true) 
+    drawVector(magnColor, &(buffer[i][6]), scaleMagn);
 
   // draw gyroscope state
   if (isGyro == true) 
@@ -220,7 +220,7 @@ void GLWidget::paintGL()
     GLfloat vector2[3]    = {-0.0,  0.0,  1.0};
     drawVector(acclColor, vector2, 1.0);
     GLfloat vector3[3]    = {-1.0,  0.0,  0.0};
-    drawVector(magColor,  vector3, 1.0);
+    drawVector(magnColor,  vector3, 1.0);
     glPopMatrix();
   }
 

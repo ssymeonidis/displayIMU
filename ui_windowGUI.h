@@ -158,6 +158,7 @@ public:
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
+    QToolBar *toolBar;
 
     void setupUi(QMainWindow *windowGUI)
     {
@@ -185,9 +186,11 @@ public:
         dispEnableGyro = new QCheckBox(centralWidget);
         dispEnableGyro->setObjectName(QStringLiteral("dispEnableGyro"));
         dispEnableGyro->setGeometry(QRect(540, 40, 141, 22));
+        dispEnableGyro->setChecked(true);
         dispEnableAccl = new QCheckBox(centralWidget);
         dispEnableAccl->setObjectName(QStringLiteral("dispEnableAccl"));
         dispEnableAccl->setGeometry(QRect(540, 80, 141, 22));
+        dispEnableAccl->setChecked(true);
         line_v1 = new QFrame(centralWidget);
         line_v1->setObjectName(QStringLiteral("line_v1"));
         line_v1->setGeometry(QRect(710, 0, 20, 701));
@@ -196,6 +199,7 @@ public:
         dispEnableMagn = new QCheckBox(centralWidget);
         dispEnableMagn->setObjectName(QStringLiteral("dispEnableMagn"));
         dispEnableMagn->setGeometry(QRect(540, 120, 141, 22));
+        dispEnableMagn->setChecked(true);
         dispEnableIMU = new QCheckBox(centralWidget);
         dispEnableIMU->setObjectName(QStringLiteral("dispEnableIMU"));
         dispEnableIMU->setGeometry(QRect(540, 160, 141, 22));
@@ -575,6 +579,7 @@ public:
         dispVectCor = new QRadioButton(centralWidget);
         dispVectCor->setObjectName(QStringLiteral("dispVectCor"));
         dispVectCor->setGeometry(QRect(510, 200, 111, 22));
+        dispVectCor->setChecked(true);
         dispVectFltr = new QRadioButton(centralWidget);
         dispVectFltr->setObjectName(QStringLiteral("dispVectFltr"));
         dispVectFltr->setGeometry(QRect(620, 200, 81, 22));
@@ -596,6 +601,9 @@ public:
         statusBar = new QStatusBar(windowGUI);
         statusBar->setObjectName(QStringLiteral("statusBar"));
         windowGUI->setStatusBar(statusBar);
+        toolBar = new QToolBar(windowGUI);
+        toolBar->setObjectName(QStringLiteral("toolBar"));
+        windowGUI->addToolBar(Qt::TopToolBarArea, toolBar);
 
         retranslateUi(windowGUI);
         QObject::connect(gBias0, SIGNAL(editingFinished()), windowGUI, SLOT(calib_read()));
@@ -653,6 +661,13 @@ public:
         QObject::connect(mAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
         QObject::connect(moveAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
         QObject::connect(autocalAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(dispScaleGyro, SIGNAL(editingFinished()), windowGUI, SLOT(glWidget_update()));
+        QObject::connect(dispScaleAccl, SIGNAL(editingFinished()), windowGUI, SLOT(glWidget_update()));
+        QObject::connect(dispScaleMagn, SIGNAL(editingFinished()), windowGUI, SLOT(glWidget_update()));
+        QObject::connect(dispScaleIMU, SIGNAL(editingFinished()), windowGUI, SLOT(glWidget_update()));
+        QObject::connect(dispVectCor, SIGNAL(clicked()), windowGUI, SLOT(glWidget_update()));
+        QObject::connect(dispVectRaw, SIGNAL(clicked()), windowGUI, SLOT(glWidget_update()));
+        QObject::connect(dispVectFltr, SIGNAL(clicked()), windowGUI, SLOT(glWidget_update()));
 
         QMetaObject::connectSlotsByName(windowGUI);
     } // setupUi
@@ -777,6 +792,7 @@ public:
         dispVectFltr->setText(QApplication::translate("windowGUI", "Filtered", 0));
         labelConfig7->setText(QApplication::translate("windowGUI", "moveAlpha", 0));
         moveAlpha->setText(QApplication::translate("windowGUI", "1.0", 0));
+        toolBar->setWindowTitle(QApplication::translate("windowGUI", "toolBar", 0));
     } // retranslateUi
 
 };

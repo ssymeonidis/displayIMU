@@ -36,13 +36,13 @@ class GLWidget : public QGLWidget
     int    xRot;
     int    yRot;
     int    zRot;
-    bool   isAccl;
-    bool   isMag;
     bool   isGyro;
+    bool   isAccl;
+    bool   isMagn;
     bool   isIMU;
-    float  scaleAccl;
-    float  scaleMag;
     float  scaleGyro;
+    float  scaleAccl;
+    float  scaleMagn;
     float  scaleIMU;
 
   public slots:
@@ -87,7 +87,7 @@ class GLWidget : public QGLWidget
 
     // colors
     static float acclColor [4];
-    static float magColor  [4];
+    static float magnColor [4];
     static float gyroColor [4];
     static float gridColor [4];
 };

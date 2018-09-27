@@ -41,16 +41,27 @@ private slots:
   void config_write();
   void calib_read();
   void calib_write(); 
+  void glWidget_update();
   void on_configOpen_clicked();
   void on_configSave_clicked();
   void on_calibOpen_clicked();
   void on_calibSave_clicked();
+  void on_dispEnableGyro_clicked();
+  void on_dispEnableAccl_clicked();
+  void on_dispEnableMagn_clicked();
+  void on_dispEnableIMU_clicked();
+  void on_viewUp_clicked();
+  void on_viewSide1_clicked();
+  void on_viewSide2_clicked();
 
 private:
   // internal structures/classes
   Ui::windowGUI      *ui;
   displayIMU_config  *config;
   displayIMU_calib   *calib;
+
+  // internal functions
+  void load_json(char* filename);
 };
 
 #endif // WINDOWGUI_H
