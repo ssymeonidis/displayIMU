@@ -27,11 +27,17 @@
 #include "dataParse.h"
 #include "IMU.h"
 
+// internal constants
+static const float arrowSize      = 0.5;
+static const float coneHeight     = 0.05;
+static const float coneRadius     = 0.03;
+static const float cylinderRadius = 0.012;
+
 // colors for GUI elements
-GLfloat GLWidget::acclColor[4] = {   1.0,    0.0,    0.0,    1.0};
-GLfloat GLWidget::magnColor[4] = {   0.0,    1.0,    0.0,    1.0};
-GLfloat GLWidget::gyroColor[4] = {   0.0,    0.0,    1.0,    1.0};
-GLfloat GLWidget::gridColor[4] = {   0.3,    0.3,    0.3,    1.0}; 
+static GLfloat acclColor[4] = {1.0, 0.0, 0.0, 1.0};
+static GLfloat magnColor[4] = {0.0, 1.0, 0.0, 1.0};
+static GLfloat gyroColor[4] = {0.0, 0.0, 1.0, 1.0};
+static GLfloat gridColor[4] = {1.0, 0.0, 1.0, 1.0}; 
 
 
 /******************************************************************************
@@ -48,11 +54,11 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), p
   // initialize component state variables
   isAccl     = true;
   isMagn     = true;
-  isGyro     = false;
+  isGyro     = true;
   isIMU      = false;
-  scaleAccl  = 2500;
-  scaleMagn  = 5000;
-  scaleGyro  = 200; 
+  scaleAccl  = 1;
+  scaleMagn  = 1;
+  scaleGyro  = 1; 
 
   // create timer
   refresh_timer = new QTimer(this);
@@ -67,76 +73,6 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), p
 
 GLWidget::~GLWidget()
 {
-}
-
-
-QSize GLWidget::minimumSizeHint() const
-{
-  return QSize(50, 50);
-}
-
-
-QSize GLWidget::sizeHint() const
-{
-  return QSize(400, 400);
-}
-
-
-/******************************************************************************
-* utlility function for keeping angles between 0 and 360
-******************************************************************************/
-
-static void qNormalizeAngle(int &angle)
-{
-  while (angle < 0)
-    angle += 360 * 16;
-  while (angle > 360 * 16)
-    angle -= 360 * 16;
-}
-
-
-/******************************************************************************
-* QT slider control for setting x rotation
-******************************************************************************/
-
-void GLWidget::setXRotation(int angle)
-{
-  qNormalizeAngle(angle);
-  if (angle != xRot) {
-    xRot = angle;
-    emit xRotationChanged(angle);
-    updateGL();
-  }
-}
-
-
-/******************************************************************************
-* QT slider control for setting y rotation
-******************************************************************************/
-
-void GLWidget::setYRotation(int angle)
-{
-  qNormalizeAngle(angle);
-  if (angle != yRot) {
-    yRot = angle;
-    emit yRotationChanged(angle);
-    updateGL();
-  }
-}
-
-
-/******************************************************************************
-* QT slider control for setting z rotation
-******************************************************************************/
-
-void GLWidget::setZRotation(int angle)
-{
-  qNormalizeAngle(angle);
-  if (angle != zRot) {
-    zRot = angle;
-    emit zRotationChanged(angle);
-    updateGL();
-  }
 }
 
 
@@ -269,12 +205,9 @@ void GLWidget::mouseMoveEvent(QMouseEvent *event)
   int dy = event->y() - lastPos.y();
 
   if (event->buttons() & Qt::LeftButton) {
-    setXRotation(xRot + 8 * dy);
-    setYRotation(yRot + 8 * dx);
-  } else if (event->buttons() & Qt::RightButton) {
-    setXRotation(xRot + 8 * dy);
-    setZRotation(zRot + 8 * dx);
-  }
+    xRot = xRot + 8 * dy;
+    yRot = yRot + 8 * dx;
+  } 
   lastPos = event->pos();
 }
 
@@ -339,8 +272,7 @@ void GLWidget::drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale
 void GLWidget::drawGrid()
 {
   // draw the reference plane
-  GLfloat planeColor1[4] = {1.0, 0.0, 1.0, 1.0};
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, planeColor1);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, gridColor);
   glBegin(GL_LINES);
   glVertex3f(-1.0, 0.0,  1.0); glVertex3f(-1.0, 0.0, -1.0);
   glVertex3f(-0.8, 0.0,  1.0); glVertex3f(-0.8, 0.0, -1.0);

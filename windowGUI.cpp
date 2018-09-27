@@ -246,16 +246,16 @@ void windowGUI::load_json(char* filename)
     // extract arguments for the specified field
     if        (strcmp(field, "gyro") == 0) {
       sscanf(args, "%f", &val);
-      ui->dispScaleGyro->setText(QString::number(val, 'f', 2));
+      ui->dispScaleGyro->setText(QString::number(val, 'f', 1));
     } else if (strcmp(field, "accl") == 0) {
       sscanf(args, "%f", &val);
-      ui->dispScaleAccl->setText(QString::number(val, 'f', 2));
+      ui->dispScaleAccl->setText(QString::number(val, 'f', 1));
     } else if (strcmp(field, "magn") == 0) {
       sscanf(args, "%f", &val);
-      ui->dispScaleMagn->setText(QString::number(val, 'f', 2));
+      ui->dispScaleMagn->setText(QString::number(val, 'f', 1));
     } else if (strcmp(field, "IMU") == 0) {
       sscanf(args, "%f", &val);
-      ui->dispScaleIMU->setText(QString::number(val, 'f', 2));
+      ui->dispScaleIMU->setText(QString::number(val, 'f', 1));
     }
   }
 

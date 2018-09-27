@@ -33,7 +33,7 @@ MOVE          = mv -f
 TAR           = tar -cf
 COMPRESS      = gzip -9f
 DISTNAME      = displayIMU1.0.0
-DISTDIR = /home/simeon.symeonidis/Projects/displayIMU/.tmp/displayIMU1.0.0
+DISTDIR = /home/simeon.symeonidis/Projects/displayIMU/obj/displayIMU1.0.0
 LINK          = g++
 LFLAGS        = -m64 -Wl,-O1
 LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -lGLU -lcsv -lQt5OpenGL -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
@@ -44,7 +44,7 @@ STRIP         = strip
 
 ####### Output directory
 
-OBJECTS_DIR   = ./
+OBJECTS_DIR   = obj/
 
 ####### Files
 
@@ -55,14 +55,14 @@ SOURCES       = glWidget.cpp \
 		fileUtils.cpp \
 		main.cpp moc_glWidget.cpp \
 		moc_windowGUI.cpp
-OBJECTS       = glWidget.o \
-		windowGUI.o \
-		IMU.o \
-		dataParse.o \
-		fileUtils.o \
-		main.o \
-		moc_glWidget.o \
-		moc_windowGUI.o
+OBJECTS       = obj/glWidget.o \
+		obj/windowGUI.o \
+		obj/IMU.o \
+		obj/dataParse.o \
+		obj/fileUtils.o \
+		obj/main.o \
+		obj/moc_glWidget.o \
+		obj/moc_windowGUI.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -350,40 +350,40 @@ compiler_clean: compiler_moc_header_clean compiler_uic_clean
 
 ####### Compile
 
-glWidget.o: glWidget.cpp glWidget.h \
+obj/glWidget.o: glWidget.cpp glWidget.h \
 		windowGUI.h \
 		IMU.h \
 		dataParse.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o glWidget.o glWidget.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/glWidget.o glWidget.cpp
 
-windowGUI.o: windowGUI.cpp windowGUI.h \
+obj/windowGUI.o: windowGUI.cpp windowGUI.h \
 		IMU.h \
 		ui_windowGUI.h \
 		glWidget.h \
 		fileUtils.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o windowGUI.o windowGUI.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/windowGUI.o windowGUI.cpp
 
-IMU.o: IMU.cpp IMU.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o IMU.o IMU.cpp
+obj/IMU.o: IMU.cpp IMU.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/IMU.o IMU.cpp
 
-dataParse.o: dataParse.cpp dataParse.h \
+obj/dataParse.o: dataParse.cpp dataParse.h \
 		IMU.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o dataParse.o dataParse.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/dataParse.o dataParse.cpp
 
-fileUtils.o: fileUtils.cpp fileUtils.h \
+obj/fileUtils.o: fileUtils.cpp fileUtils.h \
 		IMU.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fileUtils.o fileUtils.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/fileUtils.o fileUtils.cpp
 
-main.o: main.cpp windowGUI.h \
+obj/main.o: main.cpp windowGUI.h \
 		IMU.h \
 		dataParse.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o main.cpp
 
-moc_glWidget.o: moc_glWidget.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_glWidget.o moc_glWidget.cpp
+obj/moc_glWidget.o: moc_glWidget.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_glWidget.o moc_glWidget.cpp
 
-moc_windowGUI.o: moc_windowGUI.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_windowGUI.o moc_windowGUI.cpp
+obj/moc_windowGUI.o: moc_windowGUI.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/moc_windowGUI.o moc_windowGUI.cpp
 
 ####### Install
 

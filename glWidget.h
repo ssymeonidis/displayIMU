@@ -30,9 +30,8 @@ class GLWidget : public QGLWidget
   public:
     explicit GLWidget(QWidget *parent = 0);
     ~GLWidget();
-    QSize minimumSizeHint() const;
-    QSize sizeHint() const;
 
+    // draw parameters
     int    xRot;
     int    yRot;
     int    zRot;
@@ -46,15 +45,7 @@ class GLWidget : public QGLWidget
     float  scaleIMU;
 
   public slots:
-    void setXRotation(int angle);
-    void setYRotation(int angle);
-    void setZRotation(int angle);
     void updateFrame();
-
-  signals:
-    void xRotationChanged(int angle);
-    void yRotationChanged(int angle);
-    void zRotationChanged(int angle);
 
   protected:
     void initializeGL();
@@ -69,27 +60,10 @@ class GLWidget : public QGLWidget
     void drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale);
     void drawGrid();
 
-    // internal colors
+    // internal objects/parameters
     GLUquadricObj   *obj;
     QTimer*         refresh_timer;
-
-    // internal variables
-    int     is_csv_file;
-    QPoint  lastPos;
-    QColor  qtGreen;
-    QColor  qtPurple;
-    
-    // constants
-    static const float arrowSize      = 0.5;
-    static const float coneHeight     = 0.05;
-    static const float coneRadius     = 0.03;
-    static const float cylinderRadius = 0.012;
-
-    // colors
-    static float acclColor [4];
-    static float magnColor [4];
-    static float gyroColor [4];
-    static float gridColor [4];
+    QPoint          lastPos;
 };
 
 #endif

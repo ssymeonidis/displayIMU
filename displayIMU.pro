@@ -3,6 +3,8 @@ QT           += core                \
                 opengl              \
                 widgets
 
+OBJECTS_DIR   = ./obj
+
 HEADERS      += glWidget.h          \
                 windowGUI.h         \
                 IMU.h               \
