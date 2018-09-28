@@ -17,22 +17,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef FILE_UTILS_H
-#define FILE_UTILS_H
+#ifndef _IMU_UTIL_H
+#define _IMU_UTIL_H
 
 // include statements
-#include "IMU.h"
+#include "IMU_core.h"
+#include "IMU_correct.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // functions to read/write sturctures to json files 
-int displayIMU_getLine(FILE *file, char** field, char** args);
-int displayIMU_readConfig(char* filename, struct displayIMU_config *config);
-int displayIMU_writeConfig(char* filename, struct displayIMU_config *config);
-int displayIMU_readCalib(char* filename, struct displayIMU_calib *calib);
-int displayIMU_writeCalib(char* filename, struct displayIMU_calib *calib);
+int IMU_util_getLine     (FILE *file, char** field, char** args);
+int IMU_util_readConfig  (char* filename, struct displayIMU_config *config);
+int IMU_util_writeConfig (char* filename, struct displayIMU_config *config);
+int IMU_util_readCalib   (char* filename, struct IMU_correct_calib *calib);
+int IMU_util_writeCalib  (char* filename, struct IMU_correct_calib *calib);
 
 #ifdef __cplusplus
 }

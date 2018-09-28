@@ -25,7 +25,7 @@
 #include "glWidget.h"
 #include "windowGUI.h"
 #include "dataParse.h"
-#include "IMU.h"
+#include "IMU_core.h"
 
 // internal constants
 static const float arrowSize      = 0.5;

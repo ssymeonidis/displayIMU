@@ -28,12 +28,10 @@
 // include statements 
 #include <math.h>            // sqrt/trig
 #include <string.h>          // memcopy
-#include "IMU.h"
+#include "IMU_core.h"
 
 // internally managed structures
-struct displayIMU_calib     calib;
 struct displayIMU_config    config; 
-struct displayIMU_autocal   autocal;
 struct displayIMU_state     state;
 
 
@@ -94,16 +92,6 @@ inline void decrm(float* v, float* d)
 
 
 /******************************************************************************
-* function to return calib structure handle
-******************************************************************************/
-
-void displayIMU_getCalib(struct displayIMU_calib **calib_pntr) 
-{
-  *calib_pntr = &calib;
-}
-
-
-/******************************************************************************
 * function to return config structure handle
 ******************************************************************************/
 
@@ -120,16 +108,6 @@ void displayIMU_getConfig(struct displayIMU_config **config_pntr)
 void displayIMU_getState(struct displayIMU_state **state_pntr) 
 {
   *state_pntr = &state;
-}
-
-
-/******************************************************************************
-* function to copy autocal structure 
-******************************************************************************/
-
-void displayIMU_getAutocal(struct displayIMU_autocal **autocal_pntr) 
-{
-  *autocal_pntr = &autocal;
 }
 
 
@@ -171,55 +149,6 @@ void displayIMU_setRefAccl(float* up)
 
 
 /******************************************************************************
-* correct raw gyroscope data
-******************************************************************************/
-
-void displayIMU_corGyro(float* g_raw, float* g)
-{
-  g[0]      = (g_raw[0] - calib.gBias[0]) / calib.gMult[0];
-  g[1]      = (g_raw[1] - calib.gBias[1]) / calib.gMult[1];
-  g[2]      = (g_raw[2] - calib.gBias[2]) / calib.gMult[2];
-}
-
-
-/******************************************************************************
-* correct raw accelerometer data
-******************************************************************************/
-
-void displayIMU_corAccl(float* a_raw, float* a)
-{
-  a[0]      = a_raw[0] - calib.aBias[0];
-  a[1]      = a_raw[1] - calib.aBias[1];
-  a[2]      = a_raw[2] - calib.aBias[2];
-}
-
-
-/******************************************************************************
-* correct raw magnetometer data
-******************************************************************************/
-
-void displayIMU_corMagn(float* m_raw, float* m)
-{
-  m[0]      = m_raw[0] - calib.mBias[0];
-  m[1]      = m_raw[1] - calib.mBias[1];
-  m[2]      = m_raw[2] - calib.mBias[2];
-}
-
-
-/******************************************************************************
-* correct raw gyroscope, accelerometer, and magnetometer data
-******************************************************************************/
-
-void displayIMU_corAll(float* g_raw, float* a_raw, float* m_raw,
-                       float* g,     float* a,     float* m)
-{
-  displayIMU_corGyro(g_raw, g);
-  displayIMU_corAccl(a_raw, a);
-  displayIMU_corMagn(m_raw, m);
-}
-
-
-/******************************************************************************
 * initialize state and autocal to known state
 ******************************************************************************/
 
@@ -235,16 +164,6 @@ void displayIMU_init()
   state.ref[2]      = 0.0;
   state.ref[3]      = 0.0;
   state.isReset     = 1;
-
-  // initialize autocal structure w/ previous value
-  memcpy(autocal.gBias,     calib.gBias, 3*sizeof(float));
-  memcpy(autocal.gBiasCont, calib.gBias, 3*sizeof(float));
-  autocal.aMag      = calib.aMag;
-  autocal.aMagCont  = calib.aMag;
-  autocal.mMag      = calib.mMag;
-  autocal.mMagCont  = calib.mMag;
-  autocal.mAng      = calib.mAng;
-  autocal.mAngCont  = calib.mAng;
 }
 
 
@@ -522,7 +441,7 @@ inline void displayIMU_estmMove(float* a, float* A)
   float* SEq       = state.SEq;
 
   // rotate gravity up vector by estimated orientation
-  float g[4] = {-SEq[3] * calib.aMag,  -SEq[2] * calib.aMag,
+  /*float g[4] = {-SEq[3] * calib.aMag,  -SEq[2] * calib.aMag,
                  SEq[1] * calib.aMag,   SEq[0] * calib.aMag};
   float G[3] = {-g[0]*SEq[1] + g[1]*SEq[0] + g[2]*SEq[3] - g[3]*SEq[2],
                 -g[0]*SEq[2] - g[1]*SEq[3] + g[2]*SEq[0] + g[3]*SEq[1],
@@ -552,7 +471,7 @@ inline void displayIMU_estmMove(float* a, float* A)
                        SEq[0]*A[2] + SEq[1]*A[1] - SEq[2]*A[0]};
   A[0] = -tmp[0]*SEq[1] + tmp[1]*SEq[0] - tmp[2]*SEq[3] + tmp[3]*SEq[2];
   A[1] = -tmp[0]*SEq[2] + tmp[1]*SEq[3] + tmp[2]*SEq[0] - tmp[3]*SEq[1];
-  A[2] = -tmp[0]*SEq[3] - tmp[1]*SEq[2] + tmp[2]*SEq[1] + tmp[3]*SEq[0];
+  A[2] = -tmp[0]*SEq[3] - tmp[1]*SEq[2] + tmp[2]*SEq[1] + tmp[3]*SEq[0];*/
 }
 
 

@@ -1,6 +1,1 @@
-library dependencies:
-- libcsv
-
-for Ubuntu 16.04 LTS:
-- sudo apt-get install libcsv3
-- sudo apt-get install libcsv-dev 
+TBD

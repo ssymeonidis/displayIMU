@@ -21,7 +21,8 @@
 #define _DATA_PARSE_H
 
 // include statements
-#include "IMU.h"
+#include "IMU_core.h"
+#include "IMU_correct.h"
 
 // define input sensor data structure
 struct dataParse_sensor {

@@ -20,7 +20,7 @@
 // include statements
 #include <stdio.h>
 #include <string.h>
-#include "fileUtils.h"
+#include "IMU_util.h"
 
 // calib structure parsing inputs
 static const int   calib_size = 9;
@@ -93,43 +93,6 @@ static char temp[line_size];
 
 
 /******************************************************************************
-* utility function - gets a line and seperates field from arguments
-******************************************************************************/
-
-int displayIMU_getLine(FILE *file, char** field, char** args)
-{
-  fgets(line, line_size, file);
-  *field = strtok(line, ":"); 
-  sscanf(*field, "%s", temp);
-  if (strcmp(temp, "{") == 0)
-    return 1;
-  if (strcmp(temp, "}") == 0)
-    return 2;
-  if (temp == NULL)
-    return -2;
-  *args = strtok(NULL, "\n");
-  strtok(*field, "\"");
-  *field = strtok(NULL, "\""); 
-  return 0;
-} 
-
-
-/******************************************************************************
-* utility function - matches field string with respective enum type
-******************************************************************************/
-
-int get_field(char* field, const char* names[], int size)
-{
-  int   i;
-  for (i=0; i<size; i++) {
-    if (strcmp(field, names[i]) == 0)
-      return i;
-  } 
-  return -1; 
-}
-
-
-/******************************************************************************
 * utility function - gets an array of comma seperated floats 
 ******************************************************************************/
 
@@ -195,10 +158,50 @@ void write_bool(FILE* file, unsigned char val)
 
 
 /******************************************************************************
+* utility function - gets a line and seperates field from arguments
+******************************************************************************/
+
+int IMU_util_getLine(FILE *file, char** field, char** args)
+{
+  char* status; 
+  status  = fgets(line, line_size, file);
+  if (status == NULL)
+    return -2;
+  *field = strtok(line, ":"); 
+  sscanf(*field, "%s", temp);
+  if (strcmp(temp, "{") == 0)
+    return 1;
+  if (strcmp(temp, "}") == 0)
+    return 2;
+  if (temp == NULL)
+    return -2;
+  *args = strtok(NULL, "\n");
+  strtok(*field, "\"");
+  *field = strtok(NULL, "\""); 
+  return 0;
+} 
+
+
+/******************************************************************************
+* utility function - matches field string with respective enum type
+******************************************************************************/
+
+int IMU_util_getField(char* field, const char* names[], int size)
+{
+  int   i;
+  for (i=0; i<size; i++) {
+    if (strcmp(field, names[i]) == 0)
+      return i;
+  } 
+  return -1; 
+}
+
+
+/******************************************************************************
 * reads calibration json file into memory (structure)
 ******************************************************************************/
 
-int displayIMU_readCalib(char* filename, struct displayIMU_calib *calib) 
+int IMU_util_readCalib(char* filename, struct IMU_correct_calib *calib) 
 {
   // define internal variables
   FILE*     file;
@@ -215,14 +218,14 @@ int displayIMU_readCalib(char* filename, struct displayIMU_calib *calib)
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = displayIMU_getLine(file, &field, &args);
+    status = IMU_util_getLine(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
       break;
 
     // extract arguments for the specified field 
-    type = get_field(field, calib_name, calib_size);
+    type = IMU_util_getField(field, calib_name, calib_size);
     if      (type == gBias) 
       get_floats(args, calib->gBias, 3);
     else if (type == gMult)
@@ -253,7 +256,7 @@ int displayIMU_readCalib(char* filename, struct displayIMU_calib *calib)
 * writes calibration structure to a json file
 ******************************************************************************/
 
-int displayIMU_writeCalib(char* filename, struct displayIMU_calib *calib)
+int IMU_util_writeCalib(char* filename, struct IMU_correct_calib *calib)
 {
   // define internal variables
   FILE*    file;
@@ -286,7 +289,7 @@ int displayIMU_writeCalib(char* filename, struct displayIMU_calib *calib)
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int displayIMU_readConfig(char* filename, struct displayIMU_config *config)
+int IMU_util_readConfig(char* filename, struct displayIMU_config *config)
 {
   // define internal variables
   FILE*     file;
@@ -304,12 +307,12 @@ int displayIMU_readConfig(char* filename, struct displayIMU_config *config)
   while (1) {
 
     // read line and parse field/args
-    status = displayIMU_getLine(file, &field, &args);
+    status = IMU_util_getLine(file, &field, &args);
     if (status > 1 || status < 0)
       break;
 
     // extract arguments for the specified field
-    type = get_field(field, config_name, config_size);
+    type = IMU_util_getField(field, config_name, config_size);
     if      (type == isGyro)
       get_bool(args, &config->isGyro);
     else if (type == isAccl)
@@ -354,7 +357,7 @@ int displayIMU_readConfig(char* filename, struct displayIMU_config *config)
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int displayIMU_writeConfig(char* filename, struct displayIMU_config *config)
+int IMU_util_writeConfig(char* filename, struct displayIMU_config *config)
 {
   // define internal variables
   FILE*    file;

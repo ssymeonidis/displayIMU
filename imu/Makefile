@@ -6,7 +6,7 @@ OBJDIR      = obj
 RM          = rm -f  
 TARGET_LIB  = $(BINDIR)/libIMU.so 
 
-SRCS = fileUtils.c IMU.c 
+SRCS = IMU_util.c IMU_correct.c IMU_core.c 
 OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 all: ${TARGET_LIB}

@@ -183,7 +183,7 @@ void *data_run(void*)
         &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2],
         &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2],
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-      displayIMU_corAll(sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
+      IMU_correct_all(sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
         sensor.gyroCor, sensor.acclCor, sensor.magnCor);
       displayIMU_estmAll(&sensor.lastTime, sensor.gyroCor, sensor.acclCor, 
         sensor.magnCor, estim.ang, estim.move, &FOM);
@@ -193,7 +193,7 @@ void *data_run(void*)
     else if (datum_type == 1) {
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
-      displayIMU_corGyro(sensor.gyroRaw, sensor.gyroCor);
+      IMU_correct_gyro(sensor.gyroRaw, sensor.gyroCor);
       displayIMU_estmGyro(&sensor.lastTime, sensor.gyroCor, estim.ang, 
         estim.move, &FOM);
     }
@@ -202,7 +202,7 @@ void *data_run(void*)
     else if (datum_type == 2) {
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
-      displayIMU_corAccl(sensor.acclRaw, sensor.acclCor);
+      IMU_correct_accl(sensor.acclRaw, sensor.acclCor);
       displayIMU_estmAccl(&sensor.lastTime, sensor.acclCor, estim.ang, 
         estim.move, &FOM);
     }
@@ -211,7 +211,7 @@ void *data_run(void*)
     else if (datum_type == 3) {
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-      displayIMU_corMagn(sensor.magnRaw, sensor.magnCor);
+      IMU_correct_magn(sensor.magnRaw, sensor.magnCor);
       displayIMU_estmMagn(&sensor.lastTime, sensor.magnCor, estim.ang, 
         estim.move, &FOM);
     }
