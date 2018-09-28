@@ -3,7 +3,7 @@ QT               += core                \
                     opengl              \
                     widgets
 
-QMAKE_RPATHDIR   += ../build
+QMAKE_RPATHDIR   += ../bin
 
 OBJECTS_DIR       = ./obj
 
@@ -20,10 +20,10 @@ INCLUDEPATH      += ../imu
 
 FORMS            += windowGUI.ui
 
-LIBS             += -L../build          \
+LIBS             += -L../bin            \
                     -lIMU               \ 
                     -lGLU               \
                     -lcsv               \
                     -lpthread
 
-DESTDIR           = ../build
+DESTDIR           = ../bin

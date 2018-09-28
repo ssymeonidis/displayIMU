@@ -171,7 +171,6 @@ void *data_run(void*)
     }
 
     if (first_frame == true) {
-      printf("first frame\n");
       gettimeofday(&time, NULL);
       time_init_sys  = time.tv_sec * 1000000 + time.tv_usec;
       time_init_sen  = sensor.lastTime;

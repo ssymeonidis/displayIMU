@@ -40,7 +40,7 @@ windowGUI::windowGUI(QWidget *parent) :
   displayIMU_getCalib(&calib);
   
   // initialize display parameters
-  load_json((char *)"displayIMU.json");
+  load_json((char *)"../config/displayIMU.json");
   glWidget_update();
 }
 
@@ -287,7 +287,7 @@ void windowGUI::glWidget_update()
 
 void windowGUI::on_configOpen_clicked()
 {
-  QString file = QFileDialog::getOpenFileName(this, ("Open File"), ".",
+  QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config",
     ("json (*.json)"));
   displayIMU_readConfig((char *)file.toStdString().c_str(), config);
   config_write();
@@ -300,7 +300,7 @@ void windowGUI::on_configOpen_clicked()
 
 void windowGUI::on_configSave_clicked()
 {
-  QString file = QFileDialog::getSaveFileName(this, ("Save File"), ".",
+  QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
   displayIMU_writeConfig((char *)file.toStdString().c_str(), config);
 }
@@ -312,7 +312,7 @@ void windowGUI::on_configSave_clicked()
 
 void windowGUI::on_calibOpen_clicked()
 {
-  QString file = QFileDialog::getOpenFileName(this, ("Open File"), ".", 
+  QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config", 
     ("json (*.json)"));
   displayIMU_readCalib((char *)file.toStdString().c_str(), calib);
   calib_write();
@@ -325,7 +325,7 @@ void windowGUI::on_calibOpen_clicked()
 
 void windowGUI::on_calibSave_clicked()
 {
-  QString file = QFileDialog::getSaveFileName(this, ("Save File"), ".",
+  QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
   displayIMU_writeCalib((char *)file.toStdString().c_str(), calib);
 }
