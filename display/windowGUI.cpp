@@ -100,6 +100,7 @@ void windowGUI::config_read()
   config->isTear       = !ui->noTear->isChecked();
   config->isMove       = !ui->noMove->isChecked();
   config->isFOM        = !ui->noFOM->isChecked();
+  config->isAutocal    = !ui->noAutocal->isChecked();
   config->gThreshVal   = ui->gThreshVal->text().toFloat();
   config->gThreshTime  = ui->gThreshTime->text().toFloat();
   config->aWeight      = ui->aWeight->text().toFloat();

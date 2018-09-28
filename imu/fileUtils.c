@@ -87,7 +87,7 @@ enum config_enum {
 };
 
 // buffers used for parsing
-static const int line_size = 128;
+#define line_size 128
 static char line[line_size];
 static char temp[line_size];
 
@@ -152,16 +152,16 @@ int get_floats(char* args, float* vals, int size)
 * utility function - converts true/false string into boolean 
 ******************************************************************************/
 
-int get_bool(char* args, bool* val)
+int get_bool(char* args, unsigned char* val)
 {
   char temp[16];
   sscanf(args, "%s", temp);
   if      (strcmp(temp, "true")   == 0 ||
            strcmp(temp, "true,")  == 0)
-    *val = true;
+    *val = 1;
   else if (strcmp(temp, "false")  == 0 ||
            strcmp(temp, "false,") == 0)
-    *val = false;
+    *val = 0;
   else
     return -3;
   return 0;
@@ -185,12 +185,12 @@ void write_floats(FILE* file, float* vals, int size)
 * utility function - write boolean string
 ******************************************************************************/
 
-void write_bool(FILE* file, bool val)
+void write_bool(FILE* file, unsigned char val)
 {
-  if (val == true)
-    fprintf(file, "true,\n");
-  else
+  if (val == 0)
     fprintf(file, "false,\n");
+  else
+    fprintf(file, "true,\n");
 }
 
 
@@ -198,7 +198,7 @@ void write_bool(FILE* file, bool val)
 * reads calibration json file into memory (structure)
 ******************************************************************************/
 
-int displayIMU_readCalib(char* filename, displayIMU_calib *calib) 
+int displayIMU_readCalib(char* filename, struct displayIMU_calib *calib) 
 {
   // define internal variables
   FILE*     file;
@@ -253,7 +253,7 @@ int displayIMU_readCalib(char* filename, displayIMU_calib *calib)
 * writes calibration structure to a json file
 ******************************************************************************/
 
-int displayIMU_writeCalib(char* filename, displayIMU_calib *calib)
+int displayIMU_writeCalib(char* filename, struct displayIMU_calib *calib)
 {
   // define internal variables
   FILE*    file;
@@ -286,7 +286,7 @@ int displayIMU_writeCalib(char* filename, displayIMU_calib *calib)
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int displayIMU_readConfig(char* filename, displayIMU_config *config)
+int displayIMU_readConfig(char* filename, struct displayIMU_config *config)
 {
   // define internal variables
   FILE*     file;
@@ -354,7 +354,7 @@ int displayIMU_readConfig(char* filename, displayIMU_config *config)
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int displayIMU_writeConfig(char* filename, displayIMU_config *config)
+int displayIMU_writeConfig(char* filename, struct displayIMU_config *config)
 {
   // define internal variables
   FILE*    file;

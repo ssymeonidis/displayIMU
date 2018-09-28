@@ -1,4 +1,4 @@
-CC          = g++ 
+CC          = gcc 
 CFLAGS      = -fPIC -Wall -Wextra -O2 -g 
 LDFLAGS     = -shared  
 BINDIR      = ../bin

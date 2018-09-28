@@ -31,10 +31,10 @@
 #include "IMU.h"
 
 // internally managed structures
-displayIMU_calib     calib;
-displayIMU_config    config; 
-displayIMU_autocal   autocal;
-displayIMU_state     state;
+struct displayIMU_calib     calib;
+struct displayIMU_config    config; 
+struct displayIMU_autocal   autocal;
+struct displayIMU_state     state;
 
 
 /******************************************************************************
@@ -97,7 +97,7 @@ inline void decrm(float* v, float* d)
 * function to return calib structure handle
 ******************************************************************************/
 
-void displayIMU_getCalib(displayIMU_calib **calib_pntr) 
+void displayIMU_getCalib(struct displayIMU_calib **calib_pntr) 
 {
   *calib_pntr = &calib;
 }
@@ -107,7 +107,7 @@ void displayIMU_getCalib(displayIMU_calib **calib_pntr)
 * function to return config structure handle
 ******************************************************************************/
 
-void displayIMU_getConfig(displayIMU_config **config_pntr) 
+void displayIMU_getConfig(struct displayIMU_config **config_pntr) 
 {
   *config_pntr = &config;
 }
@@ -117,7 +117,7 @@ void displayIMU_getConfig(displayIMU_config **config_pntr)
 * function to copy state structure
 ******************************************************************************/
 
-void displayIMU_getState(displayIMU_state **state_pntr) 
+void displayIMU_getState(struct displayIMU_state **state_pntr) 
 {
   *state_pntr = &state;
 }
@@ -127,9 +127,9 @@ void displayIMU_getState(displayIMU_state **state_pntr)
 * function to copy autocal structure 
 ******************************************************************************/
 
-void displayIMU_getAutocal(displayIMU_autocal *autocal_pntr) 
+void displayIMU_getAutocal(struct displayIMU_autocal **autocal_pntr) 
 {
-  memcpy(autocal_pntr, &autocal, sizeof(displayIMU_autocal));
+  *autocal_pntr = &autocal;
 }
 
 
@@ -234,7 +234,7 @@ void displayIMU_init()
   state.ref[1]      = 0.0;
   state.ref[2]      = 0.0;
   state.ref[3]      = 0.0;
-  state.isReset     = true;
+  state.isReset     = 1;
 
   // initialize autocal structure w/ previous value
   memcpy(autocal.gBias,     calib.gBias, 3*sizeof(float));
@@ -260,7 +260,7 @@ inline float* displayIMU_updateAbs(float* a, float* m)
   float  n;
   
   // update the system quaternian
-  if (config.isAccl != 0 && config.isMagn != 0 && a != NULL && m != NULL) {
+  if (!config.isAccl && !config.isMagn && a != NULL && m != NULL) {
 
     // ortho-normalize forwared vector 
     n            = m[0]*a[0]+m[1]*a[1]+m[2]*a[2];
@@ -328,7 +328,7 @@ inline float* displayIMU_updateAbs(float* a, float* m)
 inline float* displayIMU_updateGyro(float* g)
 {
   // determine whether the function needs to be executed
-  if (config.isGyro == false)
+  if (!config.isGyro)
     return state.SEq;
 
   // define internal variables
@@ -354,7 +354,7 @@ inline float* displayIMU_updateGyro(float* g)
 inline float* displayIMU_updateAccl(float* a)
 {
   // determine whether the functions needs to be executed
-  if (config.isAccl == false)
+  if (!config.isAccl)
     return state.SEq;
 
   // define internal variables
@@ -397,7 +397,7 @@ inline float* displayIMU_updateAccl(float* a)
 inline float* displayIMU_updateMagn(float* m)
 {
   // determine whether the functions needs to be executed
-  if (config.isMagn == false)
+  if (!config.isMagn)
     return state.SEq;
 
   // define internal variables
@@ -499,7 +499,7 @@ inline void displayIMU_calcEuler(float* q, float* E)
 
 inline void displayIMU_refAndEuler(float* E)
 {
-  if (config.isTear == true){
+  if (config.isTear) {
     float q_tmp[4];
     displayIMU_applyRef(state.SEq, state.ref, q_tmp);
     displayIMU_calcEuler(q_tmp, E);
@@ -513,9 +513,9 @@ inline void displayIMU_refAndEuler(float* E)
 * estimate velocity vector (minus gravity)
 ******************************************************************************/
 
-inline void displayIMU_estmAccl(float* a, float* A)
+inline void displayIMU_estmMove(float* a, float* A)
 {
-  if (config.isMove == false)
+  if (!config.isMove)
     return;
 
   // define internal varirables
@@ -565,7 +565,7 @@ void displayIMU_deadRecon(float* a, float* m, float* E)
   // update system state (quaternion)
   displayIMU_updateAbs(norm3(a), norm3(m));
   displayIMU_refAndEuler(E);
-  state.isReset = false;
+  state.isReset = 0;
 }
 
 
@@ -574,15 +574,15 @@ void displayIMU_deadRecon(float* a, float* m, float* E)
 ******************************************************************************/
 
 void  displayIMU_estmGyro(float* t, float* g, float* E, float* A,
-  displayIMU_metrics* FOM)
+  struct displayIMU_metrics* FOM)
 {
-  if (state.isReset == true || config.isFltr == false)
+  if (!state.isReset)
     return;
 
   // derive euler and acceleration from system state
   norm4(displayIMU_updateGyro(norm3(g)));
   displayIMU_refAndEuler(E);
-  displayIMU_estmAccl(state.a, A);
+  displayIMU_estmMove(state.a, A);
 }
 
 
@@ -591,23 +591,23 @@ void  displayIMU_estmGyro(float* t, float* g, float* E, float* A,
 ******************************************************************************/
 
 void  displayIMU_estmAccl(float* t,  float* a, float* E, float* A,
-  displayIMU_metrics* FOM)
+  struct displayIMU_metrics* FOM)
 {
   // save original acclerometer if estimating accleration
-  if (config.isAccl == true)
+  if (!config.isAccl)
     memcpy(state.a, a, 3*sizeof(float));
   
   // update system state (quaternion)
-  if (state.isReset == true || config.isFltr == false) {
+  if (state.isReset || !config.isFltr) {
     displayIMU_updateAbs(norm3(a), NULL);
-    state.isReset = false;
+    state.isReset = 0;
   } else {
     norm4(displayIMU_updateAccl(norm3(a)));
   }
   
   // derive euler and acceleration from system state
   displayIMU_refAndEuler(E);
-  displayIMU_estmAccl(state.a, A);
+  displayIMU_estmMove(state.a, A);
 }
 
 
@@ -616,19 +616,19 @@ void  displayIMU_estmAccl(float* t,  float* a, float* E, float* A,
 ******************************************************************************/
 
 void  displayIMU_estmMagn(float* t, float* m, float* E, float* A,
-  displayIMU_metrics* FOM)
+  struct displayIMU_metrics* FOM)
 {
   // update system state (quaternion)
-  if (state.isReset == true || config.isFltr == false) {
+  if (state.isReset || !config.isFltr) {
     displayIMU_updateAbs(NULL, norm3(m));
-    state.isReset = false;
+    state.isReset = 0;
   } else {
     norm4(displayIMU_updateMagn(norm3(m)));
   }
   
   // derive euler and acceleration from system state
   displayIMU_refAndEuler(E);
-  displayIMU_estmAccl(state.a, A);
+  displayIMU_estmMove(state.a, A);
 }
 
 
@@ -637,16 +637,16 @@ void  displayIMU_estmMagn(float* t, float* m, float* E, float* A,
 ******************************************************************************/
 
 void  displayIMU_estmAll(float* t, float* g, float* a, float* m, float* E, 
-  float* A, displayIMU_metrics* FOM)
+  float* A, struct displayIMU_metrics* FOM)
 {
   // save original acclerometer if estimating accleration
-  if (config.isAccl == true)
+  if (config.isAccl != 0)
     memcpy(state.a, a, 3*sizeof(float));
   
   // update system state (quaternion)
-  if (state.isReset == true || config.isFltr == false) {
+  if (state.isReset || !config.isFltr) {
     displayIMU_updateAbs(norm3(a), norm3(m));
-    state.isReset = false;
+    state.isReset = 0;
   } else {
     displayIMU_updateGyro(norm3(g));
     displayIMU_updateAccl(norm3(a));
@@ -656,5 +656,5 @@ void  displayIMU_estmAll(float* t, float* g, float* a, float* m, float* E,
   
   // derive euler and acceleration from system state
   displayIMU_refAndEuler(E);
-  displayIMU_estmAccl(state.a, A);
+  displayIMU_estmMove(state.a, A);
 }
