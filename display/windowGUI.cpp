@@ -36,7 +36,7 @@ windowGUI::windowGUI(QWidget *parent) :
   ui->setupUi(this);
 
   // get pointers to IMU structures
-  displayIMU_getConfig(&config);
+  IMU_core_getConfig(&config);
   IMU_correct_getCalib(&calib);
   
   // initialize display parameters

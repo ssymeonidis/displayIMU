@@ -57,8 +57,8 @@ private slots:
 
 private:
   // internal structures/classes
-  Ui::windowGUI             *ui;
-  displayIMU_config   *config;
+  Ui::windowGUI       *ui;
+  IMU_core_config     *config;
   IMU_correct_calib   *calib;
 
   // internal functions

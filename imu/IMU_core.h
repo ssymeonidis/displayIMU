@@ -17,15 +17,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _DISPLAYIMU_H
-#define _DISPLAYIMU_H
+#ifndef _IMU_CORE_H
+#define _IMU_CORE_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // define the configuration structure (values tuned for a part)
-struct displayIMU_config {
+struct IMU_core_config {
   unsigned char  isGyro;          // enable gyroscope data
   unsigned char  isAccl;          // enable accelerometer data
   unsigned char  isMagn;          // enable magnetometer data
@@ -45,7 +45,7 @@ struct displayIMU_config {
 };
 
 // define internal state struct (captures internal IMU state)
-struct displayIMU_state {
+struct IMU_core_state {
   float          SEq[4];          // current quaterion
   float          ref[4];          // "tear" reference 
   float          a[3];            // last accelerometer input
@@ -54,7 +54,7 @@ struct displayIMU_state {
 };
 
 // define the quality metrics structure (used for debugging)
-struct displayIMU_metrics {
+struct IMU_core_metrics {
   float          delta_G;
   float          delta_a;
   float          delta_m;
@@ -63,22 +63,22 @@ struct displayIMU_metrics {
 };
 
 // data structure access functions
-void displayIMU_getConfig   (struct displayIMU_config  **config);
-void displayIMU_getState    (struct displayIMU_state   **state);
+void IMU_core_getConfig   (struct IMU_core_config  **config);
+void IMU_core_getState    (struct IMU_core_state   **state);
 
 // "tear" functions
-void displayIMU_setRef      ();
-void displayIMU_setRefAccl  (float* a);
+void IMU_core_setRef      ();
+void IMU_core_setRefAccl  (float* a);
 
 // general operation functions 
-#define displayIMU_ESTM_ARGS float* E, float* A, struct displayIMU_metrics* FOM 
-void displayIMU_init        ();
-void displayIMU_deadRecon   (float* a, float* m, float* E);
-void displayIMU_estmGyro    (float* t, float* g, displayIMU_ESTM_ARGS);
-void displayIMU_estmAccl    (float* t, float* a, displayIMU_ESTM_ARGS);
-void displayIMU_estmMagn    (float* t, float* m, displayIMU_ESTM_ARGS);
-void displayIMU_estmAll     (float* t, float* g, float* a, float* m,  
-                             displayIMU_ESTM_ARGS);
+#define IMU_CORE_ESTM_ARGS float* E, float* A, struct IMU_core_metrics* FOM 
+void IMU_core_init        ();
+void IMU_core_deadRecon   (float* a, float* m, float* E);
+void IMU_core_estmGyro    (float* t, float* g, IMU_CORE_ESTM_ARGS);
+void IMU_core_estmAccl    (float* t, float* a, IMU_CORE_ESTM_ARGS);
+void IMU_core_estmMagn    (float* t, float* m, IMU_CORE_ESTM_ARGS);
+void IMU_core_estmAll     (float* t, float* g, float* a, float* m,  
+                           IMU_CORE_ESTM_ARGS);
 
 #ifdef __cplusplus
 }

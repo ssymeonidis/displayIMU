@@ -47,7 +47,7 @@ struct dataParse_estim {
 // define the sensor data structure
 extern dataParse_sensor    sensor;
 extern dataParse_estim     estim;
-extern displayIMU_metrics  FOM;
+extern IMU_core_metrics    FOM;
 
 // access functions
 void data_init_log(const char* filename);

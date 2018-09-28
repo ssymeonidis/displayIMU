@@ -35,7 +35,7 @@ dataParse_estim     estim;
 const int           buffer_size   = 100;
 float               buffer[buffer_size][15];
 int                 buffer_index  = 0;
-displayIMU_metrics  FOM;
+IMU_core_metrics  FOM;
 
 // define internal/external variables
 bool                is_log_data   = false;
@@ -81,7 +81,7 @@ void data_init_UDP(int portno)
   int          status;
  
   // init IMU and data_stream state
-  displayIMU_init();
+  IMU_core_init();
   is_csv_file = false;
 
   // open socket
@@ -107,7 +107,7 @@ void data_init_UDP(int portno)
 void data_init_CSV(const char* filename)
 {
   // init IMU and data_stream state
-  displayIMU_init();
+  IMU_core_init();
   is_csv_file = true;
 
   // fopen file  
@@ -185,7 +185,7 @@ void *data_run(void*)
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
       IMU_correct_all(sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
         sensor.gyroCor, sensor.acclCor, sensor.magnCor);
-      displayIMU_estmAll(&sensor.lastTime, sensor.gyroCor, sensor.acclCor, 
+      IMU_core_estmAll(&sensor.lastTime, sensor.gyroCor, sensor.acclCor, 
         sensor.magnCor, estim.ang, estim.move, &FOM);
     }
 
@@ -194,7 +194,7 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
       IMU_correct_gyro(sensor.gyroRaw, sensor.gyroCor);
-      displayIMU_estmGyro(&sensor.lastTime, sensor.gyroCor, estim.ang, 
+      IMU_core_estmGyro(&sensor.lastTime, sensor.gyroCor, estim.ang, 
         estim.move, &FOM);
     }
 
@@ -203,7 +203,7 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
       IMU_correct_accl(sensor.acclRaw, sensor.acclCor);
-      displayIMU_estmAccl(&sensor.lastTime, sensor.acclCor, estim.ang, 
+      IMU_core_estmAccl(&sensor.lastTime, sensor.acclCor, estim.ang, 
         estim.move, &FOM);
     }
 
@@ -212,7 +212,7 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
       IMU_correct_magn(sensor.magnRaw, sensor.magnCor);
-      displayIMU_estmMagn(&sensor.lastTime, sensor.magnCor, estim.ang, 
+      IMU_core_estmMagn(&sensor.lastTime, sensor.magnCor, estim.ang, 
         estim.move, &FOM);
     }
   }

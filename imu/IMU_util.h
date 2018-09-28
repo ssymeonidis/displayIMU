@@ -30,10 +30,11 @@ extern "C" {
 
 // functions to read/write sturctures to json files 
 int IMU_util_getLine     (FILE *file, char** field, char** args);
-int IMU_util_readConfig  (char* filename, struct displayIMU_config *config);
-int IMU_util_writeConfig (char* filename, struct displayIMU_config *config);
+int IMU_util_getField    (char* field, const char* names[], int size);
 int IMU_util_readCalib   (char* filename, struct IMU_correct_calib *calib);
 int IMU_util_writeCalib  (char* filename, struct IMU_correct_calib *calib);
+int IMU_util_readConfig  (char* filename, struct IMU_core_config *config);
+int IMU_util_writeConfig (char* filename, struct IMU_core_config *config);
 
 #ifdef __cplusplus
 }

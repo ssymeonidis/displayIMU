@@ -25,14 +25,16 @@
  * changes were made for adding hooks and increasing readabilty 
 */
 
+// definitions for increased readability
+#define NULL 0
+
 // include statements 
 #include <math.h>            // sqrt/trig
-#include <string.h>          // memcopy
 #include "IMU_core.h"
 
 // internally managed structures
-struct displayIMU_config    config; 
-struct displayIMU_state     state;
+struct IMU_core_config    config; 
+struct IMU_core_state     state;
 
 
 /******************************************************************************
@@ -95,7 +97,7 @@ inline void decrm(float* v, float* d)
 * function to return config structure handle
 ******************************************************************************/
 
-void displayIMU_getConfig(struct displayIMU_config **config_pntr) 
+void IMU_core_getConfig(struct IMU_core_config **config_pntr) 
 {
   *config_pntr = &config;
 }
@@ -105,7 +107,7 @@ void displayIMU_getConfig(struct displayIMU_config **config_pntr)
 * function to copy state structure
 ******************************************************************************/
 
-void displayIMU_getState(struct displayIMU_state **state_pntr) 
+void IMU_core_getState(struct IMU_core_state **state_pntr) 
 {
   *state_pntr = &state;
 }
@@ -115,7 +117,7 @@ void displayIMU_getState(struct displayIMU_state **state_pntr)
 * set reference using last system quaternion
 ******************************************************************************/
 
-void displayIMU_setRef()
+void IMU_core_setRef()
 {
   state.ref[0]       =  state.SEq[0];
   state.ref[1]       = -state.SEq[1];
@@ -129,7 +131,7 @@ void displayIMU_setRef()
 * assumes: normalized input
 ******************************************************************************/
 
-void displayIMU_setRefAccl(float* up)
+void IMU_core_setRefAccl(float* up)
 {
   // updating reference based on accelerometer
   float* ref         = state.ref;
@@ -152,7 +154,7 @@ void displayIMU_setRefAccl(float* up)
 * initialize state and autocal to known state
 ******************************************************************************/
 
-void displayIMU_init()
+void IMU_core_init()
 {
   // initialize state to known value
   state.SEq[0]      = 1.0;
@@ -172,7 +174,7 @@ void displayIMU_init()
 * assumes: corrected and normalized data
 ******************************************************************************/
 
-inline float* displayIMU_updateAbs(float* a, float* m)
+inline float* IMU_core_updateAbs(float* a, float* m)
 {
   // define the local variables
   float* SEq         = state.SEq;
@@ -244,7 +246,7 @@ inline float* displayIMU_updateAbs(float* a, float* m)
 * assumes: corrected and normalized data
 ******************************************************************************/
 
-inline float* displayIMU_updateGyro(float* g)
+inline float* IMU_core_updateGyro(float* g)
 {
   // determine whether the function needs to be executed
   if (!config.isGyro)
@@ -270,7 +272,7 @@ inline float* displayIMU_updateGyro(float* g)
 * assumes: corrected and normalized data
 ******************************************************************************/
 
-inline float* displayIMU_updateAccl(float* a)
+inline float* IMU_core_updateAccl(float* a)
 {
   // determine whether the functions needs to be executed
   if (!config.isAccl)
@@ -313,7 +315,7 @@ inline float* displayIMU_updateAccl(float* a)
 * assumes: corrected and normalized data
 ******************************************************************************/
 
-inline float* displayIMU_updateMagn(float* m)
+inline float* IMU_core_updateMagn(float* m)
 {
   // determine whether the functions needs to be executed
   if (!config.isMagn)
@@ -390,7 +392,7 @@ inline float* displayIMU_updateMagn(float* m)
 * assumes: corrected and normalized data
 ******************************************************************************/
 
-inline void displayIMU_applyRef(float* q, float* ref, float* q_out)
+inline void IMU_core_applyRef(float* q, float* ref, float* q_out)
 {
   q_out[0] = q[0]*ref[0] - q[1]*ref[1] - q[2]*ref[2] - q[3]*ref[3];
   q_out[1] = q[0]*ref[1] + q[1]*ref[0] + q[2]*ref[3] - q[3]*ref[2];
@@ -403,7 +405,7 @@ inline void displayIMU_applyRef(float* q, float* ref, float* q_out)
 * calculate euler angle
 ******************************************************************************/
 
-inline void displayIMU_calcEuler(float* q, float* E)
+inline void IMU_core_calcEuler(float* q, float* E)
 {
   float Q[4] = {q[0]*q[0], q[1]*q[1], q[2]*q[2], q[3]*q[3]};
   E[0] = 180 * atan2(2*(q[1]*q[3]+q[3]*q[0]),  Q[1]-Q[2]-Q[3]+Q[0]) / M_PI;
@@ -416,14 +418,14 @@ inline void displayIMU_calcEuler(float* q, float* E)
 * calculate euler angle
 ******************************************************************************/
 
-inline void displayIMU_refAndEuler(float* E)
+inline void IMU_core_refAndEuler(float* E)
 {
   if (config.isTear) {
     float q_tmp[4];
-    displayIMU_applyRef(state.SEq, state.ref, q_tmp);
-    displayIMU_calcEuler(q_tmp, E);
+    IMU_core_applyRef(state.SEq, state.ref, q_tmp);
+    IMU_core_calcEuler(q_tmp, E);
   } else {
-    displayIMU_calcEuler(state.SEq, E);
+    IMU_core_calcEuler(state.SEq, E);
   }
 }
 
@@ -432,7 +434,7 @@ inline void displayIMU_refAndEuler(float* E)
 * estimate velocity vector (minus gravity)
 ******************************************************************************/
 
-inline void displayIMU_estmMove(float* a, float* A)
+inline void IMU_core_estmMove(float* a, float* A)
 {
   if (!config.isMove)
     return;
@@ -479,11 +481,11 @@ inline void displayIMU_estmMove(float* a, float* A)
 * estimate euler angle given acclerometer and magnetomer (no filtering)
 ******************************************************************************/
 
-void displayIMU_deadRecon(float* a, float* m, float* E)
+void IMU_core_deadRecon(float* a, float* m, float* E)
 {
   // update system state (quaternion)
-  displayIMU_updateAbs(norm3(a), norm3(m));
-  displayIMU_refAndEuler(E);
+  IMU_core_updateAbs(norm3(a), norm3(m));
+  IMU_core_refAndEuler(E);
   state.isReset = 0;
 }
 
@@ -492,16 +494,16 @@ void displayIMU_deadRecon(float* a, float* m, float* E)
 * estimate euler angle given gyroscope data (asynchronous operation)
 ******************************************************************************/
 
-void  displayIMU_estmGyro(float* t, float* g, float* E, float* A,
-  struct displayIMU_metrics* FOM)
+void  IMU_core_estmGyro(float* t, float* g, float* E, float* A,
+  struct IMU_core_metrics* FOM)
 {
   if (!state.isReset)
     return;
 
   // derive euler and acceleration from system state
-  norm4(displayIMU_updateGyro(norm3(g)));
-  displayIMU_refAndEuler(E);
-  displayIMU_estmMove(state.a, A);
+  norm4(IMU_core_updateGyro(norm3(g)));
+  IMU_core_refAndEuler(E);
+  IMU_core_estmMove(state.a, A);
 }
 
 
@@ -509,8 +511,8 @@ void  displayIMU_estmGyro(float* t, float* g, float* E, float* A,
 * estimate euler angle given magnetometer data (asynchronous operation)
 ******************************************************************************/
 
-void  displayIMU_estmAccl(float* t,  float* a, float* E, float* A,
-  struct displayIMU_metrics* FOM)
+void  IMU_core_estmAccl(float* t,  float* a, float* E, float* A,
+  struct IMU_core_metrics* FOM)
 {
   // save original acclerometer if estimating accleration
   if (!config.isAccl)
@@ -518,15 +520,15 @@ void  displayIMU_estmAccl(float* t,  float* a, float* E, float* A,
   
   // update system state (quaternion)
   if (state.isReset || !config.isFltr) {
-    displayIMU_updateAbs(norm3(a), NULL);
+    IMU_core_updateAbs(norm3(a), NULL);
     state.isReset = 0;
   } else {
-    norm4(displayIMU_updateAccl(norm3(a)));
+    norm4(IMU_core_updateAccl(norm3(a)));
   }
   
   // derive euler and acceleration from system state
-  displayIMU_refAndEuler(E);
-  displayIMU_estmMove(state.a, A);
+  IMU_core_refAndEuler(E);
+  IMU_core_estmMove(state.a, A);
 }
 
 
@@ -534,20 +536,20 @@ void  displayIMU_estmAccl(float* t,  float* a, float* E, float* A,
 * estimate euler angle given gyroscope, magnetometer, and accelerometer
 ******************************************************************************/
 
-void  displayIMU_estmMagn(float* t, float* m, float* E, float* A,
-  struct displayIMU_metrics* FOM)
+void  IMU_core_estmMagn(float* t, float* m, float* E, float* A,
+  struct IMU_core_metrics* FOM)
 {
   // update system state (quaternion)
   if (state.isReset || !config.isFltr) {
-    displayIMU_updateAbs(NULL, norm3(m));
+    IMU_core_updateAbs(NULL, norm3(m));
     state.isReset = 0;
   } else {
-    norm4(displayIMU_updateMagn(norm3(m)));
+    norm4(IMU_core_updateMagn(norm3(m)));
   }
   
   // derive euler and acceleration from system state
-  displayIMU_refAndEuler(E);
-  displayIMU_estmMove(state.a, A);
+  IMU_core_refAndEuler(E);
+  IMU_core_estmMove(state.a, A);
 }
 
 
@@ -555,8 +557,8 @@ void  displayIMU_estmMagn(float* t, float* m, float* E, float* A,
 * estimate euler angle given gyroscope, accelerometer, and magnetometer data 
 ******************************************************************************/
 
-void  displayIMU_estmAll(float* t, float* g, float* a, float* m, float* E, 
-  float* A, struct displayIMU_metrics* FOM)
+void  IMU_core_estmAll(float* t, float* g, float* a, float* m, float* E, 
+  float* A, struct IMU_core_metrics* FOM)
 {
   // save original acclerometer if estimating accleration
   if (config.isAccl != 0)
@@ -564,16 +566,16 @@ void  displayIMU_estmAll(float* t, float* g, float* a, float* m, float* E,
   
   // update system state (quaternion)
   if (state.isReset || !config.isFltr) {
-    displayIMU_updateAbs(norm3(a), norm3(m));
+    IMU_core_updateAbs(norm3(a), norm3(m));
     state.isReset = 0;
   } else {
-    displayIMU_updateGyro(norm3(g));
-    displayIMU_updateAccl(norm3(a));
-    displayIMU_updateMagn(norm3(m));
+    IMU_core_updateGyro(norm3(g));
+    IMU_core_updateAccl(norm3(a));
+    IMU_core_updateMagn(norm3(m));
     norm4(state.SEq);
   }
   
   // derive euler and acceleration from system state
-  displayIMU_refAndEuler(E);
-  displayIMU_estmMove(state.a, A);
+  IMU_core_refAndEuler(E);
+  IMU_core_estmMove(state.a, A);
 }

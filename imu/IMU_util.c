@@ -289,7 +289,7 @@ int IMU_util_writeCalib(char* filename, struct IMU_correct_calib *calib)
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readConfig(char* filename, struct displayIMU_config *config)
+int IMU_util_readConfig(char* filename, struct IMU_core_config *config)
 {
   // define internal variables
   FILE*     file;
@@ -357,7 +357,7 @@ int IMU_util_readConfig(char* filename, struct displayIMU_config *config)
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeConfig(char* filename, struct displayIMU_config *config)
+int IMU_util_writeConfig(char* filename, struct IMU_core_config *config)
 {
   // define internal variables
   FILE*    file;
