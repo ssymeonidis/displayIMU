@@ -24,11 +24,14 @@
 #include <unistd.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
 #include "dataParse.h"
 
 // define the sensor data structure
+dataParse_sensor    sensor;
+dataParse_estim     estim;
 const int           buffer_size   = 100;
 float               buffer[buffer_size][15];
 int                 buffer_index  = 0;
@@ -123,10 +126,16 @@ void *data_run(void*)
   // define the variables
   const int  line_size = 256;
   char       line[line_size];
-  float buffer_corrected[9];
-  int   rc;
-  int   index;
-  int   sensor_type   = 1; 
+  int        datum_type; 
+  bool       first_frame = true;
+  int        rc;
+  timeval    time;
+  double     time_cur;
+  double     time_init_sys;
+  double     time_init_sen;
+  double     time_delt_sys;
+  double     time_delt_sen;
+  char       *results;
 
   // main processing loop
   while(1) {
@@ -136,53 +145,76 @@ void *data_run(void*)
       rc = recv(data_socket, line, sizeof(line), 0);
       line[rc] = (char)NULL;
     } else {
-      fgets(line, sizeof(line), csv_file);
-      if (line == NULL)
-        break;
+      results = fgets(line, sizeof(line), csv_file);
+      if (results == NULL) {
+        fseek(csv_file, 0, SEEK_SET);
+        first_frame = true;
+        fgets(line, sizeof(line), csv_file);
+      } 
     }
     
-    // store the results into ring buffer
-    index      = buffer_index+1;
-    if (index >= buffer_size)
-      index    = 0; 
-    sscanf(line, "%*f, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
-      &buffer[index][0], &buffer[index][1], &buffer[index][2],
-      &buffer[index][3], &buffer[index][4], &buffer[index][5],
-      &buffer[index][6], &buffer[index][7], &buffer[index][8]);
-    buffer_index = index;
+    // determine the datum type
+    sscanf(line, "%d, %f", &datum_type, &sensor.lastTime);
 
-    // perform the specified IMU
-    if (sensor_type == 1) {
-      displayIMU_corAll(&buffer[index][0],
-                        &buffer[index][3],
-                        &buffer[index][6],
-                        &buffer_corrected[0], &buffer_corrected[3], &buffer_corrected[6]); 
-      displayIMU_estmAll(NULL,
-                 &buffer_corrected[0],
-                 &buffer_corrected[3],
-                 &buffer_corrected[6],
-                 &buffer[index][9],
-                 &buffer[index][12],
-                 &FOM);
-      if (is_log_data == true) {
-      fprintf(log_file, "%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,%.8f,",
-              buffer[index][6],
-              buffer[index][7],
-              buffer[index][8],
-              buffer[index][0],
-              buffer[index][1],
-              buffer[index][2],
-              buffer[index][3],
-              buffer[index][4],
-              buffer[index][5]);
-      fprintf(log_file, "%.8f,%.8f,%.8f,%.8f,%.8f,%.8f\n",
-              buffer[index][9],
-              buffer[index][10],
-              buffer[index][11],
-              buffer[index][12],
-              buffer[index][13],
-              buffer[index][14]);
+    // inject delay if running csv file
+    if (is_csv_file == true && first_frame == false) {
+      while (1) { 
+        gettimeofday(&time, NULL);
+        time_cur         = time.tv_sec * 1000000 + time.tv_usec;
+        time_delt_sys    = time_cur - time_init_sys;
+        time_delt_sen    = sensor.lastTime - time_init_sen;
+        if (time_delt_sen - time_delt_sys > 0) 
+          usleep(time_delt_sen - time_delt_sys); 
+        else
+          break;
       }
+    }
+
+    if (first_frame == true) {
+      printf("first frame\n");
+      gettimeofday(&time, NULL);
+      time_init_sys  = time.tv_sec * 1000000 + time.tv_usec;
+      time_init_sen  = sensor.lastTime;
+      first_frame    = false;
+    }
+
+    // process synced data (all three sensors)
+    if (datum_type == 0) {
+      sscanf(line, "%*d, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
+        &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2],
+        &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2],
+        &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
+      displayIMU_corAll(sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
+        sensor.gyroCor, sensor.acclCor, sensor.magnCor);
+      displayIMU_estmAll(&sensor.lastTime, sensor.gyroCor, sensor.acclCor, 
+        sensor.magnCor, estim.ang, estim.move, &FOM);
+    }
+
+    // process gyroscope data (async sensors)
+    else if (datum_type == 1) {
+      sscanf(line, "%*d, %*f, %f, %f, %f", 
+        &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
+      displayIMU_corGyro(sensor.gyroRaw, sensor.gyroCor);
+      displayIMU_estmGyro(&sensor.lastTime, sensor.gyroCor, estim.ang, 
+        estim.move, &FOM);
+    }
+
+    // process accelerometer data (async sensors)
+    else if (datum_type == 2) {
+      sscanf(line, "%*d, %*f, %f, %f, %f", 
+        &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
+      displayIMU_corAccl(sensor.acclRaw, sensor.acclCor);
+      displayIMU_estmAccl(&sensor.lastTime, sensor.acclCor, estim.ang, 
+        estim.move, &FOM);
+    }
+
+    // process magnetometer data (async sensors)
+    else if (datum_type == 3) {
+      sscanf(line, "%*d, %*f, %f, %f, %f", 
+        &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
+      displayIMU_corMagn(sensor.magnRaw, sensor.magnCor);
+      displayIMU_estmMagn(&sensor.lastTime, sensor.magnCor, estim.ang, 
+        estim.move, &FOM);
     }
   }
 

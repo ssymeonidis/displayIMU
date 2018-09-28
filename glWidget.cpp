@@ -116,9 +116,6 @@ void GLWidget::initializeGL()
 
 void GLWidget::paintGL()
 {
-  // initializing the variables
-  int i = buffer_index;
-
   // setup camera
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLoadIdentity();
@@ -130,33 +127,33 @@ void GLWidget::paintGL()
   // draw reference grid
   drawGrid(); 
 
+  // draw gyroscope state
+  if (isGyro == true) 
+    drawVector(gyroColor, sensor.gyroRaw, scaleGyro);
+
   // draw accelerometer state
   if (isAccl == true) 
-    drawVector(acclColor, &(buffer[i][3]), scaleAccl);
+    drawVector(acclColor, sensor.acclRaw, scaleAccl);
 
   // draw magnetometer state
   if (isMagn == true) 
-    drawVector(magnColor, &(buffer[i][6]), scaleMagn);
-
-  // draw gyroscope state
-  if (isGyro == true) 
-    drawVector(gyroColor, &(buffer[i][0]), scaleGyro);
+    drawVector(magnColor, sensor.magnRaw, scaleMagn);
 
   // draw imu state
   if (isIMU == true) {
     glPushMatrix();
-    glRotatef(buffer[i][11], 1.0, 0.0, 0.0);
-    glRotatef(buffer[i][10], 0.0, 0.0, 1.0);
-    glRotatef(buffer[i][9],  0.0, 1.0, 0.0);
-    glTranslatef(buffer[i][12]/scaleIMU,
-                 buffer[i][14]/scaleIMU,
-                 buffer[i][13]/scaleIMU);
+    glRotatef(estim.ang[2], 1.0, 0.0, 0.0);
+    glRotatef(estim.ang[1], 0.0, 0.0, 1.0);
+    glRotatef(estim.ang[0], 0.0, 1.0, 0.0);
+    glTranslatef(estim.move[0]/scaleIMU,
+                 estim.move[2]/scaleIMU,
+                 estim.move[1]/scaleIMU);
     GLfloat vector1[3]    = { 0.0,  1.0,  0.0};
     drawVector(gyroColor, vector1, 1.0);
     GLfloat vector2[3]    = {-0.0,  0.0,  1.0};
     drawVector(acclColor, vector2, 1.0);
     GLfloat vector3[3]    = {-1.0,  0.0,  0.0};
-    drawVector(magnColor,  vector3, 1.0);
+    drawVector(magnColor, vector3, 1.0);
     glPopMatrix();
   }
 

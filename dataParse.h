@@ -17,16 +17,35 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _RECEIVE_H
-#define _RECEIVE_H
+#ifndef _DATA_PARSE_H
+#define _DATA_PARSE_H
 
 // include statements
 #include "IMU.h"
 
+// define input sensor data structure
+struct dataParse_sensor {
+  float gyroRaw[3];
+  float gyroCor[3];
+  float gyroFltr[3];
+  float acclRaw[3];
+  float acclCor[3];
+  float acclFltr[3];
+  float magnRaw[3];
+  float magnCor[3];
+  float magnFltr[3];
+  float lastTime;
+}; 
+
+// define IMU estimate data structure
+struct dataParse_estim {
+  float ang[3];
+  float move[3];  
+};
+
 // define the sensor data structure
-extern const int           buffer_size;
-extern float               buffer[][15];
-extern int                 buffer_index;
+extern dataParse_sensor    sensor;
+extern dataParse_estim     estim;
 extern displayIMU_metrics  FOM;
 
 // access functions
