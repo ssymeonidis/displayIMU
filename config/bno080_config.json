@@ -1,0 +1,18 @@
+{
+  "isGyro": true,
+  "isAccl": false,
+  "isMagn": true,
+  "isFltr": false,
+  "isTear": true,
+  "isMove": false,
+  "isFOM": true,
+  "isAutocal": false,
+  "gThreshVal": 1.2,
+  "gThreshTime": 2.3,
+  "aWeight": 3.4,
+  "aAlpha": 4.5,
+  "mWeight": 5.6,
+  "mAlpha": 6.7,
+  "moveAlpha": 7.8,
+  "autocalAlpha": 8.9
+}
