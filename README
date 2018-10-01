@@ -1,1 +1,37 @@
-TBD
+The displayIMU project provides an Inertial Measurement Unit (IMU) that takes
+in gyroscope, accelerometer, and magnetoeter data and estimates an orientation,
+i.e. where the system is pointed.  Also available is an acceleration estimate
+minus gravity.  Orientation is represeted as a quaternion, but math utilities
+are provided to convert that state into Euler angles along with applying a user
+specified reference.  The "core" IMU codebase is written in C and is configured
+to create a shared object file that can be statically or dynamically linked into
+another application.
+
+Also provided is a QT application that provides the tools to diplay IMU data,
+read/write calibration/configuration files, and stream live raw data via UPD or 
+stored raw data from a CSV file.  The "display" IMU codebase is written C++.
+qtcreator was used to create the GUI and is recommended for future changes.
+
+To compile the project in Linux perform the following in the root directory:
+- source setenv.sh
+- make 
+
+The IMU shared object and display binary are created in bin.  To run type:
+- cd bin
+- ./displayIMU
+
+The project organization is as follows
+- bin <- stores libIMU.so library and displayIMU executable
+- config <- stores json configuration and calibration files
+- display <- source code for QT diplay application
+- imu <- source code for IMU library
+
+The IMU library is broken down into smaller components to provide flexibility on
+how the code is integrated into a project.  For example, the correction function
+which applies calibration factors to raw data can be colocated with the sensors
+and whereas the core functions can be placed in the main application.  The files
+along with their descriptions are captured below:
+- IMU_core <- functions that fuse corrected sensor data (generate estimates) 
+- IMU_correct <- functions that applies calibarion factors to raw data
+- IMU_util_file <- functions for reading/writting structs to json files 
+- IMU_util_math <- functions for converting/orienting quaternion IMU states
