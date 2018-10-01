@@ -24,6 +24,9 @@
 extern "C" {
 #endif
 
+// define error codes
+#define IMU_CORRECT_INST_OVERFLOW -1
+
 // define the calibration structure (values tuned for each unit)
 struct IMU_correct_calib {
   float          gBias[3];        // gyroscope biases
@@ -37,29 +40,16 @@ struct IMU_correct_calib {
   float          mAng;            // magnetic north angle
 };
 
-// define the auto_calib state (used to improve config struct)
-struct IMU_correct_autocal {
-  float          gBias[3];        // gyroscope autocal estimate #1
-  float          gBiasCont[3];    // gyroscope autocal estimate #2
-  float          aMag;            // gravity magnitude estimate #1
-  float          aMagCont;        // gravity magnitude estimate #2
-  float          mMag;            // magnetic north magnitude estimate #1
-  float          mMagCont;        // magnetic north magnitude estimate #2
-  float          mAng;            // magnetic north angle estimate #1
-  float          mAngCont;        // magnetic north angle estiamte #2
-}; 
-
-
 // data structure access functions
-void IMU_correct_getCalib    (struct IMU_correct_calib   **calib);
-void IMU_correct_getAutocal  (struct IMU_correct_autocal **autocal);
+int  IMU_correct_init (unsigned short *id, struct IMU_correct_calib **calib);
 
 // raw data correction functions
-void IMU_correct_gyro        (float* g_raw, float* g);
-void IMU_correct_accl        (float* a_raw, float* a);
-void IMU_correct_magn        (float* m_raw, float* m);
-void IMU_correct_all         (float* g_raw, float* a_raw, float* m_raw, 
-                              float* g,     float* a,     float* m);
+void IMU_correct_gyro (unsigned short id, IMU_TYPE *g_raw, IMU_TYPE *g);
+void IMU_correct_accl (unsigned short id, IMU_TYPE *a_raw, IMU_TYPE *a);
+void IMU_correct_magn (unsigned short id, IMU_TYPE *m_raw, IMU_TYPE *m);
+void IMU_correct_all  (unsigned short id, 
+                       IMU_TYPE *g_raw, IMU_TYPE *a_raw, IMU_TYPE *m_raw, 
+                       IMU_TYPE *g,     IMU_TYPE *a,     IMU_TYPE *m);
 
 #ifdef __cplusplus
 }

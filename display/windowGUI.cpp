@@ -32,12 +32,15 @@ windowGUI::windowGUI(QWidget *parent) :
   QMainWindow(parent),
   ui(new Ui::windowGUI)
 {
+  // define local variables (not really used) 
+  unsigned short IMU_correct_id;
+ 
   // create and place window widgets
   ui->setupUi(this);
 
   // get pointers to IMU structures
   IMU_core_getConfig(&config);
-  IMU_correct_getCalib(&calib);
+  IMU_correct_init(&IMU_correct_id, &calib);
   
   // initialize display parameters
   load_json((char *)"../config/displayIMU.json");

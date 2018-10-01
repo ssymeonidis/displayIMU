@@ -27,3 +27,5 @@ LIBS             += -L../bin            \
                     -lpthread
 
 DESTDIR           = ../bin
+
+DEFINES          += IMU_TYPE=${IMU_TYPE}

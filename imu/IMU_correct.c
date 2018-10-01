@@ -18,31 +18,28 @@
 */
 
 // include statements 
-// #include <math.h>           // sqrt/trig
 #include "IMU_correct.h"
 
 // internally managed structures
-struct IMU_correct_calib    calib;
-struct IMU_correct_autocal  autocal;
+struct IMU_correct_calib    calib[IMU_MAX_INST];
+static unsigned short       IMU_correct_inst = 0;
 
 
 /******************************************************************************
 * function to return calib structure handle
 ******************************************************************************/
 
-void IMU_correct_getCalib(struct IMU_correct_calib **calib_pntr) 
+int IMU_correct_init(unsigned short *id, struct IMU_correct_calib **calib_pntr) 
 {
-  *calib_pntr = &calib;
-}
+  // check for device count overflow
+  if (IMU_correct_inst >= IMU_MAX_INST)
+    return IMU_CORRECT_INST_OVERFLOW;
 
-
-/******************************************************************************
-* function to return autocal structure handle
-******************************************************************************/
-
-void IMU_correct_getAutocal(struct IMU_correct_autocal **autocal_pntr) 
-{
-  *autocal_pntr = &autocal;
+  // return handle and calib pointer
+  *id = IMU_correct_inst; 
+  *calib_pntr = &calib[*id];
+  IMU_correct_inst++;
+  return 0;
 }
 
 
@@ -50,11 +47,21 @@ void IMU_correct_getAutocal(struct IMU_correct_autocal **autocal_pntr)
 * correct raw gyroscope data
 ******************************************************************************/
 
-void IMU_correct_gyro(float* g_raw, float* g)
+void IMU_correct_gyro(unsigned short id, IMU_TYPE *g_raw, IMU_TYPE *g)
 {
-  g[0]      = (g_raw[0] - calib.gBias[0]) / calib.gMult[0];
-  g[1]      = (g_raw[1] - calib.gBias[1]) / calib.gMult[1];
-  g[2]      = (g_raw[2] - calib.gBias[2]) / calib.gMult[2];
+  // define internal variables
+  float *bias  = calib[id].gBias;
+  float *mult  = calib[id].gMult; 
+
+  // apply bias
+  g[0]         = g_raw[0] + bias[0];
+  g[1]         = g_raw[1] + bias[1];
+  g[2]         = g_raw[2] + bias[2];
+
+  // apply transform
+  g[0]         = g[0]*mult[0] + g[1]*mult[1] + g[2]*mult[2];
+  g[1]         = g[0]*mult[3] + g[1]*mult[4] + g[2]*mult[5];
+  g[2]         = g[0]*mult[6] + g[1]*mult[7] + g[2]*mult[8];
 }
 
 
@@ -62,11 +69,21 @@ void IMU_correct_gyro(float* g_raw, float* g)
 * correct raw accelerometer data
 ******************************************************************************/
 
-void IMU_correct_accl(float* a_raw, float* a)
+void IMU_correct_accl(unsigned short id, IMU_TYPE *a_raw, IMU_TYPE *a)
 {
-  a[0]      = a_raw[0] - calib.aBias[0];
-  a[1]      = a_raw[1] - calib.aBias[1];
-  a[2]      = a_raw[2] - calib.aBias[2];
+  // define internal variables
+  float *bias  = calib[id].aBias;
+  float *mult  = calib[id].aMult; 
+
+  // apply bias
+  a[0]         = a_raw[0] - bias[0];
+  a[1]         = a_raw[1] - bias[1];
+  a[2]         = a_raw[2] - bias[2];
+
+  // apply transform
+  a[0]         = a[0]*mult[0] + a[1]*mult[1] + a[2]*mult[2];
+  a[1]         = a[0]*mult[3] + a[1]*mult[4] + a[2]*mult[5];
+  a[2]         = a[0]*mult[6] + a[1]*mult[7] + a[2]*mult[8];
 }
 
 
@@ -74,11 +91,22 @@ void IMU_correct_accl(float* a_raw, float* a)
 * correct raw magnetometer data
 ******************************************************************************/
 
-void IMU_correct_magn(float* m_raw, float* m)
+void IMU_correct_magn(unsigned short id, IMU_TYPE *m_raw, IMU_TYPE *m)
+
 {
-  m[0]      = m_raw[0] - calib.mBias[0];
-  m[1]      = m_raw[1] - calib.mBias[1];
-  m[2]      = m_raw[2] - calib.mBias[2];
+  // define internal variables
+  float *bias  = calib[id].mBias;
+  float *mult  = calib[id].mMult; 
+
+  // apply bias
+  m[0]         = m_raw[0] - bias[0];
+  m[1]         = m_raw[1] - bias[1];
+  m[2]         = m_raw[2] - bias[2];
+
+  // apply transform
+  m[0]         = m[0]*mult[0] + m[1]*mult[1] + m[2]*mult[2];
+  m[1]         = m[0]*mult[3] + m[1]*mult[4] + m[2]*mult[5];
+  m[2]         = m[0]*mult[6] + m[1]*mult[7] + m[2]*mult[8];
 }
 
 
@@ -86,10 +114,11 @@ void IMU_correct_magn(float* m_raw, float* m)
 * correct raw gyroscope, accelerometer, and magnetometer data
 ******************************************************************************/
 
-void IMU_correct_all(float* g_raw, float* a_raw, float* m_raw,
-                     float* g,     float* a,     float* m)
+void IMU_correct_all(unsigned short id, 
+                     IMU_TYPE *g_raw, IMU_TYPE *a_raw, IMU_TYPE *m_raw,
+                     IMU_TYPE *g,     IMU_TYPE *a,     IMU_TYPE *m)
 {
-  IMU_correct_gyro(g_raw, g);
-  IMU_correct_accl(a_raw, a);
-  IMU_correct_magn(m_raw, m);
+  IMU_correct_gyro(id, g_raw, g);
+  IMU_correct_accl(id, a_raw, a);
+  IMU_correct_magn(id, m_raw, m);
 }

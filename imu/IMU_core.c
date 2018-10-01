@@ -30,6 +30,7 @@
 
 // include statements 
 #include <math.h>            // sqrt/trig
+#include <string.h>
 #include "IMU_core.h"
 
 // internally managed structures
