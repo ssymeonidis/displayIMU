@@ -115,43 +115,6 @@ void IMU_core_getState(struct IMU_core_state **state_pntr)
 
 
 /******************************************************************************
-* set reference using last system quaternion
-******************************************************************************/
-
-void IMU_core_setRef()
-{
-  state.ref[0]       =  state.SEq[0];
-  state.ref[1]       = -state.SEq[1];
-  state.ref[2]       = -state.SEq[2];
-  state.ref[3]       = -state.SEq[3];
-}
-
-
-/******************************************************************************
-* set reference using up vector
-* assumes: normalized input
-******************************************************************************/
-
-void IMU_core_setRefAccl(float* up)
-{
-  // updating reference based on accelerometer
-  float* ref         = state.ref;
-  float  tmp         = sqrt(2.0 + 2.0 * up[2]);
-  if (tmp > 0.001) {
-    ref[0]      =  0.5   * tmp;
-    ref[1]      = -up[1] / tmp;
-    ref[2]      =  up[0] / tmp;
-    ref[3]      =  0.0;
-  } else {
-    ref[0]      =  0.0;
-    ref[1]      =  0.0;
-    ref[2]      =  1.0;
-    ref[3]      =  0.0;
-  }
-}
-
-
-/******************************************************************************
 * initialize state and autocal to known state
 ******************************************************************************/
 
@@ -389,49 +352,6 @@ inline float* IMU_core_updateMagn(float* m)
 
 
 /******************************************************************************
-* calculate euler angle
-* assumes: corrected and normalized data
-******************************************************************************/
-
-inline void IMU_core_applyRef(float* q, float* ref, float* q_out)
-{
-  q_out[0] = q[0]*ref[0] - q[1]*ref[1] - q[2]*ref[2] - q[3]*ref[3];
-  q_out[1] = q[0]*ref[1] + q[1]*ref[0] + q[2]*ref[3] - q[3]*ref[2];
-  q_out[2] = q[0]*ref[2] - q[1]*ref[3] + q[2]*ref[0] + q[3]*ref[1];
-  q_out[3] = q[0]*ref[3] + q[1]*ref[2] - q[2]*ref[1] + q[3]*ref[0];
-}
-
-
-/******************************************************************************
-* calculate euler angle
-******************************************************************************/
-
-inline void IMU_core_calcEuler(float* q, float* E)
-{
-  float Q[4] = {q[0]*q[0], q[1]*q[1], q[2]*q[2], q[3]*q[3]};
-  E[0] = 180 * atan2(2*(q[1]*q[3]+q[3]*q[0]),  Q[1]-Q[2]-Q[3]+Q[0]) / M_PI;
-  E[1] = 180 * asin(-2*(q[1]*q[3]-q[2]*q[0])) / M_PI;
-  E[2] = 180 * atan2(2*(q[2]*q[3]+q[1]*q[0]), -Q[1]-Q[2]+Q[3]+Q[0]) / M_PI;
-}
-
-
-/******************************************************************************
-* calculate euler angle
-******************************************************************************/
-
-inline void IMU_core_refAndEuler(float* E)
-{
-  if (config.isTear) {
-    float q_tmp[4];
-    IMU_core_applyRef(state.SEq, state.ref, q_tmp);
-    IMU_core_calcEuler(q_tmp, E);
-  } else {
-    IMU_core_calcEuler(state.SEq, E);
-  }
-}
-
-
-/******************************************************************************
 * estimate velocity vector (minus gravity)
 ******************************************************************************/
 
@@ -486,7 +406,6 @@ void IMU_core_deadRecon(float* a, float* m, float* E)
 {
   // update system state (quaternion)
   IMU_core_updateAbs(norm3(a), norm3(m));
-  IMU_core_refAndEuler(E);
   state.isReset = 0;
 }
 
@@ -503,7 +422,6 @@ void  IMU_core_estmGyro(float* t, float* g, float* E, float* A,
 
   // derive euler and acceleration from system state
   norm4(IMU_core_updateGyro(norm3(g)));
-  IMU_core_refAndEuler(E);
   IMU_core_estmMove(state.a, A);
 }
 
@@ -528,7 +446,6 @@ void  IMU_core_estmAccl(float* t,  float* a, float* E, float* A,
   }
   
   // derive euler and acceleration from system state
-  IMU_core_refAndEuler(E);
   IMU_core_estmMove(state.a, A);
 }
 
@@ -549,7 +466,6 @@ void  IMU_core_estmMagn(float* t, float* m, float* E, float* A,
   }
   
   // derive euler and acceleration from system state
-  IMU_core_refAndEuler(E);
   IMU_core_estmMove(state.a, A);
 }
 
@@ -577,6 +493,5 @@ void  IMU_core_estmAll(float* t, float* g, float* a, float* m, float* E,
   }
   
   // derive euler and acceleration from system state
-  IMU_core_refAndEuler(E);
   IMU_core_estmMove(state.a, A);
 }

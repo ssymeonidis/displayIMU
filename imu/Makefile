@@ -7,8 +7,11 @@ RM          = rm -f
 TARGET_LIB  = $(BINDIR)/libIMU.so 
 DEFINES     = -D"IMU_MAX_INST=${IMU_MAX_INST}" \
               -D"IMU_TYPE=${IMU_TYPE}"
+SRCS        = IMU_util_file.c \
+              IMU_util_math.c \
+              IMU_correct.c   \
+              IMU_core.c 
 
-SRCS = IMU_util.c IMU_correct.c IMU_core.c 
 OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 all: ${TARGET_LIB}

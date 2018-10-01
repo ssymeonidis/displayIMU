@@ -130,11 +130,11 @@ void *data_run(void*)
   bool       first_frame = true;
   int        rc;
   timeval    time;
-  double     time_cur;
-  double     time_init_sys;
-  double     time_init_sen;
-  double     time_delt_sys;
-  double     time_delt_sen;
+  double     time_cur       = 0;
+  double     time_init_sys  = 0;
+  double     time_init_sen  = 0;
+  double     time_delt_sys  = 0;
+  double     time_delt_sen  = 0;
   char       *results;
 
   // main processing loop
@@ -149,7 +149,7 @@ void *data_run(void*)
       if (results == NULL) {
         fseek(csv_file, 0, SEEK_SET);
         first_frame = true;
-        fgets(line, sizeof(line), csv_file);
+        results = fgets(line, sizeof(line), csv_file);
       } 
     }
     

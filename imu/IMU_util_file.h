@@ -17,8 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _IMU_UTIL_H
-#define _IMU_UTIL_H
+#ifndef _IMU_UTIL_FILE_H
+#define _IMU_UTIL_FILE_H
 
 // include statements
 #include "IMU_core.h"

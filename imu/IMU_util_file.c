@@ -20,7 +20,7 @@
 // include statements
 #include <stdio.h>
 #include <string.h>
-#include "IMU_util.h"
+#include "IMU_util_file.h"
 
 // calib structure parsing inputs
 static const int   calib_size = 9;
@@ -90,6 +90,11 @@ enum config_enum {
 #define line_size 128
 static char line[line_size];
 static char temp[line_size];
+
+
+/******************************************************************************
+* utility function - gets an array of comma seperated floats 
+******************************************************************************/
 
 
 /******************************************************************************

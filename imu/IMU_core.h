@@ -66,10 +66,6 @@ struct IMU_core_metrics {
 void IMU_core_getConfig   (struct IMU_core_config  **config);
 void IMU_core_getState    (struct IMU_core_state   **state);
 
-// "tear" functions
-void IMU_core_setRef      ();
-void IMU_core_setRefAccl  (float* a);
-
 // general operation functions 
 #define IMU_CORE_ESTM_ARGS float* E, float* A, struct IMU_core_metrics* FOM 
 void IMU_core_init        ();
