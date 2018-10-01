@@ -23,17 +23,14 @@
 #include "IMU_util_file.h"
 
 // calib structure parsing inputs
-static const int   calib_size = 9;
+static const int   calib_size = 6;
 static const char* calib_name[] = {
   "gBias",
   "gMult",
   "aBias",
   "aMult",
   "mBias",
-  "mMult",
-  "aMag",
-  "mMag",
-  "mAng"
+  "mMult"
 };
 enum calib_enum {
   gBias   = 0,
@@ -41,14 +38,11 @@ enum calib_enum {
   aBias   = 2,
   aMult   = 3,
   mBias   = 4,
-  mMult   = 5,
-  aMag    = 6,
-  mMag    = 7,
-  mAng    = 8
+  mMult   = 5
 };
 
 // config struct parsing inputs
-static const int   config_size = 16;
+static const int   config_size = 19;
 static const char* config_name[] = {
   "isGyro", 
   "isAccl",
@@ -58,6 +52,9 @@ static const char* config_name[] = {
   "isMove",
   "isFOM",
   "isAutocal",
+  "aMag",
+  "mMag",
+  "mAng",
   "gThreshVal",
   "gThreshTime",
   "aWeight",
@@ -76,14 +73,17 @@ enum config_enum {
   isMove          = 5,
   isFOM           = 6,
   isAutocal       = 7,
-  gThreshVal      = 8,
-  gThreshTime     = 9,
-  aWeight         = 10,
-  aAlpha          = 11,
-  mWeight         = 12,
-  mAlpha          = 13,
-  moveAlpha       = 14,
-  autocalAlpha    = 15
+  aMag            = 8,
+  mMag            = 9,
+  mAng            = 10,
+  gThreshVal      = 11,
+  gThreshTime     = 12,
+  aWeight         = 13,
+  aAlpha          = 14,
+  mWeight         = 15,
+  mAlpha          = 16,
+  moveAlpha       = 17,
+  autocalAlpha    = 18
 };
 
 // buffers used for parsing
@@ -243,12 +243,6 @@ int IMU_util_readCalib(char* filename, struct IMU_correct_calib *calib)
       get_floats(args, calib->mBias, 3);
     else if (type == mMult)
       get_floats(args, calib->mMult, 9);
-    else if (type == aMag)
-      sscanf(args, "%f", &calib->aMag);
-    else if (type == mMag)
-      sscanf(args, "%f", &calib->mMag);
-    else if (type == mAng)
-      sscanf(args, "%f", &calib->mAng);
   }
 
   // exit function
@@ -279,9 +273,6 @@ int IMU_util_writeCalib(char* filename, struct IMU_correct_calib *calib)
   fprintf(file, "  \"aMult\": ");  write_floats(file, calib->aMult, 9);
   fprintf(file, "  \"mBias\": ");  write_floats(file, calib->mBias, 3);
   fprintf(file, "  \"mMult\": ");  write_floats(file, calib->mMult, 9);
-  fprintf(file, "  \"aMag\": %0.2f,\n", calib->aMag);
-  fprintf(file, "  \"mMag\": %0.2f,\n", calib->mMag);
-  fprintf(file, "  \"mAng\": %0.2f\n",  calib->mAng);
   fprintf(file, "}\n");
 
   // exit function
@@ -334,6 +325,12 @@ int IMU_util_readConfig(char* filename, struct IMU_core_config *config)
       get_bool(args, &config->isFOM);
     else if (type == isAutocal)
       get_bool(args, &config->isAutocal);
+    else if (type == aMag)
+      sscanf(args, "%f", &config->aMag);
+    else if (type == mMag)
+      sscanf(args, "%f", &config->mMag);
+    else if (type == mAng)
+      sscanf(args, "%f", &config->mAng);
     else if (type == gThreshVal)
       sscanf(args, "%f", &config->gThreshVal);
     else if (type == gThreshTime)
@@ -382,6 +379,9 @@ int IMU_util_writeConfig(char* filename, struct IMU_core_config *config)
   fprintf(file, "  \"isMove\": ");      write_bool(file, config->isMove);
   fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
   fprintf(file, "  \"isAutocal\": ");   write_bool(file, config->isAutocal);
+  fprintf(file, "  \"aMag\": %0.2f,\n",            config->aMag);
+  fprintf(file, "  \"mMag\": %0.2f,\n",            config->mMag);
+  fprintf(file, "  \"mAng\": %0.2f,\n",             config->mAng);
   fprintf(file, "  \"gThreshVal\": %0.2f,\n",      config->gThreshVal);
   fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
   fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
@@ -389,7 +389,7 @@ int IMU_util_writeConfig(char* filename, struct IMU_core_config *config)
   fprintf(file, "  \"mWeight\": %0.2f,\n",         config->mWeight);
   fprintf(file, "  \"mAlpha\": %0.2f,\n",          config->mAlpha);
   fprintf(file, "  \"moveAlpha\": %0.2f,\n",       config->moveAlpha);
-  fprintf(file, "  \"autocalAlpha\": %0.2f,\n",    config->autocalAlpha);
+  fprintf(file, "  \"autocalAlpha\": %0.2f\n",    config->autocalAlpha);
   fprintf(file, "}\n");
 
   // exit function

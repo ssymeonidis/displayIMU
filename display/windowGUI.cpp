@@ -79,6 +79,9 @@ void windowGUI::config_write()
   ui->noMove->setChecked(!config->isMove);
   ui->noFOM->setChecked(!config->isFOM);
   ui->noAutocal->setChecked(!config->isAutocal);
+  ui->aMag->setText(QString::number(config->aMag, 'f', 2));
+  ui->mMag->setText(QString::number(config->mMag, 'f', 2));
+  ui->mAng->setText(QString::number(config->mAng, 'f', 2));
   ui->gThreshVal->setText(QString::number(config->gThreshVal, 'f', 2));
   ui->gThreshTime->setText(QString::number(config->gThreshTime, 'f', 2));
   ui->aWeight->setText(QString::number(config->aWeight, 'f', 2));
@@ -104,6 +107,9 @@ void windowGUI::config_read()
   config->isMove       = !ui->noMove->isChecked();
   config->isFOM        = !ui->noFOM->isChecked();
   config->isAutocal    = !ui->noAutocal->isChecked();
+  config->aMag         = ui->aMag->text().toFloat();
+  config->mMag         = ui->mMag->text().toFloat();
+  config->mAng         = ui->mAng->text().toFloat();
   config->gThreshVal   = ui->gThreshVal->text().toFloat();
   config->gThreshTime  = ui->gThreshTime->text().toFloat();
   config->aWeight      = ui->aWeight->text().toFloat();
@@ -167,9 +173,6 @@ void windowGUI::calib_write()
   ui->mMult6->setText(QString::number(calib->mMult[6], 'f', 2));
   ui->mMult7->setText(QString::number(calib->mMult[7], 'f', 2));
   ui->mMult8->setText(QString::number(calib->mMult[8], 'f', 2));
-  ui->aMag->setText(QString::number(calib->aMag, 'f', 2));
-  ui->mMag->setText(QString::number(calib->mMag, 'f', 2));
-  ui->mAng->setText(QString::number(calib->mAng, 'f', 2));
 }
 
 
@@ -215,9 +218,6 @@ void windowGUI::calib_read()
   calib->mMult[6] = ui->mMult6->text().toFloat();
   calib->mMult[7] = ui->mMult7->text().toFloat();
   calib->mMult[8] = ui->mMult8->text().toFloat();
-  calib->aMag     = ui->aMag->text().toFloat();
-  calib->mMag     = ui->mMag->text().toFloat();
-  calib->mAng     = ui->mAng->text().toFloat();
 }
 
 

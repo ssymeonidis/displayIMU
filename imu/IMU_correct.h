@@ -35,9 +35,6 @@ struct IMU_correct_calib {
   float          aMult[9];        // accelerometer transform matrix 
   float          mBias[3];        // magnetometer biases
   float          mMult[9];        // magnetometer transform matrix
-  float          aMag;            // gravity magnitude
-  float          mMag;            // magnetic north magnitude  
-  float          mAng;            // magnetic north angle
 };
 
 // data structure access functions

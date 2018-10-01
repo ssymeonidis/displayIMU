@@ -34,6 +34,9 @@ struct IMU_core_config {
   unsigned char  isMove;          // enable acceleration estimate
   unsigned char  isFOM;           // enable FOM calculation
   unsigned char  isAutocal;       // enable autocal data collect
+  float          aMag;            // gravity magnitude
+  float          mMag;            // magnetic north magnitude  
+  float          mAng;            // magnetic north angle
   float          gThreshVal;      // no motion threshold value
   float          gThreshTime;     // no motion threhsold time
   float          aWeight;         // accelerometer IMU weight
