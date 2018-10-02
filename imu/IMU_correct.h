@@ -27,8 +27,9 @@ extern "C" {
 // define error codes
 #define IMU_CORRECT_INST_OVERFLOW -1
 
+
 // define the calibration structure (values tuned for each unit)
-struct IMU_correct_calib {
+struct IMU_correct_config {
   float          gBias[3];        // gyroscope biases
   float          gMult[9];        // gyroscope transform matrix 
   float          aBias[3];        // accelerometer biases
@@ -38,7 +39,7 @@ struct IMU_correct_calib {
 };
 
 // data structure access functions
-int  IMU_correct_init (unsigned short *id, struct IMU_correct_calib **calib);
+int  IMU_correct_init (unsigned short *id, struct IMU_correct_config **config);
 
 // raw data correction functions
 void IMU_correct_gyro (unsigned short id, IMU_TYPE *g_raw, IMU_TYPE *g);

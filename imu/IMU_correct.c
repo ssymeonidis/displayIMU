@@ -21,23 +21,23 @@
 #include "IMU_correct.h"
 
 // internally managed structures
-struct IMU_correct_calib    calib[IMU_MAX_INST];
+struct IMU_correct_config   config[IMU_MAX_INST];
 static unsigned short       IMU_correct_inst = 0;
 
 
 /******************************************************************************
-* function to return calib structure handle
+* function to return config structure handle
 ******************************************************************************/
 
-int IMU_correct_init(unsigned short *id, struct IMU_correct_calib **calib_pntr) 
+int IMU_correct_init(unsigned short *id, struct IMU_correct_config **pntr) 
 {
   // check for device count overflow
   if (IMU_correct_inst >= IMU_MAX_INST)
     return IMU_CORRECT_INST_OVERFLOW;
 
-  // return handle and calib pointer
-  *id = IMU_correct_inst; 
-  *calib_pntr = &calib[*id];
+  // return handle and config pointer
+  *id   = IMU_correct_inst; 
+  *pntr = &config[*id];
   IMU_correct_inst++;
   return 0;
 }
@@ -50,8 +50,8 @@ int IMU_correct_init(unsigned short *id, struct IMU_correct_calib **calib_pntr)
 void IMU_correct_gyro(unsigned short id, IMU_TYPE *g_raw, IMU_TYPE *g)
 {
   // define internal variables
-  float *bias  = calib[id].gBias;
-  float *mult  = calib[id].gMult; 
+  float *bias  = config[id].gBias;
+  float *mult  = config[id].gMult; 
 
   // apply bias
   g[0]         = g_raw[0] + bias[0];
@@ -72,8 +72,8 @@ void IMU_correct_gyro(unsigned short id, IMU_TYPE *g_raw, IMU_TYPE *g)
 void IMU_correct_accl(unsigned short id, IMU_TYPE *a_raw, IMU_TYPE *a)
 {
   // define internal variables
-  float *bias  = calib[id].aBias;
-  float *mult  = calib[id].aMult; 
+  float *bias  = config[id].aBias;
+  float *mult  = config[id].aMult; 
 
   // apply bias
   a[0]         = a_raw[0] - bias[0];
@@ -95,8 +95,8 @@ void IMU_correct_magn(unsigned short id, IMU_TYPE *m_raw, IMU_TYPE *m)
 
 {
   // define internal variables
-  float *bias  = calib[id].mBias;
-  float *mult  = calib[id].mMult; 
+  float *bias  = config[id].mBias;
+  float *mult  = config[id].mMult; 
 
   // apply bias
   m[0]         = m_raw[0] - bias[0];

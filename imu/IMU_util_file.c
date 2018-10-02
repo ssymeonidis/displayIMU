@@ -96,11 +96,6 @@ static char temp[line_size];
 * utility function - gets an array of comma seperated floats 
 ******************************************************************************/
 
-
-/******************************************************************************
-* utility function - gets an array of comma seperated floats 
-******************************************************************************/
-
 int get_floats(char* args, float* vals, int size)
 {
   char* cur;

@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include <errno.h>
 #include "dataParse.h"
+#include "IMU_util_math.h"
 
 // define the sensor data structure
 dataParse_sensor    sensor;
@@ -124,17 +125,18 @@ void data_init_CSV(const char* filename)
 void *data_run(void*)
 {
   // define the variables
-  const int  line_size = 256;
+  const int  line_size      = 256;
   char       line[line_size];
   int        datum_type; 
-  bool       first_frame = true;
-  int        rc;
+  float*     state;
   timeval    time;
   double     time_cur       = 0;
   double     time_init_sys  = 0;
   double     time_init_sen  = 0;
   double     time_delt_sys  = 0;
   double     time_delt_sen  = 0;
+  bool       first_frame    = true;
+  int        rc;
   char       *results;
 
   // main processing loop
@@ -185,8 +187,9 @@ void *data_run(void*)
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
       IMU_correct_all(0, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
         sensor.gyroCor, sensor.acclCor, sensor.magnCor);
-      IMU_core_estmAll(&sensor.lastTime, sensor.gyroCor, sensor.acclCor, 
-        sensor.magnCor, estim.ang, estim.move, &FOM);
+      state = IMU_core_estmAll(sensor.lastTime, sensor.gyroCor, 
+        sensor.acclCor, sensor.magnCor, &FOM);
+      IMU_util_calcEuler(state, estim.ang);
     }
 
     // process gyroscope data (async sensors)
@@ -194,8 +197,8 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
       IMU_correct_gyro(0, sensor.gyroRaw, sensor.gyroCor);
-      IMU_core_estmGyro(&sensor.lastTime, sensor.gyroCor, estim.ang, 
-        estim.move, &FOM);
+      state = IMU_core_estmGyro(sensor.lastTime, sensor.gyroCor, &FOM);
+      IMU_util_calcEuler(state, estim.ang);
     }
 
     // process accelerometer data (async sensors)
@@ -203,8 +206,8 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
       IMU_correct_accl(0, sensor.acclRaw, sensor.acclCor);
-      IMU_core_estmAccl(&sensor.lastTime, sensor.acclCor, estim.ang, 
-        estim.move, &FOM);
+      state = IMU_core_estmAccl(sensor.lastTime, sensor.acclCor, &FOM);
+      IMU_util_calcEuler(state, estim.ang);
     }
 
     // process magnetometer data (async sensors)
@@ -212,8 +215,8 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
       IMU_correct_magn(0, sensor.magnRaw, sensor.magnCor);
-      IMU_core_estmMagn(&sensor.lastTime, sensor.magnCor, estim.ang, 
-        estim.move, &FOM);
+      state = IMU_core_estmMagn(sensor.lastTime, sensor.magnCor, &FOM);
+      IMU_util_calcEuler(state, estim.ang);
     }
   }
 

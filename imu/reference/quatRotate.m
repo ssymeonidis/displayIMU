@@ -18,11 +18,18 @@
 %%
 % The rotates this quaterion, representing a unit vector, by the input
 % quaternion
-function out = quatRotate(in,q)
-  in         = [0, in];
+function out = quatRotate(in, q, method)
   q          = quatNormalize(q);
-  tmp        = quatMultiply(in,quatConjugate(q));
-  out        = quatMultiply(q,tmp);
-  out        = out(2:4);
+  if     (method == 1)
+    in       = [0, in];
+    tmp      = quatMultiply(in,quatConjugate(q));
+    out      = quatMultiply(q,tmp);
+    out      = out(2:4);
+  elseif (method == 2)
+    u        = q(2:4);
+    s        = q(1);
+    out      = 2.0 * dot(u, in) * u    ...
+             + (s*s - dot(u, u)) * in  ...
+             + 2.0 * s * cross(u, in);
+  end
 end
-
