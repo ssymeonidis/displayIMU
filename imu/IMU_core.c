@@ -281,10 +281,10 @@ float* IMU_core_estmGyro(
 
   // check for stable condition
   if (config[id].isStable) {
-    float g_sum                = g[0] + g[1] + g[2];
-    if (g_sum > 3 * config[id].gThreshVal)
+    float g_sum                = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
+    if (g_sum > config[id].gThresh * config[id].gThreshVal)
       state[id].t_stable       = t;
-    else if (t - state[id].t_stable > config[id].gThreshVal) {
+    else if (t - state[id].t_stable > config[id].gThreshTime) {
       stable                   = 1;
       if (FOM != NULL)
         FOM->data.gyro.stable  = stable;
