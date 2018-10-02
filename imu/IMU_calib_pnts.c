@@ -31,7 +31,7 @@ static unsigned short         IMU_calib_pnts_inst = 0;
 * utility function - break stable
 ******************************************************************************/
 
-inline void break_stable_state()
+inline void break_stable_state(unsigned short id)
 {
   state[id].numEntries++;
   state[id].index++;
@@ -66,8 +66,8 @@ int IMU_calib_pnts_init(
 ******************************************************************************/
 
 int IMU_calib_pnts_getState( 
-  unsigned short                id,  
-  struct IMU_calib_pnts_state   **pntr)
+  unsigned short               id,  
+  struct IMU_calib_pnts_state  **pntr)
 {
   // check for out-of-bounds condition
   if (id > IMU_calib_pnts_inst - 1)
@@ -85,7 +85,7 @@ int IMU_calib_pnts_getState(
 
 int IMU_calib_pnts_getEntry(
   unsigned short                id, 
-  struct IMU_calib_pnts_state   **pntr)
+  struct IMU_calib_pnts_entry   **pntr)
 {
   // check for out-of-bounds condition
   if (id > IMU_calib_pnts_inst - 1)
@@ -109,23 +109,19 @@ int IMU_calib_pnts_getEntry(
 ******************************************************************************/
 
 int IMU_calib_pnts_reset(
-  unsigned short              id);  
+  unsigned short                id)
 {
   // check for out-of-bounds condition
   if (id > IMU_calib_pnts_inst - 1)
     return IMU_CALIB_PNTS_BAD_INST; 
 
   // ininitialize inst state 
-  state[id].numEntries        = 0;
-  state[id].index             = 0; 
-  state[id].gAccum[0]         = 0;
-  state[id].gAccum[1]         = 0;
-  state[id].gAccum[2]         = 0;
-  state[id].tReset            = 1;
-  state[id].aReset            = 1;
-  state[id].aCurrent          = 0;
-  state[id].mReset            = 1;
-  state[id].mCurrent          = 0;
+  state[id].index               = 0; 
+  state[id].state               = reset;
+  state[id].aClock              = 0;
+  state[id].mClock              = 0;
+  state[id].numEntries          = 0;
+  return 0;
 }
 
 
@@ -134,17 +130,17 @@ int IMU_calib_pnts_reset(
 ******************************************************************************/
 
 void IMU_calib_pnts_updateGyro(
-  unsigned short              id,
-  float                       t,
-  float                       *g);
+  unsigned short                id,
+  float                         t,
+  float                         *g)
 {
   // define the variable
-  struct IMU_calib_pnts *entry  = table[id][state[id].index];
+  struct IMU_calib_pnts_entry *entry  = &table[id][state[id].index];
 
   // calculate gyroscope deviation (estimates movement w/o bias) 
   float diff;
   float std;
-  float alpha                   = state[id].gAlpha;
+  float alpha                   = config[id].gAlpha;
   state[id].gMean[0]            = alpha * g[0] + (1-alpha) * state[id].gMean[0];
   state[id].gMean[1]            = alpha * g[1] + (1-alpha) * state[id].gMean[1];
   state[id].gMean[2]            = alpha * g[2] + (1-alpha) * state[id].gMean[2];
@@ -158,8 +154,8 @@ void IMU_calib_pnts_updateGyro(
   // determine whether signal meets stability requirements 
   unsigned int stable           = 0;
   if (std > config[id].gThreshVal * config[id].gThreshVal)
-    state[id].t_stable          = t;
-  else if (t - state[id].t_stable > config[id].gThreshTime) 
+    state[id].tStable           = t;
+  else if (t - state[id].tStable > config[id].gThreshTime) 
     stable                      = 1;
 
   // state entered upon initialization or stability break 
@@ -183,20 +179,20 @@ void IMU_calib_pnts_updateGyro(
       entry->gFltr[0]           = g[0];
       entry->gFltr[1]           = g[1];
       entry->gFltr[2]           = g[2];
-      state[id].state           = still;
+      state[id].state           = stable;
       state[id].aClock          = 1;
       state[id].mClock          = 1;
     } 
   }
 
   // state occurs after reaching "stable" 
-  else if (state[id].state == still) {
+  else if (state[id].state == stable) {
     if (stable) {
       entry->gFltr[0]           = alpha * g[0] + (1 - alpha) * entry->gFltr[0];
       entry->gFltr[1]           = alpha * g[1] + (1 - alpha) * entry->gFltr[1]; 
       entry->gFltr[2]           = alpha * g[2] + (1 - alpha) * entry->gFltr[2];
     } else {
-      break_stable_state();
+      break_stable_state(id);
     }
   } 
 }
@@ -209,14 +205,14 @@ void IMU_calib_pnts_updateGyro(
 void IMU_calib_pnts_updateAccl(
   unsigned short                id, 
   float                         t, 
-  float                         *a); 
+  float                         *a)
 {
   // verify system state (stable and sensor is enabled)  
-  if (!state.isAccl || state.state != still)
+  if (!config[id].isAccl || state[id].state != stable)
     return;
 
   // define the variable
-  struct IMU_calib_pnts *entry  = table[id][state[id].index];
+  struct IMU_calib_pnts_entry *entry  = &table[id][state[id].index];
 
   // save accelerometer data
   if (state[id].aClock) {
@@ -234,16 +230,16 @@ void IMU_calib_pnts_updateAccl(
   std                          += diff * diff;
   diff                          = entry->aFltr[2] - a[2];
   std                          += diff * diff;
-  if (std > state[id].aThreshVal * state[id].aThreshVal) {
-    break_stable_state();
+  if (std > config[id].aThresh * config[id].aThresh) {
+    break_stable_state(id);
     return;
   }
 
   // initialize figure of merit
-  float alpha                   = state[id].aAlpha;
-  entry->aFltr[0]               = alpha * g[0] + (1 - alpha) * entry->aFltr[0];
-  entry->aFltr[1]               = alpha * g[1] + (1 - alpha) * entry->aFltr[1]; 
-  entry->aFltr[2]               = alpha * g[2] + (1 - alpha) * entry->aFltr[2];
+  float alpha                   = config[id].aAlpha;
+  entry->aFltr[0]               = alpha * a[0] + (1 - alpha) * entry->aFltr[0];
+  entry->aFltr[1]               = alpha * a[1] + (1 - alpha) * entry->aFltr[1]; 
+  entry->aFltr[2]               = alpha * a[2] + (1 - alpha) * entry->aFltr[2];
 }
 
 
@@ -257,11 +253,11 @@ void IMU_calib_pnts_updateMagn(
   float                         *m) 
 {
   // verify system state (stable and sensor is enabled)
-  if (!state.isMagn || state.state != still)
+  if (!config[id].isMagn || state[id].state != stable)
     return;
 
   // define the variable
-  struct IMU_calib_pnts *entry  = table[id][state[id].index];
+  struct IMU_calib_pnts_entry *entry  = &table[id][state[id].index];
 
   // save accelerometer data
   if (state[id].mClock) {
@@ -279,16 +275,16 @@ void IMU_calib_pnts_updateMagn(
   std                          += diff * diff;
   diff                          = entry->mFltr[2] - m[2];
   std                          += diff * diff;
-  if (std > state[id].mThreshVal * state[id].mThreshVal) {
-    break_stable_state();
+  if (std > config[id].mThresh * config[id].mThresh) {
+    break_stable_state(id);
     return;
   }
 
   // initialize figure of merit
-  float alpha                   = state[id].mAlpha;
-  entry->mFltr[0]               = alpha * g[0] + (1 - alpha) * entry->mFltr[0];
-  entry->mFltr[1]               = alpha * g[1] + (1 - alpha) * entry->mFltr[1];
-  entry->mFltr[2]               = alpha * g[2] + (1 - alpha) * entry->mFltr[2];
+  float alpha                   = config[id].mAlpha;
+  entry->mFltr[0]               = alpha * m[0] + (1 - alpha) * entry->mFltr[0];
+  entry->mFltr[1]               = alpha * m[1] + (1 - alpha) * entry->mFltr[1];
+  entry->mFltr[2]               = alpha * m[2] + (1 - alpha) * entry->mFltr[2];
 }
 
 

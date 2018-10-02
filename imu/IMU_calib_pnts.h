@@ -32,41 +32,43 @@ extern "C" {
 
 // define the configuration structure (values tuned for a part)
 struct IMU_calib_pnts_config {
-  unsigned char       isAccl;
-  unsigned char       isMagn;
-  float               gThreshVal;      // no motion threshold value
-  float               gThreshTime;     // no motion threhsold time
-  float               gAlpha;
-  float               aAlpha;          // accelerometer filter value
-  float               mAlpha;          // magnetometer filter value
+  unsigned char          isAccl;
+  unsigned char          isMagn;
+  float                  gAlpha;
+  float                  gThreshVal;      // no motion threshold value
+  float                  gThreshTime;     // no motion threhsold time
+  float                  aAlpha;          // accelerometer filter value
+  float                  aThresh;         // no motion threshold value
+  float                  mAlpha;          // magnetometer filter value
+  float                  mThresh;         // no motion threshold value
+};
+
+// internal state for IMU_calib_pnts functions
+enum calib_pnts_state {
+  reset,
+  moving,
+  stable
 };
 
 // define internal state struct (captures internal IMU state)
 struct IMU_calib_pnts_state {
-  int                 index;
-  float               t;               // last datum time
-  float               tStable;         // last "unstable" time
-  float               gAccum[3];       // 
-  float               gFltr[3];
-  float               aFltr[3];
-  float               gFltr[3];
-  unsigned char       stable;
-  unsigned char       tReset;
-  unsigned char       gCurrent;
-  unsigned char       aReset;
-  unsigned char       aCurrent;
-  unsigned char       mReset;
-  unsigned char       mCurrent;
+  unsigned short         index;
+  enum calib_pnts_state  state;
+  float                  gMean[3];
+  float                  tStable;         // last "unstable" time
+  unsigned char          aClock;
+  unsigned char          mClock;
+  unsigned short         numEntries;
 };
 
 // define 
 struct IMU_calib_pnts_entry {
-  float               tStart;
-  float               tEnd;
-  float               gAccum[3];
-  float               gFltr[3];
-  float               aFltr[3]; 
-  float               gFltr[3];
+  float                  tStart;
+  float                  tEnd;
+  float                  gAccum[3];
+  float                  gFltr[3];
+  float                  aFltr[3]; 
+  float                  mFltr[3];
 };
 
 
