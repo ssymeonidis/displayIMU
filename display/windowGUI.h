@@ -35,7 +35,7 @@ class windowGUI : public QMainWindow {
 public:
   explicit windowGUI(QWidget *parent = 0);
   ~windowGUI();
-  void initIMU(char* config_file, char* calib_file);
+  void initIMU(char* core_config_file, char* correct_config_file);
 
 private slots:
   void config_read();
@@ -58,8 +58,8 @@ private slots:
 private:
   // internal structures/classes
   Ui::windowGUI       *ui;
-  IMU_core_config     *config;
-  IMU_correct_calib   *calib;
+  IMU_core_config     *core_config;
+  IMU_correct_config  *correct_config;
 
   // internal functions
   void load_json(char* filename);

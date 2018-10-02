@@ -355,7 +355,6 @@ obj/windowGUI.o: windowGUI.cpp windowGUI.h \
 		../imu/IMU_core.h \
 		../imu/IMU_correct.h \
 		ui_windowGUI.h \
-		glWidget.h \
 		../imu/IMU_util_file.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/windowGUI.o windowGUI.cpp
 

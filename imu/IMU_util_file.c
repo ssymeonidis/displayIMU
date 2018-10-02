@@ -23,8 +23,8 @@
 #include "IMU_util_file.h"
 
 // calib structure parsing inputs
-static const int   calib_size = 6;
-static const char* calib_name[] = {
+static const int   correct_config_size = 6;
+static const char* correct_config_name[] = {
   "gBias",
   "gMult",
   "aBias",
@@ -32,7 +32,7 @@ static const char* calib_name[] = {
   "mBias",
   "mMult"
 };
-enum calib_enum {
+enum correct_config_enum {
   gBias   = 0,
   gMult   = 1,
   aBias   = 2,
@@ -42,48 +42,44 @@ enum calib_enum {
 };
 
 // config struct parsing inputs
-static const int   config_size = 19;
-static const char* config_name[] = {
+static const int   core_config_size = 17;
+static const char* core_config_name[] = {
   "isGyro", 
   "isAccl",
   "isMagn",
-  "isFltr",
-  "isTear",
-  "isMove",
+  "isStable",
   "isFOM",
-  "isAutocal",
-  "aMag",
-  "mMag",
-  "mAng",
+  "isMove",
   "gThreshVal",
   "gThreshTime",
   "aWeight",
-  "aAlpha",
+  "aMag",
+  "aMagThresh",
   "mWeight",
-  "mAlpha",
-  "moveAlpha",
-  "autocalAlpha"
+  "mMag",
+  "mMagThresh",
+  "mAng",
+  "mAngThresh",
+  "moveAlpha"
 };
-enum config_enum {
+enum core_config_enum {
   isGyro          = 0,
   isAccl          = 1,
   isMagn          = 2,
-  isFltr          = 3,
-  isTear          = 4,
+  isStable        = 3,
+  isFOM           = 4,
   isMove          = 5,
-  isFOM           = 6,
-  isAutocal       = 7,
-  aMag            = 8,
-  mMag            = 9,
-  mAng            = 10,
-  gThreshVal      = 11,
-  gThreshTime     = 12,
-  aWeight         = 13,
-  aAlpha          = 14,
-  mWeight         = 15,
-  mAlpha          = 16,
-  moveAlpha       = 17,
-  autocalAlpha    = 18
+  gThreshVal      = 6,
+  gThreshTime     = 7,
+  aWeight         = 8,
+  aMag            = 9,
+  aMagThresh      = 10,
+  mWeight         = 11,
+  mMag            = 12,
+  mMagThresh      = 13,
+  mAng            = 14,
+  mAngThresh      = 15,
+  moveAlpha       = 16
 };
 
 // buffers used for parsing
@@ -198,10 +194,121 @@ int IMU_util_getField(char* field, const char* names[], int size)
 
 
 /******************************************************************************
+* reads configuration json file into memory (structure)
+******************************************************************************/
+
+int IMU_util_readCore(char* filename, struct IMU_core_config *config)
+{
+  // define internal variables
+  FILE*     file;
+  char*     field;
+  char*     args;
+  int       type;
+  int       status;
+
+  // open json file containg config struct
+  file = fopen(filename, "r");
+  if (file == NULL)
+    return -1;
+
+  // main loop that parse json file line by line
+  while (1) {
+
+    // read line and parse field/args
+    status = IMU_util_getLine(file, &field, &args);
+    if (status > 1 || status < 0)
+      break;
+
+    // extract arguments for the specified field
+    type = IMU_util_getField(field, core_config_name, core_config_size);
+    if      (type == isGyro)
+      get_bool(args, &config->isGyro);
+    else if (type == isAccl)
+      get_bool(args, &config->isAccl);
+    else if (type == isMagn)
+      get_bool(args, &config->isMagn);
+    else if (type == isStable)
+      get_bool(args, &config->isStable);
+    else if (type == isFOM)
+      get_bool(args, &config->isFOM);
+    else if (type == isMove)
+      get_bool(args, &config->isMove);
+    else if (type == gThreshVal)
+      sscanf(args, "%f", &config->gThreshVal);
+    else if (type == gThreshTime)
+      sscanf(args, "%f", &config->gThreshTime);
+    else if (type == aWeight)
+      sscanf(args, "%f", &config->aWeight);
+    else if (type == aMag)
+      sscanf(args, "%f", &config->aMag);
+    else if (type == aMagThresh)
+      sscanf(args, "%f", &config->aMagThresh);
+    else if (type == mWeight)
+      sscanf(args, "%f", &config->mWeight);
+    else if (type == mMag)
+      sscanf(args, "%f", &config->mMag);
+    else if (type == mMagThresh)
+      sscanf(args, "%f", &config->mMagThresh);
+    else if (type == mAng)
+      sscanf(args, "%f", &config->mAng);
+    else if (type == mAngThresh)
+      sscanf(args, "%f", &config->mAngThresh);
+    else if (type == moveAlpha)
+      sscanf(args, "%f", &config->moveAlpha);
+  }
+
+  // exit function
+  fclose(file);
+  return 0;  
+}
+
+
+/******************************************************************************
+* writes configuration structure to a json file
+******************************************************************************/
+
+int IMU_util_writeCore(char* filename, struct IMU_core_config *config)
+{
+  // define internal variables
+  FILE*    file;
+
+  // open file to contain json struct
+  file = fopen(filename, "w");
+  if (file == NULL)
+    return -1;
+
+  // write contents to json file one line at a time
+  fprintf(file, "{\n");
+  fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
+  fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
+  fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
+  fprintf(file, "  \"isStable\": ");    write_bool(file, config->isStable);
+  fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
+  fprintf(file, "  \"isMove\": ");      write_bool(file, config->isMove);
+  fprintf(file, "  \"gThreshVal\": %0.2f,\n",      config->gThreshVal);
+  fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
+  fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
+  fprintf(file, "  \"aMag\": %0.2f,\n",            config->aMag);
+  fprintf(file, "  \"aMagThresh\": %0.2f,\n",      config->aMagThresh);
+  fprintf(file, "  \"mWeight\": %0.2f,\n",         config->mWeight);
+  fprintf(file, "  \"mMag\": %0.2f,\n",            config->mMag);
+  fprintf(file, "  \"mMagThresh\": %0.2f,\n",      config->mMagThresh);
+  fprintf(file, "  \"mAng\": %0.2f,\n",            config->mAng);
+  fprintf(file, "  \"mAngThresh\": %0.2f,\n",      config->mAngThresh);
+  fprintf(file, "  \"moveAlpha\": %0.2f,\n",       config->moveAlpha);
+  fprintf(file, "}\n");
+
+  // exit function
+  fclose(file);
+  return 0;
+}
+
+
+/******************************************************************************
 * reads calibration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readCalib(char* filename, struct IMU_correct_calib *calib) 
+int IMU_util_readCorrect(char* filename, struct IMU_correct_config *config) 
 {
   // define internal variables
   FILE*     file;
@@ -225,19 +332,19 @@ int IMU_util_readCalib(char* filename, struct IMU_correct_calib *calib)
       break;
 
     // extract arguments for the specified field 
-    type = IMU_util_getField(field, calib_name, calib_size);
+    type = IMU_util_getField(field, correct_config_name, correct_config_size);
     if      (type == gBias) 
-      get_floats(args, calib->gBias, 3);
+      get_floats(args, config->gBias, 3);
     else if (type == gMult)
-      get_floats(args, calib->gMult, 9);
+      get_floats(args, config->gMult, 9);
     else if (type == aBias)
-      get_floats(args, calib->aBias, 3);
+      get_floats(args, config->aBias, 3);
     else if (type == aMult)
-      get_floats(args, calib->aMult, 9);
+      get_floats(args, config->aMult, 9);
     else if (type == mBias)
-      get_floats(args, calib->mBias, 3);
+      get_floats(args, config->mBias, 3);
     else if (type == mMult)
-      get_floats(args, calib->mMult, 9);
+      get_floats(args, config->mMult, 9);
   }
 
   // exit function
@@ -250,7 +357,7 @@ int IMU_util_readCalib(char* filename, struct IMU_correct_calib *calib)
 * writes calibration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeCalib(char* filename, struct IMU_correct_calib *calib)
+int IMU_util_writeCorrect(char* filename, struct IMU_correct_config *config)
 {
   // define internal variables
   FILE*    file;
@@ -262,129 +369,12 @@ int IMU_util_writeCalib(char* filename, struct IMU_correct_calib *calib)
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
-  fprintf(file, "  \"gBias\": ");  write_floats(file, calib->gBias, 3);
-  fprintf(file, "  \"gMult\": ");  write_floats(file, calib->gMult, 9);
-  fprintf(file, "  \"aBias\": ");  write_floats(file, calib->aBias, 3);
-  fprintf(file, "  \"aMult\": ");  write_floats(file, calib->aMult, 9);
-  fprintf(file, "  \"mBias\": ");  write_floats(file, calib->mBias, 3);
-  fprintf(file, "  \"mMult\": ");  write_floats(file, calib->mMult, 9);
-  fprintf(file, "}\n");
-
-  // exit function
-  fclose(file);
-  return 0;
-}
-
-
-/******************************************************************************
-* reads configuration json file into memory (structure)
-******************************************************************************/
-
-int IMU_util_readConfig(char* filename, struct IMU_core_config *config)
-{
-  // define internal variables
-  FILE*     file;
-  char*     field;
-  char*     args;
-  int       type;
-  int       status;
-
-  // open json file containg config struct
-  file = fopen(filename, "r");
-  if (file == NULL)
-    return -1;
-
-  // main loop that parse json file line by line
-  while (1) {
-
-    // read line and parse field/args
-    status = IMU_util_getLine(file, &field, &args);
-    if (status > 1 || status < 0)
-      break;
-
-    // extract arguments for the specified field
-    type = IMU_util_getField(field, config_name, config_size);
-    if      (type == isGyro)
-      get_bool(args, &config->isGyro);
-    else if (type == isAccl)
-      get_bool(args, &config->isAccl);
-    else if (type == isMagn)
-      get_bool(args, &config->isMagn);
-    else if (type == isFltr)
-      get_bool(args, &config->isFltr);
-    else if (type == isTear)
-      get_bool(args, &config->isTear);
-    else if (type == isMove)
-      get_bool(args, &config->isMove);
-    else if (type == isFOM)
-      get_bool(args, &config->isFOM);
-    else if (type == isAutocal)
-      get_bool(args, &config->isAutocal);
-    else if (type == aMag)
-      sscanf(args, "%f", &config->aMag);
-    else if (type == mMag)
-      sscanf(args, "%f", &config->mMag);
-    else if (type == mAng)
-      sscanf(args, "%f", &config->mAng);
-    else if (type == gThreshVal)
-      sscanf(args, "%f", &config->gThreshVal);
-    else if (type == gThreshTime)
-      sscanf(args, "%f", &config->gThreshTime);
-    else if (type == aWeight)
-      sscanf(args, "%f", &config->aWeight);
-    else if (type == aAlpha)
-      sscanf(args, "%f", &config->aAlpha);
-    else if (type == mWeight)
-      sscanf(args, "%f", &config->mWeight);
-    else if (type == mAlpha)
-      sscanf(args, "%f", &config->mAlpha);
-    else if (type == moveAlpha)
-      sscanf(args, "%f", &config->moveAlpha);
-    else if (type == autocalAlpha)
-      sscanf(args, "%f", &config->autocalAlpha);
-  }
-
-  // exit function
-  fclose(file);
-  return 0;  
-}
-
-
-/******************************************************************************
-* writes configuration structure to a json file
-******************************************************************************/
-
-int IMU_util_writeConfig(char* filename, struct IMU_core_config *config)
-{
-  // define internal variables
-  FILE*    file;
-
-  // open file to contain json struct
-  file = fopen(filename, "w");
-  if (file == NULL)
-    return -1;
-
-  // write contents to json file one line at a time
-  fprintf(file, "{\n");
-  fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
-  fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
-  fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
-  fprintf(file, "  \"isFltr\": ");      write_bool(file, config->isFltr);
-  fprintf(file, "  \"isTear\": ");      write_bool(file, config->isTear);
-  fprintf(file, "  \"isMove\": ");      write_bool(file, config->isMove);
-  fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
-  fprintf(file, "  \"isAutocal\": ");   write_bool(file, config->isAutocal);
-  fprintf(file, "  \"aMag\": %0.2f,\n",            config->aMag);
-  fprintf(file, "  \"mMag\": %0.2f,\n",            config->mMag);
-  fprintf(file, "  \"mAng\": %0.2f,\n",             config->mAng);
-  fprintf(file, "  \"gThreshVal\": %0.2f,\n",      config->gThreshVal);
-  fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
-  fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
-  fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
-  fprintf(file, "  \"mWeight\": %0.2f,\n",         config->mWeight);
-  fprintf(file, "  \"mAlpha\": %0.2f,\n",          config->mAlpha);
-  fprintf(file, "  \"moveAlpha\": %0.2f,\n",       config->moveAlpha);
-  fprintf(file, "  \"autocalAlpha\": %0.2f\n",    config->autocalAlpha);
+  fprintf(file, "  \"gBias\": ");  write_floats(file, config->gBias, 3);
+  fprintf(file, "  \"gMult\": ");  write_floats(file, config->gMult, 9);
+  fprintf(file, "  \"aBias\": ");  write_floats(file, config->aBias, 3);
+  fprintf(file, "  \"aMult\": ");  write_floats(file, config->aMult, 9);
+  fprintf(file, "  \"mBias\": ");  write_floats(file, config->mBias, 3);
+  fprintf(file, "  \"mMult\": ");  write_floats(file, config->mMult, 9);
   fprintf(file, "}\n");
 
   // exit function

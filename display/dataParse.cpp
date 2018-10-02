@@ -33,10 +33,10 @@
 // define the sensor data structure
 dataParse_sensor    sensor;
 dataParse_estim     estim;
+IMU_core_FOM        FOM;
 const int           buffer_size   = 100;
 float               buffer[buffer_size][15];
 int                 buffer_index  = 0;
-IMU_core_metrics  FOM;
 
 // define internal/external variables
 bool                is_log_data   = false;
@@ -82,7 +82,6 @@ void data_init_UDP(int portno)
   int          status;
  
   // init IMU and data_stream state
-  IMU_core_init();
   is_csv_file = false;
 
   // open socket
@@ -108,7 +107,6 @@ void data_init_UDP(int portno)
 void data_init_CSV(const char* filename)
 {
   // init IMU and data_stream state
-  IMU_core_init();
   is_csv_file = true;
 
   // fopen file  
@@ -187,7 +185,7 @@ void *data_run(void*)
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
       IMU_correct_all(0, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
         sensor.gyroCor, sensor.acclCor, sensor.magnCor);
-      state = IMU_core_estmAll(sensor.lastTime, sensor.gyroCor, 
+      state = IMU_core_estmAll(0, sensor.lastTime, sensor.gyroCor, 
         sensor.acclCor, sensor.magnCor, &FOM);
       IMU_util_calcEuler(state, estim.ang);
     }
@@ -197,7 +195,7 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
       IMU_correct_gyro(0, sensor.gyroRaw, sensor.gyroCor);
-      state = IMU_core_estmGyro(sensor.lastTime, sensor.gyroCor, &FOM);
+      state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, &FOM);
       IMU_util_calcEuler(state, estim.ang);
     }
 
@@ -206,7 +204,7 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
       IMU_correct_accl(0, sensor.acclRaw, sensor.acclCor);
-      state = IMU_core_estmAccl(sensor.lastTime, sensor.acclCor, &FOM);
+      state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, &FOM);
       IMU_util_calcEuler(state, estim.ang);
     }
 
@@ -215,7 +213,7 @@ void *data_run(void*)
       sscanf(line, "%*d, %*f, %f, %f, %f", 
         &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
       IMU_correct_magn(0, sensor.magnRaw, sensor.magnCor);
-      state = IMU_core_estmMagn(sensor.lastTime, sensor.magnCor, &FOM);
+      state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, &FOM);
       IMU_util_calcEuler(state, estim.ang);
     }
   }

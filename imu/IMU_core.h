@@ -36,6 +36,8 @@ struct IMU_core_config {
   unsigned char       isStable;        // enable detection of no movement
   unsigned char       isFOM;           // enable FOM calculation
   unsigned char       isMove;          // enable acceleration estimate
+  float               gThreshVal;      // no motion threshold value
+  float               gThreshTime;     // no motion threhsold time
   float               aWeight;         // accelerometer IMU weight
   float               aMag;            // gravity magnitude
   float               aMagThresh;      // gravity magnitude error thresh
@@ -44,8 +46,6 @@ struct IMU_core_config {
   float               mMagThresh;      // magnetic north magn error thres
   float               mAng;            // magnetic north angle
   float               mAngThresh;      // magnetic north angle error thresh
-  float               gThreshVal;      // no motion threshold value
-  float               gThreshTime;     // no motion threhsold time
   float               moveAlpha;       // acceleration estimate alpha
 };
 
