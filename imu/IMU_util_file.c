@@ -122,7 +122,7 @@ int get_bool(char* args, unsigned char* val)
            strcmp(temp, "false,") == 0)
     *val = 0;
   else
-    return -3;
+    return IMU_UTIL_FILE_INVALID_BOOL;
   return 0;
 }
 
@@ -162,7 +162,7 @@ int IMU_util_getLine(FILE *file, char** field, char** args)
   char* status; 
   status  = fgets(line, line_size, file);
   if (status == NULL)
-    return -2;
+    return IMU_UTIL_FILE_UNEXPECTED_EOF;
   *field = strtok(line, ":"); 
   sscanf(*field, "%s", temp);
   if (strcmp(temp, "{") == 0)
@@ -170,7 +170,7 @@ int IMU_util_getLine(FILE *file, char** field, char** args)
   if (strcmp(temp, "}") == 0)
     return 2;
   if (temp == NULL)
-    return -2;
+    return IMU_UTIL_FILE_MISSING_ARGS;
   *args = strtok(NULL, "\n");
   strtok(*field, "\"");
   *field = strtok(NULL, "\""); 
@@ -189,7 +189,7 @@ int IMU_util_getField(char* field, const char* names[], int size)
     if (strcmp(field, names[i]) == 0)
       return i;
   } 
-  return -1; 
+  return IMU_UTIL_FILE_INVALID_FIELD; 
 }
 
 
@@ -209,7 +209,7 @@ int IMU_util_readCore(char* filename, struct IMU_core_config *config)
   // open json file containg config struct
   file = fopen(filename, "r");
   if (file == NULL)
-    return -1;
+    return IMU_UTIL_FILE_INVALID_FILE;
 
   // main loop that parse json file line by line
   while (1) {
@@ -275,7 +275,7 @@ int IMU_util_writeCore(char* filename, struct IMU_core_config *config)
   // open file to contain json struct
   file = fopen(filename, "w");
   if (file == NULL)
-    return -1;
+    return IMU_UTIL_FILE_INVALID_FILE;
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
@@ -320,7 +320,7 @@ int IMU_util_readCorrect(char* filename, struct IMU_correct_config *config)
   // open json file containg config struct
   file = fopen(filename, "r");
   if (file == NULL)
-    return -1;
+    return IMU_UTIL_FILE_INVALID_FILE;
 
   // main loop that parse json file line by line
   while (1) {
@@ -365,7 +365,7 @@ int IMU_util_writeCorrect(char* filename, struct IMU_correct_config *config)
   // open file to contain json struct
   file = fopen(filename, "w");
   if (file == NULL)
-    return -1;
+    return IMU_UTIL_FILE_INVALID_FILE;
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");

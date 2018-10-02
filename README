@@ -16,6 +16,14 @@ To compile the project in Linux perform the following in the root directory:
 - source setenv.sh
 - make 
 
+If changes are made to the GUI, running qmake may be necessary.  This cand be
+done by performing the following:
+- cd display
+- make clean
+- qmake
+- make
+- cd ..
+
 The IMU shared object and display binary are created in bin.  To run type:
 - cd bin
 - ./displayIMU
@@ -23,6 +31,7 @@ The IMU shared object and display binary are created in bin.  To run type:
 The project organization is as follows
 - bin <- stores libIMU.so library and displayIMU executable
 - config <- stores json configuration and calibration files
+- doc <- support documentation 
 - display <- source code for QT diplay application
 - imu <- source code for IMU library
 
@@ -33,5 +42,17 @@ and whereas the core functions can be placed in the main application.  The files
 along with their descriptions are captured below:
 - IMU_core <- functions that fuse corrected sensor data (generate estimates) 
 - IMU_correct <- functions that applies calibarion factors to raw data
+- IMU_calib_pnts <- functions that extracts points for multi-point calibrations
+- IMU_calib_auto <- functions that generates calibration data continously
+- IMU_calib_ctrl <- functions that generates correct structures from pnts/auto
 - IMU_util_file <- functions for reading/writting structs to json files 
 - IMU_util_math <- functions for converting/orienting quaternion IMU states
+
+Note: QT may generate an "Attempt to set a screen on a child window" message
+from QWindowPrivate::setTopLevelScreen.  According to stackoverlflow, question
+33545006, 'Qt5 "Attempt to set a screen on a child window" many runtime warning
+messages', this occurs whenvever setMinumumWidth() or setMiniumumHeight() are
+called on a QGLWidget under Linux with a dual screen display.  This is likely a
+bug in Qt and will not be fixed because documentation recommened to use the new
+QOpenGLWidget instead.  This is a significant change to the OpenGL interface
+and there is no significant benefits to pursue this.

@@ -28,6 +28,14 @@
 extern "C" {
 #endif
 
+// define error codes
+#define IMU_UTIL_FILE_INVALID_FILE   -1
+#define IMU_UTIL_FILE_INVALID_FIELD  -2
+#define IMU_UTIL_FILE_UNEXPECTED_EOF -3
+#define IMU_UTIL_FILE_MISSING_ARGS   -4
+#define IMU_UTIL_FILE_INVALID_BOOL   -5
+
+
 // functions to read/write sturctures to json files 
 int IMU_util_getLine      (FILE *file, char** field, char** args);
 int IMU_util_getField     (char* field, const char* names[], int size);
