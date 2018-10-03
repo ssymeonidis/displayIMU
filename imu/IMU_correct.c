@@ -44,6 +44,22 @@ int IMU_correct_init(unsigned short *id, struct IMU_correct_config **pntr)
 
 
 /******************************************************************************
+* function to copy config structure
+******************************************************************************/
+
+int IMU_correct_getConfig(unsigned short id, struct IMU_correct_config **pntr)
+{
+  // check for out-of-bounds condition
+  if (id > IMU_correct_inst - 1)
+    return IMU_CORRECT_BAD_INST; 
+
+  // return state
+  *pntr = &config[id];
+  return 0;
+}
+
+
+/******************************************************************************
 * correct raw gyroscope data
 ******************************************************************************/
 

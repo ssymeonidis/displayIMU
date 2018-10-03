@@ -26,6 +26,7 @@ extern "C" {
 
 // define error codes
 #define IMU_CORRECT_INST_OVERFLOW -1
+#define IMU_CORRECT_BAD_INST      -2
 
 
 // define the calibration structure (values tuned for each unit)
@@ -39,7 +40,12 @@ struct IMU_correct_config {
 };
 
 // data structure access functions
-int  IMU_correct_init (unsigned short *id, struct IMU_correct_config **config);
+int  IMU_correct_init(
+  unsigned short             *id, 
+  struct IMU_correct_config  **config);
+int  IMU_correct_getConfig(
+  unsigned short             id, 
+  struct IMU_correct_config  **config);
 
 // raw data correction functions
 void IMU_correct_gyro (unsigned short id, IMU_TYPE *g_raw, IMU_TYPE *g);

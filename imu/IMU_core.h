@@ -26,6 +26,7 @@ extern "C" {
 
 // define error codes
 #define IMU_CORE_INST_OVERFLOW -1
+#define IMU_CORE_BAD_INST      -2
 
 
 // define the configuration structure (values tuned for a part)
@@ -69,18 +70,14 @@ enum IMU_core_sensor_type {
   magn                        = 3
 };
 
-// define gyroscope figure of merit
+// define sensor figure of merit
 struct IMU_core_FOM_gyro {
   unsigned char               stable;
 };
-
-// define acclerometer figure of merit
 struct IMU_core_FOM_accl {
   float                       aMag;
   float                       aDelt;
 };
-  
-// define magnetometer figure of merit
 struct IMU_core_FOM_magn {
   float                       mMag;
   float                       mAng;
@@ -102,13 +99,16 @@ struct IMU_core_FOM {
 int IMU_core_init(
   unsigned short              *id, 
   struct IMU_core_config      **config);
-void IMU_core_getState(
+int IMU_core_getConfig(
+  unsigned short              id,
+  struct IMU_core_config      **config);
+int IMU_core_getState(
   unsigned short              id,  
   struct IMU_core_state       **state);
 
 
 // general operation functions 
-void IMU_core_reset(
+int IMU_core_reset(
   unsigned short              id);
 float* IMU_core_deadRecon(
   unsigned short              id,  

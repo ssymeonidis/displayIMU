@@ -146,14 +146,38 @@ int IMU_core_init(
 
 
 /******************************************************************************
+* function to copy config structure
+******************************************************************************/
+
+int IMU_core_getConfig( 
+  unsigned short              id,  
+  struct IMU_core_config      **pntr)
+{
+  // check for out-of-bounds condition
+  if (id > IMU_core_inst - 1)
+    return IMU_CORE_BAD_INST; 
+
+  // return state
+  *pntr = &config[id];
+  return 0;
+}
+
+
+/******************************************************************************
 * function to copy state structure
 ******************************************************************************/
 
-void IMU_core_getState( 
+int IMU_core_getState( 
   unsigned short              id,  
   struct IMU_core_state       **pntr)
 {
+  // check for out-of-bounds condition
+  if (id > IMU_core_inst - 1)
+    return IMU_CORE_BAD_INST; 
+
+  // return state
   *pntr = &state[id];
+  return 0;
 }
 
 
@@ -161,9 +185,13 @@ void IMU_core_getState(
 * initialize state and autocal to known state
 ******************************************************************************/
 
-void IMU_core_reset(
+int IMU_core_reset(
   unsigned short              id)
 {
+  // check for out-of-bounds condition
+  if (id > IMU_core_inst - 1)
+    return IMU_CORE_BAD_INST; 
+
   // initialize state to known value
   state[id].SEq[0]            = 1.0;
   state[id].SEq[1]            = 0.0;
@@ -171,6 +199,7 @@ void IMU_core_reset(
   state[id].SEq[3]            = 0.0;
   state[id].aReset            = config[id].isAccl;
   state[id].mReset            = config[id].isMagn;
+  return 0;
 }
 
 

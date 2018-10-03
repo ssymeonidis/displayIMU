@@ -30,7 +30,7 @@ extern "C" {
 #define IMU_CALIB_PNTS_EMPTY_TABLE   -3
 
 
-// define the configuration structure (values tuned for a part)
+// define configuration structure
 struct IMU_calib_pnts_config {
   unsigned char          isAccl;          // process accelerometer data
   unsigned char          isMagn;          // process magnetometer data
@@ -43,15 +43,15 @@ struct IMU_calib_pnts_config {
   float                  mThresh;         // no motion threshold value
 };
 
-// internal state for IMU_calib_pnts functions
+// point collection internal state
 enum calib_pnts_state {
-  stop, 
-  reset,
-  moving,
-  stable
+  stop                   = 0,
+  reset                  = 1,
+  moving                 = 2,
+  stable                 = 3
 };
 
-// define internal state struct (captures internal IMU state)
+// define internal state (unique to instance)
 struct IMU_calib_pnts_state {
   unsigned short         numPnts;
   unsigned short         curPnts;
@@ -63,7 +63,7 @@ struct IMU_calib_pnts_state {
   float                  gMean[3];
 };
 
-// define 
+// define report fo calibration point
 struct IMU_calib_pnts_entry {
   float                  tStart;
   float                  tEnd;
@@ -81,9 +81,6 @@ int IMU_calib_pnts_init(
 int IMU_calib_pnts_getState(
   unsigned short                  id,  
   struct IMU_calib_pnts_state     **state);
-int IMU_calib_pnts_getCount(
-  unsigned short                  id,
-  unsigned short                  *count);
 int IMU_calib_pnts_start(
   unsigned short                  id,
   unsigned short                  numPnts);
@@ -92,6 +89,9 @@ int IMU_calib_pnts_stop(
 
 // points table access function
 #if IMU_CALIB_TABLE_SIZE > 1
+int IMU_calib_pnts_getCount(
+  unsigned short                  id,
+  unsigned short                  *count);
 int IMU_calib_pnts_getEntry(
   unsigned short                  id,
   unsigned short                  index,

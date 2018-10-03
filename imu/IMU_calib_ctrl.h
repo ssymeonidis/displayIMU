@@ -24,21 +24,33 @@
 extern "C" {
 #endif
 
+// define status codes
+#define IMU_CALIB_CTRL_UPDATED        1
+
 // define error codes
 #define IMU_CALIB_CTRL_INST_OVERFLOW -1
 #define IMU_CALIB_CTRL_BAD_INST      -2
 
 
-// data structure access functions
-int IMU_calib_ctrl_init(unsigned short *id);
+// point collection internal state
+enum IMU_calib_mode {
+  IMU_calib_NA         = -1,
+  IMU_calib_4pnt       = 0,
+  IMU_calib_6pnt       = 1
+};
+
 
 // general operation functions
-int IMU_calib_ctrl_4pnt_init   (unsigned short id);
-int IMU_calib_ctrl_4pnt_update (unsigned short id, IMU_calib_pnts_entry *pnt);
-int IMU_calib_ctrl_4pnt_save   (unsigned short id);
-int IMU_calib_ctrl_6pnt_init   (unsigned short id);
-int IMU_calib_ctrl_6pnt_update (unsigned short id, IMU_calib_pnts_entry *pnt);
-int IMU_calib_ctrl_6pnt_save   (unsigned short id);
+int IMU_calib_ctrl_init(
+  unsigned short                  *id);
+int IMU_calib_ctrl_start(
+  unsigned short                  id,
+  enum IMU_calib_mode             mode);
+int IMU_calib_ctrl_update(
+  unsigned short                  id, 
+  struct IMU_calib_pnts_entry     *pnt);
+int IMU_calib_ctrl_save(
+  unsigned short                  id);
 
 
 #ifdef __cplusplus

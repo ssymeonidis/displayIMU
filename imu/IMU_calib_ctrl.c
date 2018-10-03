@@ -23,10 +23,14 @@
 #include "IMU_calib_ctrl.h"
 
 // internally managed structures
-struct IMU_correct_state      config  [IMU_MAX_INST];
+struct IMU_correct_config     config  [IMU_MAX_INST];
 struct IMU_calib_pnts_entry   table   [IMU_MAX_INST][IMU_CALIB_TABLE_SIZE];
+static enum IMU_calib_mode    mode    [IMU_MAX_INST];
 static unsigned short         numPnts [IMU_MAX_INST];
 static unsigned short         numInst = 0;
+
+// internal constants
+static const unsigned short   modePnts[2] = {4, 6};
 
 
 /******************************************************************************
@@ -53,22 +57,64 @@ int IMU_calib_ctrl_init(unsigned short *id)
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calib_ctrl_4pnt_update(unsigned short id, IMU_calib_pnts_entry *pnt)
+int IMU_calib_ctrl_start(
+  unsigned short                  id,
+  enum IMU_calib_mode             mode_in);
+{
+  // check for out-of-bounds condition
+  if (id > numInst - 1)
+    return IMU_CALIB_CTRL_BAD_INST;
+
+  // copy current entry to the table
+  numPnts[id]   = 0;
+  mode[id]      = mode_in;
+  return 0;
+}
+
+
+/******************************************************************************
+* function to return instance state pointer
+******************************************************************************/
+
+int IMU_calib_ctrl_update(
+  unsigned short                id, 
+  struct IMU_calib_pnts_entry   *pnt)
 {
   // check for out-of-bounds condition
   if (id > numInst - 1)
     return IMU_CALIB_CTRL_BAD_INST; 
 
-  // define internal variables
-  float                 gAvg[3] = {0, 0, 0};
-  float                 mAvg[3] = {0, 0, 0};
-  unsigned short        count;
-  IMU_calib_pnts_entry  *point;
+  // copy current entry to the table
+  memcpy(&table[id][numPnts[id]], pnt, sizeof(struct IMU_calib_pnts_entry));
+  numPnts[id]++;
+
+  // determine whether enough points were collected
+  if (numPnts[id] < modePnts[mode[id]])
+    return 0;
  
-  // verifiy number of collected points
-  IMU_calib_ponts_getCount(id, &count);
-  if (count != 4)
-    return IMU_CALIB_CTRL_WRONG_PNTS_COUNT;
+  // define internal variables
+  struct IMU_correct_config  *current;
+  unsigned short             i;
+
+  // copy current config structure to local array
+  IMU_correct_getConfig(id, &current);
+  memcpy(&config[id], current, sizeof(struct IMU_correct_config));
   
-  return 0;
+  // process completed points table
+  config[id].gBias[0]     = 0;
+  config[id].gBias[1]     = 0;
+  config[id].gBias[2]     = 0;
+  config[id].mBias[0]     = 0;
+  config[id].mBias[1]     = 0;
+  config[id].mBias[2]     = 0;
+  for (i=0; i<4; i++) {
+    config[id].gBias[0]  += table[id][i].gFltr[0];
+    config[id].gBias[1]  += table[id][i].gFltr[1];
+    config[id].gBias[2]  += table[id][i].gFltr[2];
+    config[id].mBias[0]  += table[id][i].mFltr[0];
+    config[id].mBias[1]  += table[id][i].mFltr[1];
+    config[id].mBias[2]  += table[id][i].nFltr[2];
+  }
+    
+  return IMU_CALIB_CTRL_UPDATED;
 }
