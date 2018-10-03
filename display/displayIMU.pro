@@ -16,7 +16,10 @@ SOURCES          += glWidget.cpp        \
                     dataParse.cpp       \
                     main.cpp 
 
-INCLUDEPATH      += ../imu
+VPATH            += ../common
+
+INCLUDEPATH      += ../imu              \
+                    ../common
 
 FORMS            += windowGUI.ui
 

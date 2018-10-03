@@ -17,42 +17,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _DATA_PARSE_H
-#define _DATA_PARSE_H
+#ifndef _IMU_CALIB_CTRL_H
+#define _IMU_CALIB_CTRL_H
 
-// include statements
-#include "IMU_core.h"
-#include "IMU_correct.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// define input sensor data structure
-struct dataParse_sensor {
-  float gyroRaw[3];
-  float gyroCor[3];
-  float gyroFltr[3];
-  float acclRaw[3];
-  float acclCor[3];
-  float acclFltr[3];
-  float magnRaw[3];
-  float magnCor[3];
-  float magnFltr[3];
-  float lastTime;
-}; 
+// define error codes
+#define IMU_CALIB_CTRL_INST_OVERFLOW -1
+#define IMU_CALIB_CTRL_BAD_INST      -2
 
-// define IMU estimate data structure
-struct dataParse_estim {
-  float ang[3];
-  float move[3];  
-};
 
-// define the sensor data structure
-extern dataParse_sensor    sensor;
-extern dataParse_estim     estim;
-extern IMU_core_FOM        FOM;
+// data structure access functions
+int IMU_calib_ctrl_init(unsigned short *id);
 
-// access functions
-void data_init_log(const char* filename);
-void data_init_UDP(int portno);
-void data_init_CSV(const char* filename);
-void *data_run(void* id);
+// general operation functions
+int IMU_calib_ctrl_4pnt_init   (unsigned short id);
+int IMU_calib_ctrl_4pnt_update (unsigned short id, IMU_calib_pnts_entry *pnt);
+int IMU_calib_ctrl_4pnt_save   (unsigned short id);
+int IMU_calib_ctrl_6pnt_init   (unsigned short id);
+int IMU_calib_ctrl_6pnt_update (unsigned short id, IMU_calib_pnts_entry *pnt);
+int IMU_calib_ctrl_6pnt_save   (unsigned short id);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

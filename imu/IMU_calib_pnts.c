@@ -17,6 +17,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+// definitions for increased readability
+#define NULL 0
+
 // include statements 
 #include "IMU_calib_pnts.h"
 
@@ -163,10 +166,14 @@ int IMU_calib_pnts_stop(
 ******************************************************************************/
 
 int IMU_calib_pnts_updateGyro(
-  unsigned short        id,
-  float                 t,
-  float                 *g)
+  unsigned short                  id,
+  float                           t,
+  float                           *g,
+  struct IMU_calib_pnts_entry     **pntr)
 {
+  // initialize entry pointer to NULL
+  *pntr                 = NULL;
+
   // check for stop condition
   if (state[id].state == stop)
     return state[id].curPnts;
@@ -229,6 +236,7 @@ int IMU_calib_pnts_updateGyro(
       entry->gFltr[1]   = alpha * g[1] + (1 - alpha) * entry->gFltr[1]; 
       entry->gFltr[2]   = alpha * g[2] + (1 - alpha) * entry->gFltr[2];
     } else {
+      *pntr             = entry; 
       break_stable_state(id);
     }
   } 
@@ -243,10 +251,14 @@ int IMU_calib_pnts_updateGyro(
 ******************************************************************************/
 
 int IMU_calib_pnts_updateAccl(
-  unsigned short        id, 
-  float                 t, 
-  float                 *a)
+  unsigned short                  id, 
+  float                           t, 
+  float                           *a,
+  struct IMU_calib_pnts_entry     **pntr)
 {
+  // initialize entry pointer to NULL
+  *pntr                 = NULL;
+
   // verify system state (stable and sensor is enabled)  
   if (!config[id].isAccl || state[id].state != stable)
     return state[id].curPnts;
@@ -271,6 +283,7 @@ int IMU_calib_pnts_updateAccl(
   diff                  = entry->aFltr[2] - a[2];
   std                  += diff * diff;
   if (std > config[id].aThresh * config[id].aThresh) {
+    *pntr               = entry; 
     break_stable_state(id);
     return state[id].curPnts;
   }
@@ -291,10 +304,14 @@ int IMU_calib_pnts_updateAccl(
 ******************************************************************************/
 
 int IMU_calib_pnts_updateMagn(
-  unsigned short        id, 
-  float                 t, 
-  float                 *m) 
+  unsigned short                  id, 
+  float                           t, 
+  float                           *m, 
+  struct IMU_calib_pnts_entry     **pntr)
 {
+  // initialize entry pointer to NULL
+  *pntr                 = NULL;
+
   // verify system state (stable and sensor is enabled)
   if (!config[id].isMagn || state[id].state != stable)
     return state[id].curPnts;
@@ -319,6 +336,7 @@ int IMU_calib_pnts_updateMagn(
   diff                  = entry->mFltr[2] - m[2];
   std                  += diff * diff;
   if (std > config[id].mThresh * config[id].mThresh) {
+    *pntr               = entry; 
     break_stable_state(id);
     return state[id].curPnts;
   }
@@ -339,14 +357,22 @@ int IMU_calib_pnts_updateMagn(
 ******************************************************************************/
 
 int IMU_calib_pnts_updateAll(
-  unsigned short        id, 
-  float                 t, 
-  float                 *g, 
-  float                 *a, 
-  float                 *m)  
+  unsigned short                  id, 
+  float                           t, 
+  float                           *g, 
+  float                           *a, 
+  float                           *m,  
+  struct IMU_calib_pnts_entry     **pntr)
 {
-  IMU_calib_pnts_updateGyro(id, t, g); 
-  IMU_calib_pnts_updateAccl(id, t, a); 
-  IMU_calib_pnts_updateMagn(id, t, m); 
+  // define local variables
+  struct IMU_calib_pnts_entry     *entry;
+
+  // update all three vectors
+  IMU_calib_pnts_updateGyro(id, t, g, &entry);
+  *pntr = entry; 
+  IMU_calib_pnts_updateAccl(id, t, a, &entry); 
+  *pntr = (entry != NULL) ? entry : *pntr; 
+  IMU_calib_pnts_updateMagn(id, t, m, &entry); 
+  *pntr = (entry != NULL) ? entry : *pntr; 
   return state[id].curPnts;
 }

@@ -30,9 +30,10 @@ The IMU shared object and display binary are created in bin.  To run type:
 
 The project organization is as follows
 - bin <- stores libIMU.so library and displayIMU executable
+- common <- stores shared c/c++ and header files 
 - config <- stores json configuration and calibration files
-- doc <- support documentation 
 - display <- source code for QT diplay application
+- doc <- support documentation 
 - imu <- source code for IMU library
 
 The IMU library is broken down into smaller components to provide flexibility on

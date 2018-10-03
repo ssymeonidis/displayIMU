@@ -74,42 +74,53 @@ struct IMU_calib_pnts_entry {
 };
 
 
-// data structure access functions
+// data structure access function
 int IMU_calib_pnts_init(
   unsigned short                  *id, 
   struct IMU_calib_pnts_config    **config);
 int IMU_calib_pnts_getState(
   unsigned short                  id,  
   struct IMU_calib_pnts_state     **state);
-int IMU_calib_pnts_getEntry(
+int IMU_calib_pnts_getCount(
   unsigned short                  id,
-  unsigned short                  index,
-  struct IMU_calib_pnts_entry     **entry);
+  unsigned short                  *count);
 int IMU_calib_pnts_start(
   unsigned short                  id,
   unsigned short                  numPnts);
 int IMU_calib_pnts_stop(
   unsigned short                  id);
 
+// points table access function
+#if IMU_CALIB_TABLE_SIZE > 1
+int IMU_calib_pnts_getEntry(
+  unsigned short                  id,
+  unsigned short                  index,
+  struct IMU_calib_pnts_entry     **entry);
+#endif
+
 // general operation functions 
 int IMU_calib_pnts_updateGyro(
   unsigned short                  id, 
   float                           t, 
-  float                           *g); 
+  float                           *g,
+  struct IMU_calib_pnts_entry     **entry); 
 int IMU_calib_pnts_updateAccl(
   unsigned short                  id, 
   float                           t, 
-  float                           *a); 
+  float                           *a,
+  struct IMU_calib_pnts_entry     **entry); 
 int IMU_calib_pnts_updateMagn(
   unsigned short                  id, 
   float                           t, 
-  float                           *m); 
+  float                           *m, 
+  struct IMU_calib_pnts_entry     **entry); 
 int IMU_calib_pnts_updateAll(
   unsigned short                  id,
   float                           t,
   float                           *g,
   float                           *a,
-  float                           *m);
+  float                           *m,
+  struct IMU_calib_pnts_entry     **entry); 
 
 
 #ifdef __cplusplus

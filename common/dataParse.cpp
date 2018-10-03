@@ -34,13 +34,16 @@
 dataParse_sensor    sensor;
 dataParse_estim     estim;
 IMU_core_FOM        FOM;
-const int           buffer_size   = 100;
+const int           buffer_size    = 100;
 float               buffer[buffer_size][15];
-int                 buffer_index  = 0;
+int                 buffer_index   = 0;
 
 // define internal/external variables
-bool                is_log_data   = false;
-bool                is_csv_file   = false;
+bool                is_log_data    = false;
+bool                is_csv_file    = false;
+bool                first_frame    = true;
+double              time_init_sys  = 0;
+double              time_init_sen  = 0;
 int                 data_socket;
 FILE*               csv_file;
 FILE*               log_file;
@@ -120,7 +123,7 @@ void data_init_CSV(const char* filename)
 * main function for receiving/parsing data and updating IMU
 ******************************************************************************/
 
-void *data_run(void*)
+void data_process_datum()
 {
   // define the variables
   const int  line_size      = 256;
@@ -129,101 +132,114 @@ void *data_run(void*)
   float*     state;
   timeval    time;
   double     time_cur       = 0;
-  double     time_init_sys  = 0;
-  double     time_init_sen  = 0;
   double     time_delt_sys  = 0;
   double     time_delt_sen  = 0;
-  bool       first_frame    = true;
   int        rc;
   char       *results;
 
-  // main processing loop
-  while(1) {
-
-    // extract data line
-    if (is_csv_file == false) {
-      rc = recv(data_socket, line, sizeof(line), 0);
-      line[rc] = (char)NULL;
-    } else {
+  // extract data line
+  if (is_csv_file == false) {
+    rc = recv(data_socket, line, sizeof(line), 0);
+    line[rc] = (char)NULL;
+  } else {
+    results = fgets(line, sizeof(line), csv_file);
+    if (results == NULL) {
+      fseek(csv_file, 0, SEEK_SET);
+      first_frame = true;
       results = fgets(line, sizeof(line), csv_file);
-      if (results == NULL) {
-        fseek(csv_file, 0, SEEK_SET);
-        first_frame = true;
-        results = fgets(line, sizeof(line), csv_file);
-      } 
-    }
-    
-    // determine the datum type
-    sscanf(line, "%d, %f", &datum_type, &sensor.lastTime);
+    } 
+  }
 
-    // inject delay if running csv file
-    if (is_csv_file == true && first_frame == false) {
-      while (1) { 
-        gettimeofday(&time, NULL);
-        time_cur         = time.tv_sec * 1000000 + time.tv_usec;
-        time_delt_sys    = time_cur - time_init_sys;
-        time_delt_sen    = sensor.lastTime - time_init_sen;
-        if (time_delt_sen - time_delt_sys > 0) 
-          usleep(time_delt_sen - time_delt_sys); 
-        else
-          break;
-      }
-    }
+  // determine the datum type
+  sscanf(line, "%d, %f", &datum_type, &sensor.lastTime);
 
-    if (first_frame == true) {
+  // inject delay if running csv file
+  if (is_csv_file == true && first_frame == false) {
+    while (1) { 
       gettimeofday(&time, NULL);
-      time_init_sys  = time.tv_sec * 1000000 + time.tv_usec;
-      time_init_sen  = sensor.lastTime;
-      first_frame    = false;
-    }
-
-    // process synced data (all three sensors)
-    if (datum_type == 0) {
-      sscanf(line, "%*d, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
-        &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2],
-        &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2],
-        &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-      IMU_correct_all(0, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
-        sensor.gyroCor, sensor.acclCor, sensor.magnCor);
-      state = IMU_core_estmAll(0, sensor.lastTime, sensor.gyroCor, 
-        sensor.acclCor, sensor.magnCor, &FOM);
-      IMU_util_calcEuler(state, estim.ang);
-    }
-
-    // process gyroscope data (async sensors)
-    else if (datum_type == 1) {
-      sscanf(line, "%*d, %*f, %f, %f, %f", 
-        &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
-      IMU_correct_gyro(0, sensor.gyroRaw, sensor.gyroCor);
-      state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, &FOM);
-      IMU_util_calcEuler(state, estim.ang);
-    }
-
-    // process accelerometer data (async sensors)
-    else if (datum_type == 2) {
-      sscanf(line, "%*d, %*f, %f, %f, %f", 
-        &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
-      IMU_correct_accl(0, sensor.acclRaw, sensor.acclCor);
-      state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, &FOM);
-      IMU_util_calcEuler(state, estim.ang);
-    }
-
-    // process magnetometer data (async sensors)
-    else if (datum_type == 3) {
-      sscanf(line, "%*d, %*f, %f, %f, %f", 
-        &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-      IMU_correct_magn(0, sensor.magnRaw, sensor.magnCor);
-      state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, &FOM);
-      IMU_util_calcEuler(state, estim.ang);
+      time_cur         = time.tv_sec * 1000000 + time.tv_usec;
+      time_delt_sys    = time_cur - time_init_sys;
+      time_delt_sen    = sensor.lastTime - time_init_sen;
+      if (time_delt_sen - time_delt_sys > 0) 
+        usleep(time_delt_sen - time_delt_sys); 
+      else
+        break;
     }
   }
 
-  // exit function
+  // initialize system and sensor time
+  if (first_frame == true) {
+    gettimeofday(&time, NULL);
+    time_init_sys  = time.tv_sec * 1000000 + time.tv_usec;
+    time_init_sen  = sensor.lastTime;
+    first_frame    = false;
+  }
+
+  // process synced data (all three sensors)
+  if (datum_type == 0) {
+    sscanf(line, "%*d, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
+      &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2],
+      &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2],
+      &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
+    IMU_correct_all(0, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
+      sensor.gyroCor, sensor.acclCor, sensor.magnCor);
+    state = IMU_core_estmAll(0, sensor.lastTime, sensor.gyroCor, 
+      sensor.acclCor, sensor.magnCor, &FOM);
+    IMU_util_calcEuler(state, estim.ang);
+  }
+
+  // process gyroscope data (async sensors)
+  else if (datum_type == 1) {
+    sscanf(line, "%*d, %*f, %f, %f, %f", 
+      &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
+    IMU_correct_gyro(0, sensor.gyroRaw, sensor.gyroCor);
+    state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, &FOM);
+    IMU_util_calcEuler(state, estim.ang);
+  }
+
+  // process accelerometer data (async sensors)
+  else if (datum_type == 2) {
+    sscanf(line, "%*d, %*f, %f, %f, %f", 
+      &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
+    IMU_correct_accl(0, sensor.acclRaw, sensor.acclCor);
+    state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, &FOM);
+    IMU_util_calcEuler(state, estim.ang);
+  }
+
+  // process magnetometer data (async sensors)
+  else if (datum_type == 3) {
+    sscanf(line, "%*d, %*f, %f, %f, %f", 
+      &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
+    IMU_correct_magn(0, sensor.magnRaw, sensor.magnCor);
+    state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, &FOM);
+    IMU_util_calcEuler(state, estim.ang);
+  }
+}
+
+
+/******************************************************************************
+* deconstructor for overall data parse block
+******************************************************************************/
+
+void data_close()
+{
   if (is_csv_file == false)
     close(data_socket);
   else
     fclose(csv_file);
   if (is_log_data == true)
     fclose(log_file);
-  return NULL;
+}
+
+
+/******************************************************************************
+* "continous run" function handle for recreating a thread 
+******************************************************************************/
+
+void *data_run(void*)
+{
+  // main processing loop
+  while(1) {
+    data_process_datum();
+  }
 }
