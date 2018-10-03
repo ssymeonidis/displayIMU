@@ -23,6 +23,7 @@
 // include statements
 #include "IMU_core.h"
 #include "IMU_correct.h"
+#include "IMU_calib_pnts.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -36,13 +37,31 @@ extern "C" {
 #define IMU_UTIL_FILE_INVALID_BOOL   -5
 
 
-// functions to read/write sturctures to json files 
-int IMU_util_getLine      (FILE *file, char** field, char** args);
-int IMU_util_getField     (char* field, const char* names[], int size);
-int IMU_util_readCore     (char* filename, struct IMU_core_config    *config);
-int IMU_util_writeCore    (char* filename, struct IMU_core_config    *config);
-int IMU_util_readCorrect  (char* filename, struct IMU_correct_config *config);
-int IMU_util_writeCorrect (char* filename, struct IMU_correct_config *config);
+// functions used to create custom json reader 
+int IMU_util_getLine  (FILE *file, char** field, char** args);
+int IMU_util_getField (char* field, const char* names[], int size);
+
+// functions to access imu specfic json readers and writers 
+int IMU_util_readCorrect(
+  char*                         filename, 
+  struct IMU_correct_config     *config);
+int IMU_util_writeCorrect(
+  char*                         filename, 
+  struct IMU_correct_config     *config);
+int IMU_util_readCore(
+  char*                         filename, 
+  struct IMU_core_config        *config);
+int IMU_util_writeCore(
+  char*                         filename, 
+  struct IMU_core_config        *config);
+int IMU_util_readCalibPnts(
+  char*                         filename,
+  struct IMU_calib_pnts_config  *config);
+int IMU_util_writeCalibPnts(
+  char*                         filename,
+  struct IMU_calib_pnts_config  *config);
+
+
 
 #ifdef __cplusplus
 }

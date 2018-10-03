@@ -32,9 +32,9 @@ extern "C" {
 
 // define the configuration structure (values tuned for a part)
 struct IMU_calib_pnts_config {
-  unsigned char          isAccl;
-  unsigned char          isMagn;
-  float                  gAlpha;
+  unsigned char          isAccl;          // process accelerometer data
+  unsigned char          isMagn;          // process magnetometer data
+  float                  gAlpha;          // mean/std calc filter value 
   float                  gThreshVal;      // no motion threshold value
   float                  gThreshTime;     // no motion threhsold time
   float                  aAlpha;          // accelerometer filter value
@@ -45,6 +45,7 @@ struct IMU_calib_pnts_config {
 
 // internal state for IMU_calib_pnts functions
 enum calib_pnts_state {
+  stop, 
   reset,
   moving,
   stable
@@ -52,13 +53,14 @@ enum calib_pnts_state {
 
 // define internal state struct (captures internal IMU state)
 struct IMU_calib_pnts_state {
-  unsigned short         index;
+  unsigned short         numPnts;
+  unsigned short         curPnts;
   enum calib_pnts_state  state;
-  float                  gMean[3];
-  float                  tStable;         // last "unstable" time
+  unsigned short         index;
+  float                  tStable;
   unsigned char          aClock;
   unsigned char          mClock;
-  unsigned short         numEntries;
+  float                  gMean[3];
 };
 
 // define 
@@ -81,24 +83,28 @@ int IMU_calib_pnts_getState(
   struct IMU_calib_pnts_state     **state);
 int IMU_calib_pnts_getEntry(
   unsigned short                  id,
+  unsigned short                  index,
   struct IMU_calib_pnts_entry     **entry);
-int IMU_calib_pnts_reset(
+int IMU_calib_pnts_start(
+  unsigned short                  id,
+  unsigned short                  numPnts);
+int IMU_calib_pnts_stop(
   unsigned short                  id);
 
 // general operation functions 
-void IMU_calib_pnts_updateGyro(
+int IMU_calib_pnts_updateGyro(
   unsigned short                  id, 
   float                           t, 
   float                           *g); 
-void IMU_calib_pnts_updateAccl(
+int IMU_calib_pnts_updateAccl(
   unsigned short                  id, 
   float                           t, 
   float                           *a); 
-void IMU_calib_pnts_updateMagn(
+int IMU_calib_pnts_updateMagn(
   unsigned short                  id, 
   float                           t, 
   float                           *m); 
-void IMU_calib_pnts_updateAll(
+int IMU_calib_pnts_updateAll(
   unsigned short                  id,
   float                           t,
   float                           *g,
