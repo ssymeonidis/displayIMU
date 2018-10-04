@@ -50,7 +50,6 @@ struct IMU_calib_ctrl_state {
   enum IMU_calib_ctrl_mode        mode;
   struct IMU_correct_config       correct;
   struct IMU_core_config          core;
-  struct IMU_calib_pnts_entry     table[IMU_CALIB_CTRL_SIZE]; 
   unsigned short                  numPnts;
 };
 

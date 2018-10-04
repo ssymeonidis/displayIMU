@@ -32,6 +32,7 @@ extern "C" {
 
 // define configuration structure
 struct IMU_calib_pnts_config {
+  unsigned char          enable;          // to disable entire function
   unsigned char          isAccl;          // process accelerometer data
   unsigned char          isMagn;          // process magnetometer data
   float                  gAlpha;          // mean/std calc filter value 
@@ -45,10 +46,10 @@ struct IMU_calib_pnts_config {
 
 // point collection internal state
 enum calib_pnts_state {
-  stop                   = 0,
-  reset                  = 1,
-  moving                 = 2,
-  stable                 = 3
+  IMU_calib_pnts_stop    = 0,
+  IMU_calib_pnts_reset   = 1,
+  IMU_calib_pnts_moving  = 2,
+  IMU_calib_pnts_stable  = 3
 };
 
 // define internal state 

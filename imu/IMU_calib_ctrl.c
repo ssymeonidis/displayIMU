@@ -22,7 +22,8 @@
 #include "IMU_calib_ctrl.h"
 
 // internally managed variables
-struct IMU_calib_ctrl_state   state[IMU_MAX_INST];     
+struct IMU_calib_ctrl_state   state [IMU_MAX_INST];     
+struct IMU_calib_pnts_entry   table [IMU_MAX_INST][IMU_CALIB_CTRL_SIZE]; 
 static unsigned short         numInst = 0;
 static const unsigned short   modePnts[2] = {4, 6};
 
@@ -35,7 +36,6 @@ void calib_4pnt(unsigned short id)
 {
   // define internal variables
   struct IMU_correct_config *correct = &state[id].correct;
-  struct IMU_calib_pnts_entry *table = state[id].table;
   int i;
 
   // process completed points table
@@ -46,12 +46,12 @@ void calib_4pnt(unsigned short id)
   correct->mBias[1]     = 0;
   correct->mBias[2]     = 0;
   for (i=0; i<4; i++) {
-    correct->gBias[0]  += table[i].gFltr[0];
-    correct->gBias[1]  += table[i].gFltr[1];
-    correct->gBias[2]  += table[i].gFltr[2];
-    correct->mBias[0]  += table[i].mFltr[0];
-    correct->mBias[1]  += table[i].mFltr[1];
-    correct->mBias[2]  += table[i].mFltr[2];
+    correct->gBias[0]  += table[id][i].gFltr[0];
+    correct->gBias[1]  += table[id][i].gFltr[1];
+    correct->gBias[2]  += table[id][i].gFltr[2];
+    correct->mBias[0]  += table[id][i].mFltr[0];
+    correct->mBias[1]  += table[id][i].mFltr[1];
+    correct->mBias[2]  += table[id][i].mFltr[2];
   }
 }
 
@@ -64,7 +64,6 @@ void calib_6pnt(unsigned short id)
 { 
   // define internal variables
   struct IMU_correct_config *correct = &state[id].correct;
-  struct IMU_calib_pnts_entry *table = state[id].table;
   int i;
 
   // process completed points table
@@ -78,15 +77,15 @@ void calib_6pnt(unsigned short id)
   correct->mBias[1]     = 0;
   correct->mBias[2]     = 0;
   for (i=0; i<6; i++) {
-    correct->gBias[0]  += table[i].gFltr[0];
-    correct->gBias[1]  += table[i].gFltr[1];
-    correct->gBias[2]  += table[i].gFltr[2];
-    correct->aBias[0]  += table[i].aFltr[0];
-    correct->aBias[1]  += table[i].aFltr[1];
-    correct->aBias[2]  += table[i].aFltr[2];
-    correct->mBias[0]  += table[i].mFltr[0];
-    correct->mBias[1]  += table[i].mFltr[1];
-    correct->mBias[2]  += table[i].mFltr[2];
+    correct->gBias[0]  += table[id][i].gFltr[0];
+    correct->gBias[1]  += table[id][i].gFltr[1];
+    correct->gBias[2]  += table[id][i].gFltr[2];
+    correct->aBias[0]  += table[id][i].aFltr[0];
+    correct->aBias[1]  += table[id][i].aFltr[1];
+    correct->aBias[2]  += table[id][i].aFltr[2];
+    correct->mBias[0]  += table[id][i].mFltr[0];
+    correct->mBias[1]  += table[id][i].mFltr[1];
+    correct->mBias[2]  += table[id][i].mFltr[2];
   }
 }
 
@@ -147,7 +146,7 @@ int IMU_calib_ctrl_update(
     return IMU_CALIB_CTRL_BAD_INST; 
 
   // copy current entry to the table
-  struct IMU_calib_pnts_entry *entry = &state[id].table[state[id].numPnts]; 
+  struct IMU_calib_pnts_entry *entry = &table[id][state[id].numPnts]; 
   memcpy(entry, pntr, sizeof(struct IMU_calib_pnts_entry));
   state[id].numPnts++;
 
@@ -180,7 +179,7 @@ int IMU_calib_ctrl_save(
   if (id > numInst - 1)
     return IMU_CALIB_CTRL_BAD_INST;
 
-  // copy current entry to the table
+  // copy current entry to the IMU_correct config 
   memcpy(correct, &state[id].correct, sizeof(struct IMU_correct_config));
   return 0;
 }

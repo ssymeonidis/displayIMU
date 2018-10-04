@@ -64,10 +64,10 @@ struct IMU_core_state {
 
 // define datum enumertation type for FOM structure
 enum IMU_core_sensor_type {
-  all                         = 0,
-  gyro                        = 1,
-  accl                        = 2,
-  magn                        = 3
+  IMU_core_all                = 0,
+  IMU_core_gyro               = 1,
+  IMU_core_accl               = 2,
+  IMU_core_magn               = 3
 };
 
 // define sensor figure of merit

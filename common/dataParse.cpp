@@ -27,26 +27,26 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include "dataParse.h"
 #include "IMU_util_math.h"
+#include "dataParse.h"
+
 
 // define the sensor data structure
-dataParse_sensor    sensor;
-dataParse_estim     estim;
-IMU_core_FOM        FOM;
-const int           buffer_size    = 100;
-float               buffer[buffer_size][15];
-int                 buffer_index   = 0;
+struct dataParse_config    config;
+struct dataParse_state     state;
+struct dataParse_sensor    sensor;
+struct dataParse_estim     estim;
 
 // define internal/external variables
-bool                is_log_data    = false;
-bool                is_csv_file    = false;
-bool                first_frame    = true;
-double              time_init_sys  = 0;
-double              time_init_sen  = 0;
-int                 data_socket;
-FILE*               csv_file;
-FILE*               log_file;
+bool                       is_log_data    = false;
+bool                       is_csv_file    = false;
+bool                       first_frame    = true;
+bool                       exit_thread    = false;
+double                     time_init_sys  = 0;
+double                     time_init_sen  = 0;
+int                        data_socket;
+FILE*                      csv_file;
+FILE*                      log_file;
 
 
 /******************************************************************************
@@ -61,10 +61,39 @@ void data_error(const char *msg)
 
 
 /******************************************************************************
-* used to initiate logging data to csv file
+* constructor for dataParse functions
 ******************************************************************************/
 
-void data_init_log(const char* filename)
+void data_init(
+  char*  file_correct,
+  char*  file_core,
+  char*  file_calib_pnts,
+  char*  file_calib_auto)
+{
+  // initialize and get handles to all IMU functions
+  IMU_correct_init     (&state.id_correct,     &state.config_correct);
+  IMU_core_init        (&state.id_core,        &state.config_core);
+  IMU_calib_pnts_init  (&state.id_calib_pnts,  &state.config_calib_pnts);
+  IMU_calib_auto_init  (&state.id_calib_auto,  &state.config_calib_auto);
+  IMU_calib_ctrl_init  (&state.id_calib_ctrl,  &state.config_calib_ctrl);
+
+  // read config structures from json files
+  if (!file_correct)      
+    IMU_util_readCorrect    (file_correct,     &state.config_correct);
+  if (!file_core)
+    IMU_util_readCore       (file_core,        &state.config_core);
+  if (!file_calib_pnts)
+    IMU_util_readCalibPnts  (file_calib_pnts,  &state.config_calib_pnts);
+  if (!file_calib_auto)
+    IMU_util_readCalibAuto  (file_calib_auto,  &state.config_calib_auto);
+}
+
+
+/******************************************************************************
+* used to start logging results to csv file
+******************************************************************************/
+
+void data_start_log(const char* filename)
 {
   log_file    = fopen(filename, "w+");
   if (!log_file)
@@ -78,7 +107,7 @@ void data_init_log(const char* filename)
 * iniatilizes IMU and creates UDP server
 ******************************************************************************/
 
-void data_init_UDP(int portno)
+void data_start_UDP(int portno)
 {
   // define internal variables
   sockaddr_in  serv_addr;
@@ -104,10 +133,10 @@ void data_init_UDP(int portno)
 
 
 /******************************************************************************
-* iniatilizes IMU and creates CSV file reader
+* initializes IMU and creates CSV file reader
 ******************************************************************************/
 
-void data_init_CSV(const char* filename)
+void data_start_CSV(const char* filename)
 {
   // init IMU and data_stream state
   is_csv_file = true;
@@ -239,7 +268,7 @@ void data_close()
 void *data_run(void*)
 {
   // main processing loop
-  while(1) {
+  while(!exit_thread) {
     data_process_datum();
   }
 }

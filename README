@@ -10,7 +10,9 @@ another application.
 Also provided is a QT application that provides the tools to diplay IMU data,
 read/write calibration/configuration files, and stream live raw data via UPD or 
 stored raw data from a CSV file.  The "display" IMU codebase is written C++.
-qtcreator was used to create the GUI and is recommended for future changes.
+qtcreator was used to create the GUI and is recommended for future changes.  For
+offline processing, there is an program for parsing and generating csv files,
+which can be found in the csv directory.
 
 To compile the project in Linux perform the following in the root directory:
 - source setenv.sh
@@ -32,6 +34,7 @@ The project organization is as follows
 - bin <- stores libIMU.so library and displayIMU executable
 - common <- stores shared c/c++ and header files 
 - config <- stores json configuration and calibration files
+- csv <- source code for appliction for processing CSV files
 - display <- source code for QT diplay application
 - doc <- support documentation 
 - imu <- source code for IMU library

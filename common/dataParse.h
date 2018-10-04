@@ -21,40 +21,76 @@
 #define _DATA_PARSE_H
 
 // include statements
-#include "IMU_core.h"
 #include "IMU_correct.h"
+#include "IMU_core.h"
+#include "IMU_calib_pnts.h"
+#include "IMU_calib_auto.h"
+#include "IMU_calib_ctrl.h"
+
+
+// define controls for dataParse
+struct dataParse_config{
+  unsigned char                  isCorrect;
+  unsigned char                  isCore;
+  unsigned char                  isCalibPnts; 
+  unsigned char                  isCalibAuto;
+  unsigned char                  isCalibCtrl;
+};
+
+// define IMU state structure
+struct dataParse_state {
+  unsigned short                 id_correct;
+  unsigned short                 id_core;
+  unsigned short                 id_calib_pnts;
+  unsigned short                 id_calib_auto;
+  unsigned short                 id_calib_ctrl;
+  struct IMU_correct_config      config_correct;
+  struct IMU_core_config         config_core;
+  struct IMU_calib_pnts_config   config_calib_pnts;
+  struct IMU_calib_auto_config   config_calib_auto;
+};
 
 // define input sensor data structure
 struct dataParse_sensor {
-  float gyroRaw[3];
-  float gyroCor[3];
-  float gyroFltr[3];
-  float acclRaw[3];
-  float acclCor[3];
-  float acclFltr[3];
-  float magnRaw[3];
-  float magnCor[3];
-  float magnFltr[3];
-  float lastTime;
+  float                          gyroRaw[3];
+  float                          gyroCor[3];
+  float                          gyroFltr[3];
+  float                          acclRaw[3];
+  float                          acclCor[3];
+  float                          acclFltr[3];
+  float                          magnRaw[3];
+  float                          magnCor[3];
+  float                          magnFltr[3];
+  float                          lastTime;
 }; 
 
 // define IMU estimate data structure
 struct dataParse_estim {
-  float ang[3];
-  float move[3];  
+  float                          ang[3];
+  float                          move[3];  
+  IMU_core_FOM                   FOM;
 };
 
+
 // define the sensor data structure
-extern dataParse_sensor    sensor;
-extern dataParse_estim     estim;
-extern IMU_core_FOM        FOM;
+extern dataParse_config  config;
+extern dataParse_state   state;
+extern dataParse_sensor  sensor;
+extern dataParse_estim   estim;
+
+// initialization function
+void data_init(
+  char*                  file_correct,
+  char*                  file_core,
+  char*                  file_calib_pnts,
+  char*                  file_calib_auto);
 
 // access functions
-void data_init_log(const char* filename);
-void data_init_UDP(int portno);
-void data_init_CSV(const char* filename);
-void data_close();
-void data_process_datum();
-void *data_run(void* id);
+void data_start_log      (const char* filename);
+void data_start_UDP      (int portno);
+void data_start_CSV      (const char* filename);
+void data_close          ();
+void data_process_datum  ();
+void *data_run           (void* id);
 
 #endif
