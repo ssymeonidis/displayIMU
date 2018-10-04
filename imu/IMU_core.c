@@ -34,21 +34,23 @@
 #include "IMU_core.h"
 
 // internally managed structures
-struct IMU_core_config  config [IMU_MAX_INST]; 
-struct IMU_core_state   state  [IMU_MAX_INST];
-static unsigned short   IMU_core_inst = 0;
+IMU_core_config  config [IMU_MAX_INST]; 
+IMU_core_state   state  [IMU_MAX_INST];
+uint16_t         numInst = 0;
 
 
 /******************************************************************************
 * utility function - normalize 3x1 array
 ******************************************************************************/
 
-inline float norm3(float* in, float* out)
+inline float norm3(
+  float          *in, 
+  float          *out)
 {
-  float norm    = sqrt(in[0]*in[0] + in[1]*in[1] + in[2]*in[2]); 
-  out[0]        = in[0] / norm;
-  out[1]        = in[1] / norm;
-  out[2]        = in[2] / norm;
+  float norm     = sqrt(in[0]*in[0] + in[1]*in[1] + in[2]*in[2]); 
+  out[0]         = in[0] / norm;
+  out[1]         = in[1] / norm;
+  out[2]         = in[2] / norm;
   return norm;
 }
 
@@ -57,14 +59,15 @@ inline float norm3(float* in, float* out)
 * utility function - normalize 4x1 array
 ******************************************************************************/
 
-inline float* norm4(float* v)
+inline float* norm4(
+  float          *v)
 {
-  float norm    = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
-  v[0]         /= norm;
-  v[1]         /= norm;
-  v[2]         /= norm;
-  v[3]         /= norm;
-  return v;    // allows function to be used as function argument
+  float norm     = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
+  v[0]          /= norm;
+  v[1]          /= norm;
+  v[2]          /= norm;
+  v[3]          /= norm;
+  return v;     // allows function to be used as function argument
 }
 
 
@@ -72,13 +75,15 @@ inline float* norm4(float* v)
 * utility function - scale 4x1 array by scalar value
 ******************************************************************************/
 
-inline float* scale(float* v, float m)
+inline float* scale(
+  float          *v, 
+  float          m)
 {
-  v[0]         *= m;
-  v[1]         *= m;
-  v[2]         *= m;
-  v[3]         *= m;
-  return v;    // allows function to be used as function argument
+  v[0]          *= m;
+  v[1]          *= m;
+  v[2]          *= m;
+  v[3]          *= m;
+  return v;     // allows function to be used as function argument
 }
 
 
@@ -86,12 +91,14 @@ inline float* scale(float* v, float m)
 * utility function - decrement 4x1 array by another 4x1 array
 ******************************************************************************/
 
-inline float* decrm(float* v, float* d)
+inline float* decrm(
+  float          *v, 
+  float          *d)
 {
-  v[0]         -= d[0];
-  v[1]         -= d[1];
-  v[2]         -= d[2];
-  v[3]         -= d[3];
+  v[0]          -= d[0];
+  v[1]          -= d[1];
+  v[2]          -= d[2];
+  v[3]          -= d[3];
   return v;
 }
 
@@ -101,14 +108,16 @@ inline float* decrm(float* v, float* d)
 * (this function needs to be double checked)
 ******************************************************************************/
 
-inline void getUpVector(unsigned short id, float* v)
+inline void getUpVector(
+  uint16_t       id, 
+  float          *v)
 {
-  float* SEq    = state[id].SEq;
-  float g[4]    = {-SEq[3] * config[id].aMag,  -SEq[2] * config[id].aMag,
-                    SEq[1] * config[id].aMag,   SEq[0] * config[id].aMag};
-  v[0]          =  -g[0]*SEq[1] + g[1]*SEq[0] + g[2]*SEq[3] - g[3]*SEq[2];
-  v[1]          =  -g[0]*SEq[2] - g[1]*SEq[3] + g[2]*SEq[0] + g[3]*SEq[1];
-  v[2]          =  -g[0]*SEq[3] + g[1]*SEq[2] - g[2]*SEq[1] + g[3]*SEq[0];
+  float* SEq     = state[id].SEq;
+  float g[4]     = {-SEq[3] * config[id].aMag,  -SEq[2] * config[id].aMag,
+                     SEq[1] * config[id].aMag,   SEq[0] * config[id].aMag};
+  v[0]           =  -g[0]*SEq[1] + g[1]*SEq[0] + g[2]*SEq[3] - g[3]*SEq[2];
+  v[1]           =  -g[0]*SEq[2] - g[1]*SEq[3] + g[2]*SEq[0] + g[3]*SEq[1];
+  v[2]           =  -g[0]*SEq[3] + g[1]*SEq[2] - g[2]*SEq[1] + g[3]*SEq[0];
 }
 
 
@@ -117,11 +126,13 @@ inline void getUpVector(unsigned short id, float* v)
 * (this function needs to be written)
 ******************************************************************************/
 
-inline void getForwardVector(unsigned short id, float* v)
+inline void getForwardVector(
+  uint16_t       id, 
+  float*         v)
 {
-  v[0]          =  0;
-  v[1]          =  0;
-  v[2]          =  0;
+  v[0]           =  0;
+  v[1]           =  0;
+  v[2]           =  0;
 }
 
 
@@ -130,17 +141,17 @@ inline void getForwardVector(unsigned short id, float* v)
 ******************************************************************************/
 
 int IMU_core_init(
-  unsigned short              *id, 
-  struct IMU_core_config      **pntr)
+  uint16_t              *id, 
+  IMU_core_config       **pntr)
 {
   // check for device count overflow
-  if (IMU_core_inst >= IMU_MAX_INST)
+  if (numInst >= IMU_MAX_INST)
     return IMU_CORE_INST_OVERFLOW;
 
   // return handle and calib pointer
-  *id   = IMU_core_inst; 
+  *id   = numInst; 
   *pntr = &config[*id];
-  IMU_core_inst++;
+  numInst++;
   return 0;
 }
 
@@ -150,11 +161,11 @@ int IMU_core_init(
 ******************************************************************************/
 
 int IMU_core_getConfig( 
-  unsigned short              id,  
-  struct IMU_core_config      **pntr)
+  uint16_t              id,  
+  IMU_core_config        **pntr)
 {
   // check for out-of-bounds condition
-  if (id > IMU_core_inst - 1)
+  if (id > numInst-1)
     return IMU_CORE_BAD_INST; 
 
   // return state
@@ -168,11 +179,11 @@ int IMU_core_getConfig(
 ******************************************************************************/
 
 int IMU_core_getState( 
-  unsigned short              id,  
-  struct IMU_core_state       **pntr)
+  uint16_t		id,  
+  IMU_core_state        **pntr)
 {
   // check for out-of-bounds condition
-  if (id > IMU_core_inst - 1)
+  if (id > numInst-1)
     return IMU_CORE_BAD_INST; 
 
   // return state
@@ -186,19 +197,19 @@ int IMU_core_getState(
 ******************************************************************************/
 
 int IMU_core_reset(
-  unsigned short              id)
+  uint16_t              id)
 {
   // check for out-of-bounds condition
-  if (id > IMU_core_inst - 1)
+  if (id > numInst-1)
     return IMU_CORE_BAD_INST; 
 
   // initialize state to known value
-  state[id].SEq[0]            = 1.0;
-  state[id].SEq[1]            = 0.0;
-  state[id].SEq[2]            = 0.0;
-  state[id].SEq[3]            = 0.0;
-  state[id].aReset            = config[id].isAccl;
-  state[id].mReset            = config[id].isMagn;
+  state[id].SEq[0]      = 1.0;
+  state[id].SEq[1]      = 0.0;
+  state[id].SEq[2]      = 0.0;
+  state[id].SEq[3]      = 0.0;
+  state[id].aReset      = config[id].isAccl;
+  state[id].mReset      = config[id].isMagn;
   return 0;
 }
 
@@ -208,24 +219,33 @@ int IMU_core_reset(
 * assumes: corrected and normalized data
 ******************************************************************************/
 
-float* IMU_core_deadRecon(
-  unsigned short              id,  
-  float                       t,
-  float                       *a_in, 
-  float                       *m_in)
+int IMU_core_deadRecon(
+  uint16_t              id,  
+  float                 t,
+  float                 *a_in, 
+  float                 *m_in,
+  float                 *estm)
 {
+  // check for out-of-bounds condition
+  if (id > numInst-1)
+    return IMU_CORE_BAD_INST;
+  if (!config[id].enable)
+    return 0;
+    
+  // assign estimate vector
+  estm                  = state[id].SEq;
+
   // define the local variables
-  float* SEq     = state[id].SEq;
-  float  a[3];
-  float  m[3];
-  float  n;
+  float                 a[3];
+  float                 m[3];
+  float                 n;
   
   // normalize accerometer data or derive from system state
   if (!config[id].isAccl || a_in == NULL) {
     getUpVector(id, a);
   } else {
     norm3(a_in, a);
-    state[id].aReset = 0;
+    state[id].aReset    = 0;
   }
   
   // normalize magnetometer data or derive from system state
@@ -233,52 +253,52 @@ float* IMU_core_deadRecon(
     getForwardVector(id, m);
   } else {
     norm3(m_in, m);
-    state[id].mReset = 0;
+    state[id].mReset    = 0;
   }
   
   // ortho-normalize forwared vector 
-  n            = m[0]*a[0]+m[1]*a[1]+m[2]*a[2];
-  float f[3]   = {m[0]-n*a[0], 
-                  m[1]-n*a[1], 
-                  m[2]-n*a[2]};
+  n                     = m[0]*a[0]+m[1]*a[1]+m[2]*a[2];
+  float f[3]            = {m[0]-n*a[0], 
+                           m[1]-n*a[1], 
+                           m[2]-n*a[2]};
   norm3(f, f);
 
   // calcuate the right vector
-  float r[3]   = {a[1]*f[2]-a[2]*f[1], 
-                  a[2]*f[0]-a[0]*f[2], 
-                  a[0]*f[1]-a[1]*f[0]};
+  float r[3]            = {a[1]*f[2]-a[2]*f[1], 
+                          a[2]*f[0]-a[0]*f[2], 
+                          a[0]*f[1]-a[1]*f[0]};
 
   // calculate the quaternion
-  n            = f[0]+r[1]+a[2];
+  n                     = f[0]+r[1]+a[2];
   if (n > 0) {
-    n          = sqrt(1.0+n)*2;
-    SEq[0]     = 0.25*n;
-    SEq[1]     = (a[1]-r[2])/n;
-    SEq[2]	 = (f[2]-a[0])/n;
-    SEq[3]     = (r[0]-f[1])/n;
+    n                   = sqrt(1.0+n)*2;
+    estm[0]             = 0.25*n;
+    estm[1]             = (a[1]-r[2])/n;
+    estm[2]             = (f[2]-a[0])/n;
+    estm[3]             = (r[0]-f[1])/n;
   } else if (f[0] > r[1] && f[0] > a[2]) {
-    n          = sqrt(1.0+f[0]-r[1]-a[2])*2;
-    SEq[0]     = (a[1]-r[2])/n;
-    SEq[1]     = 0.25*n;
-    SEq[2]     = (f[1]+r[0])/n;
-    SEq[3]     = (f[2]+a[0])/n;
+    n                   = sqrt(1.0+f[0]-r[1]-a[2])*2;
+    estm[0]             = (a[1]-r[2])/n;
+    estm[1]             = 0.25*n;
+    estm[2]             = (f[1]+r[0])/n;
+    estm[3]             = (f[2]+a[0])/n;
   } else if (r[1] > a[2]) {
-    n          = sqrt(1.0+r[1]-f[0]-a[2])*2;
-    SEq[0]     = (f[2]-a[0])/n;
-    SEq[1]     = (f[1]+r[0])/n;
-    SEq[2]     = 0.25*n;
-    SEq[3]     = (r[2]+a[1])/n;
+    n                   = sqrt(1.0+r[1]-f[0]-a[2])*2;
+    estm[0]             = (f[2]-a[0])/n;
+    estm[1]             = (f[1]+r[0])/n;
+    estm[2]             = 0.25*n;
+    estm[3]             = (r[2]+a[1])/n;
   } else {
-    n          = sqrt(1.0+a[2]-f[0]-r[1])*2;
-    SEq[0]     = (r[0]-f[1])/n;
-    SEq[1]     = (f[2]+a[0])/n;
-    SEq[2]     = (r[2]+a[1])/n;
-    SEq[3]     = 0.25*n;
+    n                   = sqrt(1.0+a[2]-f[0]-r[1])*2;
+    estm[0]             = (r[0]-f[1])/n;
+    estm[1]             = (f[2]+a[0])/n;
+    estm[2]             = (r[2]+a[1])/n;
+    estm[3]             = 0.25*n;
   }
 
   // exit function
-  state[id].t  = t;
-  return SEq;
+  state[id].t           = t;
+  return 0;
 }
 
 
@@ -286,53 +306,62 @@ float* IMU_core_deadRecon(
 * apply gyroscope rates
 ******************************************************************************/
 
-float* IMU_core_estmGyro(
-  unsigned short               id, 
-  float                        t, 
-  float                        *g, 
-  struct IMU_core_FOM          *FOM)
+int IMU_core_estmGyro(
+  uint16_t              id, 
+  float                 t, 
+  float                 *g,
+  float                 *estm,
+  IMU_core_FOM          *pntr)
 {
+  // check for out-of-bounds condition
+  if (id > numInst-1)
+    return IMU_CORE_BAD_INST; 
+
+  // define/initialize variables
+  estm                  = state[id].SEq;
+
   // initialize figure of merit
-  if (FOM != NULL) {
-    FOM->type                  = IMU_core_gyro;
-    FOM->data.gyro.stable      = 0;
+  IMU_core_FOM_gyro     *FOM;
+  if (pntr != NULL) {
+    pntr->type          = IMU_core_gyro;
+    FOM                 = &pntr->data.gyro;               
+    FOM->stable         = 0;
   }
   
   // determine whether the function needs to be executed
-  if (!config[id].isGyro || state[id].aReset || state[id].mReset)
-    return state[id].SEq;
+  if (!config[id].enable || !config[id].isGyro ||
+      state[id].aReset   || state[id].mReset)
+    return 0;
   
-  // define internal variables
-  unsigned char stable         = 0; 
-
-  // update state last time
-  state[id].t                  = t;
-
+  // define/update variables
+  uint8_t stable        = 0; 
+  state[id].t           = t;
+ 
   // check for stable condition
   if (config[id].isStable) {
-    float g_sum                = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
+    float g_sum         = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
     if (g_sum > config[id].gThreshVal * config[id].gThreshVal)
-      state[id].t_stable       = t;
-    else if (t - state[id].t_stable > config[id].gThreshTime) {
-      stable                   = 1;
-      if (FOM != NULL)
-        FOM->data.gyro.stable  = stable;
-      return state[id].SEq;
+      state[id].t_move  = t;
+    else if (t - state[id].t_move > config[id].gThreshTime) {
+      stable            = 1;
+      if (pntr != NULL)
+        FOM->stable     = stable;
+      return IMU_CORE_GYRO_STABLE;
     }
   }
 
   // define internal variables
-  float half_dt                = 0.5 * (t - state[id].t);
-  float *SEq                   = state[id].SEq;
+  float half_dt         = 0.5 * (t - state[id].t);
+  float *SEq            = state[id].SEq;
 
   // compute gyro quaternion rate and apply delta to estimated orientation
-  SEq[0]       += half_dt * (-SEq[1]*g[0] - SEq[2]*g[1] - SEq[3]*g[2]);
-  SEq[1]       += half_dt * ( SEq[0]*g[0] + SEq[2]*g[2] - SEq[3]*g[1]);
-  SEq[2]       += half_dt * ( SEq[0]*g[1] - SEq[1]*g[2] + SEq[3]*g[0]);
-  SEq[3]       += half_dt * ( SEq[0]*g[2] + SEq[1]*g[1] - SEq[2]*g[0]);
+  estm[0]      += half_dt * (-SEq[1]*g[0] - SEq[2]*g[1] - SEq[3]*g[2]);
+  estm[1]      += half_dt * ( SEq[0]*g[0] + SEq[2]*g[2] - SEq[3]*g[1]);
+  estm[2]      += half_dt * ( SEq[0]*g[1] - SEq[1]*g[2] + SEq[3]*g[0]);
+  estm[3]      += half_dt * ( SEq[0]*g[2] + SEq[1]*g[1] - SEq[2]*g[0]);
   
   // exit function
-  return SEq;
+  return 0;
 }
 
 
@@ -340,81 +369,93 @@ float* IMU_core_estmGyro(
 * apply accelerometer vector
 ******************************************************************************/
 
-float* IMU_core_estmAccl(
-  unsigned short          id, 
-  float                   t, 
-  float                   *a_in, 
-  struct IMU_core_FOM     *FOM)
+int IMU_core_estmAccl(
+  uint16_t              id, 
+  float                 t, 
+  float                 *a_in, 
+  float                 *estm,
+  IMU_core_FOM          *pntr)
 {
+  // check for out-of-bounds condition
+  if (id > numInst - 1)
+    return IMU_CORE_BAD_INST; 
+
+  // assign estimate vector
+  estm                  = state[id].SEq;
+
   // save accelerometer data
   if (config[id].isMove) {
-    state[id].a[0]        = a_in[0];
-    state[id].a[1]        = a_in[1];
-    state[id].a[2]        = a_in[2];
+    state[id].a[0]      = a_in[0];
+    state[id].a[1]      = a_in[1];
+    state[id].a[2]      = a_in[2];
   }
 
   // initialize figure of merit
-  if (FOM != NULL) {
-    FOM->type             = IMU_core_accl;
-    FOM->data.accl.aMag   = 0;
-    FOM->data.accl.aDelt  = 0;
+  IMU_core_FOM_accl     *FOM;
+  if (pntr != NULL) {
+    pntr->type          = IMU_core_accl;
+    FOM                 = &pntr->data.accl;               
+    FOM->aMag           = 0;
+    FOM->aDelt          = 0;
   }
   
   // determine whether the functions needs to be executed
-  if (!config[id].isAccl)
-    return state[id].SEq;
-  if (state[id].aReset)
-    return IMU_core_deadRecon(id, t, a_in, NULL);
+  if (!config[id].enable || !config[id].isAccl)
+    return 0;
+  if (state[id].aReset) {
+    IMU_core_deadRecon(id, t, a_in, NULL, estm);
+    return 0;
+  }
 
   // define internal variables
-  float *SEq              = state[id].SEq;
-  float aMagFOM           = 0.0;
+  float *SEq            = state[id].SEq;
+  float aMagFOM         = 0.0;
   float a[3];
     
   // normalize input vector
-  float mag               = norm3(a_in, a);
+  float mag             = norm3(a_in, a);
   
   // determine datum quality factor
-  float aWeight           = config[id].aWeight;
+  float aWeight         = config[id].aWeight;
   if (config[id].isFOM) {
-    float error           = abs(mag - config[id].aMag) / mag;
-    aMagFOM               = 1.0 - error / config[id].aMagThresh;
-    aMagFOM               = (aMagFOM < 0.0) ? 0.0 : aMagFOM;
-    aWeight              *= aMagFOM;
+    float error         = abs(mag - config[id].aMag) / mag;
+    aMagFOM             = 1.0 - error / config[id].aMagThresh;
+    aMagFOM             = (aMagFOM < 0.0) ? 0.0 : aMagFOM;
+    aWeight             *= aMagFOM;
   }
-  if (FOM != NULL)
-    FOM->data.accl.aMag   = aMagFOM;
+  if (pntr != NULL)
+    FOM->aMag           = aMagFOM;
   
   // check reset and zero weight condition
   if (aWeight <= 0.0)
-    return SEq;
+    return 0;
 
   // compute the objective function 
-  float twoSEq[4]    = {2.0f*SEq[0], 2.0f*SEq[1], 2.0f*SEq[2], 2.0f*SEq[3]};
-  float f_1          = twoSEq[1]*SEq[3] - twoSEq[0]*SEq[2] - a[0];
-  float f_2          = twoSEq[0]*SEq[1] + twoSEq[2]*SEq[3] - a[1];
-  float f_3          = 1.0f - twoSEq[1]*SEq[1] - twoSEq[2]*SEq[2] - a[2];
+  float twoSEq[4]       = {2.0f*SEq[0], 2.0f*SEq[1], 2.0f*SEq[2], 2.0f*SEq[3]};
+  float f_1             = twoSEq[1]*SEq[3] - twoSEq[0]*SEq[2] - a[0];
+  float f_2             = twoSEq[0]*SEq[1] + twoSEq[2]*SEq[3] - a[1];
+  float f_3             = 1.0f - twoSEq[1]*SEq[1] - twoSEq[2]*SEq[2] - a[2];
  
   // compute the Jacobian
-  float J_11or24     = twoSEq[2]; 
-  float J_12or23     = twoSEq[3];
-  float J_13or22     = twoSEq[0];
-  float J_14or21     = twoSEq[1];
-  float J_32         = 2.0f * J_14or21;
-  float J_33         = 2.0f * J_11or24;
+  float J_11or24        = twoSEq[2]; 
+  float J_12or23        = twoSEq[3];
+  float J_13or22        = twoSEq[0];
+  float J_14or21        = twoSEq[1];
+  float J_32            = 2.0f * J_14or21;
+  float J_33            = 2.0f * J_11or24;
 
   // calculate the gradient
-  float SEqHatDot[4] = {J_14or21 * f_2 - J_11or24 * f_1,
-                        J_12or23 * f_1 + J_13or22 * f_2 - J_32     * f_3,
-                        J_12or23 * f_2 - J_33     * f_3 - J_13or22 * f_1,
-                        J_14or21 * f_1 + J_11or24 * f_2};
+  float SEqHatDot[4]    = {J_14or21 * f_2 - J_11or24 * f_1,
+                           J_12or23 * f_1 + J_13or22 * f_2 - J_32     * f_3,
+                           J_12or23 * f_2 - J_33     * f_3 - J_13or22 * f_1,
+                           J_14or21 * f_1 + J_11or24 * f_2};
   norm4(decrm(SEq, scale(norm4(SEqHatDot), aWeight)));
-  if (FOM != NULL)
-    FOM->data.accl.aDelt  = SEqHatDot[0];
+  if (pntr != NULL)
+    FOM->aDelt          = SEqHatDot[0];
   
   // exit function
-  state[id].t             = aWeight * t + (1.0 - aWeight) * state[id].t;
-  return SEq;
+  state[id].t           = aWeight * t + (1.0 - aWeight) * state[id].t;
+  return 0;
 }
 
 
@@ -422,25 +463,37 @@ float* IMU_core_estmAccl(
 * apply magnetometer vector
 ******************************************************************************/
 
-float* IMU_core_estmMagn(
-  unsigned short         id, 
-  float                  t, 
-  float                  *m_in, 
-  struct IMU_core_FOM    *FOM)
+int IMU_core_estmMagn(
+  uint16_t              id, 
+  float                 t, 
+  float                 *m_in,
+  float                 *estm,
+  IMU_core_FOM          *pntr)
 {
+  // check for out-of-bounds condition
+  if (id > numInst-1)
+    return IMU_CORE_BAD_INST; 
+
+  // assign estimate vector
+  estm                  = state[id].SEq;
+
   // initialize figure of merit
-  if (FOM != NULL) {
-    FOM->type            = IMU_core_magn;
-    FOM->data.magn.mMag  = 0;
-    FOM->data.magn.mAng  = 0;
-    FOM->data.magn.mDelt = 0;
+  IMU_core_FOM_magn     *FOM;
+  if (pntr != NULL) {
+    pntr->type          = IMU_core_magn;
+    FOM                 = &pntr->data.magn;               
+    FOM->mMag           = 0;
+    FOM->mAng           = 0;
+    FOM->mDelt          = 0;
   }
   
   // determine whether the functions needs to be executed
-  if (!config[id].isMagn)
-    return state[id].SEq;
-  if (state[id].mReset)
-    return IMU_core_deadRecon(id, t, NULL, m_in);
+  if (!config[id].isMagn || !config[id].enable)
+    return 0;
+  if (state[id].mReset) {
+    IMU_core_deadRecon(id, t, NULL, m_in, estm);
+    return 0;
+  }
 
   // define internal variables
   float *SEq             = state[id].SEq;
@@ -472,61 +525,62 @@ float* IMU_core_estmMagn(
   }
 
   // update figure of merit
-  if (FOM != NULL) {
-    FOM->data.magn.mMag  = mMagFOM;
-    FOM->data.magn.mAng  = mAngFOM;
+  if (pntr != NULL) {
+    FOM->mMag             = mMagFOM;
+    FOM->mAng             = mAngFOM;
   }
   
   // check zero weight conditiond
   if (mWeight <= 0.0)
-    return SEq;
+    return 0;
 
   // compute the objective function 
-  float twom_x       = 2.0f * m[0];
-  float twom_z       = 2.0f * m[2];
-  float SEq_1SEq_3   = SEq[0] * SEq[2];
-  float SEq_2SEq_4   = SEq[1] * SEq[3];
-  float f_4          = twom_x * (0.5f - SEq[2]*SEq[2] - SEq[3]*SEq[3]) + 
-                       twom_z * (SEq_2SEq_4 - SEq_1SEq_3) - m[0];
-  float f_5          = twom_x * (SEq[1]*SEq[2] - SEq[0]*SEq[3]) + 
-                       twom_z * (SEq[0]*SEq[1] + SEq[2]*SEq[3]) - m[1];
-  float f_6          = twom_x * (SEq_1SEq_3 + SEq_2SEq_4) + 
-                       twom_z * (0.5f - SEq[1]*SEq[1] - SEq[2]*SEq[2]) - m[2];
+  float twom_x           = 2.0f * m[0];
+  float twom_z           = 2.0f * m[2];
+  float SEq_1SEq_3       = SEq[0] * SEq[2];
+  float SEq_2SEq_4       = SEq[1] * SEq[3];
+  float f_4              = twom_x * (0.5 - SEq[2]*SEq[2] - SEq[3]*SEq[3]) + 
+                           twom_z * (SEq_2SEq_4 - SEq_1SEq_3) - m[0];
+  float f_5              = twom_x * (SEq[1]*SEq[2] - SEq[0]*SEq[3]) + 
+                           twom_z * (SEq[0]*SEq[1] + SEq[2]*SEq[3]) - m[1];
+  float f_6              = twom_x * (SEq_1SEq_3 + SEq_2SEq_4) + 
+                           twom_z * (0.5 - SEq[1]*SEq[1] - SEq[2]*SEq[2]) - 
+                           m[2];
 
   // compute the Jacobian
-  float twom_xSEq_1  = 2.0f * m[0] * SEq[0];
-  float twom_xSEq_2  = 2.0f * m[0] * SEq[1];
-  float twom_xSEq_3  = 2.0f * m[0] * SEq[2];
-  float twom_xSEq_4  = 2.0f * m[0] * SEq[3];
-  float twom_zSEq_1  = 2.0f * m[2] * SEq[0];
-  float twom_zSEq_2  = 2.0f * m[2] * SEq[1];
-  float twom_zSEq_3  = 2.0f * m[2] * SEq[2];
-  float twom_zSEq_4  = 2.0f * m[2] * SEq[3];
-  float J_41         = twom_zSEq_3;
-  float J_42         = twom_zSEq_4;
-  float J_43         = 2.0f * twom_xSEq_3 + twom_zSEq_1; 
-  float J_44         = 2.0f * twom_xSEq_4 - twom_zSEq_2;
-  float J_51         = twom_xSEq_4 - twom_zSEq_2;
-  float J_52         = twom_xSEq_3 + twom_zSEq_1;
-  float J_53         = twom_xSEq_2 + twom_zSEq_4;
-  float J_54         = twom_xSEq_1 - twom_zSEq_3;
-  float J_61         = twom_xSEq_3;
-  float J_62         = twom_xSEq_4 - 2.0f * twom_zSEq_2;
-  float J_63         = twom_xSEq_1 - 2.0f * twom_zSEq_3;
-  float J_64         = twom_xSEq_2;
+  float twom_xSEq_1      = 2.0f * m[0] * SEq[0];
+  float twom_xSEq_2      = 2.0f * m[0] * SEq[1];
+  float twom_xSEq_3      = 2.0f * m[0] * SEq[2];
+  float twom_xSEq_4      = 2.0f * m[0] * SEq[3];
+  float twom_zSEq_1      = 2.0f * m[2] * SEq[0];
+  float twom_zSEq_2      = 2.0f * m[2] * SEq[1];
+  float twom_zSEq_3      = 2.0f * m[2] * SEq[2];
+  float twom_zSEq_4      = 2.0f * m[2] * SEq[3];
+  float J_41             = twom_zSEq_3;
+  float J_42             = twom_zSEq_4;
+  float J_43             = 2.0f * twom_xSEq_3 + twom_zSEq_1; 
+  float J_44             = 2.0f * twom_xSEq_4 - twom_zSEq_2;
+  float J_51             = twom_xSEq_4 - twom_zSEq_2;
+  float J_52             = twom_xSEq_3 + twom_zSEq_1;
+  float J_53             = twom_xSEq_2 + twom_zSEq_4;
+  float J_54             = twom_xSEq_1 - twom_zSEq_3;
+  float J_61             = twom_xSEq_3;
+  float J_62             = twom_xSEq_4 - 2.0f * twom_zSEq_2;
+  float J_63             = twom_xSEq_1 - 2.0f * twom_zSEq_3;
+  float J_64             = twom_xSEq_2;
 
   // calculate the gradient
-  float SEqHatDot[4] = {-J_41 * f_4 - J_51 * f_5 + J_61 * f_6,
-                         J_42 * f_4 + J_52 * f_5 + J_62 * f_6,
-                        -J_43 * f_4 + J_53 * f_5 + J_63 * f_6,
-                        -J_44 * f_4 - J_54 * f_5 + J_64 * f_6};
+  float SEqHatDot[4]     = {-J_41 * f_4 - J_51 * f_5 + J_61 * f_6,
+                             J_42 * f_4 + J_52 * f_5 + J_62 * f_6,
+                            -J_43 * f_4 + J_53 * f_5 + J_63 * f_6,
+                            -J_44 * f_4 - J_54 * f_5 + J_64 * f_6};
   norm4(decrm(SEq, scale(norm4(SEqHatDot), config[id].mWeight)));
-  if (FOM != NULL)
-    FOM->data.magn.mDelt  = SEqHatDot[0];
+  if (pntr != NULL)
+    FOM->mDelt           = SEqHatDot[0];
   
   // exit function
-  state[id].t             = mWeight * t + (1.0 - mWeight) * state[id].t;
-  return SEq;
+  state[id].t            = mWeight * t + (1.0 - mWeight) * state[id].t;
+  return 0;
 }
 
 
@@ -534,14 +588,19 @@ float* IMU_core_estmMagn(
 * estimate euler angle given gyroscope, accelerometer, and magnetometer data 
 ******************************************************************************/
 
-float* IMU_core_estmAll(
-  unsigned short              id, 
-  float                       t, 
-  float                       *g, 
-  float                       *a, 
-  float                       *m,  
-  struct IMU_core_FOM         FOM[3])
+int IMU_core_estmAll(
+  uint16_t              id, 
+  float                 t, 
+  float                 *g, 
+  float                 *a, 
+  float                 *m,
+  float                 *estm,
+  IMU_core_FOM          FOM[3])
 {
+  // check for out-of-bounds condition
+  if (id > numInst - 1)
+    return IMU_CORE_BAD_INST; 
+
   // check for reset conditions
   if (state[id].mReset && state[id].aReset) {
     // initialize to known value
@@ -558,14 +617,16 @@ float* IMU_core_estmAll(
     }
     
     // zero the system to the current sensor
-    return IMU_core_deadRecon(id, t, a, m);
+    IMU_core_deadRecon(id, t, a, m, estm);
+    return 0;
   }
   
   // update system state w/ each sensor
-  IMU_core_estmGyro(id, t, g, &FOM[0]);
-  IMU_core_estmAccl(id, t, a, &FOM[1]);
-  IMU_core_estmMagn(id, t, m, &FOM[2]);
-  return state[id].SEq;
+  IMU_core_estmGyro(id, t, g, estm, &FOM[0]);
+  IMU_core_estmAccl(id, t, a, estm, &FOM[1]);
+  IMU_core_estmMagn(id, t, m, estm, &FOM[2]);
+  estm = state[id].SEq;
+  return 0;
 }
 
 
@@ -573,37 +634,39 @@ float* IMU_core_estmAll(
 * estimate velocity vector (minus gravity)
 ******************************************************************************/
 
-float* IMU_core_estmMove(unsigned short id)
+int IMU_core_estmMove(
+  uint16_t              id,
+  float                 *estm)
 {
   // define internal varirables
-  float *A         = state[id].A;
-  float *A_rot     = state[id].A_rot;
-  float *a         = state[id].a;
-  float *SEq       = state[id].SEq;
+  float *A              = state[id].A;
+  float *a              = state[id].a;
+  float *SEq            = state[id].SEq;
   float G[3];
 
   // rotate gravity up vector by estimated orientation
   getUpVector(id, G);
  
   // remove the gravity from the accelerometer data
-  float alpha      = config[id].moveAlpha;
+  float alpha           = config[id].moveAlpha;
   if (state[id].aReset || state[id].mReset) {
-    A[0]           = a[0]-G[0];
-    A[1]           = a[1]-G[1];
-    A[2]           = a[2]-G[2];
+    A[0]                = a[0]-G[0];
+    A[1]                = a[1]-G[1];
+    A[2]                = a[2]-G[2];
   } else {
-    A[0]           = alpha*A[0] + (1.0f-alpha)*(a[0]-G[0]);
-    A[1]           = alpha*A[1] + (1.0f-alpha)*(a[1]-G[1]);
-    A[2]           = alpha*A[2] + (1.0f-alpha)*(a[2]-G[2]); 
+    A[0]                = alpha*A[0] + (1.0f-alpha)*(a[0]-G[0]);
+    A[1]                = alpha*A[1] + (1.0f-alpha)*(a[1]-G[1]);
+    A[2]                = alpha*A[2] + (1.0f-alpha)*(a[2]-G[2]); 
   }
   
   // apply rotation to acceleration vector
-  float tmp[4]     = {-SEq[1]*A[0] - SEq[2]*A[1] - SEq[3]*A[2],
-                       SEq[0]*A[0] + SEq[2]*A[2] - SEq[3]*A[1],
-                       SEq[0]*A[1] - SEq[1]*A[2] + SEq[3]*A[0],
-                       SEq[0]*A[2] + SEq[1]*A[1] - SEq[2]*A[0]};
-  A_rot[0] = -tmp[0]*SEq[1] + tmp[1]*SEq[0] - tmp[2]*SEq[3] + tmp[3]*SEq[2];
-  A_rot[1] = -tmp[0]*SEq[2] + tmp[1]*SEq[3] + tmp[2]*SEq[0] - tmp[3]*SEq[1];
-  A_rot[2] = -tmp[0]*SEq[3] - tmp[1]*SEq[2] + tmp[2]*SEq[1] + tmp[3]*SEq[0];
-  return A_rot;
+  float tmp[4]          = {-SEq[1]*A[0] - SEq[2]*A[1] - SEq[3]*A[2],
+                            SEq[0]*A[0] + SEq[2]*A[2] - SEq[3]*A[1],
+                            SEq[0]*A[1] - SEq[1]*A[2] + SEq[3]*A[0],
+                            SEq[0]*A[2] + SEq[1]*A[1] - SEq[2]*A[0]};
+  estm[0] = -tmp[0]*SEq[1] + tmp[1]*SEq[0] - tmp[2]*SEq[3] + tmp[3]*SEq[2];
+  estm[1] = -tmp[0]*SEq[2] + tmp[1]*SEq[3] + tmp[2]*SEq[0] - tmp[3]*SEq[1];
+  estm[2] = -tmp[0]*SEq[3] - tmp[1]*SEq[2] + tmp[2]*SEq[1] + tmp[3]*SEq[0];
+  
+  return 0;
 }

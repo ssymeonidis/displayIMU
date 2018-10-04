@@ -17,18 +17,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _IMU_UTIL_MATH_H
-#define _IMU_UTIL_MATH_H
+#ifndef _IMU_MATH_H
+#define _IMU_MATH_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // functions for modifying/converting quaternions
-void IMU_util_calcRefState  (float* q, float* ref);
-void IMU_util_calcRefVectUp (float* u, float* ref);
-void IMU_util_applyRef      (float* q, float* ref, float* q_out);
-void IMU_util_calcEuler     (float* q, float* E);
+void IMU_math_calcRefState  (float* q, float* ref);
+void IMU_math_calcRefVectUp (float* u, float* ref);
+void IMU_math_applyRef      (float* q, float* ref, float* q_out);
+void IMU_math_calcEuler     (float* q, float* E);
 
 #ifdef __cplusplus
 }

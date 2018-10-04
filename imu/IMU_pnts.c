@@ -21,29 +21,30 @@
 #define NULL 0
 
 // include statements 
-#include "IMU_calib_pnts.h"
+#include "IMU_pnts.h"
 
 // internally managed structures
-struct IMU_calib_pnts_config  config [IMU_MAX_INST]; 
-struct IMU_calib_pnts_state   state  [IMU_MAX_INST];
-struct IMU_calib_pnts_entry   table  [IMU_MAX_INST][IMU_CALIB_PNTS_SIZE];
-static unsigned short         IMU_calib_pnts_inst = 0;
+IMU_pnts_config  config [IMU_MAX_INST]; 
+IMU_pnts_state   state  [IMU_MAX_INST];
+IMU_pnts_entry   table  [IMU_MAX_INST][IMU_PNTS_SIZE];
+uint16_t         numInst = 0;
 
 
 /******************************************************************************
 * utility function - break stable
 ******************************************************************************/
 
-inline void break_stable_state(unsigned short id)
+inline void break_stable_state(
+  uint16_t                id)
 {
   state[id].curPnts++;
   state[id].index++;
-  if (state[id].index >= IMU_CALIB_PNTS_SIZE)
+  if (state[id].index >= IMU_PNTS_SIZE)
     state[id].index         = 0;
   if (state[id].curPnts != 0 && state[id].curPnts >= state[id].numPnts)
-    state[id].state         = IMU_calib_pnts_state_stop;
+    state[id].state         = IMU_pnts_enum_stop;
   else
-    state[id].state         = IMU_calib_pnts_state_reset; 
+    state[id].state         = IMU_pnts_enum_reset; 
 }
 
 
@@ -51,23 +52,23 @@ inline void break_stable_state(unsigned short id)
 * function to create new instance
 ******************************************************************************/
 
-int IMU_calib_pnts_init(
-  unsigned short                *id, 
-  struct IMU_calib_pnts_config  **pntr)
+int IMU_pnts_init(
+  uint16_t                *id, 
+  IMU_pnts_config         **pntr)
 {
   // check for device count overflow
-  if (IMU_calib_pnts_inst >= IMU_MAX_INST)
-    return IMU_CALIB_PNTS_INST_OVERFLOW;
+  if (numInst >= IMU_MAX_INST)
+    return IMU_PNTS_INST_OVERFLOW;
 
   // return inst handle and config struct
-  *id   = IMU_calib_pnts_inst; 
+  *id   = numInst; 
   *pntr = &config[*id];
-  IMU_calib_pnts_inst++;
+  numInst++;
   
   // initialize instance state  
   state[*id].numPnts             = 0;
   state[*id].curPnts             = 0;
-  state[*id].state               = IMU_calib_pnts_state_stop;
+  state[*id].state               = IMU_pnts_enum_stop;
   state[*id].index               = 0; 
   state[*id].aClock              = 0;
   state[*id].mClock              = 0;
@@ -81,13 +82,13 @@ int IMU_calib_pnts_init(
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calib_pnts_getState( 
-  unsigned short               id,  
-  struct IMU_calib_pnts_state  **pntr)
+int IMU_pnts_getState( 
+  uint16_t               id,  
+  IMU_pnts_state         **pntr)
 {
   // check for out-of-bounds condition
-  if (id > IMU_calib_pnts_inst - 1)
-    return IMU_CALIB_PNTS_BAD_INST; 
+  if (id > numInst - 1)
+    return IMU_PNTS_BAD_INST; 
 
   // return state
   *pntr = &state[id];
@@ -99,21 +100,21 @@ int IMU_calib_pnts_getState(
 * function to return instance last entry pointer
 ******************************************************************************/
 
-int IMU_calib_pnts_getEntry(
-  unsigned short                id, 
-  unsigned short                index,
-  struct IMU_calib_pnts_entry   **pntr)
+int IMU_pnts_getEntry(
+  uint16_t                id, 
+  uint16_t                index,
+  IMU_pnts_entry          **pntr)
 {
   // check for out-of-bounds condition
-  if (id > IMU_calib_pnts_inst - 1)
-    return IMU_CALIB_PNTS_BAD_INST;
+  if (id > numInst - 1)
+    return IMU_PNTS_BAD_INST;
   if (state[id].numPnts < 1)
-    return IMU_CALIB_PNTS_EMPTY_TABLE;
+    return IMU_PNTS_EMPTY_TABLE;
 
   // return state
-  short i = index - index - 1;
+  short i = index - state[id].index - 1;
   if (i < 0)
-    i += IMU_CALIB_PNTS_SIZE;
+    i += IMU_PNTS_SIZE;
   *pntr = &table[id][i];
   return 0;
 }
@@ -123,18 +124,18 @@ int IMU_calib_pnts_getEntry(
 * function to reset instance state
 ******************************************************************************/
 
-int IMU_calib_pnts_start(
-  unsigned short                id,
-  unsigned short                numPnts)
+int IMU_pnts_start(
+  uint16_t                id,
+  uint16_t                numPnts)
 {
   // check for out-of-bounds condition
-  if (id > IMU_calib_pnts_inst - 1)
-    return IMU_CALIB_PNTS_BAD_INST;
+  if (id > numInst - 1)
+    return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state 
   state[id].numPnts             = numPnts;
   state[id].curPnts             = 0;
-  state[id].state               = IMU_calib_pnts_state_reset;
+  state[id].state               = IMU_pnts_enum_reset;
   state[id].index               = 0; 
   state[id].aClock              = 0;
   state[id].mClock              = 0;
@@ -146,17 +147,17 @@ int IMU_calib_pnts_start(
 * function to reset instance state
 ******************************************************************************/
 
-int IMU_calib_pnts_stop(
-  unsigned short                id)
+int IMU_pnts_stop(
+  uint16_t                id)
 {
   // check for out-of-bounds condition
-  if (id > IMU_calib_pnts_inst - 1)
-    return IMU_CALIB_PNTS_BAD_INST;
+  if (id > numInst - 1)
+    return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state
-  state[id].state               = IMU_calib_pnts_state_stop;
-  state[id].aClock              = 0;
-  state[id].mClock              = 0;
+  state[id].state         = IMU_pnts_enum_stop;
+  state[id].aClock        = 0;
+  state[id].mClock        = 0;
   return 0;
 }
 
@@ -165,21 +166,21 @@ int IMU_calib_pnts_stop(
 * process gyroscope rates
 ******************************************************************************/
 
-int IMU_calib_pnts_updateGyro(
-  unsigned short                  id,
-  float                           t,
-  float                           *g,
-  struct IMU_calib_pnts_entry     **pntr)
+int IMU_pnts_updateGyro(
+  uint16_t                id,
+  float                   t,
+  float                   *g,
+  IMU_pnts_entry          **pntr)
 {
   // initialize entry pointer to NULL
   *pntr                 = NULL;
 
   // check for stop condition
-  if (state[id].state == IMU_calib_pnts_state_stop)
+  if (state[id].state == IMU_pnts_enum_stop)
     return state[id].curPnts;
 
   // define the variable
-  struct IMU_calib_pnts_entry *entry = &table[id][state[id].index];
+  IMU_pnts_entry *entry = &table[id][state[id].index];
 
   // calculate gyroscope deviation (estimates movement w/o bias) 
   float diff;
@@ -203,17 +204,17 @@ int IMU_calib_pnts_updateGyro(
     stable              = 1;
 
   // state entered upon initialization or stability break 
-  if (state[id].state == IMU_calib_pnts_state_reset) {
+  if (state[id].state == IMU_pnts_enum_reset) {
     entry->gAccum[0]    = g[0];
     entry->gAccum[1]    = g[1];
     entry->gAccum[2]    = g[2];
     state[id].tStable   = t;
     entry->tStart       = t;
-    state[id].state     = IMU_calib_pnts_state_moving;
+    state[id].state     = IMU_pnts_enum_moving;
   } 
 
   // state occurs prior to reaching "stable" 
-  else if (state[id].state == IMU_calib_pnts_state_moving) {
+  else if (state[id].state == IMU_pnts_enum_moving) {
     if (!stable) {
       entry->gAccum[0] += g[0];
       entry->gAccum[1] += g[1];
@@ -223,14 +224,14 @@ int IMU_calib_pnts_updateGyro(
       entry->gFltr[0]   = g[0];
       entry->gFltr[1]   = g[1];
       entry->gFltr[2]   = g[2];
-      state[id].state   = IMU_calib_pnts_state_stable;
+      state[id].state   = IMU_pnts_enum_stable;
       state[id].aClock  = 1;
       state[id].mClock  = 1;
     } 
   }
 
   // state occurs after reaching "stable" 
-  else if (state[id].state == IMU_calib_pnts_state_stable) {
+  else if (state[id].state == IMU_pnts_enum_stable) {
     if (stable) {
       entry->gFltr[0]   = alpha * g[0] + (1 - alpha) * entry->gFltr[0];
       entry->gFltr[1]   = alpha * g[1] + (1 - alpha) * entry->gFltr[1]; 
@@ -250,21 +251,21 @@ int IMU_calib_pnts_updateGyro(
 * process accelerometer vector
 ******************************************************************************/
 
-int IMU_calib_pnts_updateAccl(
-  unsigned short                  id, 
-  float                           t, 
-  float                           *a,
-  struct IMU_calib_pnts_entry     **pntr)
+int IMU_pnts_updateAccl(
+  uint16_t                id, 
+  float                   t, 
+  float                   *a,
+  IMU_pnts_entry          **pntr)
 {
   // initialize entry pointer to NULL
   *pntr                 = NULL;
 
   // verify system state (stable and sensor is enabled)  
-  if (!config[id].isAccl || state[id].state != IMU_calib_pnts_state_stable)
+  if (!config[id].isAccl || state[id].state != IMU_pnts_enum_stable)
     return state[id].curPnts;
 
   // define the variable
-  struct IMU_calib_pnts_entry *entry  = &table[id][state[id].index];
+  IMU_pnts_entry *entry  = &table[id][state[id].index];
 
   // save accelerometer data
   if (state[id].aClock) {
@@ -303,21 +304,21 @@ int IMU_calib_pnts_updateAccl(
 * process magnetometer vector
 ******************************************************************************/
 
-int IMU_calib_pnts_updateMagn(
-  unsigned short                  id, 
-  float                           t, 
-  float                           *m, 
-  struct IMU_calib_pnts_entry     **pntr)
+int IMU_pnts_updateMagn(
+  uint16_t                id, 
+  float                   t, 
+  float                   *m, 
+  IMU_pnts_entry          **pntr)
 {
   // initialize entry pointer to NULL
   *pntr                 = NULL;
 
   // verify system state (stable and sensor is enabled)
-  if (!config[id].isMagn || state[id].state != IMU_calib_pnts_state_stable)
+  if (!config[id].isMagn || state[id].state != IMU_pnts_enum_stable)
     return state[id].curPnts;
 
   // define the variable
-  struct IMU_calib_pnts_entry *entry = &table[id][state[id].index];
+  IMU_pnts_entry *entry = &table[id][state[id].index];
 
   // save accelerometer data
   if (state[id].mClock) {
@@ -356,23 +357,23 @@ int IMU_calib_pnts_updateMagn(
 * process gyroscope, accelerometer, and magnetometer vectors 
 ******************************************************************************/
 
-int IMU_calib_pnts_updateAll(
-  unsigned short                  id, 
-  float                           t, 
-  float                           *g, 
-  float                           *a, 
-  float                           *m,  
-  struct IMU_calib_pnts_entry     **pntr)
+int IMU_pnts_updateAll(
+  uint16_t                id, 
+  float                   t, 
+  float                   *g, 
+  float                   *a, 
+  float                   *m,  
+  IMU_pnts_entry          **pntr)
 {
   // define local variables
-  struct IMU_calib_pnts_entry     *entry;
+  IMU_pnts_entry          *entry;
 
   // update all three vectors
-  IMU_calib_pnts_updateGyro(id, t, g, &entry);
+  IMU_pnts_updateGyro(id, t, g, &entry);
   *pntr = entry; 
-  IMU_calib_pnts_updateAccl(id, t, a, &entry); 
+  IMU_pnts_updateAccl(id, t, a, &entry); 
   *pntr = (entry != NULL) ? entry : *pntr; 
-  IMU_calib_pnts_updateMagn(id, t, m, &entry); 
+  IMU_pnts_updateMagn(id, t, m, &entry); 
   *pntr = (entry != NULL) ? entry : *pntr; 
   return state[id].curPnts;
 }

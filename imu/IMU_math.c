@@ -19,7 +19,7 @@
 
 // include statements 
 #include <math.h>            // sqrt/trig
-#include "IMU_util_math.h"
+#include "IMU_math.h"
 
 
 
@@ -27,7 +27,9 @@
 * set reference using last system quaternion
 ******************************************************************************/
 
-void IMU_util_calcRefState(float* q, float* ref)
+void IMU_math_calcRefState(
+  float                 *q, 
+  float                 *ref)
 {
   ref[0]       =  q[0];
   ref[1]       = -q[1];
@@ -41,7 +43,9 @@ void IMU_util_calcRefState(float* q, float* ref)
 * assumes: normalized input
 ******************************************************************************/
 
-void IMU_util_calcRefVectUp(float* u, float* ref)
+void IMU_math_calcRefVectUp(
+  float                 *u, 
+  float                 *ref)
 {
   // updating reference based on accelerometer
   float  tmp         = sqrt(2.0 + 2.0 * u[2]);
@@ -63,7 +67,10 @@ void IMU_util_calcRefVectUp(float* u, float* ref)
 * apply reference quaterion to current state
 ******************************************************************************/
 
-void IMU_util_applyRef(float* q, float* ref, float* q_out)
+void IMU_math_applyRef(
+  float                 *q, 
+  float                 *ref, 
+  float                 *q_out)
 {
   q_out[0] = q[0]*ref[0] - q[1]*ref[1] - q[2]*ref[2] - q[3]*ref[3];
   q_out[1] = q[0]*ref[1] + q[1]*ref[0] + q[2]*ref[3] - q[3]*ref[2];
@@ -76,7 +83,9 @@ void IMU_util_applyRef(float* q, float* ref, float* q_out)
 * calculate euler angle
 ******************************************************************************/
 
-void IMU_util_calcEuler(float* q, float* E)
+void IMU_util_calcEuler(
+  float                 *q, 
+  float                 *E)
 {
   float Q[4] = {q[0]*q[0], q[1]*q[1], q[2]*q[2], q[3]*q[3]};
   E[0] = 180 * atan2(2*(q[1]*q[3]+q[3]*q[0]),  Q[1]-Q[2]-Q[3]+Q[0]) / M_PI;

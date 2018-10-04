@@ -20,11 +20,12 @@
 // include statements
 #include <stdio.h>
 #include <string.h>
-#include "IMU_util_file.h"
+#include <stdint.h>
+#include "IMU_file.h"
 
 // calib structure parsing inputs
-static const int   correct_config_size = 6;
-static const char* correct_config_name[] = {
+static const int   rect_config_size = 6;
+static const char* rect_config_name[] = {
   "gBias",
   "gMult",
   "aBias",
@@ -32,14 +33,14 @@ static const char* correct_config_name[] = {
   "mBias",
   "mMult"
 };
-enum correct_config_enum {
+typedef enum {
   gBias   = 0,
   gMult   = 1,
   aBias   = 2,
   aMult   = 3,
   mBias   = 4,
   mMult   = 5
-};
+} rect_config_enum;
 
 // config struct parsing inputs
 static const int   core_config_size = 17;
@@ -62,7 +63,7 @@ static const char* core_config_name[] = {
   "mAngThresh",
   "moveAlpha"
 };
-enum core_config_enum {
+typedef enum {
   isGyro            = 0,
   isAccl            = 1,
   isMagn            = 2,
@@ -80,11 +81,11 @@ enum core_config_enum {
   mAng              = 14,
   mAngThresh        = 15,
   moveAlpha         = 16
-};
+} core_config_enum;
 
 // calib structure parsing inputs
-static const int   calib_pnts_config_size = 9;
-static const char* calib_pnts_config_name[] = {
+static const int   pnts_config_size = 9;
+static const char* pnts_config_name[] = {
   "isAccl",
   "isMagn",
   "gAlpha",
@@ -95,7 +96,7 @@ static const char* calib_pnts_config_name[] = {
   "mAlpha",
   "mThresh"
 };
-enum calib_pnts_config_enum {
+typedef enum {
   pnts_isAccl      = 0,
   pnts_isMagn      = 1,
   pnts_gAlpha      = 2,
@@ -105,11 +106,11 @@ enum calib_pnts_config_enum {
   pnts_aThresh     = 6,
   pnts_mAlpha      = 7,
   pnts_mThresh     = 8
-};
+} pnts_config_enum;
 
 // calib structure parsing inputs
-static const int   calib_auto_config_size = 7;
-static const char* calib_auto_config_name[] = {
+static const int   auto_config_size = 7;
+static const char* auto_config_name[] = {
   "isGyro",
   "isAccl",
   "isMagn",
@@ -117,7 +118,7 @@ static const char* calib_auto_config_name[] = {
   "aAlpha",
   "mAlpha"
 };
-enum calib_auto_config_enum {
+typedef enum {
   auto_isGyro      = 0,
   auto_isAccl      = 1,
   auto_isMagn      = 2,
@@ -125,7 +126,7 @@ enum calib_auto_config_enum {
   auto_gThreshVal  = 4,
   auto_aAlpha      = 5,
   auto_mAlpha      = 6,
-};
+} auto_config_enum;
 
 // buffers used for parsing
 #define line_size 128
@@ -137,7 +138,10 @@ static char temp[line_size];
 * utility function - gets an array of comma seperated floats 
 ******************************************************************************/
 
-int get_floats(char* args, float* vals, int size)
+int get_floats(
+  char                 *args, 
+  float                *vals, 
+  int                  size)
 {
   char* cur;
   int   i;
@@ -156,7 +160,9 @@ int get_floats(char* args, float* vals, int size)
 * utility function - converts true/false string into boolean 
 ******************************************************************************/
 
-int get_bool(char* args, unsigned char* val)
+int get_bool(
+  char                 *args, 
+  uint8_t              *val)
 {
   char temp[16];
   sscanf(args, "%s", temp);
@@ -167,7 +173,7 @@ int get_bool(char* args, unsigned char* val)
            strcmp(temp, "false,") == 0)
     *val = 0;
   else
-    return IMU_UTIL_FILE_INVALID_BOOL;
+    return IMU_FILE_INVALID_BOOL;
   return 0;
 }
 
@@ -176,7 +182,10 @@ int get_bool(char* args, unsigned char* val)
 * utility function - writes json float array (includes brackets and commas)
 ******************************************************************************/
 
-void write_floats(FILE* file, float* vals, int size)
+void write_floats(
+  FILE                 *file, 
+  float                *vals, 
+  int                  size)
 {
   fprintf(file, "[");
   for (int i=0; i<size-1; i++)
@@ -189,7 +198,9 @@ void write_floats(FILE* file, float* vals, int size)
 * utility function - write boolean string
 ******************************************************************************/
 
-void write_bool(FILE* file, unsigned char val)
+void write_bool(
+  FILE                 *file, 
+  uint8_t              val)
 {
   if (val == 0)
     fprintf(file, "false,\n");
@@ -202,12 +213,15 @@ void write_bool(FILE* file, unsigned char val)
 * utility function - gets a line and seperates field from arguments
 ******************************************************************************/
 
-int IMU_util_getLine(FILE *file, char** field, char** args)
+int IMU_file_getLine(
+  FILE                 *file, 
+  char                 **field, 
+  char                 **args)
 {
-  char* status; 
+  char *status; 
   status  = fgets(line, line_size, file);
   if (status == NULL)
-    return IMU_UTIL_FILE_UNEXPECTED_EOF;
+    return IMU_FILE_UNEXPECTED_EOF;
   *field = strtok(line, ":"); 
   sscanf(*field, "%s", temp);
   if (strcmp(temp, "{") == 0)
@@ -215,7 +229,7 @@ int IMU_util_getLine(FILE *file, char** field, char** args)
   if (strcmp(temp, "}") == 0)
     return 2;
   if (temp == NULL)
-    return IMU_UTIL_FILE_MISSING_ARGS;
+    return IMU_FILE_MISSING_ARGS;
   *args = strtok(NULL, "\n");
   strtok(*field, "\"");
   *field = strtok(NULL, "\""); 
@@ -227,14 +241,17 @@ int IMU_util_getLine(FILE *file, char** field, char** args)
 * utility function - matches field string with respective enum type
 ******************************************************************************/
 
-int IMU_util_getField(char* field, const char* names[], int size)
+int IMU_file_getField(
+  char                  *field, 
+  const char            *names[], 
+  int                   size)
 {
   int   i;
   for (i=0; i<size; i++) {
     if (strcmp(field, names[i]) == 0)
       return i;
   } 
-  return IMU_UTIL_FILE_INVALID_FIELD; 
+  return IMU_FILE_INVALID_FIELD; 
 }
 
 
@@ -242,34 +259,32 @@ int IMU_util_getField(char* field, const char* names[], int size)
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readCore(
-  char*                         filename,
-  struct IMU_core_config        *config)
+int IMU_file_readCore(
+  char*                 filename,
+  IMU_core_config       *config)
 {
   // define internal variables
-  FILE*                         file;
-  char*                         field;
-  char*                         args;
-  enum core_config_enum         type;
-  int                           status;
+  FILE                  *file;
+  char                  *field;
+  char                  *args;
+  core_config_enum      type;
+  int                   status;
 
   // open json file containg config struct
   file = fopen(filename, "r");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // main loop that parse json file line by line
   while (1) {
 
     // read line and parse field/args
-    status = IMU_util_getLine(file, &field, &args);
+    status = IMU_file_getLine(file, &field, &args);
     if (status > 1 || status < 0)
       break;
 
     // extract arguments for the specified field
-    type = IMU_util_getField(field, 
-      core_config_name, 
-      core_config_size);
+    type = IMU_file_getField(field, core_config_name, core_config_size);
     if      (type == isGyro)
       get_bool(args, &config->isGyro);
     else if (type == isAccl)
@@ -316,17 +331,17 @@ int IMU_util_readCore(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeCore(
-  char*                         filename,
-  struct IMU_core_config        *config)
+int IMU_file_writeCore(
+  char                  *filename,
+  IMU_core_config       *config)
 {
   // define internal variables
-  FILE*    file;
+  FILE                  *file;
 
   // open file to contain json struct
   file = fopen(filename, "w");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
@@ -359,35 +374,33 @@ int IMU_util_writeCore(
 * reads calibration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readCorrect( 
-  char*                         filename,
-  struct IMU_correct_config     *config)
+int IMU_file_readRect( 
+  char                  *filename,
+  IMU_rect_config       *config)
 {
   // define internal variables
-  FILE*                         file;
-  char*                         field;
-  char*                         args;
-  enum correct_config_enum      type;
-  int                           status;
+  FILE                  *file;
+  char                  *field;
+  char                  *args;
+  rect_config_enum      type;
+  int                   status;
 
   // open json file containg config struct
   file = fopen(filename, "r");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = IMU_util_getLine(file, &field, &args);
+    status = IMU_file_getLine(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
       break;
 
     // extract arguments for the specified field 
-    type = IMU_util_getField(field, 
-      correct_config_name, 
-      correct_config_size);
+    type = IMU_file_getField(field, rect_config_name, rect_config_size);
     if      (type == gBias) 
       get_floats(args, config->gBias, 3);
     else if (type == gMult)
@@ -412,17 +425,17 @@ int IMU_util_readCorrect(
 * writes calibration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeCorrect(
-  char*                         filename,
-  struct IMU_correct_config     *config)
+int IMU_util_writeRect(
+  char                  *filename,
+  IMU_rect_config       *config)
 {
   // define internal variables
-  FILE*    file;
+  FILE                  *file;
 
   // open file to contain json struct
   file = fopen(filename, "w");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
@@ -444,35 +457,33 @@ int IMU_util_writeCorrect(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readCalibPnts(
-  char*                         filename,
-  struct IMU_calib_pnts_config  *config)
+int IMU_util_readPnts(
+  char                  *filename,
+  IMU_pnts_config       *config)
 {
   // define internal variables
-  FILE*                         file;
-  char*                         field;
-  char*                         args;
-  enum calib_pnts_config_enum   type;     
-  int                           status;
+  FILE*                 file;
+  char*                 field;
+  char*                 args;
+  pnts_config_enum      type;     
+  int                   status;
 
   // open json file containg config struct
   file = fopen(filename, "r");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = IMU_util_getLine(file, &field, &args);
+    status = IMU_file_getLine(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
       break;
 
     // extract arguments for the specified field
-    type = IMU_util_getField(field, 
-      calib_pnts_config_name, 
-      calib_pnts_config_size);
+    type = IMU_file_getField(field, pnts_config_name, pnts_config_size);
     if      (type == pnts_isAccl)
       get_bool(args, &config->isAccl);
     else if (type == pnts_isMagn)
@@ -503,17 +514,17 @@ int IMU_util_readCalibPnts(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeCalibPnts(
-  char*                         filename,
-  struct IMU_calib_pnts_config  *config)
+int IMU_util_writePnts(
+  char                  *filename,
+  IMU_pnts_config       *config)
 {
   // define internal variables
-  FILE*    file;
+  FILE                  *file;
 
   // open file to contain json struct
   file = fopen(filename, "w");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
@@ -538,46 +549,44 @@ int IMU_util_writeCalibPnts(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readCalibAuto(
-  char*                         filename,
-  struct IMU_calib_auto_config  *config)
+int IMU_util_readAuto(
+  char                  *filename,
+  IMU_auto_config       *config)
 {
   // define internal variables
-  FILE*                         file;
-  char*                         field;
-  char*                         args;
-  enum calib_auto_config_enum   type;     
-  int                           status;
+  FILE                  *file;
+  char                  *field;
+  char                  *args;
+  auto_config_enum      type;     
+  int                   status;
 
   // open json file containg config struct
   file = fopen(filename, "r");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = IMU_util_getLine(file, &field, &args);
+    status = IMU_file_getLine(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
       break;
 
     // extract arguments for the specified field
-    type = IMU_util_getField(field, 
-      calib_auto_config_name, 
-      calib_auto_config_size);
+    type = IMU_file_getField(field, auto_config_name, auto_config_size);
     if      (type == auto_isGyro)
       get_bool(args, &config->isGyro);
     else if (type == auto_isAccl)
       get_bool(args, &config->isAccl);
-    else if (type == pnts_isMagn)
+    else if (type == auto_isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == pnts_gAlpha)
+    else if (type == auto_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
-    else if (type == pnts_aAlpha)
+    else if (type == auto_aAlpha)
       sscanf(args, "%f", &config->aAlpha);
-    else if (type == pnts_mAlpha)
+    else if (type == auto_mAlpha)
       sscanf(args, "%f", &config->mAlpha);
   }
 
@@ -591,17 +600,17 @@ int IMU_util_readCalibAuto(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeCalibAuto(
-  char*                         filename,
-  struct IMU_calib_auto_config  *config)
+int IMU_util_writeAuto(
+  char                 *filename,
+  IMU_auto_config      *config)
 {
   // define internal variables
-  FILE*    file;
+  FILE                 *file;
 
   // open file to contain json struct
   file = fopen(filename, "w");
   if (file == NULL)
-    return IMU_UTIL_FILE_INVALID_FILE;
+    return IMU_FILE_INVALID_FILE;
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");

@@ -24,122 +24,98 @@
 extern "C" {
 #endif
 
+// include statements
+#include <stdint.h>
+
+// define status codes
+#define IMU_CORE_GYRO_STABLE     1
+
 // define error codes
 #define IMU_CORE_INST_OVERFLOW  -1
 #define IMU_CORE_BAD_INST       -2
 
 
 // define the configuration structure (values tuned for a part)
-struct IMU_core_config {
-  unsigned char       enable;          // enable IMU core capability
-  unsigned char       isGyro;          // enable gyroscope data
-  unsigned char       isAccl;          // enable accelerometer data
-  unsigned char       isMagn;          // enable magnetometer data
-  unsigned char       isStable;        // enable detection of no movement
-  unsigned char       isFOM;           // enable FOM calculation
-  unsigned char       isMove;          // enable acceleration estimate
-  float               gThreshVal;      // no motion threshold value
-  float               gThreshTime;     // no motion threhsold time
-  float               aWeight;         // accelerometer IMU weight
-  float               aMag;            // gravity magnitude
-  float               aMagThresh;      // gravity magnitude error thresh
-  float               mWeight;         // magnetometer IMU weight
-  float               mMag;            // magnetic north magn  
-  float               mMagThresh;      // magnetic north magn error thres
-  float               mAng;            // magnetic north angle
-  float               mAngThresh;      // magnetic north angle error thresh
-  float               moveAlpha;       // acceleration estimate alpha
-};
+typedef struct {
+  unsigned char        enable;          // enable IMU core capability
+  unsigned char        isGyro;          // enable gyroscope data
+  unsigned char        isAccl;          // enable accelerometer data
+  unsigned char        isMagn;          // enable magnetometer data
+  unsigned char        isStable;        // enable detection of no movement
+  unsigned char        isFOM;           // enable FOM calculation
+  unsigned char        isMove;          // enable acceleration estimate
+  float                gThreshVal;      // no motion threshold value
+  float                gThreshTime;     // no motion threhsold time
+  float                aWeight;         // accelerometer IMU weight
+  float                aMag;            // gravity magnitude
+  float                aMagThresh;      // gravity magnitude error thresh
+  float                mWeight;         // magnetometer IMU weight
+  float                mMag;            // magnetic north magn  
+  float                mMagThresh;      // magnetic north magn error thres
+  float                mAng;            // magnetic north angle
+  float                mAngThresh;      // magnetic north angle error thresh
+  float                moveAlpha;       // acceleration estimate alpha
+} IMU_core_config;
 
 // define internal state struct (captures internal IMU state)
-struct IMU_core_state {
-  float               t;               // last datum time
-  float               t_stable;        // last "unstable" time
-  float               SEq[4];          // current quaterion
-  float               A[3];            // last acceleration estimate
-  float               A_rot[3];        // rotated acceleration estimate
-  float               a[3];            // last acclerometer datum
-  unsigned char       aReset;          // accelerometer reset signal
-  unsigned char       mReset;          // magnetometer reset signal
-};
+typedef struct {
+  float                t;              // last datum time
+  float                t_move;         // last "unstable" time
+  float                SEq[4];         // current quaterion
+  float                A[3];           // last acceleration estimate
+  float                A_rot[3];       // rotated acceleration estimate
+  float                a[3];           // last acclerometer datum
+  unsigned char        aReset;         // accelerometer reset signal
+  unsigned char        mReset;         // magnetometer reset signal
+} IMU_core_state;
 
 // define datum enumertation type for FOM structure
-enum IMU_core_sensor_type {
-  IMU_core_all                = 0,
-  IMU_core_gyro               = 1,
-  IMU_core_accl               = 2,
-  IMU_core_magn               = 3
-};
+typedef enum {
+  IMU_core_all         = 0,
+  IMU_core_gyro        = 1,
+  IMU_core_accl        = 2,
+  IMU_core_magn        = 3
+} IMU_core_sensor;
 
 // define sensor figure of merit
-struct IMU_core_FOM_gyro {
-  unsigned char               stable;
-};
-struct IMU_core_FOM_accl {
-  float                       aMag;
-  float                       aDelt;
-};
-struct IMU_core_FOM_magn {
-  float                       mMag;
-  float                       mAng;
-  float                       mDelt;
-};
+typedef struct {
+  unsigned char        stable;
+} IMU_core_FOM_gyro;
+typedef struct {
+  float                aMag;
+  float                aDelt;
+} IMU_core_FOM_accl;
+typedef struct {
+  float                mMag;
+  float                mAng;
+  float                mDelt;
+} IMU_core_FOM_magn; 
 
 // define figure of merit 
-struct IMU_core_FOM {
-  enum IMU_core_sensor_type   type;
+typedef struct {
+  IMU_core_sensor      type;
   union {
-    struct IMU_core_FOM_gyro  gyro;
-    struct IMU_core_FOM_accl  accl;
-    struct IMU_core_FOM_magn  magn;
-  }                           data;
-};
-
+    IMU_core_FOM_gyro  gyro;
+    IMU_core_FOM_accl  accl;
+    IMU_core_FOM_magn  magn;
+  }                    data;
+} IMU_core_FOM;
 
 // data structure access functions
-int IMU_core_init(
-  unsigned short              *id, 
-  struct IMU_core_config      **config);
-int IMU_core_getConfig(
-  unsigned short              id,
-  struct IMU_core_config      **config);
-int IMU_core_getState(
-  unsigned short              id,  
-  struct IMU_core_state       **state);
+int IMU_core_init      (uint16_t *id, IMU_core_config **config);
+int IMU_core_getConfig (uint16_t id,  IMU_core_config **config);
+int IMU_core_getState  (uint16_t id,  IMU_core_state  **state);
 
 
 // general operation functions 
-int IMU_core_reset(
-  unsigned short              id);
-float* IMU_core_deadRecon(
-  unsigned short              id,  
-  float                       t, 
-  float                       *a, 
-  float                       *m);
-float* IMU_core_estmGyro(
-  unsigned short              id, 
-  float                       t, 
-  float                       *g, 
-  struct IMU_core_FOM         *FOM);
-float* IMU_core_estmAccl(
-  unsigned short              id, 
-  float                       t, 
-  float                       *a, 
-  struct IMU_core_FOM         *FOM);
-float* IMU_core_estmMagn(
-  unsigned short              id, 
-  float                       t, 
-  float                       *m, 
-  struct IMU_core_FOM         *FOM);
-float* IMU_core_estmAll(
-  unsigned short              id, 
-  float                       t, 
-  float                       *g, 
-  float                       *a, 
-  float                       *m,  
-  struct IMU_core_FOM         FOM[3]);
-float* IMU_core_estmMove(
-  unsigned short              id);
+int IMU_core_reset    (uint16_t id);
+int IMU_core_zero     (uint16_t id, float t, float *a, float *m, float *);
+int IMU_core_estmGyro (uint16_t id, float t, float *g, float*, IMU_core_FOM*);
+int IMU_core_estmAccl (uint16_t id, float t, float *a, float*, IMU_core_FOM*);
+int IMU_core_estmMagn (uint16_t id, float t, float *m, float*, IMU_core_FOM*);
+int IMU_core_estmAll  (uint16_t id, float t, float *g, float *a, float *m,
+                       float *, IMU_core_FOM FOM[3]);
+int IMU_core_estmMove (uint16_t id, float *);
 
 
 #ifdef __cplusplus

@@ -19,39 +19,40 @@
 
 // include statements 
 #include <string.h>           // memcpy
-#include "IMU_calib_ctrl.h"
+#include "IMU_calb.h"
 
 // internally managed variables
-struct IMU_calib_ctrl_state   state [IMU_MAX_INST];     
-struct IMU_calib_pnts_entry   table [IMU_MAX_INST][IMU_CALIB_CTRL_SIZE]; 
-static unsigned short         numInst = 0;
-static const unsigned short   modePnts[2] = {4, 6};
+IMU_calb_state   state [IMU_MAX_INST];     
+IMU_pnts_entry   table [IMU_MAX_INST][IMU_CALB_SIZE]; 
+uint16_t         numInst = 0;
+uint16_t         modePnts[2] = {4, 6};
 
 
 /******************************************************************************
 * function to return instance state pointer
 ******************************************************************************/
 
-void calib_4pnt(unsigned short id)
+void calb_4pnt(
+  uint16_t                id)
 {
   // define internal variables
-  struct IMU_correct_config *correct = &state[id].correct;
+  IMU_rect_config *rect = &state[id].rect;
   int i;
 
   // process completed points table
-  correct->gBias[0]     = 0;
-  correct->gBias[1]     = 0;
-  correct->gBias[2]     = 0;
-  correct->mBias[0]     = 0;
-  correct->mBias[1]     = 0;
-  correct->mBias[2]     = 0;
+  rect->gBias[0]     = 0;
+  rect->gBias[1]     = 0;
+  rect->gBias[2]     = 0;
+  rect->mBias[0]     = 0;
+  rect->mBias[1]     = 0;
+  rect->mBias[2]     = 0;
   for (i=0; i<4; i++) {
-    correct->gBias[0]  += table[id][i].gFltr[0];
-    correct->gBias[1]  += table[id][i].gFltr[1];
-    correct->gBias[2]  += table[id][i].gFltr[2];
-    correct->mBias[0]  += table[id][i].mFltr[0];
-    correct->mBias[1]  += table[id][i].mFltr[1];
-    correct->mBias[2]  += table[id][i].mFltr[2];
+    rect->gBias[0]  += table[id][i].gFltr[0];
+    rect->gBias[1]  += table[id][i].gFltr[1];
+    rect->gBias[2]  += table[id][i].gFltr[2];
+    rect->mBias[0]  += table[id][i].mFltr[0];
+    rect->mBias[1]  += table[id][i].mFltr[1];
+    rect->mBias[2]  += table[id][i].mFltr[2];
   }
 }
 
@@ -60,32 +61,33 @@ void calib_4pnt(unsigned short id)
 * function to return instance state pointer
 ******************************************************************************/
 
-void calib_6pnt(unsigned short id)
+void calb_6pnt(
+  uint16_t                id)
 { 
   // define internal variables
-  struct IMU_correct_config *correct = &state[id].correct;
+  IMU_rect_config *rect = &state[id].rect;
   int i;
 
   // process completed points table
-  correct->gBias[0]     = 0;
-  correct->gBias[1]     = 0;
-  correct->gBias[2]     = 0;
-  correct->aBias[0]     = 0;
-  correct->aBias[1]     = 0;
-  correct->aBias[2]     = 0;
-  correct->mBias[0]     = 0;
-  correct->mBias[1]     = 0;
-  correct->mBias[2]     = 0;
+  rect->gBias[0]     = 0;
+  rect->gBias[1]     = 0;
+  rect->gBias[2]     = 0;
+  rect->aBias[0]     = 0;
+  rect->aBias[1]     = 0;
+  rect->aBias[2]     = 0;
+  rect->mBias[0]     = 0;
+  rect->mBias[1]     = 0;
+  rect->mBias[2]     = 0;
   for (i=0; i<6; i++) {
-    correct->gBias[0]  += table[id][i].gFltr[0];
-    correct->gBias[1]  += table[id][i].gFltr[1];
-    correct->gBias[2]  += table[id][i].gFltr[2];
-    correct->aBias[0]  += table[id][i].aFltr[0];
-    correct->aBias[1]  += table[id][i].aFltr[1];
-    correct->aBias[2]  += table[id][i].aFltr[2];
-    correct->mBias[0]  += table[id][i].mFltr[0];
-    correct->mBias[1]  += table[id][i].mFltr[1];
-    correct->mBias[2]  += table[id][i].mFltr[2];
+    rect->gBias[0]  += table[id][i].gFltr[0];
+    rect->gBias[1]  += table[id][i].gFltr[1];
+    rect->gBias[2]  += table[id][i].gFltr[2];
+    rect->aBias[0]  += table[id][i].aFltr[0];
+    rect->aBias[1]  += table[id][i].aFltr[1];
+    rect->aBias[2]  += table[id][i].aFltr[2];
+    rect->mBias[0]  += table[id][i].mFltr[0];
+    rect->mBias[1]  += table[id][i].mFltr[1];
+    rect->mBias[2]  += table[id][i].mFltr[2];
   }
 }
 
@@ -94,11 +96,12 @@ void calib_6pnt(unsigned short id)
 * function to create new instance
 ******************************************************************************/
 
-int IMU_calib_ctrl_init(unsigned short *id)
+int IMU_calb_init(
+  uint16_t                *id)
 {
   // check for device count overflow
   if (numInst >= IMU_MAX_INST)
-    return IMU_CALIB_PNTS_INST_OVERFLOW;
+    return IMU_CALB_INST_OVERFLOW;
 
   // return inst handle and config struct
   *id   = numInst; 
@@ -113,21 +116,21 @@ int IMU_calib_ctrl_init(unsigned short *id)
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calib_ctrl_start(
-  unsigned short                id,
-  enum IMU_calib_ctrl_mode      mode,
-  struct IMU_correct_config     *correct,
-  struct IMU_core_config        *core)
+int IMU_calb_start(
+  uint16_t                id,
+  IMU_calb_mode           mode,
+  IMU_rect_config         *rect,
+  IMU_core_config         *core)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
-    return IMU_CALIB_CTRL_BAD_INST;
+  if (id > numInst-1)
+    return IMU_CALB_BAD_INST;
 
   // copy current entry to the table
   state[id].numPnts             = 0;
   state[id].mode                = mode;
-  memcpy(&state[id].correct, correct, sizeof(struct IMU_correct_config));
-  memcpy(&state[id].core,    core,    sizeof(struct IMU_core_config));
+  memcpy(&state[id].rect, rect, sizeof(IMU_rect_config));
+  memcpy(&state[id].core, core, sizeof(IMU_core_config));
   return 0;
 }
 
@@ -136,18 +139,18 @@ int IMU_calib_ctrl_start(
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calib_ctrl_update(
-  unsigned short                id, 
-  struct IMU_calib_pnts_entry   *pntr,
-  struct IMU_calib_ctrl_FOM     *FOM)
+int IMU_calb_update(
+  uint16_t                id, 
+  IMU_pnts_entry          *pntr,
+  IMU_calb_FOM            *FOM)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
-    return IMU_CALIB_CTRL_BAD_INST; 
+  if (id > numInst-1)
+    return IMU_CALB_BAD_INST; 
 
   // copy current entry to the table
-  struct IMU_calib_pnts_entry *entry = &table[id][state[id].numPnts]; 
-  memcpy(entry, pntr, sizeof(struct IMU_calib_pnts_entry));
+  IMU_pnts_entry *entry = &table[id][state[id].numPnts]; 
+  memcpy(entry, pntr, sizeof(IMU_pnts_entry));
   state[id].numPnts++;
 
   // determine whether enough points were collected
@@ -155,15 +158,15 @@ int IMU_calib_ctrl_update(
     return 0;
  
   // perform the specified calibration routine
-  if      (state[id].mode == IMU_calib_ctrl_4pnt)
+  if      (state[id].mode == IMU_calb_4pnt)
     calib_4pnt(id);
-  else if (state[id].mode == IMU_calib_ctrl_6pnt)
+  else if (state[id].mode == IMU_calb_6pnt)
     calib_6pnt(id);
   else
-    return IMU_CALIB_CTRL_BAD_MODE; 
+    return IMU_CALB_BAD_MODE; 
     
   // exit fuction
-  return IMU_CALIB_CTRL_UPDATED;
+  return IMU_CALB_UPDATED;
 }
 
 
@@ -171,16 +174,16 @@ int IMU_calib_ctrl_update(
 * copy calibration result to IMU_correct structure 
 ******************************************************************************/
 
-int IMU_calib_ctrl_save(
-  unsigned short                id,
-  struct IMU_correct_config     *correct)
+int IMU_calb_save(
+  uint16_t                id,
+  IMU_rect_config         *rect)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
-    return IMU_CALIB_CTRL_BAD_INST;
+  if (id > numInst-1)
+    return IMU_CALB_BAD_INST;
 
-  // copy current entry to the IMU_correct config 
-  memcpy(correct, &state[id].correct, sizeof(struct IMU_correct_config));
+  // copy current entry to the IMU rectify config 
+  memcpy(rect, &state[id].rect, sizeof(IMU_rect_config));
   return 0;
 }
 
@@ -189,11 +192,11 @@ int IMU_calib_ctrl_save(
 * update IMU_correct structure w/ autocal results
 ******************************************************************************/
 
-int IMU_calib_ctrl_auto(
-  unsigned short                id,
-  struct IMU_calib_auto_state   *state,
-  struct IMU_correct_config     *correct,
-  struct IMU_core_config        *core)
+int IMU_calb_auto(
+  uint16_t                id,
+  IMU_auto_state          *state,
+  IMU_rect_config         *rect,
+  IMU_core_config         *core)
 {
   return 0;
 }

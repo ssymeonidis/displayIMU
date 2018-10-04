@@ -18,25 +18,25 @@
 */
 
 // include statements 
-#include "IMU_calib_auto.h"
+#include "IMU_auto.h"
 
 // internally managed structures
-struct IMU_calib_auto_config  config [IMU_MAX_INST]; 
-struct IMU_calib_auto_state   state  [IMU_MAX_INST];
-static unsigned short         numInst = 0;
+IMU_auto_config  config [IMU_MAX_INST]; 
+IMU_auto_state   state  [IMU_MAX_INST];
+uint16_t         numInst = 0;
 
 
 /******************************************************************************
 * function to create new instance
 ******************************************************************************/
 
-int IMU_calib_auto_init(
-  unsigned short                *id, 
-  struct IMU_calib_auto_config  **pntr)
+int IMU_auto_init(
+  uint16_t                *id, 
+  IMU_auto_config         **pntr)
 {
   // check for device count overflow
   if (numInst >= IMU_MAX_INST)
-    return IMU_CALIB_AUTO_INST_OVERFLOW;
+    return IMU_AUTO_INST_OVERFLOW;
 
   // return inst handle and config struct
   *id   = numInst; 
@@ -52,13 +52,13 @@ int IMU_calib_auto_init(
 * function to return instance config pointer
 ******************************************************************************/
 
-int IMU_calib_auto_getConfig(
-  unsigned short                id,
-  struct IMU_calib_auto_config  **pntr)
+int IMU_auto_getConfig(
+  uint16_t                id,
+  IMU_auto_config         **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
-    return IMU_CALIB_AUTO_BAD_INST;
+  if (id > numInst-1)
+    return IMU_AUTO_BAD_INST;
 
   // return state
   *pntr = &config[id];
@@ -70,13 +70,13 @@ int IMU_calib_auto_getConfig(
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calib_auto_getState( 
-  unsigned short                id,  
-  struct IMU_calib_auto_state   **pntr)
+int IMU_auto_getState( 
+  uint16_t                id,  
+  IMU_auto_state          **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
-    return IMU_CALIB_AUTO_BAD_INST; 
+  if (id > numInst-1)
+    return IMU_AUTO_BAD_INST; 
 
   // return state
   *pntr = &state[id];
@@ -88,10 +88,10 @@ int IMU_calib_auto_getState(
 * process gyroscope rates
 ******************************************************************************/
 
-int IMU_calib_auto_updateGyro(
-  unsigned short                id,
-  float                         t,
-  float                         *g)
+int IMU_auto_updateGyro(
+  uint16_t                id,
+  float                   t,
+  float                   *g)
 {
   return 0;
 }
@@ -101,10 +101,10 @@ int IMU_calib_auto_updateGyro(
 * process accelerometer vector
 ******************************************************************************/
 
-int IMU_calib_auto_updateAccl(
-  unsigned short                id, 
-  float                         t, 
-  float                         *a)
+int IMU_auto_updateAccl(
+  uint16_t                id, 
+  float                   t, 
+  float                   *a)
 {
   return 0;
 }
@@ -114,10 +114,10 @@ int IMU_calib_auto_updateAccl(
 * process magnetometer vector
 ******************************************************************************/
 
-int IMU_calib_auto_updateMagn(
-  unsigned short                id, 
-  float                         t, 
-  float                         *m) 
+int IMU_auto_updateMagn(
+  uint16_t                id, 
+  float                   t, 
+  float                   *m) 
 {
   return 0;
 }
@@ -127,12 +127,12 @@ int IMU_calib_auto_updateMagn(
 * process gyroscope, accelerometer, and magnetometer vectors 
 ******************************************************************************/
 
-int IMU_calib_auto_updateAll(
-  unsigned short                id, 
-  float                         t, 
-  float                         *g, 
-  float                         *a, 
-  float                         *m)  
+int IMU_auto_updateAll(
+  uint16_t                id, 
+  float                   t, 
+  float                   *g, 
+  float                   *a, 
+  float                   *m)  
 {
   return 0;
 }
@@ -142,10 +142,10 @@ int IMU_calib_auto_updateAll(
 * process gyroscope, accelerometer, and magnetometer vectors
 ******************************************************************************/
 
-int IMU_calib_auto_updateFOM(
-  unsigned short                id,  
-  struct IMU_core_FOM           *FOM,
-  unsigned short                size)
+int IMU_auto_updateFOM(
+  uint16_t                id,  
+  IMU_core_FOM            *FOM,
+  uint16_t                size)
 {
   return 0;
 }
