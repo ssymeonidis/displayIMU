@@ -33,6 +33,7 @@ extern "C" {
 
 // define configuration structure
 struct IMU_calib_auto_config {
+  unsigned char          enable;          // enable system characterization
   unsigned char          isGyro;          // process gyroscope data
   unsigned char          isAccl;          // process accelerometer data
   unsigned char          isMagn;          // process magnetometer data
@@ -82,7 +83,8 @@ int IMU_calib_auto_updateAll(
   float                           *m);
 int IMU_calib_auto_updateFOM(
   unsigned short                  id,
-  struct IMU_core_FOM             *FOM);
+  struct IMU_core_FOM             *FOM,
+  unsigned short                  size);
 
 
 #ifdef __cplusplus

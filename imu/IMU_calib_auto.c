@@ -144,7 +144,8 @@ int IMU_calib_auto_updateAll(
 
 int IMU_calib_auto_updateFOM(
   unsigned short                id,  
-  struct IMU_core_FOM           *FOM)  
+  struct IMU_core_FOM           *FOM,
+  unsigned short                size)
 {
   return 0;
 }

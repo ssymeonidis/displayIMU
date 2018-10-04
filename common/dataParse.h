@@ -28,15 +28,6 @@
 #include "IMU_calib_ctrl.h"
 
 
-// define controls for dataParse
-struct dataParse_config{
-  unsigned char                  isCorrect;
-  unsigned char                  isCore;
-  unsigned char                  isCalibPnts; 
-  unsigned char                  isCalibAuto;
-  unsigned char                  isCalibCtrl;
-};
-
 // define IMU state structure
 struct dataParse_state {
   unsigned short                 id_correct;
@@ -68,14 +59,15 @@ struct dataParse_sensor {
 struct dataParse_estim {
   float                          ang[3];
   float                          move[3];  
-  IMU_core_FOM                   FOM;
+  IMU_calib_pnts_entry           *pnt;
+  IMU_core_FOM                   FOMcore[3];
+  IMU_calib_ctrl_FOM             FOMcalib;
 };
 
 
 // define the sensor data structure
 extern dataParse_sensor  sensor;
 extern dataParse_estim   estim;
-extern dataParse_config  configIMU;
 extern dataParse_state   stateIMU;
 
 // initialization function

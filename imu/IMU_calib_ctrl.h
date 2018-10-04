@@ -30,12 +30,12 @@ extern "C" {
 #endif
 
 // define status codes
-#define IMU_CALIB_CTRL_UPDATED        1
+#define IMU_CALIB_CTRL_UPDATED         1
 
 // define error codes
-#define IMU_CALIB_CTRL_INST_OVERFLOW -1
-#define IMU_CALIB_CTRL_BAD_INST      -2
-#define IMU_CALIB_CTRL_BAD_MODE      -3
+#define IMU_CALIB_CTRL_INST_OVERFLOW  -1
+#define IMU_CALIB_CTRL_BAD_INST       -2
+#define IMU_CALIB_CTRL_BAD_MODE       -3
 
 
 // define calibration types

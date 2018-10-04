@@ -31,6 +31,7 @@ extern "C" {
 
 // define the calibration structure (values tuned for each unit)
 struct IMU_correct_config {
+  unsigned char  enable;          // enable IMU sensor correction
   float          gBias[3];        // gyroscope biases
   float          gMult[9];        // gyroscope transform matrix 
   float          aBias[3];        // accelerometer biases

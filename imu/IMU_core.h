@@ -25,12 +25,13 @@ extern "C" {
 #endif
 
 // define error codes
-#define IMU_CORE_INST_OVERFLOW -1
-#define IMU_CORE_BAD_INST      -2
+#define IMU_CORE_INST_OVERFLOW  -1
+#define IMU_CORE_BAD_INST       -2
 
 
 // define the configuration structure (values tuned for a part)
 struct IMU_core_config {
+  unsigned char       enable;          // enable IMU core capability
   unsigned char       isGyro;          // enable gyroscope data
   unsigned char       isAccl;          // enable accelerometer data
   unsigned char       isMagn;          // enable magnetometer data

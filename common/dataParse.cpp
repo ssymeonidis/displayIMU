@@ -33,10 +33,9 @@
 
 
 // define the sensor data structure
-struct dataParse_sensor    sensor;
-struct dataParse_estim     estim;
-struct dataParse_config    configIMU;
-struct dataParse_state     stateIMU;
+struct dataParse_sensor  sensor;
+struct dataParse_estim   estim;
+struct dataParse_state   stateIMU;
 
 // define internal/external variables
 bool                       is_log_data    = false;
@@ -213,9 +212,16 @@ void data_process_datum()
       &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
     IMU_correct_all(0, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
       sensor.gyroCor, sensor.acclCor, sensor.magnCor);
+    IMU_calib_pnts_updateAll(0, sensor.lastTime, sensor.gyroRaw, sensor.acclRaw,
+      sensor.magnRaw, &estim.pnt); estim.pnt = NULL; 
     state = IMU_core_estmAll(0, sensor.lastTime, sensor.gyroCor, 
-      sensor.acclCor, sensor.magnCor, &estim.FOM);
+      sensor.acclCor, sensor.magnCor, estim.FOMcore);
     IMU_util_calcEuler(state, estim.ang);
+    if (estim.pnt != NULL) 
+      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
+    IMU_calib_auto_updateAll(0, sensor.lastTime, sensor.gyroCor, sensor.acclCor,
+      sensor.magnCor); 
+    IMU_calib_auto_updateFOM(0, estim.FOMcore, 3); 
   }
 
   // process gyroscope data (async sensors)
@@ -223,8 +229,13 @@ void data_process_datum()
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
     IMU_correct_gyro(0, sensor.gyroRaw, sensor.gyroCor);
-    state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, &estim.FOM);
+    IMU_calib_pnts_updateGyro(0, sensor.lastTime, sensor.gyroRaw, &estim.pnt);
+    state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, estim.FOMcore);
     IMU_util_calcEuler(state, estim.ang);
+    if (estim.pnt != NULL) 
+      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
+    IMU_calib_auto_updateGyro(0, sensor.lastTime, sensor.gyroCor);
+    IMU_calib_auto_updateFOM(0, estim.FOMcore, 1); 
   }
 
   // process accelerometer data (async sensors)
@@ -232,8 +243,13 @@ void data_process_datum()
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
     IMU_correct_accl(0, sensor.acclRaw, sensor.acclCor);
-    state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, &estim.FOM);
+    IMU_calib_pnts_updateAccl(0, sensor.lastTime, sensor.acclRaw, &estim.pnt);
+    state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, estim.FOMcore);
     IMU_util_calcEuler(state, estim.ang);
+    if (estim.pnt != NULL) 
+      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
+    IMU_calib_auto_updateAccl(0, sensor.lastTime, sensor.acclCor);
+    IMU_calib_auto_updateFOM(0, estim.FOMcore, 1); 
   }
 
   // process magnetometer data (async sensors)
@@ -241,8 +257,13 @@ void data_process_datum()
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
     IMU_correct_magn(0, sensor.magnRaw, sensor.magnCor);
-    state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, &estim.FOM);
+    IMU_calib_pnts_updateMagn(0, sensor.lastTime, sensor.magnRaw, &estim.pnt);
+    state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, estim.FOMcore);
     IMU_util_calcEuler(state, estim.ang);
+    if (estim.pnt != NULL) 
+      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
+    IMU_calib_auto_updateMagn(0, sensor.lastTime, sensor.magnCor);
+    IMU_calib_auto_updateFOM(0, estim.FOMcore, 1); 
   }
 }
 
