@@ -1,3 +1,4 @@
 export IMU_MAX_INST=4
 export IMU_TYPE=float
-export IMU_CALIB_TABLE_SIZE=1
+export IMU_CALIB_PNTS_SIZE=1
+export IMU_CALIB_CTRL_SIZE=20

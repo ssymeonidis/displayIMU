@@ -1,5 +1,5 @@
 /*
- * This file is part of quaternion-based displayIMU C++/QT code base
+ * This file is part of quaternion-based displayIMU C/C++/QT code base
  * (https://github.com/ssymeonidis/displayIMU.git)
  * Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
  * Time (SMRT) Processing Solutions
@@ -26,7 +26,7 @@
 // internally managed structures
 struct IMU_calib_pnts_config  config [IMU_MAX_INST]; 
 struct IMU_calib_pnts_state   state  [IMU_MAX_INST];
-struct IMU_calib_pnts_entry   table  [IMU_MAX_INST][IMU_CALIB_TABLE_SIZE];
+struct IMU_calib_pnts_entry   table  [IMU_MAX_INST][IMU_CALIB_PNTS_SIZE];
 static unsigned short         IMU_calib_pnts_inst = 0;
 
 
@@ -38,7 +38,7 @@ inline void break_stable_state(unsigned short id)
 {
   state[id].curPnts++;
   state[id].index++;
-  if (state[id].index >= IMU_CALIB_TABLE_SIZE)
+  if (state[id].index >= IMU_CALIB_PNTS_SIZE)
     state[id].index         = 0;
   if (state[id].curPnts != 0 && state[id].curPnts >= state[id].numPnts)
     state[id].state         = stop;
@@ -113,7 +113,7 @@ int IMU_calib_pnts_getEntry(
   // return state
   short i = index - index - 1;
   if (i < 0)
-    i += IMU_CALIB_TABLE_SIZE;
+    i += IMU_CALIB_PNTS_SIZE;
   *pntr = &table[id][i];
   return 0;
 }

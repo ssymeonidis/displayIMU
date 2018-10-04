@@ -5,13 +5,15 @@ BINDIR      = ../bin
 OBJDIR      = obj
 RM          = rm -f  
 TARGET_LIB  = $(BINDIR)/libIMU.so 
-DEFINES     = -D"IMU_MAX_INST=${IMU_MAX_INST}" \
-              -D"IMU_TYPE=${IMU_TYPE}"         \
-              -D"IMU_CALIB_TABLE_SIZE=${IMU_CALIB_TABLE_SIZE}"
+DEFINES     = -D"IMU_MAX_INST=${IMU_MAX_INST}"                 \
+              -D"IMU_TYPE=${IMU_TYPE}"                         \
+              -D"IMU_CALIB_PNTS_SIZE=${IMU_CALIB_PNTS_SIZE}"   \
+              -D"IMU_CALIB_CTRL_SIZE=${IMU_CALIB_CTRL_SIZE}"
 SRCS        = IMU_util_file.c   \
               IMU_util_math.c   \
               IMU_correct.c     \
               IMU_calib_pnts.c  \
+              IMU_calib_ctrl.c  \
               IMU_core.c 
 
 OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
@@ -26,4 +28,3 @@ $(OBJDIR)/%.o: %.c
 
 clean:
 	-${RM} ${TARGET_LIB} ${OBJS}
-

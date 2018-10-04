@@ -1,5 +1,5 @@
 /*
- * This file is part of quaternion-based displayIMU C++/QT code base
+ * This file is part of quaternion-based displayIMU C/C++/QT code base
  * (https://github.com/ssymeonidis/displayIMU.git)
  * Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
  * Time (SMRT) Processing Solutions
@@ -84,7 +84,7 @@ struct IMU_core_FOM_magn {
   float                       mDelt;
 };
 
-// define figure of merit structure
+// define figure of merit 
 struct IMU_core_FOM {
   enum IMU_core_sensor_type   type;
   union {

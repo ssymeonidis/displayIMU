@@ -1,5 +1,5 @@
 /*
- * This file is part of quaternion-based displayIMU C++/QT code base
+ * This file is part of quaternion-based displayIMU C/C++/QT code base
  * (https://github.com/ssymeonidis/displayIMU.git)
  * Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
  * Time (SMRT) Processing Solutions
@@ -51,7 +51,7 @@ enum calib_pnts_state {
   stable                 = 3
 };
 
-// define internal state (unique to instance)
+// define internal state 
 struct IMU_calib_pnts_state {
   unsigned short         numPnts;
   unsigned short         curPnts;
