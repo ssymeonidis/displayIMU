@@ -21,6 +21,7 @@
 #define _IMU_CALIB_CTRL_H
 
 #include "IMU_calib_pnts.h"
+#include "IMU_calib_auto.h"
 #include "IMU_core.h"
 #include "IMU_correct.h"
 
@@ -59,12 +60,12 @@ struct IMU_calib_ctrl_FOM {
 };
 
 
-// general operation functions
+// general operation 
 int IMU_calib_ctrl_init(
   unsigned short                  *id);
 int IMU_calib_ctrl_start(
   unsigned short                  id,
-  enum IMU_calib_ctrl_mode         mode,
+  enum IMU_calib_ctrl_mode        mode,
   struct IMU_correct_config       *correct,
   struct IMU_core_config          *core);
 int IMU_calib_ctrl_update(
@@ -74,6 +75,11 @@ int IMU_calib_ctrl_update(
 int IMU_calib_ctrl_save(
   unsigned short                  id,
   struct IMU_correct_config       *correct);
+int IMU_calib_ctrl_auto(
+  unsigned short                  id,
+  struct IMU_calib_auto_state     *state,
+  struct IMU_correct_config       *correct,
+  struct IMU_core_config          *core);
 
 
 #ifdef __cplusplus

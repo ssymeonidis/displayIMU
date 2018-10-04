@@ -169,7 +169,7 @@ int IMU_calib_ctrl_update(
 
 
 /******************************************************************************
-* function to return instance state pointer
+* copy calibration result to IMU_correct structure 
 ******************************************************************************/
 
 int IMU_calib_ctrl_save(
@@ -182,5 +182,19 @@ int IMU_calib_ctrl_save(
 
   // copy current entry to the table
   memcpy(correct, &state[id].correct, sizeof(struct IMU_correct_config));
+  return 0;
+}
+
+
+/******************************************************************************
+* update IMU_correct structure w/ autocal results
+******************************************************************************/
+
+int IMU_calib_ctrl_auto(
+  unsigned short                id,
+  struct IMU_calib_auto_state   *state,
+  struct IMU_correct_config     *correct,
+  struct IMU_core_config        *core)
+{
   return 0;
 }
