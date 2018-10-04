@@ -21,9 +21,10 @@
 #define _IMU_UTIL_FILE_H
 
 // include statements
-#include "IMU_core.h"
 #include "IMU_correct.h"
+#include "IMU_core.h"
 #include "IMU_calib_pnts.h"
+#include "IMU_calib_auto.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,6 +61,12 @@ int IMU_util_readCalibPnts(
 int IMU_util_writeCalibPnts(
   char*                         filename,
   struct IMU_calib_pnts_config  *config);
+int IMU_util_readCalibAuto(
+  char*                         filename,
+  struct IMU_calib_auto_config  *config);
+int IMU_util_writeCalibAuto(
+  char*                         filename,
+  struct IMU_calib_auto_config  *config);
 
 
 

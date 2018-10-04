@@ -32,6 +32,9 @@ int main(int argc, char *argv[])
   int           data_thread_id;
   pthread_t     data_thread;
 
+  // initialize the IMU data structures
+  data_init(NULL, NULL, NULL, NULL);
+
   // create the display
   QApplication  app    (argc,   argv);
   windowGUI     window;
@@ -41,9 +44,9 @@ int main(int argc, char *argv[])
 
   // launch data parser (seperate thread)
   if (argc < 4) 
-    data_init_UDP(port_no);
+    data_start_UDP(port_no);
   else
-    data_init_CSV(argv[3]);
+    data_start_CSV(argv[3]);
   pthread_create(&data_thread, NULL, data_run, &data_thread_id);
 
   // start the main app

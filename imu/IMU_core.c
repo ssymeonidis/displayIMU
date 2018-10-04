@@ -294,7 +294,7 @@ float* IMU_core_estmGyro(
 {
   // initialize figure of merit
   if (FOM != NULL) {
-    FOM->type                  = gyro;
+    FOM->type                  = IMU_core_gyro;
     FOM->data.gyro.stable      = 0;
   }
   
@@ -355,7 +355,7 @@ float* IMU_core_estmAccl(
 
   // initialize figure of merit
   if (FOM != NULL) {
-    FOM->type             = accl;
+    FOM->type             = IMU_core_accl;
     FOM->data.accl.aMag   = 0;
     FOM->data.accl.aDelt  = 0;
   }
@@ -430,7 +430,7 @@ float* IMU_core_estmMagn(
 {
   // initialize figure of merit
   if (FOM != NULL) {
-    FOM->type            = magn;
+    FOM->type            = IMU_core_magn;
     FOM->data.magn.mMag  = 0;
     FOM->data.magn.mAng  = 0;
     FOM->data.magn.mDelt = 0;
@@ -546,12 +546,12 @@ float* IMU_core_estmAll(
   if (state[id].mReset && state[id].aReset) {
     // initialize to known value
     if (FOM != NULL) {
-      FOM[0].type             = gyro;
+      FOM[0].type             = IMU_core_gyro;
       FOM[0].data.gyro.stable = 0.0;
-      FOM[1].type             = accl;
+      FOM[1].type             = IMU_core_accl;
       FOM[1].data.accl.aMag   = 0.0;
       FOM[1].data.accl.aDelt  = 0.0;
-      FOM[2].type             = magn;
+      FOM[2].type             = IMU_core_magn;
       FOM[2].data.magn.mMag   = 0.0;
       FOM[2].data.magn.mAng   = 0.0;
       FOM[2].data.magn.mDelt  = 0.0;

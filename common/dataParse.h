@@ -44,10 +44,10 @@ struct dataParse_state {
   unsigned short                 id_calib_pnts;
   unsigned short                 id_calib_auto;
   unsigned short                 id_calib_ctrl;
-  struct IMU_correct_config      config_correct;
-  struct IMU_core_config         config_core;
-  struct IMU_calib_pnts_config   config_calib_pnts;
-  struct IMU_calib_auto_config   config_calib_auto;
+  struct IMU_correct_config      *config_correct;
+  struct IMU_core_config         *config_core;
+  struct IMU_calib_pnts_config   *config_calib_pnts;
+  struct IMU_calib_auto_config   *config_calib_auto;
 };
 
 // define input sensor data structure
@@ -73,10 +73,10 @@ struct dataParse_estim {
 
 
 // define the sensor data structure
-extern dataParse_config  config;
-extern dataParse_state   state;
 extern dataParse_sensor  sensor;
 extern dataParse_estim   estim;
+extern dataParse_config  configIMU;
+extern dataParse_state   stateIMU;
 
 // initialization function
 void data_init(

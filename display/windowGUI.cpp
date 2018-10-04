@@ -56,15 +56,15 @@ windowGUI::~windowGUI()
 * iniatialize IMU structures and GUI elements 
 ******************************************************************************/
 
-void windowGUI::initIMU(char* core_config_file, char* correct_config_file)
+void windowGUI::initIMU(char* correct_config_file, char* core_config_file)
 {
-  if (core_config_file != NULL) {
-    IMU_util_readCore(core_config_file, core_config);
-    config_write();
-  }
   if (correct_config_file  != NULL) {
     IMU_util_readCorrect(correct_config_file, correct_config);
     calib_write();
+  }
+  if (core_config_file != NULL) {
+    IMU_util_readCore(core_config_file, core_config);
+    config_write();
   }
 }
 
@@ -75,24 +75,24 @@ void windowGUI::initIMU(char* core_config_file, char* correct_config_file)
 
 void windowGUI::config_write()
 {
-  struct IMU_core_config config = state.config_core;
-  ui->noGyro->setChecked(!config->isGyro);
-  ui->noAccl->setChecked(!config->isAccl);
-  ui->noMagn->setChecked(!config->isMagn);
-  ui->noStable->setChecked(!config->isStable);
-  ui->noFOM->setChecked(!config->isFOM);
-  ui->noMove->setChecked(!config->isMove);
-  ui->gThreshVal->setText(QString::number(config->gThreshVal, 'f', 2));
-  ui->gThreshTime->setText(QString::number(config->gThreshTime, 'f', 2));
-  ui->aWeight->setText(QString::number(config->aWeight, 'f', 2));
-  ui->aMag->setText(QString::number(config->aMag, 'f', 2));
-  ui->aMagThresh->setText(QString::number(config->aMagThresh, 'f', 2));
-  ui->mWeight->setText(QString::number(config->mWeight, 'f', 2));
-  ui->mMag->setText(QString::number(config->mMag, 'f', 2));
-  ui->mMagThresh->setText(QString::number(config->mMagThresh, 'f', 2));
-  ui->mAng->setText(QString::number(config->mAng, 'f', 2));
-  ui->mAngThresh->setText(QString::number(config->mAngThresh, 'f', 2));
-  ui->moveAlpha->setText(QString::number(config->moveAlpha, 'f', 2));
+  struct IMU_core_config *core = stateIMU.config_core;
+  ui->noGyro->setChecked(!core->isGyro);
+  ui->noAccl->setChecked(!core->isAccl);
+  ui->noMagn->setChecked(!core->isMagn);
+  ui->noStable->setChecked(!core->isStable);
+  ui->noFOM->setChecked(!core->isFOM);
+  ui->noMove->setChecked(!core->isMove);
+  ui->gThreshVal->setText(QString::number(core->gThreshVal, 'f', 2));
+  ui->gThreshTime->setText(QString::number(core->gThreshTime, 'f', 2));
+  ui->aWeight->setText(QString::number(core->aWeight, 'f', 2));
+  ui->aMag->setText(QString::number(core->aMag, 'f', 2));
+  ui->aMagThresh->setText(QString::number(core->aMagThresh, 'f', 2));
+  ui->mWeight->setText(QString::number(core->mWeight, 'f', 2));
+  ui->mMag->setText(QString::number(core->mMag, 'f', 2));
+  ui->mMagThresh->setText(QString::number(core->mMagThresh, 'f', 2));
+  ui->mAng->setText(QString::number(core->mAng, 'f', 2));
+  ui->mAngThresh->setText(QString::number(core->mAngThresh, 'f', 2));
+  ui->moveAlpha->setText(QString::number(core->moveAlpha, 'f', 2));
 }
 
 
@@ -102,24 +102,24 @@ void windowGUI::config_write()
 
 void windowGUI::config_read()
 {
-  struct IMU_core_config config = state.config_core;
-  config->isGyro       = !ui->noGyro->isChecked();
-  config->isAccl       = !ui->noAccl->isChecked();
-  config->isMagn       = !ui->noMagn->isChecked();
-  config->isStable     = !ui->noStable->isChecked();
-  config->isFOM        = !ui->noFOM->isChecked();
-  config->isMove       = !ui->noMove->isChecked();
-  config->gThreshVal   = ui->gThreshVal->text().toFloat();
-  config->gThreshTime  = ui->gThreshTime->text().toFloat();
-  config->aWeight      = ui->aWeight->text().toFloat();
-  config->aMag         = ui->aMag->text().toFloat();
-  config->aMagThresh   = ui->aMagThresh->text().toFloat();
-  config->mWeight      = ui->mWeight->text().toFloat();
-  config->mMag         = ui->mMag->text().toFloat();
-  config->mMagThresh   = ui->mMagThresh->text().toFloat();
-  config->mAng         = ui->mAng->text().toFloat();
-  config->mAngThresh   = ui->mAngThresh->text().toFloat();
-  config->moveAlpha    = ui->moveAlpha->text().toFloat();
+  struct IMU_core_config *core = stateIMU.config_core;
+  core->isGyro       = !ui->noGyro->isChecked();
+  core->isAccl       = !ui->noAccl->isChecked();
+  core->isMagn       = !ui->noMagn->isChecked();
+  core->isStable     = !ui->noStable->isChecked();
+  core->isFOM        = !ui->noFOM->isChecked();
+  core->isMove       = !ui->noMove->isChecked();
+  core->gThreshVal   = ui->gThreshVal->text().toFloat();
+  core->gThreshTime  = ui->gThreshTime->text().toFloat();
+  core->aWeight      = ui->aWeight->text().toFloat();
+  core->aMag         = ui->aMag->text().toFloat();
+  core->aMagThresh   = ui->aMagThresh->text().toFloat();
+  core->mWeight      = ui->mWeight->text().toFloat();
+  core->mMag         = ui->mMag->text().toFloat();
+  core->mMagThresh   = ui->mMagThresh->text().toFloat();
+  core->mAng         = ui->mAng->text().toFloat();
+  core->mAngThresh   = ui->mAngThresh->text().toFloat();
+  core->moveAlpha    = ui->moveAlpha->text().toFloat();
 }
 
 
@@ -129,7 +129,7 @@ void windowGUI::config_read()
 
 void windowGUI::calib_write()
 {
-  struct IMU_correct_config config = state.config_correct;
+  struct IMU_correct_config *config = stateIMU.config_correct;
   ui->gBias0->setText(QString::number(config->gBias[0], 'f', 2));
   ui->gBias1->setText(QString::number(config->gBias[1], 'f', 2));
   ui->gBias2->setText(QString::number(config->gBias[2], 'f', 2));
@@ -175,7 +175,7 @@ void windowGUI::calib_write()
 
 void windowGUI::calib_read()
 {
-  struct IMU_correct_config config = state.config_correct;
+  struct IMU_correct_config *config = stateIMU.config_correct;
   config->gBias[0] = ui->gBias0->text().toFloat();
   config->gBias[1] = ui->gBias1->text().toFloat();
   config->gBias[2] = ui->gBias2->text().toFloat();

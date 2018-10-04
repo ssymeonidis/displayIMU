@@ -27,15 +27,16 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include "IMU_util_file.h"
 #include "IMU_util_math.h"
 #include "dataParse.h"
 
 
 // define the sensor data structure
-struct dataParse_config    config;
-struct dataParse_state     state;
 struct dataParse_sensor    sensor;
 struct dataParse_estim     estim;
+struct dataParse_config    configIMU;
+struct dataParse_state     stateIMU;
 
 // define internal/external variables
 bool                       is_log_data    = false;
@@ -71,21 +72,21 @@ void data_init(
   char*  file_calib_auto)
 {
   // initialize and get handles to all IMU functions
-  IMU_correct_init     (&state.id_correct,     &state.config_correct);
-  IMU_core_init        (&state.id_core,        &state.config_core);
-  IMU_calib_pnts_init  (&state.id_calib_pnts,  &state.config_calib_pnts);
-  IMU_calib_auto_init  (&state.id_calib_auto,  &state.config_calib_auto);
-  IMU_calib_ctrl_init  (&state.id_calib_ctrl,  &state.config_calib_ctrl);
+  IMU_correct_init     (&stateIMU.id_correct,     &stateIMU.config_correct);
+  IMU_core_init        (&stateIMU.id_core,        &stateIMU.config_core);
+  IMU_calib_pnts_init  (&stateIMU.id_calib_pnts,  &stateIMU.config_calib_pnts);
+  IMU_calib_auto_init  (&stateIMU.id_calib_auto,  &stateIMU.config_calib_auto);
+  IMU_calib_ctrl_init  (&stateIMU.id_calib_ctrl);
 
   // read config structures from json files
   if (!file_correct)      
-    IMU_util_readCorrect    (file_correct,     &state.config_correct);
+    IMU_util_readCorrect    (file_correct,        stateIMU.config_correct);
   if (!file_core)
-    IMU_util_readCore       (file_core,        &state.config_core);
+    IMU_util_readCore       (file_core,           stateIMU.config_core);
   if (!file_calib_pnts)
-    IMU_util_readCalibPnts  (file_calib_pnts,  &state.config_calib_pnts);
+    IMU_util_readCalibPnts  (file_calib_pnts,     stateIMU.config_calib_pnts);
   if (!file_calib_auto)
-    IMU_util_readCalibAuto  (file_calib_auto,  &state.config_calib_auto);
+    IMU_util_readCalibAuto  (file_calib_auto,     stateIMU.config_calib_auto);
 }
 
 
@@ -213,7 +214,7 @@ void data_process_datum()
     IMU_correct_all(0, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
       sensor.gyroCor, sensor.acclCor, sensor.magnCor);
     state = IMU_core_estmAll(0, sensor.lastTime, sensor.gyroCor, 
-      sensor.acclCor, sensor.magnCor, &FOM);
+      sensor.acclCor, sensor.magnCor, &estim.FOM);
     IMU_util_calcEuler(state, estim.ang);
   }
 
@@ -222,7 +223,7 @@ void data_process_datum()
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
     IMU_correct_gyro(0, sensor.gyroRaw, sensor.gyroCor);
-    state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, &FOM);
+    state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, &estim.FOM);
     IMU_util_calcEuler(state, estim.ang);
   }
 
@@ -231,7 +232,7 @@ void data_process_datum()
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
     IMU_correct_accl(0, sensor.acclRaw, sensor.acclCor);
-    state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, &FOM);
+    state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, &estim.FOM);
     IMU_util_calcEuler(state, estim.ang);
   }
 
@@ -240,7 +241,7 @@ void data_process_datum()
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
     IMU_correct_magn(0, sensor.magnRaw, sensor.magnCor);
-    state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, &FOM);
+    state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, &estim.FOM);
     IMU_util_calcEuler(state, estim.ang);
   }
 }
@@ -265,10 +266,11 @@ void data_close()
 * "continous run" function handle for recreating a thread 
 ******************************************************************************/
 
-void *data_run(void*)
+void* data_run(void*)
 {
   // main processing loop
   while(!exit_thread) {
     data_process_datum();
   }
+  return 0;
 }

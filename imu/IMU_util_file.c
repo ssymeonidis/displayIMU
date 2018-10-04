@@ -96,15 +96,35 @@ static const char* calib_pnts_config_name[] = {
   "mThresh"
 };
 enum calib_pnts_config_enum {
-  calib_isAccl      = 0,
-  calib_isMagn      = 1,
-  calib_gAlpha      = 2,
-  calib_gThreshVal  = 3,
-  calib_gThreshTime = 4,
-  calib_aAlpha      = 5,
-  calib_aThresh     = 6,
-  calib_mAlpha      = 7,
-  calib_mThresh     = 8
+  pnts_isAccl      = 0,
+  pnts_isMagn      = 1,
+  pnts_gAlpha      = 2,
+  pnts_gThreshVal  = 3,
+  pnts_gThreshTime = 4,
+  pnts_aAlpha      = 5,
+  pnts_aThresh     = 6,
+  pnts_mAlpha      = 7,
+  pnts_mThresh     = 8
+};
+
+// calib structure parsing inputs
+static const int   calib_auto_config_size = 7;
+static const char* calib_auto_config_name[] = {
+  "isGyro",
+  "isAccl",
+  "isMagn",
+  "gAlpha",
+  "aAlpha",
+  "mAlpha"
+};
+enum calib_auto_config_enum {
+  auto_isGyro      = 0,
+  auto_isAccl      = 1,
+  auto_isMagn      = 2,
+  auto_gAlpha      = 3,
+  auto_gThreshVal  = 4,
+  auto_aAlpha      = 5,
+  auto_mAlpha      = 6,
 };
 
 // buffers used for parsing
@@ -453,23 +473,23 @@ int IMU_util_readCalibPnts(
     type = IMU_util_getField(field, 
       calib_pnts_config_name, 
       calib_pnts_config_size);
-    if      (type == calib_isAccl)
+    if      (type == pnts_isAccl)
       get_bool(args, &config->isAccl);
-    else if (type == calib_isMagn)
+    else if (type == pnts_isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == calib_gAlpha)
+    else if (type == pnts_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
-    else if (type == calib_gThreshVal)
+    else if (type == pnts_gThreshVal)
       sscanf(args, "%f", &config->gThreshVal);
-    else if (type == calib_gThreshTime)
+    else if (type == pnts_gThreshTime)
       sscanf(args, "%f", &config->gThreshTime);
-    else if (type == calib_aAlpha)
+    else if (type == pnts_aAlpha)
       sscanf(args, "%f", &config->aAlpha);
-    else if (type == calib_aThresh)
+    else if (type == pnts_aThresh)
       sscanf(args, "%f", &config->aThresh);
-    else if (type == calib_mAlpha)
+    else if (type == pnts_mAlpha)
       sscanf(args, "%f", &config->mAlpha);
-    else if (type == calib_mThresh)
+    else if (type == pnts_mThresh)
       sscanf(args, "%f", &config->mThresh);
   }
 
@@ -505,7 +525,92 @@ int IMU_util_writeCalibPnts(
   fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
   fprintf(file, "  \"aThresh\": %0.2f,\n",         config->aThresh);
   fprintf(file, "  \"mAlpha\": %0.2f,\n",          config->mAlpha);
-  fprintf(file, "  \"mThresh\": %0.2f,\n",         config->mThresh);
+  fprintf(file, "  \"mThresh\": %0.2f\n",          config->mThresh);
+  fprintf(file, "}\n");
+
+  // exit function
+  fclose(file);
+  return 0;
+}
+
+
+/******************************************************************************
+* reads configuration json file into memory (structure)
+******************************************************************************/
+
+int IMU_util_readCalibAuto(
+  char*                         filename,
+  struct IMU_calib_auto_config  *config)
+{
+  // define internal variables
+  FILE*                         file;
+  char*                         field;
+  char*                         args;
+  enum calib_auto_config_enum   type;     
+  int                           status;
+
+  // open json file containg config struct
+  file = fopen(filename, "r");
+  if (file == NULL)
+    return IMU_UTIL_FILE_INVALID_FILE;
+
+  // main loop that parse json file line by line
+  while (1) {
+    // read line and parse field/args
+    status = IMU_util_getLine(file, &field, &args);
+    if (status == 1)
+      continue;
+    if (status > 1 || status < 0)
+      break;
+
+    // extract arguments for the specified field
+    type = IMU_util_getField(field, 
+      calib_auto_config_name, 
+      calib_auto_config_size);
+    if      (type == auto_isGyro)
+      get_bool(args, &config->isGyro);
+    else if (type == auto_isAccl)
+      get_bool(args, &config->isAccl);
+    else if (type == pnts_isMagn)
+      get_bool(args, &config->isMagn);
+    else if (type == pnts_gAlpha)
+      sscanf(args, "%f", &config->gAlpha);
+    else if (type == pnts_aAlpha)
+      sscanf(args, "%f", &config->aAlpha);
+    else if (type == pnts_mAlpha)
+      sscanf(args, "%f", &config->mAlpha);
+  }
+
+  // exit function
+  fclose(file);
+  return 0;
+}
+
+
+/******************************************************************************
+* writes configuration structure to a json file
+******************************************************************************/
+
+int IMU_util_writeCalibAuto(
+  char*                         filename,
+  struct IMU_calib_auto_config  *config)
+{
+  // define internal variables
+  FILE*    file;
+
+  // open file to contain json struct
+  file = fopen(filename, "w");
+  if (file == NULL)
+    return IMU_UTIL_FILE_INVALID_FILE;
+
+  // write contents to json file one line at a time
+  fprintf(file, "{\n");
+  fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
+  fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
+  fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
+  fprintf(file, "  \"gAlpha\": %0.2f,\n",          config->gAlpha);
+  fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
+  fprintf(file, "  \"mAlpha\": %0.2f\n",           config->mAlpha);
   fprintf(file, "}\n");
 
   // exit function

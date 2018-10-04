@@ -46,10 +46,10 @@ struct IMU_calib_pnts_config {
 
 // point collection internal state
 enum calib_pnts_state {
-  IMU_calib_pnts_stop    = 0,
-  IMU_calib_pnts_reset   = 1,
-  IMU_calib_pnts_moving  = 2,
-  IMU_calib_pnts_stable  = 3
+  IMU_calib_pnts_state_stop    = 0,
+  IMU_calib_pnts_state_reset   = 1,
+  IMU_calib_pnts_state_moving  = 2,
+  IMU_calib_pnts_state_stable  = 3
 };
 
 // define internal state 

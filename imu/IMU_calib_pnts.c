@@ -41,9 +41,9 @@ inline void break_stable_state(unsigned short id)
   if (state[id].index >= IMU_CALIB_PNTS_SIZE)
     state[id].index         = 0;
   if (state[id].curPnts != 0 && state[id].curPnts >= state[id].numPnts)
-    state[id].state         = stop;
+    state[id].state         = IMU_calib_pnts_state_stop;
   else
-    state[id].state         = reset; 
+    state[id].state         = IMU_calib_pnts_state_reset; 
 }
 
 
@@ -67,7 +67,7 @@ int IMU_calib_pnts_init(
   // initialize instance state  
   state[*id].numPnts             = 0;
   state[*id].curPnts             = 0;
-  state[*id].state               = stop;
+  state[*id].state               = IMU_calib_pnts_state_stop;
   state[*id].index               = 0; 
   state[*id].aClock              = 0;
   state[*id].mClock              = 0;
@@ -134,7 +134,7 @@ int IMU_calib_pnts_start(
   // ininitialize inst state 
   state[id].numPnts             = numPnts;
   state[id].curPnts             = 0;
-  state[id].state               = reset;
+  state[id].state               = IMU_calib_pnts_state_reset;
   state[id].index               = 0; 
   state[id].aClock              = 0;
   state[id].mClock              = 0;
@@ -154,7 +154,7 @@ int IMU_calib_pnts_stop(
     return IMU_CALIB_PNTS_BAD_INST;
 
   // ininitialize inst state
-  state[id].state               = stop;
+  state[id].state               = IMU_calib_pnts_state_stop;
   state[id].aClock              = 0;
   state[id].mClock              = 0;
   return 0;
@@ -175,7 +175,7 @@ int IMU_calib_pnts_updateGyro(
   *pntr                 = NULL;
 
   // check for stop condition
-  if (state[id].state == stop)
+  if (state[id].state == IMU_calib_pnts_state_stop)
     return state[id].curPnts;
 
   // define the variable
@@ -203,17 +203,17 @@ int IMU_calib_pnts_updateGyro(
     stable              = 1;
 
   // state entered upon initialization or stability break 
-  if (state[id].state == reset) {
+  if (state[id].state == IMU_calib_pnts_state_reset) {
     entry->gAccum[0]    = g[0];
     entry->gAccum[1]    = g[1];
     entry->gAccum[2]    = g[2];
     state[id].tStable   = t;
     entry->tStart       = t;
-    state[id].state     = moving;
+    state[id].state     = IMU_calib_pnts_state_moving;
   } 
 
   // state occurs prior to reaching "stable" 
-  else if (state[id].state == moving) {
+  else if (state[id].state == IMU_calib_pnts_state_moving) {
     if (!stable) {
       entry->gAccum[0] += g[0];
       entry->gAccum[1] += g[1];
@@ -223,14 +223,14 @@ int IMU_calib_pnts_updateGyro(
       entry->gFltr[0]   = g[0];
       entry->gFltr[1]   = g[1];
       entry->gFltr[2]   = g[2];
-      state[id].state   = stable;
+      state[id].state   = IMU_calib_pnts_state_stable;
       state[id].aClock  = 1;
       state[id].mClock  = 1;
     } 
   }
 
   // state occurs after reaching "stable" 
-  else if (state[id].state == stable) {
+  else if (state[id].state == IMU_calib_pnts_state_stable) {
     if (stable) {
       entry->gFltr[0]   = alpha * g[0] + (1 - alpha) * entry->gFltr[0];
       entry->gFltr[1]   = alpha * g[1] + (1 - alpha) * entry->gFltr[1]; 
@@ -260,7 +260,7 @@ int IMU_calib_pnts_updateAccl(
   *pntr                 = NULL;
 
   // verify system state (stable and sensor is enabled)  
-  if (!config[id].isAccl || state[id].state != stable)
+  if (!config[id].isAccl || state[id].state != IMU_calib_pnts_state_stable)
     return state[id].curPnts;
 
   // define the variable
@@ -313,7 +313,7 @@ int IMU_calib_pnts_updateMagn(
   *pntr                 = NULL;
 
   // verify system state (stable and sensor is enabled)
-  if (!config[id].isMagn || state[id].state != stable)
+  if (!config[id].isMagn || state[id].state != IMU_calib_pnts_state_stable)
     return state[id].curPnts;
 
   // define the variable

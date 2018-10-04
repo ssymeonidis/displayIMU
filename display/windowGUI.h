@@ -35,7 +35,7 @@ class windowGUI : public QMainWindow {
 public:
   explicit windowGUI(QWidget *parent = 0);
   ~windowGUI();
-  void initIMU(char* core_config_file, char* correct_config_file);
+  void initIMU(char* correct_config_file, char* core_config_file);
 
 private slots:
   void config_read();
