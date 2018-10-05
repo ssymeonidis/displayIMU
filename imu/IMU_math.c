@@ -83,7 +83,7 @@ void IMU_math_applyRef(
 * calculate euler angle
 ******************************************************************************/
 
-void IMU_util_calcEuler(
+void IMU_math_calcEuler(
   float                 *q, 
   float                 *E)
 {

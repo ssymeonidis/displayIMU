@@ -36,7 +36,7 @@
 // internally managed structures
 IMU_core_config  config [IMU_MAX_INST]; 
 IMU_core_state   state  [IMU_MAX_INST];
-uint16_t         numInst = 0;
+uint16_t         numInstCore = 0;
 
 
 /******************************************************************************
@@ -145,13 +145,13 @@ int IMU_core_init(
   IMU_core_config       **pntr)
 {
   // check for device count overflow
-  if (numInst >= IMU_MAX_INST)
+  if (numInstCore >= IMU_MAX_INST)
     return IMU_CORE_INST_OVERFLOW;
 
   // return handle and calib pointer
-  *id   = numInst; 
+  *id   = numInstCore; 
   *pntr = &config[*id];
-  numInst++;
+  numInstCore++;
   return 0;
 }
 
@@ -165,7 +165,7 @@ int IMU_core_getConfig(
   IMU_core_config        **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // return state
@@ -183,7 +183,7 @@ int IMU_core_getState(
   IMU_core_state        **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // return state
@@ -200,7 +200,7 @@ int IMU_core_reset(
   uint16_t              id)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // initialize state to known value
@@ -224,16 +224,16 @@ int IMU_core_deadRecon(
   float                 t,
   float                 *a_in, 
   float                 *m_in,
-  float                 *estm)
+  float                 **estm)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCore-1)
     return IMU_CORE_BAD_INST;
   if (!config[id].enable)
     return 0;
     
   // assign estimate vector
-  estm                  = state[id].SEq;
+  float *SEq            = *estm = state[id].SEq;
 
   // define the local variables
   float                 a[3];
@@ -272,28 +272,28 @@ int IMU_core_deadRecon(
   n                     = f[0]+r[1]+a[2];
   if (n > 0) {
     n                   = sqrt(1.0+n)*2;
-    estm[0]             = 0.25*n;
-    estm[1]             = (a[1]-r[2])/n;
-    estm[2]             = (f[2]-a[0])/n;
-    estm[3]             = (r[0]-f[1])/n;
+    SEq[0]              = 0.25*n;
+    SEq[1]              = (a[1]-r[2])/n;
+    SEq[2]              = (f[2]-a[0])/n;
+    SEq[3]              = (r[0]-f[1])/n;
   } else if (f[0] > r[1] && f[0] > a[2]) {
     n                   = sqrt(1.0+f[0]-r[1]-a[2])*2;
-    estm[0]             = (a[1]-r[2])/n;
-    estm[1]             = 0.25*n;
-    estm[2]             = (f[1]+r[0])/n;
-    estm[3]             = (f[2]+a[0])/n;
+    SEq[0]              = (a[1]-r[2])/n;
+    SEq[1]              = 0.25*n;
+    SEq[2]              = (f[1]+r[0])/n;
+    SEq[3]              = (f[2]+a[0])/n;
   } else if (r[1] > a[2]) {
     n                   = sqrt(1.0+r[1]-f[0]-a[2])*2;
-    estm[0]             = (f[2]-a[0])/n;
-    estm[1]             = (f[1]+r[0])/n;
-    estm[2]             = 0.25*n;
-    estm[3]             = (r[2]+a[1])/n;
+    SEq[0]              = (f[2]-a[0])/n;
+    SEq[1]              = (f[1]+r[0])/n;
+    SEq[2]              = 0.25*n;
+    SEq[3]              = (r[2]+a[1])/n;
   } else {
     n                   = sqrt(1.0+a[2]-f[0]-r[1])*2;
-    estm[0]             = (r[0]-f[1])/n;
-    estm[1]             = (f[2]+a[0])/n;
-    estm[2]             = (r[2]+a[1])/n;
-    estm[3]             = 0.25*n;
+    SEq[0]              = (r[0]-f[1])/n;
+    SEq[1]              = (f[2]+a[0])/n;
+    SEq[2]              = (r[2]+a[1])/n;
+    SEq[3]              = 0.25*n;
   }
 
   // exit function
@@ -310,15 +310,15 @@ int IMU_core_estmGyro(
   uint16_t              id, 
   float                 t, 
   float                 *g,
-  float                 *estm,
+  float                 **estm,
   IMU_core_FOM          *pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // define/initialize variables
-  estm                  = state[id].SEq;
+  float *SEq            = *estm = state[id].SEq;
 
   // initialize figure of merit
   IMU_core_FOM_gyro     *FOM;
@@ -350,16 +350,12 @@ int IMU_core_estmGyro(
     }
   }
 
-  // define internal variables
-  float half_dt         = 0.5 * (t - state[id].t);
-  float *SEq            = state[id].SEq;
-
   // compute gyro quaternion rate and apply delta to estimated orientation
-  estm[0]      += half_dt * (-SEq[1]*g[0] - SEq[2]*g[1] - SEq[3]*g[2]);
-  estm[1]      += half_dt * ( SEq[0]*g[0] + SEq[2]*g[2] - SEq[3]*g[1]);
-  estm[2]      += half_dt * ( SEq[0]*g[1] - SEq[1]*g[2] + SEq[3]*g[0]);
-  estm[3]      += half_dt * ( SEq[0]*g[2] + SEq[1]*g[1] - SEq[2]*g[0]);
-  
+  float half_dt   = 0.5 * (t - state[id].t);
+  SEq[0]         += half_dt * (-SEq[1]*g[0] - SEq[2]*g[1] - SEq[3]*g[2]);
+  SEq[1]         += half_dt * ( SEq[0]*g[0] + SEq[2]*g[2] - SEq[3]*g[1]);
+  SEq[2]         += half_dt * ( SEq[0]*g[1] - SEq[1]*g[2] + SEq[3]*g[0]);
+  SEq[3]         += half_dt * ( SEq[0]*g[2] + SEq[1]*g[1] - SEq[2]*g[0]); 
   // exit function
   return 0;
 }
@@ -373,15 +369,15 @@ int IMU_core_estmAccl(
   uint16_t              id, 
   float                 t, 
   float                 *a_in, 
-  float                 *estm,
+  float                 **estm,
   IMU_core_FOM          *pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
+  if (id > numInstCore - 1)
     return IMU_CORE_BAD_INST; 
 
   // assign estimate vector
-  estm                  = state[id].SEq;
+  *estm                 = state[id].SEq;
 
   // save accelerometer data
   if (config[id].isMove) {
@@ -467,15 +463,15 @@ int IMU_core_estmMagn(
   uint16_t              id, 
   float                 t, 
   float                 *m_in,
-  float                 *estm,
+  float                 **estm,
   IMU_core_FOM          *pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // assign estimate vector
-  estm                  = state[id].SEq;
+  *estm                 = state[id].SEq;
 
   // initialize figure of merit
   IMU_core_FOM_magn     *FOM;
@@ -594,11 +590,11 @@ int IMU_core_estmAll(
   float                 *g, 
   float                 *a, 
   float                 *m,
-  float                 *estm,
+  float                 **estm,
   IMU_core_FOM          FOM[3])
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
+  if (id > numInstCore - 1)
     return IMU_CORE_BAD_INST; 
 
   // check for reset conditions
@@ -625,7 +621,6 @@ int IMU_core_estmAll(
   IMU_core_estmGyro(id, t, g, estm, &FOM[0]);
   IMU_core_estmAccl(id, t, a, estm, &FOM[1]);
   IMU_core_estmMagn(id, t, m, estm, &FOM[2]);
-  estm = state[id].SEq;
   return 0;
 }
 

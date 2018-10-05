@@ -22,7 +22,7 @@
 
 // internally managed structures
 IMU_rect_config  config[IMU_MAX_INST];
-uint16_t         numInst = 0;
+uint16_t         numInstRect = 0;
 
 
 /******************************************************************************
@@ -34,13 +34,13 @@ int IMU_rect_init(
   IMU_rect_config       **pntr)
 {
   // check for device count overflow
-  if (numInst >= IMU_MAX_INST)
+  if (numInstRect >= IMU_MAX_INST)
     return IMU_RECT_INST_OVERFLOW;
 
   // return handle and config pointer
-  *id    = numInst; 
+  *id    = numInstRect; 
   *pntr  = &config[*id];
-  numInst++;
+  numInstRect++;
   return 0;
 }
 
@@ -54,7 +54,7 @@ int IMU_rect_getConfig(
   IMU_rect_config       **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstRect-1)
     return IMU_RECT_BAD_INST; 
 
   // return state
@@ -73,7 +73,7 @@ int IMU_rect_gyro(
   IMU_TYPE              *g_out)
 {
   // check execution condition
-  if (id > numInst-1)
+  if (id > numInstRect-1)
     return IMU_RECT_BAD_INST;
   if (!config[id].enable)
     return 0;
@@ -105,7 +105,7 @@ int IMU_rect_accl(
   IMU_TYPE              *a_out)
 {
   // check execution condition
-  if (id > numInst-1)
+  if (id > numInstRect-1)
     return IMU_RECT_BAD_INST;
   if (!config[id].enable)
     return 0;
@@ -138,7 +138,7 @@ int IMU_rect_magn(
 
 {
   // check execution condition
-  if (id > numInst-1)
+  if (id > numInstRect-1)
     return IMU_RECT_BAD_INST;
   if (!config[id].enable)
     return 0;
@@ -174,7 +174,7 @@ int IMU_rect_all(
   IMU_TYPE              *m)
 {
   // check execution condition
-  if (id > numInst-1)
+  if (id > numInstRect-1)
     return IMU_RECT_BAD_INST;
   if (!config[id].enable)
     return 0;

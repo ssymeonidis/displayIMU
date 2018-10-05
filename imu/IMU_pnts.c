@@ -27,7 +27,7 @@
 IMU_pnts_config  config [IMU_MAX_INST]; 
 IMU_pnts_state   state  [IMU_MAX_INST];
 IMU_pnts_entry   table  [IMU_MAX_INST][IMU_PNTS_SIZE];
-uint16_t         numInst = 0;
+uint16_t         numInstPnts = 0;
 
 
 /******************************************************************************
@@ -57,13 +57,13 @@ int IMU_pnts_init(
   IMU_pnts_config         **pntr)
 {
   // check for device count overflow
-  if (numInst >= IMU_MAX_INST)
+  if (numInstPnts >= IMU_MAX_INST)
     return IMU_PNTS_INST_OVERFLOW;
 
   // return inst handle and config struct
-  *id   = numInst; 
+  *id   = numInstPnts; 
   *pntr = &config[*id];
-  numInst++;
+  numInstPnts++;
   
   // initialize instance state  
   state[*id].numPnts             = 0;
@@ -87,7 +87,7 @@ int IMU_pnts_getState(
   IMU_pnts_state         **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
+  if (id > numInstPnts - 1)
     return IMU_PNTS_BAD_INST; 
 
   // return state
@@ -106,7 +106,7 @@ int IMU_pnts_getEntry(
   IMU_pnts_entry          **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
+  if (id > numInstPnts - 1)
     return IMU_PNTS_BAD_INST;
   if (state[id].numPnts < 1)
     return IMU_PNTS_EMPTY_TABLE;
@@ -129,7 +129,7 @@ int IMU_pnts_start(
   uint16_t                numPnts)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
+  if (id > numInstPnts - 1)
     return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state 
@@ -151,7 +151,7 @@ int IMU_pnts_stop(
   uint16_t                id)
 {
   // check for out-of-bounds condition
-  if (id > numInst - 1)
+  if (id > numInstPnts - 1)
     return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state

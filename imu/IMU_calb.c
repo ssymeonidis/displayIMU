@@ -24,7 +24,7 @@
 // internally managed variables
 IMU_calb_state   state [IMU_MAX_INST];     
 IMU_pnts_entry   table [IMU_MAX_INST][IMU_CALB_SIZE]; 
-uint16_t         numInst = 0;
+uint16_t         numInstCalb = 0;
 uint16_t         modePnts[2] = {4, 6};
 
 
@@ -100,12 +100,12 @@ int IMU_calb_init(
   uint16_t                *id)
 {
   // check for device count overflow
-  if (numInst >= IMU_MAX_INST)
+  if (numInstCalb >= IMU_MAX_INST)
     return IMU_CALB_INST_OVERFLOW;
 
   // return inst handle and config struct
-  *id   = numInst; 
-  numInst++;
+  *id   = numInstCalb; 
+  numInstCalb++;
   
   // exit function
   return 0;
@@ -116,14 +116,14 @@ int IMU_calb_init(
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calb_start(
+int IMU_calb_strt(
   uint16_t                id,
   IMU_calb_mode           mode,
   IMU_rect_config         *rect,
   IMU_core_config         *core)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCalb-1)
     return IMU_CALB_BAD_INST;
 
   // copy current entry to the table
@@ -139,13 +139,13 @@ int IMU_calb_start(
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calb_update(
+int IMU_calb_pnts(
   uint16_t                id, 
   IMU_pnts_entry          *pntr,
   IMU_calb_FOM            *FOM)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCalb-1)
     return IMU_CALB_BAD_INST; 
 
   // copy current entry to the table
@@ -159,9 +159,9 @@ int IMU_calb_update(
  
   // perform the specified calibration routine
   if      (state[id].mode == IMU_calb_4pnt)
-    calib_4pnt(id);
+    calb_4pnt(id);
   else if (state[id].mode == IMU_calb_6pnt)
-    calib_6pnt(id);
+    calb_6pnt(id);
   else
     return IMU_CALB_BAD_MODE; 
     
@@ -179,7 +179,7 @@ int IMU_calb_save(
   IMU_rect_config         *rect)
 {
   // check for out-of-bounds condition
-  if (id > numInst-1)
+  if (id > numInstCalb-1)
     return IMU_CALB_BAD_INST;
 
   // copy current entry to the IMU rectify config 

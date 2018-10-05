@@ -425,7 +425,7 @@ int IMU_file_readRect(
 * writes calibration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeRect(
+int IMU_file_writeRect(
   char                  *filename,
   IMU_rect_config       *config)
 {
@@ -457,7 +457,7 @@ int IMU_util_writeRect(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readPnts(
+int IMU_file_readPnts(
   char                  *filename,
   IMU_pnts_config       *config)
 {
@@ -514,7 +514,7 @@ int IMU_util_readPnts(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writePnts(
+int IMU_file_writePnts(
   char                  *filename,
   IMU_pnts_config       *config)
 {
@@ -549,7 +549,7 @@ int IMU_util_writePnts(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_util_readAuto(
+int IMU_file_readAuto(
   char                  *filename,
   IMU_auto_config       *config)
 {
@@ -600,7 +600,7 @@ int IMU_util_readAuto(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_util_writeAuto(
+int IMU_file_writeAuto(
   char                 *filename,
   IMU_auto_config      *config)
 {

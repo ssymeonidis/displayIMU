@@ -27,21 +27,21 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include "IMU_util_file.h"
-#include "IMU_util_math.h"
+#include "IMU_file.h"
+#include "IMU_math.h"
 #include "dataParse.h"
 
 
 // define the sensor data structure
-struct dataParse_sensor  sensor;
-struct dataParse_estim   estim;
-struct dataParse_state   stateIMU;
+dataParse_ctrl    ctrl;
+dataParse_sensor  sensor;
+dataParse_estim   estim;
+dataParse_state   state;
 
 // define internal/external variables
 bool                       is_log_data    = false;
 bool                       is_csv_file    = false;
 bool                       first_frame    = true;
-bool                       exit_thread    = false;
 double                     time_init_sys  = 0;
 double                     time_init_sen  = 0;
 int                        data_socket;
@@ -65,27 +65,30 @@ void data_error(const char *msg)
 ******************************************************************************/
 
 void data_init(
-  char*  file_correct,
+  char*  file_rect,
   char*  file_core,
-  char*  file_calib_pnts,
-  char*  file_calib_auto)
+  char*  file_pnts,
+  char*  file_auto)
 {
   // initialize and get handles to all IMU functions
-  IMU_correct_init     (&stateIMU.id_correct,     &stateIMU.config_correct);
-  IMU_core_init        (&stateIMU.id_core,        &stateIMU.config_core);
-  IMU_calib_pnts_init  (&stateIMU.id_calib_pnts,  &stateIMU.config_calib_pnts);
-  IMU_calib_auto_init  (&stateIMU.id_calib_auto,  &stateIMU.config_calib_auto);
-  IMU_calib_ctrl_init  (&stateIMU.id_calib_ctrl);
+  IMU_rect_init  (&state.idRect,  &state.configRect);
+  IMU_core_init  (&state.idCore,  &state.configCore);
+  IMU_pnts_init  (&state.idPnts,  &state.configPnts);
+  IMU_auto_init  (&state.idAuto,  &state.configAuto);
+  IMU_calb_init  (&state.idCalb);
 
   // read config structures from json files
-  if (!file_correct)      
-    IMU_util_readCorrect    (file_correct,        stateIMU.config_correct);
-  if (!file_core)
-    IMU_util_readCore       (file_core,           stateIMU.config_core);
-  if (!file_calib_pnts)
-    IMU_util_readCalibPnts  (file_calib_pnts,     stateIMU.config_calib_pnts);
-  if (!file_calib_auto)
-    IMU_util_readCalibAuto  (file_calib_auto,     stateIMU.config_calib_auto);
+  if (!file_rect) IMU_file_readRect  (file_rect, state.configRect);
+  if (!file_core) IMU_file_readCore  (file_core, state.configCore);
+  if (!file_pnts) IMU_file_readPnts  (file_pnts, state.configPnts);
+  if (!file_auto) IMU_file_readAuto  (file_auto, state.configAuto);
+
+  // initialize the control structure
+  ctrl.q_ref[0] = 1;
+  ctrl.q_ref[1] = 0;
+  ctrl.q_ref[2] = 0;
+  ctrl.q_ref[3] = 0;
+  ctrl.exit_thread = 0;
 }
 
 
@@ -158,7 +161,6 @@ void data_process_datum()
   const int  line_size      = 256;
   char       line[line_size];
   int        datum_type; 
-  float*     state;
   timeval    time;
   double     time_cur       = 0;
   double     time_delt_sys  = 0;
@@ -180,7 +182,7 @@ void data_process_datum()
   }
 
   // determine the datum type
-  sscanf(line, "%d, %f", &datum_type, &sensor.lastTime);
+  sscanf(line, "%d, %f", &datum_type, &sensor.time);
 
   // inject delay if running csv file
   if (is_csv_file == true && first_frame == false) {
@@ -188,7 +190,7 @@ void data_process_datum()
       gettimeofday(&time, NULL);
       time_cur         = time.tv_sec * 1000000 + time.tv_usec;
       time_delt_sys    = time_cur - time_init_sys;
-      time_delt_sen    = sensor.lastTime - time_init_sen;
+      time_delt_sen    = sensor.time - time_init_sen;
       if (time_delt_sen - time_delt_sys > 0) 
         usleep(time_delt_sen - time_delt_sys); 
       else
@@ -200,7 +202,7 @@ void data_process_datum()
   if (first_frame == true) {
     gettimeofday(&time, NULL);
     time_init_sys  = time.tv_sec * 1000000 + time.tv_usec;
-    time_init_sen  = sensor.lastTime;
+    time_init_sen  = sensor.time;
     first_frame    = false;
   }
 
@@ -210,60 +212,67 @@ void data_process_datum()
       &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2],
       &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2],
       &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-    IMU_correct_all(0, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
+    IMU_rect_all(state.idRect, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
       sensor.gyroCor, sensor.acclCor, sensor.magnCor);
-    IMU_calib_pnts_updateAll(0, sensor.lastTime, sensor.gyroRaw, sensor.acclRaw,
-      sensor.magnRaw, &estim.pnt); estim.pnt = NULL; 
-    state = IMU_core_estmAll(0, sensor.lastTime, sensor.gyroCor, 
-      sensor.acclCor, sensor.magnCor, estim.FOMcore);
-    IMU_util_calcEuler(state, estim.ang);
+    IMU_pnts_updateAll(state.idPnts, sensor.time, sensor.gyroRaw, 
+      sensor.acclRaw, sensor.magnRaw, &estim.pnt); estim.pnt = NULL; 
+    IMU_core_estmAll(state.idCore, sensor.time, sensor.gyroCor, sensor.acclCor, 
+      sensor.magnCor, &estim.q_org, estim.FOMcore);
+    IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
+    IMU_math_calcEuler(estim.q, estim.ang);
     if (estim.pnt != NULL) 
-      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
-    IMU_calib_auto_updateAll(0, sensor.lastTime, sensor.gyroCor, sensor.acclCor,
-      sensor.magnCor); 
-    IMU_calib_auto_updateFOM(0, estim.FOMcore, 3); 
+      IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
+    IMU_auto_updateAll(state.idCore, sensor.time, sensor.gyroCor, 
+      sensor.acclCor, sensor.magnCor); 
+    IMU_auto_updateFOM(state.idCore, estim.FOMcore, 3); 
   }
 
   // process gyroscope data (async sensors)
   else if (datum_type == 1) {
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
-    IMU_correct_gyro(0, sensor.gyroRaw, sensor.gyroCor);
-    IMU_calib_pnts_updateGyro(0, sensor.lastTime, sensor.gyroRaw, &estim.pnt);
-    state = IMU_core_estmGyro(0, sensor.lastTime, sensor.gyroCor, estim.FOMcore);
-    IMU_util_calcEuler(state, estim.ang);
+    IMU_rect_gyro(state.idRect, sensor.gyroRaw, sensor.gyroCor);
+    IMU_pnts_updateGyro(state.idPnts, sensor.time, sensor.gyroRaw, &estim.pnt);
+    IMU_core_estmGyro(state.idCore, sensor.time, sensor.gyroCor, &estim.q_org,
+      estim.FOMcore);
+    IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
+    IMU_math_calcEuler(estim.q, estim.ang);
     if (estim.pnt != NULL) 
-      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
-    IMU_calib_auto_updateGyro(0, sensor.lastTime, sensor.gyroCor);
-    IMU_calib_auto_updateFOM(0, estim.FOMcore, 1); 
+      IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
+    IMU_auto_updateGyro(0, sensor.time, sensor.gyroCor);
+    IMU_auto_updateFOM(0, estim.FOMcore, 1); 
   }
 
   // process accelerometer data (async sensors)
   else if (datum_type == 2) {
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
-    IMU_correct_accl(0, sensor.acclRaw, sensor.acclCor);
-    IMU_calib_pnts_updateAccl(0, sensor.lastTime, sensor.acclRaw, &estim.pnt);
-    state = IMU_core_estmAccl(0, sensor.lastTime, sensor.acclCor, estim.FOMcore);
-    IMU_util_calcEuler(state, estim.ang);
+    IMU_rect_accl(state.idRect, sensor.acclRaw, sensor.acclCor);
+    IMU_pnts_updateAccl(state.idPnts, sensor.time, sensor.acclRaw, &estim.pnt);
+    IMU_core_estmAccl(state.idCore, sensor.time, sensor.acclCor, &estim.q_org,
+      estim.FOMcore);
+    IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
+    IMU_math_calcEuler(estim.q_org, estim.ang);
     if (estim.pnt != NULL) 
-      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
-    IMU_calib_auto_updateAccl(0, sensor.lastTime, sensor.acclCor);
-    IMU_calib_auto_updateFOM(0, estim.FOMcore, 1); 
+      IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
+    IMU_auto_updateAccl(state.idAuto, sensor.time, sensor.acclCor);
+    IMU_auto_updateFOM(state.idAuto, estim.FOMcore, 1); 
   }
 
   // process magnetometer data (async sensors)
   else if (datum_type == 3) {
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-    IMU_correct_magn(0, sensor.magnRaw, sensor.magnCor);
-    IMU_calib_pnts_updateMagn(0, sensor.lastTime, sensor.magnRaw, &estim.pnt);
-    state = IMU_core_estmMagn(0, sensor.lastTime, sensor.magnCor, estim.FOMcore);
-    IMU_util_calcEuler(state, estim.ang);
+    IMU_rect_magn(state.idRect, sensor.magnRaw, sensor.magnCor);
+    IMU_pnts_updateMagn(state.idPnts, sensor.time, sensor.magnRaw, &estim.pnt);
+    IMU_core_estmMagn(state.idCore, sensor.time, sensor.magnCor, &estim.q_org,
+      estim.FOMcore);
+    IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
+    IMU_math_calcEuler(estim.q_org, estim.ang);
     if (estim.pnt != NULL) 
-      IMU_calib_ctrl_update(0, estim.pnt, &estim.FOMcalib); 
-    IMU_calib_auto_updateMagn(0, sensor.lastTime, sensor.magnCor);
-    IMU_calib_auto_updateFOM(0, estim.FOMcore, 1); 
+      IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
+    IMU_auto_updateMagn(state.idAuto, sensor.time, sensor.magnCor);
+    IMU_auto_updateFOM(state.idAuto, estim.FOMcore, 1); 
   }
 }
 
@@ -290,7 +299,7 @@ void data_close()
 void* data_run(void*)
 {
   // main processing loop
-  while(!exit_thread) {
+  while(!ctrl.exit_thread) {
     data_process_datum();
   }
   return 0;

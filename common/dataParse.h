@@ -21,61 +21,67 @@
 #define _DATA_PARSE_H
 
 // include statements
-#include "IMU_correct.h"
+#include <stdint.h>
+#include "IMU_rect.h"
 #include "IMU_core.h"
-#include "IMU_calib_pnts.h"
-#include "IMU_calib_auto.h"
-#include "IMU_calib_ctrl.h"
+#include "IMU_pnts.h"
+#include "IMU_auto.h"
+#include "IMU_calb.h"
 
 
 // define IMU state structure
-struct dataParse_state {
-  unsigned short                 id_correct;
-  unsigned short                 id_core;
-  unsigned short                 id_calib_pnts;
-  unsigned short                 id_calib_auto;
-  unsigned short                 id_calib_ctrl;
-  struct IMU_correct_config      *config_correct;
-  struct IMU_core_config         *config_core;
-  struct IMU_calib_pnts_config   *config_calib_pnts;
-  struct IMU_calib_auto_config   *config_calib_auto;
-};
+typedef struct {
+  float                  q_ref[4];
+  uint8_t                exit_thread;
+} dataParse_ctrl;
+
+typedef struct {
+  uint16_t               idRect;
+  uint16_t               idCore;
+  uint16_t               idPnts;
+  uint16_t               idAuto;
+  uint16_t               idCalb;
+  IMU_rect_config        *configRect;
+  IMU_core_config        *configCore;
+  IMU_pnts_config        *configPnts;
+  IMU_auto_config        *configAuto;
+} dataParse_state;
 
 // define input sensor data structure
-struct dataParse_sensor {
-  float                          gyroRaw[3];
-  float                          gyroCor[3];
-  float                          gyroFltr[3];
-  float                          acclRaw[3];
-  float                          acclCor[3];
-  float                          acclFltr[3];
-  float                          magnRaw[3];
-  float                          magnCor[3];
-  float                          magnFltr[3];
-  float                          lastTime;
-}; 
+typedef struct {
+  float                  gyroRaw[3];
+  float                  gyroCor[3];
+  float                  gyroFltr[3];
+  float                  acclRaw[3];
+  float                  acclCor[3];
+  float                  acclFltr[3];
+  float                  magnRaw[3];
+  float                  magnCor[3];
+  float                  magnFltr[3];
+  float                  time;
+} dataParse_sensor; 
 
 // define IMU estimate data structure
-struct dataParse_estim {
-  float                          ang[3];
-  float                          move[3];  
-  IMU_calib_pnts_entry           *pnt;
-  IMU_core_FOM                   FOMcore[3];
-  IMU_calib_ctrl_FOM             FOMcalib;
-};
+typedef struct {
+  float                  *q_org;
+  float                  q[4];
+  float                  ang[3];
+  float                  move[3];  
+  IMU_pnts_entry         *pnt;
+  IMU_core_FOM           FOMcore[3];
+  IMU_calb_FOM           FOMcalib;
+} dataParse_estim;
 
 
 // define the sensor data structure
+extern dataParse_ctrl    ctrl;
 extern dataParse_sensor  sensor;
 extern dataParse_estim   estim;
-extern dataParse_state   stateIMU;
+extern dataParse_state   state;
 
 // initialization function
-void data_init(
-  char*                  file_correct,
-  char*                  file_core,
-  char*                  file_calib_pnts,
-  char*                  file_calib_auto);
+void data_init(char* file_rect, char* file_core, 
+               char* file_pnts, char* file_calb);
 
 // access functions
 void data_start_log      (const char* filename);

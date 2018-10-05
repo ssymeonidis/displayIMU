@@ -109,12 +109,12 @@ int IMU_core_getState  (uint16_t id,  IMU_core_state  **state);
 
 // general operation functions 
 int IMU_core_reset    (uint16_t id);
-int IMU_core_zero     (uint16_t id, float t, float *a, float *m, float *);
-int IMU_core_estmGyro (uint16_t id, float t, float *g, float*, IMU_core_FOM*);
-int IMU_core_estmAccl (uint16_t id, float t, float *a, float*, IMU_core_FOM*);
-int IMU_core_estmMagn (uint16_t id, float t, float *m, float*, IMU_core_FOM*);
+int IMU_core_zero     (uint16_t id, float t, float *a, float *m, float**);
+int IMU_core_estmGyro (uint16_t id, float t, float *g, float**, IMU_core_FOM*);
+int IMU_core_estmAccl (uint16_t id, float t, float *a, float**, IMU_core_FOM*);
+int IMU_core_estmMagn (uint16_t id, float t, float *m, float**, IMU_core_FOM*);
 int IMU_core_estmAll  (uint16_t id, float t, float *g, float *a, float *m,
-                       float *, IMU_core_FOM FOM[3]);
+                       float **, IMU_core_FOM FOM[3]);
 int IMU_core_estmMove (uint16_t id, float *);
 
 
