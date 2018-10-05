@@ -50,7 +50,7 @@ OBJECTS_DIR   = obj/
 
 SOURCES       = glWidget.cpp \
 		windowGUI.cpp \
-		../common/dataParse.cpp \
+		../common/dataParse.c \
 		main.cpp moc_glWidget.cpp \
 		moc_windowGUI.cpp
 OBJECTS       = obj/glWidget.o \
@@ -119,7 +119,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		windowGUI.h \
 		../common/dataParse.h glWidget.cpp \
 		windowGUI.cpp \
-		../common/dataParse.cpp \
+		../common/dataParse.c \
 		main.cpp
 QMAKE_TARGET  = displayIMU
 DESTDIR       = ../bin/#avoid trailing-slash linebreak
@@ -290,7 +290,7 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents glWidget.h windowGUI.h ../common/dataParse.h $(DISTDIR)/
-	$(COPY_FILE) --parents glWidget.cpp windowGUI.cpp ../common/dataParse.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents glWidget.cpp windowGUI.cpp ../common/dataParse.c main.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents windowGUI.ui $(DISTDIR)/
 
 
@@ -362,16 +362,19 @@ obj/windowGUI.o: windowGUI.cpp ../common/dataParse.h \
 		../imu/IMU_calb.h \
 		../imu/IMU_file.h \
 		windowGUI.h \
-		ui_windowGUI.h
+		ui_windowGUI.h \
+		glWidget.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/windowGUI.o windowGUI.cpp
 
-obj/dataParse.o: ../common/dataParse.cpp ../common/dataParse.h \
+obj/dataParse.o: ../common/dataParse.c ../imu/IMU_file.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
+		../imu/IMU_math.h \
+		../common/dataParse.h \
 		../imu/IMU_calb.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/dataParse.o ../common/dataParse.cpp
+	$(CC) -c $(CFLAGS) $(INCPATH) -o obj/dataParse.o ../common/dataParse.c
 
 obj/main.o: main.cpp windowGUI.h \
 		../imu/IMU_rect.h \

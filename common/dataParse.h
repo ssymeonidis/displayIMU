@@ -20,6 +20,10 @@
 #ifndef _DATA_PARSE_H
 #define _DATA_PARSE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // include statements
 #include <stdint.h>
 #include "IMU_rect.h"
@@ -90,5 +94,9 @@ void data_start_CSV      (const char* filename);
 void data_close          ();
 void data_process_datum  ();
 void *data_run           (void* id);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

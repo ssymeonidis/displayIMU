@@ -13,7 +13,7 @@ HEADERS          += glWidget.h          \
 
 SOURCES          += glWidget.cpp        \
                     windowGUI.cpp       \
-                    dataParse.cpp       \
+                    dataParse.c         \
                     main.cpp 
 
 VPATH            += ../common

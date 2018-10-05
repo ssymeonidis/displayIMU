@@ -1,3 +1,13 @@
+      _ _           _             _____ __  __ _    _ 
+     | (_)         | |           |_   _|  \/  | |  | |
+   __| |_ ___ _ __ | | __ _ _   _  | | | \  / | |  | |
+  / _` | / __| '_ \| |/ _` | | | | | | | |\/| | |  | |
+ | (_| | \__ \ |_) | | (_| | |_| |_| |_| |  | | |__| |
+  \__,_|_|___/ .__/|_|\__,_|\__, |_____|_|  |_|\____/ 
+             | |             __/ |                    
+             |_|            |___/                     
+
+
 The displayIMU project provides an Inertial Measurement Unit (IMU) that takes
 in gyroscope, accelerometer, and magnetoeter data and estimates an orientation,
 i.e. where the system is pointed.  Also available is an acceleration estimate
@@ -45,12 +55,12 @@ which applies calibration factors to raw data can be colocated with the sensors
 and whereas the core functions can be placed in the main application.  The files
 along with their descriptions are captured below:
 - IMU_core <- functions that fuse corrected sensor data (generate estimates) 
-- IMU_correct <- functions that applies calibarion factors to raw data
-- IMU_calib_pnts <- functions that extracts points for multi-point calibrations
-- IMU_calib_auto <- functions that generates calibration data continously
-- IMU_calib_ctrl <- functions that generates correct structures from pnts/auto
-- IMU_util_file <- functions for reading/writting structs to json files 
-- IMU_util_math <- functions for converting/orienting quaternion IMU states
+- IMU_rect <- functions that applies calibarion factors to raw data
+- IMU_pnts <- functions that extracts points for multi-point calibrations
+- IMU_auto <- functions that generates calibration data continously
+- IMU_calb <- functions that generates correct structures from pnts/auto
+- IMU_file <- functions for reading/writting structs to json files 
+- IMU_math <- functions for converting/orienting quaternion IMU states
 
 Note: QT may generate an "Attempt to set a screen on a child window" message
 from QWindowPrivate::setTopLevelScreen.  According to stackoverlflow, question

@@ -39,9 +39,9 @@ dataParse_estim   estim;
 dataParse_state   state;
 
 // define internal/external variables
-bool                       is_log_data    = false;
-bool                       is_csv_file    = false;
-bool                       first_frame    = true;
+uint8_t                    is_log_data    = 0;
+uint8_t                    is_csv_file    = 0;
+uint8_t                    first_frame    = 1;
 double                     time_init_sys  = 0;
 double                     time_init_sen  = 0;
 int                        data_socket;
@@ -102,7 +102,7 @@ void data_start_log(const char* filename)
   if (!log_file)
     data_error("ERROR opening log file"); 
   setbuf(log_file, NULL);
-  is_log_data = true;
+  is_log_data = 1;
 }
 
 
@@ -113,11 +113,11 @@ void data_start_log(const char* filename)
 void data_start_UDP(int portno)
 {
   // define internal variables
-  sockaddr_in  serv_addr;
-  int          status;
+  struct sockaddr_in  serv_addr;
+  int                 status;
  
   // init IMU and data_stream state
-  is_csv_file = false;
+  is_csv_file = 0;
 
   // open socket
   data_socket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -142,7 +142,7 @@ void data_start_UDP(int portno)
 void data_start_CSV(const char* filename)
 {
   // init IMU and data_stream state
-  is_csv_file = true;
+  is_csv_file = 1;
 
   // fopen file  
   csv_file    = fopen(filename, "r");
@@ -158,25 +158,25 @@ void data_start_CSV(const char* filename)
 void data_process_datum()
 {
   // define the variables
-  const int  line_size      = 256;
-  char       line[line_size];
-  int        datum_type; 
-  timeval    time;
-  double     time_cur       = 0;
-  double     time_delt_sys  = 0;
-  double     time_delt_sen  = 0;
-  int        rc;
-  char       *results;
+  const int         line_size      = 256;
+  char              line[line_size];
+  int               datum_type; 
+  struct timeval    time;
+  double            time_cur       = 0;
+  double            time_delt_sys  = 0;
+  double            time_delt_sen  = 0;
+  int               rc;
+  char              *results;
 
   // extract data line
-  if (is_csv_file == false) {
+  if (!is_csv_file) {
     rc = recv(data_socket, line, sizeof(line), 0);
-    line[rc] = (char)NULL;
+    line[rc] = (char)0;
   } else {
     results = fgets(line, sizeof(line), csv_file);
     if (results == NULL) {
       fseek(csv_file, 0, SEEK_SET);
-      first_frame = true;
+      first_frame = 1;
       results = fgets(line, sizeof(line), csv_file);
     } 
   }
@@ -185,7 +185,7 @@ void data_process_datum()
   sscanf(line, "%d, %f", &datum_type, &sensor.time);
 
   // inject delay if running csv file
-  if (is_csv_file == true && first_frame == false) {
+  if (is_csv_file && !first_frame) {
     while (1) { 
       gettimeofday(&time, NULL);
       time_cur         = time.tv_sec * 1000000 + time.tv_usec;
@@ -199,11 +199,11 @@ void data_process_datum()
   }
 
   // initialize system and sensor time
-  if (first_frame == true) {
+  if (first_frame) {
     gettimeofday(&time, NULL);
     time_init_sys  = time.tv_sec * 1000000 + time.tv_usec;
     time_init_sen  = sensor.time;
-    first_frame    = false;
+    first_frame    = 0;
   }
 
   // process synced data (all three sensors)
@@ -218,6 +218,7 @@ void data_process_datum()
       sensor.acclRaw, sensor.magnRaw, &estim.pnt); estim.pnt = NULL; 
     IMU_core_estmAll(state.idCore, sensor.time, sensor.gyroCor, sensor.acclCor, 
       sensor.magnCor, &estim.q_org, estim.FOMcore);
+    IMU_core_estmMove(state.idCore, estim.move);
     IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
     IMU_math_calcEuler(estim.q, estim.ang);
     if (estim.pnt != NULL) 
@@ -235,6 +236,7 @@ void data_process_datum()
     IMU_pnts_updateGyro(state.idPnts, sensor.time, sensor.gyroRaw, &estim.pnt);
     IMU_core_estmGyro(state.idCore, sensor.time, sensor.gyroCor, &estim.q_org,
       estim.FOMcore);
+    IMU_core_estmMove(state.idCore, estim.move);
     IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
     IMU_math_calcEuler(estim.q, estim.ang);
     if (estim.pnt != NULL) 
@@ -251,6 +253,7 @@ void data_process_datum()
     IMU_pnts_updateAccl(state.idPnts, sensor.time, sensor.acclRaw, &estim.pnt);
     IMU_core_estmAccl(state.idCore, sensor.time, sensor.acclCor, &estim.q_org,
       estim.FOMcore);
+    IMU_core_estmMove(state.idCore, estim.move);
     IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
     IMU_math_calcEuler(estim.q_org, estim.ang);
     if (estim.pnt != NULL) 
@@ -267,6 +270,7 @@ void data_process_datum()
     IMU_pnts_updateMagn(state.idPnts, sensor.time, sensor.magnRaw, &estim.pnt);
     IMU_core_estmMagn(state.idCore, sensor.time, sensor.magnCor, &estim.q_org,
       estim.FOMcore);
+    IMU_core_estmMove(state.idCore, estim.move);
     IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
     IMU_math_calcEuler(estim.q_org, estim.ang);
     if (estim.pnt != NULL) 
@@ -274,6 +278,15 @@ void data_process_datum()
     IMU_auto_updateMagn(state.idAuto, sensor.time, sensor.magnCor);
     IMU_auto_updateFOM(state.idAuto, estim.FOMcore, 1); 
   }
+  
+  // write state to log file
+  if (is_log_data)
+    fprintf(log_file, "%f, %f, %f, %f, %f, %f, %f, %f, ",
+      estim.q_org[0], estim.q_org[1], estim.q_org[2], estim.q_org[3],
+      estim.q[0],     estim.q[1],     estim.q[2],     estim.q[3]);
+    fprintf(log_file, "%f, %f, %f, %f, %f, %f\n",
+      estim.ang[0],   estim.ang[1],   estim.ang[2],
+      estim.move[0],  estim.move[1],  estim.move[2]);
 }
 
 
@@ -283,11 +296,11 @@ void data_process_datum()
 
 void data_close()
 {
-  if (is_csv_file == false)
+  if (!is_csv_file)
     close(data_socket);
   else
     fclose(csv_file);
-  if (is_log_data == true)
+  if (is_log_data)
     fclose(log_file);
 }
 
@@ -296,7 +309,7 @@ void data_close()
 * "continous run" function handle for recreating a thread 
 ******************************************************************************/
 
-void* data_run(void*)
+void* data_run(void* id)
 {
   // main processing loop
   while(!ctrl.exit_thread) {
