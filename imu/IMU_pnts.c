@@ -166,7 +166,7 @@ int IMU_pnts_stop(
 * process gyroscope rates
 ******************************************************************************/
 
-int IMU_pnts_updateGyro(
+int IMU_pnts_newGyro(
   uint16_t                id,
   float                   t,
   float                   *g,
@@ -198,7 +198,7 @@ int IMU_pnts_updateGyro(
 
   // determine whether signal meets stability requirements 
   unsigned int stable   = 0;
-  if (std > config[id].gThreshVal * config[id].gThreshVal)
+  if (std > config[id].gThresh * config[id].gThresh)
     state[id].tStable   = t;
   else if (t - state[id].tStable > config[id].gThreshTime) 
     stable              = 1;
@@ -251,7 +251,7 @@ int IMU_pnts_updateGyro(
 * process accelerometer vector
 ******************************************************************************/
 
-int IMU_pnts_updateAccl(
+int IMU_pnts_newAccl(
   uint16_t                id, 
   float                   t, 
   float                   *a,
@@ -304,7 +304,7 @@ int IMU_pnts_updateAccl(
 * process magnetometer vector
 ******************************************************************************/
 
-int IMU_pnts_updateMagn(
+int IMU_pnts_newMagn(
   uint16_t                id, 
   float                   t, 
   float                   *m, 
@@ -357,7 +357,7 @@ int IMU_pnts_updateMagn(
 * process gyroscope, accelerometer, and magnetometer vectors 
 ******************************************************************************/
 
-int IMU_pnts_updateAll(
+int IMU_pnts_newAll(
   uint16_t                id, 
   float                   t, 
   float                   *g, 
@@ -369,11 +369,11 @@ int IMU_pnts_updateAll(
   IMU_pnts_entry          *entry;
 
   // update all three vectors
-  IMU_pnts_updateGyro(id, t, g, &entry);
+  IMU_pnts_newGyro(id, t, g, &entry);
   *pntr = entry; 
-  IMU_pnts_updateAccl(id, t, a, &entry); 
+  IMU_pnts_newAccl(id, t, a, &entry); 
   *pntr = (entry != NULL) ? entry : *pntr; 
-  IMU_pnts_updateMagn(id, t, m, &entry); 
+  IMU_pnts_newMagn(id, t, m, &entry); 
   *pntr = (entry != NULL) ? entry : *pntr; 
   return state[id].curPnts;
 }

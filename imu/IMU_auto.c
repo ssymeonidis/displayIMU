@@ -88,7 +88,7 @@ int IMU_auto_getState(
 * process gyroscope rates
 ******************************************************************************/
 
-int IMU_auto_updateGyro(
+int IMU_auto_newGyro(
   uint16_t                id,
   float                   t,
   float                   *g)
@@ -101,7 +101,7 @@ int IMU_auto_updateGyro(
 * process accelerometer vector
 ******************************************************************************/
 
-int IMU_auto_updateAccl(
+int IMU_auto_newAccl(
   uint16_t                id, 
   float                   t, 
   float                   *a)
@@ -114,7 +114,7 @@ int IMU_auto_updateAccl(
 * process magnetometer vector
 ******************************************************************************/
 
-int IMU_auto_updateMagn(
+int IMU_auto_newMagn(
   uint16_t                id, 
   float                   t, 
   float                   *m) 
@@ -127,7 +127,7 @@ int IMU_auto_updateMagn(
 * process gyroscope, accelerometer, and magnetometer vectors 
 ******************************************************************************/
 
-int IMU_auto_updateAll(
+int IMU_auto_newAll(
   uint16_t                id, 
   float                   t, 
   float                   *g, 
@@ -142,9 +142,9 @@ int IMU_auto_updateAll(
 * process gyroscope, accelerometer, and magnetometer vectors
 ******************************************************************************/
 
-int IMU_auto_updateFOM(
+int IMU_auto_newFOM(
   uint16_t                id,  
-  IMU_core_FOM            *FOM,
+  IMU_FOM_core            *FOM,
   uint16_t                size)
 {
   return 0;

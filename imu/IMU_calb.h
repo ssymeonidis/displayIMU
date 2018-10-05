@@ -31,6 +31,7 @@ extern "C" {
 
 // include statements
 #include <stdint.h>
+#include "IMU_FOM.h"
 
 // define status codes
 #define IMU_CALB_UPDATED         1
@@ -56,17 +57,13 @@ typedef struct  {
   uint16_t                  numPnts;
 } IMU_calb_state;
 
-// define figure of merit
-typedef struct {
-  float                     empty;
-} IMU_calb_FOM;
-
 
 // general operation 
-int IMU_calb_init(uint16_t*);
-int IMU_calb_strt(uint16_t, IMU_calb_mode, IMU_rect_config*, IMU_core_config*); int IMU_calb_pnts(uint16_t, IMU_pnts_entry*, IMU_calb_FOM*);
-int IMU_calb_save(uint16_t, IMU_rect_config*);
-int IMU_calb_auto(uint16_t, IMU_auto_state*, IMU_rect_config*, IMU_core_config*);
+int IMU_calb_init (uint16_t*);
+int IMU_calb_start(uint16_t, IMU_calb_mode, IMU_rect_config*, IMU_core_config*); 
+int IMU_calb_pnts (uint16_t, IMU_pnts_entry*, IMU_FOM_calb*);
+int IMU_calb_save (uint16_t, IMU_rect_config*);
+int IMU_calb_auto (uint16_t, IMU_auto_state*, IMU_rect_config*, IMU_core_config*);
 
 
 #ifdef __cplusplus

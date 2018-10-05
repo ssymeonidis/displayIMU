@@ -51,7 +51,7 @@ static const char* core_config_name[] = {
   "isStable",
   "isFOM",
   "isMove",
-  "gThreshVal",
+  "gThresh",
   "gThreshTime",
   "aWeight",
   "aMag",
@@ -70,7 +70,7 @@ typedef enum {
   isStable          = 3,
   isFOM             = 4,
   isMove            = 5,
-  gThreshVal        = 6,
+  gThresh           = 6,
   gThreshTime       = 7,
   aWeight           = 8,
   aMag              = 9,
@@ -89,7 +89,7 @@ static const char* pnts_config_name[] = {
   "isAccl",
   "isMagn",
   "gAlpha",
-  "gThreshVal",
+  "gThresh",
   "gThreshTime",
   "aAlpha",
   "aThresh",
@@ -100,7 +100,7 @@ typedef enum {
   pnts_isAccl      = 0,
   pnts_isMagn      = 1,
   pnts_gAlpha      = 2,
-  pnts_gThreshVal  = 3,
+  pnts_gThresh     = 3,
   pnts_gThreshTime = 4,
   pnts_aAlpha      = 5,
   pnts_aThresh     = 6,
@@ -123,7 +123,7 @@ typedef enum {
   auto_isAccl      = 1,
   auto_isMagn      = 2,
   auto_gAlpha      = 3,
-  auto_gThreshVal  = 4,
+  auto_gThresh     = 4,
   auto_aAlpha      = 5,
   auto_mAlpha      = 6,
 } auto_config_enum;
@@ -259,7 +259,7 @@ int IMU_file_getField(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_readCore(
+int IMU_file_coreOpen(
   char*                 filename,
   IMU_core_config       *config)
 {
@@ -297,8 +297,8 @@ int IMU_file_readCore(
       get_bool(args, &config->isFOM);
     else if (type == isMove)
       get_bool(args, &config->isMove);
-    else if (type == gThreshVal)
-      sscanf(args, "%f", &config->gThreshVal);
+    else if (type == gThresh)
+      sscanf(args, "%f", &config->gThresh);
     else if (type == gThreshTime)
       sscanf(args, "%f", &config->gThreshTime);
     else if (type == aWeight)
@@ -331,7 +331,7 @@ int IMU_file_readCore(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_file_writeCore(
+int IMU_file_coreSave(
   char                  *filename,
   IMU_core_config       *config)
 {
@@ -351,7 +351,7 @@ int IMU_file_writeCore(
   fprintf(file, "  \"isStable\": ");    write_bool(file, config->isStable);
   fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
   fprintf(file, "  \"isMove\": ");      write_bool(file, config->isMove);
-  fprintf(file, "  \"gThreshVal\": %0.2f,\n",      config->gThreshVal);
+  fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
   fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
   fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
   fprintf(file, "  \"aMag\": %0.2f,\n",            config->aMag);
@@ -374,7 +374,7 @@ int IMU_file_writeCore(
 * reads calibration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_readRect( 
+int IMU_file_rectOpen( 
   char                  *filename,
   IMU_rect_config       *config)
 {
@@ -425,7 +425,7 @@ int IMU_file_readRect(
 * writes calibration structure to a json file
 ******************************************************************************/
 
-int IMU_file_writeRect(
+int IMU_file_rectSave(
   char                  *filename,
   IMU_rect_config       *config)
 {
@@ -457,7 +457,7 @@ int IMU_file_writeRect(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_readPnts(
+int IMU_file_pntsOpen(
   char                  *filename,
   IMU_pnts_config       *config)
 {
@@ -490,8 +490,8 @@ int IMU_file_readPnts(
       get_bool(args, &config->isMagn);
     else if (type == pnts_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
-    else if (type == pnts_gThreshVal)
-      sscanf(args, "%f", &config->gThreshVal);
+    else if (type == pnts_gThresh)
+      sscanf(args, "%f", &config->gThresh);
     else if (type == pnts_gThreshTime)
       sscanf(args, "%f", &config->gThreshTime);
     else if (type == pnts_aAlpha)
@@ -514,7 +514,7 @@ int IMU_file_readPnts(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_file_writePnts(
+int IMU_file_pntsSave(
   char                  *filename,
   IMU_pnts_config       *config)
 {
@@ -531,7 +531,7 @@ int IMU_file_writePnts(
   fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
   fprintf(file, "  \"gAlpha\": %0.2f,\n",          config->gAlpha);
-  fprintf(file, "  \"gThreshVal\": %0.2f,\n",      config->gThreshVal);
+  fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
   fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
   fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
   fprintf(file, "  \"aThresh\": %0.2f,\n",         config->aThresh);
@@ -549,7 +549,7 @@ int IMU_file_writePnts(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_readAuto(
+int IMU_file_autoOpen(
   char                  *filename,
   IMU_auto_config       *config)
 {
@@ -600,7 +600,7 @@ int IMU_file_readAuto(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_file_writeAuto(
+int IMU_file_autoSave(
   char                 *filename,
   IMU_auto_config      *config)
 {

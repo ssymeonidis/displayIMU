@@ -31,6 +31,7 @@
 // include statements 
 #include <math.h> 
 #include <stdlib.h>
+#include <string.h>
 #include "IMU_core.h"
 
 // internally managed structures
@@ -219,12 +220,11 @@ int IMU_core_reset(
 * assumes: corrected and normalized data
 ******************************************************************************/
 
-int IMU_core_deadRecon(
+int IMU_core_zero(
   uint16_t              id,  
   float                 t,
   float                 *a_in, 
-  float                 *m_in,
-  float                 **estm)
+  float                 *m_in)
 {
   // check for out-of-bounds condition
   if (id > numInstCore-1)
@@ -233,7 +233,7 @@ int IMU_core_deadRecon(
     return 0;
     
   // assign estimate vector
-  float *SEq            = *estm = state[id].SEq;
+  float *SEq            = state[id].SEq;
 
   // define the local variables
   float                 a[3];
@@ -306,24 +306,23 @@ int IMU_core_deadRecon(
 * apply gyroscope rates
 ******************************************************************************/
 
-int IMU_core_estmGyro(
+int IMU_core_newGyro(
   uint16_t              id, 
   float                 t, 
   float                 *g,
-  float                 **estm,
-  IMU_core_FOM          *pntr)
+  IMU_FOM_core          *pntr)
 {
   // check for out-of-bounds condition
   if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // define/initialize variables
-  float *SEq            = *estm = state[id].SEq;
+  float *SEq            = state[id].SEq;
 
   // initialize figure of merit
-  IMU_core_FOM_gyro     *FOM;
+  IMU_FOM_core_gyro     *FOM;
   if (pntr != NULL) {
-    pntr->type          = IMU_core_gyro;
+    pntr->type          = IMU_FOM_gyro;
     FOM                 = &pntr->data.gyro;               
     FOM->stable         = 0;
   }
@@ -340,7 +339,7 @@ int IMU_core_estmGyro(
   // check for stable condition
   if (config[id].isStable) {
     float g_sum         = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
-    if (g_sum > config[id].gThreshVal * config[id].gThreshVal)
+    if (g_sum > config[id].gThresh * config[id].gThresh)
       state[id].t_move  = t;
     else if (t - state[id].t_move > config[id].gThreshTime) {
       stable            = 1;
@@ -365,19 +364,15 @@ int IMU_core_estmGyro(
 * apply accelerometer vector
 ******************************************************************************/
 
-int IMU_core_estmAccl(
+int IMU_core_newAccl(
   uint16_t              id, 
   float                 t, 
   float                 *a_in, 
-  float                 **estm,
-  IMU_core_FOM          *pntr)
+  IMU_FOM_core          *pntr)
 {
   // check for out-of-bounds condition
   if (id > numInstCore - 1)
     return IMU_CORE_BAD_INST; 
-
-  // assign estimate vector
-  *estm                 = state[id].SEq;
 
   // save accelerometer data
   if (config[id].isMove) {
@@ -387,9 +382,9 @@ int IMU_core_estmAccl(
   }
 
   // initialize figure of merit
-  IMU_core_FOM_accl     *FOM;
+  IMU_FOM_core_accl     *FOM;
   if (pntr != NULL) {
-    pntr->type          = IMU_core_accl;
+    pntr->type          = IMU_FOM_accl;
     FOM                 = &pntr->data.accl;               
     FOM->aMag           = 0;
     FOM->aDelt          = 0;
@@ -399,7 +394,7 @@ int IMU_core_estmAccl(
   if (!config[id].enable || !config[id].isAccl)
     return 0;
   if (state[id].aReset) {
-    IMU_core_deadRecon(id, t, a_in, NULL, estm);
+    IMU_core_zero(id, t, a_in, NULL);
     return 0;
   }
 
@@ -459,24 +454,20 @@ int IMU_core_estmAccl(
 * apply magnetometer vector
 ******************************************************************************/
 
-int IMU_core_estmMagn(
+int IMU_core_newMagn(
   uint16_t              id, 
   float                 t, 
   float                 *m_in,
-  float                 **estm,
-  IMU_core_FOM          *pntr)
+  IMU_FOM_core          *pntr)
 {
   // check for out-of-bounds condition
   if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
-  // assign estimate vector
-  *estm                 = state[id].SEq;
-
   // initialize figure of merit
-  IMU_core_FOM_magn     *FOM;
+  IMU_FOM_core_magn     *FOM;
   if (pntr != NULL) {
-    pntr->type          = IMU_core_magn;
+    pntr->type          = IMU_FOM_magn;
     FOM                 = &pntr->data.magn;               
     FOM->mMag           = 0;
     FOM->mAng           = 0;
@@ -487,7 +478,7 @@ int IMU_core_estmMagn(
   if (!config[id].isMagn || !config[id].enable)
     return 0;
   if (state[id].mReset) {
-    IMU_core_deadRecon(id, t, NULL, m_in, estm);
+    IMU_core_zero(id, t, NULL, m_in);
     return 0;
   }
 
@@ -584,14 +575,13 @@ int IMU_core_estmMagn(
 * estimate euler angle given gyroscope, accelerometer, and magnetometer data 
 ******************************************************************************/
 
-int IMU_core_estmAll(
+int IMU_core_newAll(
   uint16_t              id, 
   float                 t, 
   float                 *g, 
   float                 *a, 
   float                 *m,
-  float                 **estm,
-  IMU_core_FOM          FOM[3])
+  IMU_FOM_core          FOM[3])
 {
   // check for out-of-bounds condition
   if (id > numInstCore - 1)
@@ -601,26 +591,26 @@ int IMU_core_estmAll(
   if (state[id].mReset && state[id].aReset) {
     // initialize to known value
     if (FOM != NULL) {
-      FOM[0].type             = IMU_core_gyro;
+      FOM[0].type             = IMU_FOM_gyro;
       FOM[0].data.gyro.stable = 0.0;
-      FOM[1].type             = IMU_core_accl;
+      FOM[1].type             = IMU_FOM_accl;
       FOM[1].data.accl.aMag   = 0.0;
       FOM[1].data.accl.aDelt  = 0.0;
-      FOM[2].type             = IMU_core_magn;
+      FOM[2].type             = IMU_FOM_magn;
       FOM[2].data.magn.mMag   = 0.0;
       FOM[2].data.magn.mAng   = 0.0;
       FOM[2].data.magn.mDelt  = 0.0;
     }
     
     // zero the system to the current sensor
-    IMU_core_deadRecon(id, t, a, m, estm);
+    IMU_core_zero(id, t, a, m);
     return 0;
   }
   
   // update system state w/ each sensor
-  IMU_core_estmGyro(id, t, g, estm, &FOM[0]);
-  IMU_core_estmAccl(id, t, a, estm, &FOM[1]);
-  IMU_core_estmMagn(id, t, m, estm, &FOM[2]);
+  IMU_core_newGyro(id, t, g, &FOM[0]);
+  IMU_core_newAccl(id, t, a, &FOM[1]);
+  IMU_core_newMagn(id, t, m, &FOM[2]);
   return 0;
 }
 
@@ -629,7 +619,21 @@ int IMU_core_estmAll(
 * estimate velocity vector (minus gravity)
 ******************************************************************************/
 
-int IMU_core_estmMove(
+int IMU_core_estmQuat(
+  uint16_t              id,
+  float                 *estm)
+{
+  // need to add mutex 
+  memcpy(estm, state[id].SEq, 4*sizeof(float));
+  return 0;
+}
+
+
+/******************************************************************************
+* estimate acceleration vector (minus gravity)
+******************************************************************************/
+
+int IMU_core_estmAccl(
   uint16_t              id,
   float                 *estm)
 {

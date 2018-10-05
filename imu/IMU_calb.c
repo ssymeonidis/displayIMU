@@ -116,7 +116,7 @@ int IMU_calb_init(
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_calb_strt(
+int IMU_calb_start(
   uint16_t                id,
   IMU_calb_mode           mode,
   IMU_rect_config         *rect,
@@ -142,7 +142,7 @@ int IMU_calb_strt(
 int IMU_calb_pnts(
   uint16_t                id, 
   IMU_pnts_entry          *pntr,
-  IMU_calb_FOM            *FOM)
+  IMU_FOM_calb            *FOM)
 {
   // check for out-of-bounds condition
   if (id > numInstCalb-1)

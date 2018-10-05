@@ -26,6 +26,7 @@ extern "C" {
 
 // include statements
 #include <stdint.h>
+#include "IMU_FOM.h"
 
 // define status codes
 #define IMU_CORE_GYRO_STABLE     1
@@ -42,9 +43,9 @@ typedef struct {
   unsigned char        isAccl;          // enable accelerometer data
   unsigned char        isMagn;          // enable magnetometer data
   unsigned char        isStable;        // enable detection of no movement
-  unsigned char        isFOM;           // enable FOM calculation
+  unsigned char        isFOM;           // enable weight based on FOM
   unsigned char        isMove;          // enable acceleration estimate
-  float                gThreshVal;      // no motion threshold value
+  float                gThresh;         // no motion threshold value
   float                gThreshTime;     // no motion threhsold time
   float                aWeight;         // accelerometer IMU weight
   float                aMag;            // gravity magnitude
@@ -63,59 +64,29 @@ typedef struct {
   float                t_move;         // last "unstable" time
   float                SEq[4];         // current quaterion
   float                A[3];           // last acceleration estimate
-  float                A_rot[3];       // rotated acceleration estimate
   float                a[3];           // last acclerometer datum
   unsigned char        aReset;         // accelerometer reset signal
   unsigned char        mReset;         // magnetometer reset signal
 } IMU_core_state;
 
-// define datum enumertation type for FOM structure
-typedef enum {
-  IMU_core_all         = 0,
-  IMU_core_gyro        = 1,
-  IMU_core_accl        = 2,
-  IMU_core_magn        = 3
-} IMU_core_sensor;
-
-// define sensor figure of merit
-typedef struct {
-  unsigned char        stable;
-} IMU_core_FOM_gyro;
-typedef struct {
-  float                aMag;
-  float                aDelt;
-} IMU_core_FOM_accl;
-typedef struct {
-  float                mMag;
-  float                mAng;
-  float                mDelt;
-} IMU_core_FOM_magn; 
-
-// define figure of merit 
-typedef struct {
-  IMU_core_sensor      type;
-  union {
-    IMU_core_FOM_gyro  gyro;
-    IMU_core_FOM_accl  accl;
-    IMU_core_FOM_magn  magn;
-  }                    data;
-} IMU_core_FOM;
 
 // data structure access functions
 int IMU_core_init      (uint16_t *id, IMU_core_config **config);
 int IMU_core_getConfig (uint16_t id,  IMU_core_config **config);
 int IMU_core_getState  (uint16_t id,  IMU_core_state  **state);
 
+// general update/command operation functions 
+int IMU_core_reset   (uint16_t id);
+int IMU_core_zero    (uint16_t id, float t, float *a, float *m);
+int IMU_core_newGyro (uint16_t id, float t, float *g, IMU_FOM_core*);
+int IMU_core_newAccl (uint16_t id, float t, float *a, IMU_FOM_core*);
+int IMU_core_newMagn (uint16_t id, float t, float *m, IMU_FOM_core*);
+int IMU_core_newAll  (uint16_t id, float t, float *g, float *a, float *m,
+                      IMU_FOM_core FOM[3]);
 
-// general operation functions 
-int IMU_core_reset    (uint16_t id);
-int IMU_core_zero     (uint16_t id, float t, float *a, float *m, float**);
-int IMU_core_estmGyro (uint16_t id, float t, float *g, float**, IMU_core_FOM*);
-int IMU_core_estmAccl (uint16_t id, float t, float *a, float**, IMU_core_FOM*);
-int IMU_core_estmMagn (uint16_t id, float t, float *m, float**, IMU_core_FOM*);
-int IMU_core_estmAll  (uint16_t id, float t, float *g, float *a, float *m,
-                       float **, IMU_core_FOM FOM[3]);
-int IMU_core_estmMove (uint16_t id, float *);
+// state estimateion functions
+int IMU_core_estmQuat (uint16_t id, float* estm);
+int IMU_core_estmAccl (uint16_t id, float* estm);
 
 
 #ifdef __cplusplus

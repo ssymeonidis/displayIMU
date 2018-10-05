@@ -127,7 +127,7 @@ public:
     QCheckBox *noStable;
     QCheckBox *noFOM;
     QCheckBox *noMove;
-    QLineEdit *gThreshVal;
+    QLineEdit *gThresh;
     QLineEdit *gThreshTime;
     QLabel *labelCore2;
     QPushButton *configSave;
@@ -493,9 +493,9 @@ public:
         noMove = new QCheckBox(centralWidget);
         noMove->setObjectName(QStringLiteral("noMove"));
         noMove->setGeometry(QRect(940, 70, 97, 22));
-        gThreshVal = new QLineEdit(centralWidget);
-        gThreshVal->setObjectName(QStringLiteral("gThreshVal"));
-        gThreshVal->setGeometry(QRect(730, 140, 151, 27));
+        gThresh = new QLineEdit(centralWidget);
+        gThresh->setObjectName(QStringLiteral("gThresh"));
+        gThresh->setGeometry(QRect(730, 140, 151, 27));
         gThreshTime = new QLineEdit(centralWidget);
         gThreshTime->setObjectName(QStringLiteral("gThreshTime"));
         gThreshTime->setGeometry(QRect(900, 140, 151, 27));
@@ -640,7 +640,7 @@ public:
         QObject::connect(noStable, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
         QObject::connect(noFOM, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
         QObject::connect(noMove, SIGNAL(clicked()), windowGUI, SLOT(config_read()));
-        QObject::connect(gThreshVal, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
+        QObject::connect(gThresh, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
         QObject::connect(gThreshTime, SIGNAL(editingFinished()), windowGUI, SLOT(config_read()));
         QObject::connect(dispScaleGyro, SIGNAL(editingFinished()), windowGUI, SLOT(glWidget_update()));
         QObject::connect(dispScaleAccl, SIGNAL(editingFinished()), windowGUI, SLOT(glWidget_update()));
@@ -721,7 +721,7 @@ public:
         mMult8->setText(QApplication::translate("windowGUI", "1.0", 0));
         mMult5->setText(QApplication::translate("windowGUI", "0.0", 0));
         mMult7->setText(QApplication::translate("windowGUI", "0.0", 0));
-        labelCore1->setText(QApplication::translate("windowGUI", "gThreshVal", 0));
+        labelCore1->setText(QApplication::translate("windowGUI", "gThresh", 0));
         labelCore->setText(QApplication::translate("windowGUI", "Core Structure", 0));
         labelGyroBias->setText(QApplication::translate("windowGUI", "gyro bias:", 0));
         labelGyroScale->setText(QApplication::translate("windowGUI", "gyro scale:", 0));
@@ -745,7 +745,7 @@ public:
         noStable->setText(QApplication::translate("windowGUI", "no stable", 0));
         noFOM->setText(QApplication::translate("windowGUI", "no FOM", 0));
         noMove->setText(QApplication::translate("windowGUI", "no move", 0));
-        gThreshVal->setText(QApplication::translate("windowGUI", "1.0", 0));
+        gThresh->setText(QApplication::translate("windowGUI", "1.0", 0));
         gThreshTime->setText(QApplication::translate("windowGUI", "1.0", 0));
         labelCore2->setText(QApplication::translate("windowGUI", "gThreshTime", 0));
         configSave->setText(QApplication::translate("windowGUI", "Save", 0));

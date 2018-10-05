@@ -25,10 +25,10 @@ extern "C" {
 #endif
 
 // functions for modifying/converting quaternions
+void IMU_math_calcEuler     (float* q, float* E);
 void IMU_math_calcRefState  (float* q, float* ref);
 void IMU_math_calcRefVectUp (float* u, float* ref);
 void IMU_math_applyRef      (float* q, float* ref, float* q_out);
-void IMU_math_calcEuler     (float* q, float* E);
 
 #ifdef __cplusplus
 }

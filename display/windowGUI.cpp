@@ -59,11 +59,11 @@ windowGUI::~windowGUI()
 void windowGUI::initIMU(char* rect_config_file, char* core_config_file)
 {
   if (rect_config_file  != NULL) {
-    IMU_file_readRect(rect_config_file, rect_config);
+    IMU_file_rectOpen(rect_config_file, rect_config);
     calib_write();
   }
   if (core_config_file != NULL) {
-    IMU_file_readCore(core_config_file, core_config);
+    IMU_file_coreOpen(core_config_file, core_config);
     config_write();
   }
 }
@@ -82,7 +82,7 @@ void windowGUI::config_write()
   ui->noStable->setChecked(!core->isStable);
   ui->noFOM->setChecked(!core->isFOM);
   ui->noMove->setChecked(!core->isMove);
-  ui->gThreshVal->setText(QString::number(core->gThreshVal, 'f', 2));
+  ui->gThresh->setText(QString::number(core->gThresh, 'f', 2));
   ui->gThreshTime->setText(QString::number(core->gThreshTime, 'f', 2));
   ui->aWeight->setText(QString::number(core->aWeight, 'f', 2));
   ui->aMag->setText(QString::number(core->aMag, 'f', 2));
@@ -109,7 +109,7 @@ void windowGUI::config_read()
   core->isStable     = !ui->noStable->isChecked();
   core->isFOM        = !ui->noFOM->isChecked();
   core->isMove       = !ui->noMove->isChecked();
-  core->gThreshVal   = ui->gThreshVal->text().toFloat();
+  core->gThresh      = ui->gThresh->text().toFloat();
   core->gThreshTime  = ui->gThreshTime->text().toFloat();
   core->aWeight      = ui->aWeight->text().toFloat();
   core->aMag         = ui->aMag->text().toFloat();
@@ -287,7 +287,7 @@ void windowGUI::on_configOpen_clicked()
 {
   QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config",
     ("json (*.json)"));
-  IMU_file_readCore((char *)file.toStdString().c_str(), core_config);
+  IMU_file_coreOpen((char *)file.toStdString().c_str(), core_config);
   config_write();
 }
 
@@ -300,7 +300,7 @@ void windowGUI::on_configSave_clicked()
 {
   QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
-  IMU_file_writeCore((char *)file.toStdString().c_str(), core_config);
+  IMU_file_coreSave((char *)file.toStdString().c_str(), core_config);
 }
 
 
@@ -312,7 +312,7 @@ void windowGUI::on_calibOpen_clicked()
 {
   QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config", 
     ("json (*.json)"));
-  IMU_file_readRect((char *)file.toStdString().c_str(), rect_config);
+  IMU_file_rectOpen((char *)file.toStdString().c_str(), rect_config);
   calib_write();
 }
 
@@ -325,7 +325,7 @@ void windowGUI::on_calibSave_clicked()
 {
   QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
-  IMU_file_writeRect((char *)file.toStdString().c_str(), rect_config);
+  IMU_file_rectSave((char *)file.toStdString().c_str(), rect_config);
 }
 
 

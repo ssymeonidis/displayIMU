@@ -72,8 +72,8 @@ typedef struct {
   float                  ang[3];
   float                  move[3];  
   IMU_pnts_entry         *pnt;
-  IMU_core_FOM           FOMcore[3];
-  IMU_calb_FOM           FOMcalib;
+  IMU_FOM_core           FOMcore[3];
+  IMU_FOM_calb           FOMcalib;
 } dataParse_estim;
 
 

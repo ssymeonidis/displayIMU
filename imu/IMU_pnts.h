@@ -39,7 +39,7 @@ typedef struct {
   uint8_t                isAccl;          // process accelerometer data
   uint8_t                isMagn;          // process magnetometer data
   float                  gAlpha;          // mean/std calc filter value 
-  float                  gThreshVal;      // no motion threshold value
+  float                  gThresh;         // no motion threshold value
   float                  gThreshTime;     // no motion threhsold time
   float                  aAlpha;          // accelerometer filter value
   float                  aThresh;         // no motion threshold value
@@ -79,24 +79,24 @@ typedef struct {
 
 
 // data structure access function
-int IMU_pnts_init       (uint16_t *id, IMU_pnts_config**);
-int IMU_pnts_getConfig  (uint16_t id,  IMU_pnts_config**);
-int IMU_pnts_getState   (uint16_t id,  IMU_pnts_state**);
+int IMU_pnts_init      (uint16_t *id, IMU_pnts_config**);
+int IMU_pnts_getConfig (uint16_t id,  IMU_pnts_config**);
+int IMU_pnts_getState  (uint16_t id,  IMU_pnts_state**);
 
 // points table access function
 #if IMU_CALIB_TABLE_SIZE > 1
-int IMU_pnts_getCount   (uint16_t id, uint16_t *count);
-int IMU_pnts_getEntry   (uint16_t id, uint16_t index, IMU_pnts_entry**);
+int IMU_pnts_getCount (uint16_t id, uint16_t *count);
+int IMU_pnts_getEntry (uint16_t id, uint16_t index, IMU_pnts_entry**);
 #endif
 
 // general operation functions 
-int IMU_pnts_start      (uint16_t id, uint16_t numPnts);
-int IMU_pnts_stop       (uint16_t id);
-int IMU_pnts_updateGyro (uint16_t id, float t, float *g, IMU_pnts_entry**);
-int IMU_pnts_updateAccl (uint16_t id, float t, float *a, IMU_pnts_entry**);
-int IMU_pnts_updateMagn (uint16_t id, float t, float *m, IMU_pnts_entry**);
-int IMU_pnts_updateAll  (uint16_t id, float t, float *g, float *a, float *m,
-                         IMU_pnts_entry**); 
+int IMU_pnts_start   (uint16_t id, uint16_t numPnts);
+int IMU_pnts_stop    (uint16_t id);
+int IMU_pnts_newGyro (uint16_t id, float t, float *g, IMU_pnts_entry**);
+int IMU_pnts_newAccl (uint16_t id, float t, float *a, IMU_pnts_entry**);
+int IMU_pnts_newMagn (uint16_t id, float t, float *m, IMU_pnts_entry**);
+int IMU_pnts_newAll  (uint16_t id, float t, float *g, float *a, float *m,
+                      IMU_pnts_entry**); 
 
 
 #ifdef __cplusplus

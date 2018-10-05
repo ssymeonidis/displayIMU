@@ -983,7 +983,7 @@
      </font>
     </property>
     <property name="text">
-     <string>gThreshVal</string>
+     <string>gThresh</string>
     </property>
    </widget>
    <widget class="QLabel" name="labelCore">
@@ -1416,7 +1416,7 @@
      <string>no move</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="gThreshVal">
+   <widget class="QLineEdit" name="gThresh">
     <property name="geometry">
      <rect>
       <x>730</x>
@@ -2533,7 +2533,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>gThreshVal</sender>
+   <sender>gThresh</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
    <slot>config_read()</slot>
