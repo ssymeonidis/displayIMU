@@ -59,10 +59,6 @@ int IMU_auto_getConfig (uint16_t id,  IMU_auto_config **config);
 int IMU_auto_getState  (uint16_t id,  IMU_auto_state  **state);
 
 // general operation functions 
-int IMU_auto_newGyro (uint16_t id, float t, float *g);
-int IMU_auto_newAccl (uint16_t id, float t, float *a);
-int IMU_auto_newMagn (uint16_t id, float t, float *m); 
-int IMU_auto_newAll  (uint16_t id, float t, float *g, float *a, float *m);
 int IMU_auto_newFOM  (uint16_t id, IMU_FOM_core*, uint16_t size);
 
 

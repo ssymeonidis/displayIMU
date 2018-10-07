@@ -38,21 +38,28 @@ typedef enum {
 
 // define sensor figure of merit
 typedef struct {
-  unsigned char        stable;
+  float                magSqrd;
+  uint8_t              isStable;
 } IMU_FOM_core_gyro;
 typedef struct {
-  float                aMag;
-  float                aDelt;
+  float                mag;
+  float                magFOM;
+  float                delt;
 } IMU_FOM_core_accl;
 typedef struct {
-  float                mMag;
-  float                mAng;
-  float                mDelt;
+  float                mag;
+  float                magFOM;
+  float                ang;
+  float                angFOM;
+  float                delt;
 } IMU_FOM_core_magn; 
 
 // define figure of merit 
 typedef struct {
   IMU_FOM_sensor       type;
+  float                t;
+  uint8_t              isValid;
+  IMU_TYPE             val[3];
   union {
     IMU_FOM_core_gyro  gyro;
     IMU_FOM_core_accl  accl;

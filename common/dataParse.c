@@ -218,8 +218,6 @@ void data_process_datum()
       sensor.acclRaw, sensor.magnRaw, &estim.pnt); estim.pnt = NULL; 
     if (estim.pnt != NULL) 
       IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
-    IMU_auto_newAll(state.idCore, sensor.time, sensor.gyroCor, 
-      sensor.acclCor, sensor.magnCor); 
     IMU_core_newAll(state.idCore, sensor.time, sensor.gyroCor, sensor.acclCor, 
       sensor.magnCor, estim.FOMcore);
   }
@@ -232,7 +230,6 @@ void data_process_datum()
     IMU_pnts_newGyro(state.idPnts, sensor.time, sensor.gyroRaw, &estim.pnt);
     if (estim.pnt != NULL) 
       IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
-    IMU_auto_newGyro(state.idAuto, sensor.time, sensor.gyroCor);
     IMU_core_newGyro(state.idCore, sensor.time, sensor.gyroCor, estim.FOMcore);
   }
 
@@ -244,7 +241,6 @@ void data_process_datum()
     IMU_pnts_newAccl(state.idPnts, sensor.time, sensor.acclRaw, &estim.pnt);
     if (estim.pnt != NULL) 
       IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
-    IMU_auto_newAccl(state.idAuto, sensor.time, sensor.acclCor);
     IMU_core_newAccl(state.idCore, sensor.time, sensor.acclCor, estim.FOMcore);
   }
 
@@ -256,7 +252,6 @@ void data_process_datum()
     IMU_pnts_newMagn(state.idPnts, sensor.time, sensor.magnRaw, &estim.pnt);
     if (estim.pnt != NULL) 
       IMU_calb_pnts(state.idCalb, estim.pnt, &estim.FOMcalib); 
-    IMU_auto_newMagn(state.idAuto, sensor.time, sensor.magnCor);
     IMU_core_newMagn(state.idCore, sensor.time, sensor.magnCor, estim.FOMcore);
   }
   
@@ -264,7 +259,7 @@ void data_process_datum()
   IMU_core_estmQuat(state.idCore, estim.q_org);
   IMU_core_estmAccl(state.idCore, estim.move);
   IMU_math_applyRef(estim.q_org, ctrl.q_ref, estim.q);
-  IMU_math_calcEuler(estim.q_org, estim.ang);
+  IMU_math_quatToEuler(estim.q_org, estim.ang);
   IMU_auto_newFOM(state.idAuto, estim.FOMcore, 1);   
   
   // write state to log file
