@@ -26,14 +26,22 @@ extern "C" {
 
 // include statements
 #include <stdint.h>
+#if IMU_USE_PTHREAD
+#include <pthread.h>
+#endif
 #include "IMU_FOM.h"
 
 // define status codes
-#define IMU_CORE_GYRO_STABLE     1
+#define IMU_CORE_FNC_DISABLED    1
+#define IMU_CORE_FNC_IN_RESET    2
+#define IMU_CORE_FNC_ZEROED      3
+#define IMU_CORE_NO_WEIGHT       4
+#define IMU_CORE_GYRO_STABLE     4
 
 // define error codes
 #define IMU_CORE_INST_OVERFLOW  -1
 #define IMU_CORE_BAD_INST       -2
+#define IMU_CORE_FAILED_MUTEX   -3
 
 
 // define the configuration structure (values tuned for a part)
@@ -64,9 +72,12 @@ typedef struct {
   float                t_move;         // last "unstable" time
   float                SEq[4];         // current quaterion
   float                A[3];           // last acceleration estimate
-  float                a[3];           // last acclerometer datum
   unsigned char        aReset;         // accelerometer reset signal
   unsigned char        mReset;         // magnetometer reset signal
+  unsigned char        estmValid;      // flag to insure valid state
+#if IMU_USE_PTHREAD
+  pthread_mutex_t      lock;           // mutex (for async operation)
+#endif
 } IMU_core_state;
 
 
@@ -77,12 +88,12 @@ int IMU_core_getState  (uint16_t id,  IMU_core_state  **state);
 
 // general update/command operation functions 
 int IMU_core_reset   (uint16_t id);
-int IMU_core_zero    (uint16_t id, float t, float *a, float *m);
-int IMU_core_newGyro (uint16_t id, float t, float *g, IMU_FOM_core*);
-int IMU_core_newAccl (uint16_t id, float t, float *a, IMU_FOM_core*);
-int IMU_core_newMagn (uint16_t id, float t, float *m, IMU_FOM_core*);
-int IMU_core_newAll  (uint16_t id, float t, float *g, float *a, float *m,
-                      IMU_FOM_core FOM[3]);
+int IMU_core_zero    (uint16_t id, float t, IMU_TYPE *a, IMU_TYPE *m);
+int IMU_core_newGyro (uint16_t id, float t, IMU_TYPE *g, IMU_FOM_core*);
+int IMU_core_newAccl (uint16_t id, float t, IMU_TYPE *a, IMU_FOM_core*);
+int IMU_core_newMagn (uint16_t id, float t, IMU_TYPE *m, IMU_FOM_core*);
+int IMU_core_newAll  (uint16_t id, float t, IMU_TYPE *g, IMU_TYPE *a, 
+                      IMU_TYPE *m, IMU_FOM_core FOM[3]);
 
 // state estimateion functions
 int IMU_core_estmQuat (uint16_t id, float* estm);
