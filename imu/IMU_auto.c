@@ -99,7 +99,7 @@ int IMU_auto_reset(
 * process gyroscope, accelerometer, and magnetometer vectors
 ******************************************************************************/
 
-int IMU_auto_newFOM(
+int IMU_auto_update(
   uint16_t                id,  
   IMU_core_FOM            *FOM,
   uint16_t                size)

@@ -61,7 +61,7 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), p
   scaleGyro  = 1; 
   
   // get pointer to sensor and imu data
-  dataIF_getSensor(&sensor);
+  dataIF_getPntr(&data);
   imuIF_getPntr(&estm);
 
   // create timer
@@ -133,15 +133,15 @@ void GLWidget::paintGL()
 
   // draw gyroscope state
   if (isGyro == true) 
-    drawVector(gyroColor, sensor->gyroRaw, scaleGyro);
+    drawVector(gyroColor, data->gRaw, scaleGyro);
 
   // draw accelerometer state
   if (isAccl == true) 
-    drawVector(acclColor, sensor->acclRaw, scaleAccl);
+    drawVector(acclColor, data->aRaw, scaleAccl);
 
   // draw magnetometer state
   if (isMagn == true) 
-    drawVector(magnColor, sensor->magnRaw, scaleMagn);
+    drawVector(magnColor, data->mRaw, scaleMagn);
 
   // draw imu state
   if (isIMU == true) {

@@ -64,6 +64,51 @@ int IMU_rect_getConfig(
 
 
 /******************************************************************************
+* process single datum (call function w/ respective type)
+******************************************************************************/
+
+int IMU_rect_datum(
+  uint16_t              id,
+  IMU_datum             *datum,
+  IMU_TYPE              *val)
+{
+  // check sensor type and execute
+  if      (datum->type == IMU_gyro)
+    return IMU_rect_gyro(id, val, datum->val);
+  else if (datum->type == IMU_accl)
+    return IMU_rect_accl(id, val, datum->val);
+  else if (datum->type == IMU_magn)
+    return IMU_rect_magn(id, val, datum->val);
+  return 0;
+}
+
+
+/******************************************************************************
+* correct raw gyroscope, accelerometer, and magnetometer data
+******************************************************************************/
+
+int IMU_rect_data3(
+  uint16_t              id, 
+  IMU_data3             *data3,
+  IMU_TYPE              *g,     
+  IMU_TYPE              *a,     
+  IMU_TYPE              *m)
+{
+  // check execution condition
+  if (id > numInstRect-1)
+    return IMU_RECT_BAD_INST;
+  if (!config[id].enable)
+    return 0;
+
+  // rectify all the sensors
+  IMU_rect_gyro(id, g, data3->g);
+  IMU_rect_accl(id, a, data3->a);
+  IMU_rect_magn(id, m, data3->m);
+  return 0;
+}
+
+
+/******************************************************************************
 * correct raw gyroscope data
 ******************************************************************************/
 
@@ -160,27 +205,3 @@ int IMU_rect_magn(
 }
 
 
-/******************************************************************************
-* correct raw gyroscope, accelerometer, and magnetometer data
-******************************************************************************/
-
-int IMU_rect_all(
-  uint16_t              id, 
-  IMU_TYPE              *g_raw, 
-  IMU_TYPE              *a_raw, 
-  IMU_TYPE              *m_raw,
-  IMU_TYPE              *g,     
-  IMU_TYPE              *a,     
-  IMU_TYPE              *m)
-{
-  // check execution condition
-  if (id > numInstRect-1)
-    return IMU_RECT_BAD_INST;
-  if (!config[id].enable)
-    return 0;
-
-  IMU_rect_gyro(id, g_raw, g);
-  IMU_rect_accl(id, a_raw, a);
-  IMU_rect_magn(id, m_raw, m);
-  return 0;
-}

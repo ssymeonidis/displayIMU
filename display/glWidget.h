@@ -64,7 +64,7 @@ class GLWidget : public QGLWidget
     void drawGrid();
 
     // internal objects/parameters
-    dataIF_sensor   *sensor;
+    dataIF_data     *data;
     imuIF_estm      *estm;
     GLUquadricObj   *obj;
     QTimer          *refresh_timer;

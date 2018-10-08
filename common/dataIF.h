@@ -56,23 +56,23 @@ typedef struct {
 
 // define input sensor data structure
 typedef struct {
-  IMU_TYPE               gyroRaw[3];
-  IMU_TYPE               gyroCor[3];
-  IMU_TYPE               gyroFltr[3];
-  IMU_TYPE               acclRaw[3];
-  IMU_TYPE               acclCor[3];
-  IMU_TYPE               acclFltr[3];
-  IMU_TYPE               magnRaw[3];
-  IMU_TYPE               magnCor[3];
-  IMU_TYPE               magnFltr[3];
+  IMU_TYPE               gRaw[3];
+  IMU_TYPE               gCor[3];
+  IMU_TYPE               gFltr[3];
+  IMU_TYPE               aRaw[3];
+  IMU_TYPE               aCor[3];
+  IMU_TYPE               aFltr[3];
+  IMU_TYPE               mRaw[3];
+  IMU_TYPE               mCor[3];
+  IMU_TYPE               mFltr[3];
   float                  time;
-} dataIF_sensor; 
+} dataIF_data; 
 
 
 // initialization function
 void dataIF_init        (uint16_t idRect, uint16_t idCore, 
                          uint16_t idPnts, uint16_t idAuto);
-void dataIF_getSensor   (dataIF_sensor **sensor);
+void dataIF_getPntr     (dataIF_data**);
 
 // access functions
 void dataIF_startUDP    (int         portno);

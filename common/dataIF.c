@@ -33,7 +33,7 @@
 
 // define the data interface structures
 dataIF_ctrl              ctrl;
-dataIF_sensor            sensor;
+dataIF_data              data;
 dataIF_state             state;
 
 // define internal/external variables
@@ -44,6 +44,8 @@ FILE*                    csv_file;
 void dataIF_error(const char *msg);
 void dataIF_lineUPD(char* line);
 void dataIF_lineCSV(char* line);
+void dataIF_copyData3(IMU_data3 *data3);
+void dataIF_copyDatum(IMU_datum *datum, IMU_TYPE *val);
 
 
 /******************************************************************************
@@ -71,10 +73,10 @@ void dataIF_init(
 * get pointer to sensor structure
 ******************************************************************************/
 
-void dataIF_getSensor(
-  dataIF_sensor          **pntr)
+void dataIF_getPntr(
+  dataIF_data            **pntr)
 {
-  *pntr                  = &sensor;
+  *pntr                  = &data;
 }
 
 
@@ -143,75 +145,38 @@ void dataIF_process()
     dataIF_lineCSV(line);
 
   // determine the datum type
-  sscanf(line, "%d, %f", &datum_type, &sensor.time);
+  sscanf(line, "%d, %f", &datum_type, &data.time);
 
   // process synced data (all three sensors)
   if (datum_type == 0) {
     IMU_data3    data3;
-    data3.t      = sensor.time;
-    data3.FOM    = &state.FOM;
+    data3.t      = data.time;
+    data3.FOM    = state.FOM;
     sscanf(line, "%*d, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
-      &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2],
-      &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2],
-      &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-    IMU_rect_all(state.idRect, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
-      sensor.gyroCor, sensor.acclCor, sensor.magnCor);
-    memcpy(data3.g, sensor.gyroCor, sizeof(data3.g));
-    memcpy(data3.a, sensor.acclCor, sizeof(data3.a));
-    memcpy(data3.m, sensor.magnCor, sizeof(data3.m));
+      &data.gRaw[0], &data.gRaw[1], &data.gRaw[2],
+      &data.aRaw[0], &data.aRaw[1], &data.aRaw[2],
+      &data.mRaw[0], &data.mRaw[1], &data.mRaw[2]);
+    IMU_rect_data3(state.idRect, &data3, data.gRaw, data.aRaw, data.mRaw);
     IMU_pnts_data3(state.idPnts, &data3, &state.pnt);
     IMU_core_data3(state.idCore, &data3);
-    IMU_auto_newFOM(state.idAuto, state.FOM, 3);
+    IMU_auto_update(state.idAuto, data3.FOM, 3);
+    dataIF_copyData3(&data3);
   }
 
-  // process gyroscope data (async sensors)
-  else if (datum_type == 1) {
+  // process sensor datum (asynchrous feeds)
+  else if (datum_type < 4) {
     IMU_datum    datum;
-    datum.type   = IMU_gyro;
-    datum.t      = sensor.time;
-    datum.FOM    = &state.FOM;
-    sscanf(line, "%*d, %*f, %f, %f, %f", 
-      &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
-    IMU_rect_gyro(state.idRect, sensor.gyroRaw, sensor.gyroCor);
-    memcpy(datum.val, sensor.gyroCor, sizeof(datum.val));
-    IMU_pnts_newGyro(state.idPnts, &datum, &state.pnt);
-    IMU_core_newGyro(state.idCore, &datum);
-    IMU_auto_newFOM(state.idAuto, state.FOM, 1);
+    IMU_TYPE     val[3];
+    datum.type   = datum_type;
+    datum.t      = data.time;
+    datum.FOM    = state.FOM;
+    sscanf(line, "%*d, %*f, %f, %f, %f", &val[0], &val[1], &val[2]);
+    IMU_rect_datum(state.idRect, &datum, val);
+    IMU_pnts_datum(state.idPnts, &datum, &state.pnt);
+    IMU_core_datum(state.idCore, &datum);
+    IMU_auto_update(state.idAuto, state.FOM, 1);
+    dataIF_copyDatum(&datum, val);
   }
-
-  // process accelerometer data (async sensors)
-  else if (datum_type == 2) {
-    IMU_datum    datum;
-    datum.type   = IMU_accl;
-    datum.t      = sensor.time;
-    datum.FOM    = &state.FOM;
-    sscanf(line, "%*d, %*f, %f, %f, %f", 
-      &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
-    IMU_rect_accl(state.idRect, sensor.acclRaw, sensor.acclCor);
-    memcpy(datum.val, sensor.acclCor, sizeof(datum.val));
-    IMU_pnts_newAccl(state.idPnts, &datum, &state.pnt);
-    IMU_core_newAccl(state.idCore, &datum);
-    IMU_auto_newFOM(state.idAuto, state.FOM, 1);
-  }
-
-  // process magnetometer data (async sensors)
-  else if (datum_type == 3) {
-    IMU_datum    datum;
-    datum.type   = IMU_magn;
-    datum.t      = sensor.time;
-    datum.FOM    = &state.FOM;
-    sscanf(line, "%*d, %*f, %f, %f, %f", 
-      &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
-    IMU_rect_magn(state.idRect, sensor.magnRaw, sensor.magnCor);
-    memcpy(datum.val, sensor.acclCor, sizeof(datum.val));
-    IMU_pnts_newMagn(state.idPnts, &datum, &state.pnt);
-    IMU_core_newMagn(state.idCore, &datum);
-    IMU_auto_newFOM(state.idAuto, state.FOM, 1);
-  }
-  
-  // update IMU manual and automated calibration blocks
-  if (state.pnt != NULL) 
-    IMU_calb_pnts(state.idCalb, state.pnt);
 }
 
 
@@ -318,5 +283,39 @@ void dataIF_lineCSV(
     state.timeInitSys  = time.tv_sec * 1000000 + time.tv_usec;
     state.timeInitSen  = sensor_time;
     state.isFirstFrame = 0;
+  }
+}
+
+
+/******************************************************************************
+* copies corrected and filtered data to internal structure
+******************************************************************************/
+
+void dataIF_copyData3(
+  IMU_data3              *data3)
+{
+  memcpy(data.gCor, data3->g, sizeof(data.gCor));
+  memcpy(data.aCor, data3->a, sizeof(data.aCor));
+  memcpy(data.mCor, data3->m, sizeof(data.mCor));
+}
+
+
+/******************************************************************************
+* copies corrected and filtered data to internal structure
+******************************************************************************/
+
+void dataIF_copyDatum(
+  IMU_datum              *datum,
+  IMU_TYPE               *val)
+{
+  if        (datum->type == IMU_gyro) {
+    memcpy(data.gRaw, val,        sizeof(data.gRaw));
+    memcpy(data.gCor, datum->val, sizeof(data.gCor));
+  } else if (datum->type == IMU_accl) {
+    memcpy(data.aRaw, val,        sizeof(data.aRaw));
+    memcpy(data.aCor, datum->val, sizeof(data.aCor));
+  } else if (datum->type == IMU_magn) {
+    memcpy(data.mRaw, val,        sizeof(data.mRaw));
+    memcpy(data.mCor, datum->val, sizeof(data.mCor));
   }
 }
