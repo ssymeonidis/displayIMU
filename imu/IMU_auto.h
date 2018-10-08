@@ -59,6 +59,7 @@ int IMU_auto_getConfig (uint16_t id,  IMU_auto_config **config);
 int IMU_auto_getState  (uint16_t id,  IMU_auto_state  **state);
 
 // general operation functions 
+int IMU_auto_reset   (uint16_t id);
 int IMU_auto_newFOM  (uint16_t id, IMU_FOM_core*, uint16_t size);
 
 

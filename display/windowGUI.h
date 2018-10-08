@@ -22,8 +22,7 @@
 
 // include statements
 #include <QMainWindow>
-#include "IMU_rect.h"
-#include "IMU_core.h"
+#include "imuIF.h"
 
 // create abreviated namespace for windowGUI (qtcreator codegen)
 namespace Ui {class windowGUI;}
@@ -57,6 +56,7 @@ private slots:
 
 private:
   // internal structures/classes
+  imuIF_state         *state;
   Ui::windowGUI       *ui;
   IMU_rect_config     *rect_config;
   IMU_core_config     *core_config;

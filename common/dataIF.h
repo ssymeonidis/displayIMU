@@ -17,8 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _DATA_PARSE_H
-#define _DATA_PARSE_H
+#ifndef _DATA_IF_H
+#define _DATA_IF_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,21 +35,24 @@ extern "C" {
 
 // define IMU state structure
 typedef struct {
-  float                  q_ref[4];
-  uint8_t                exit_thread;
-} dataParse_ctrl;
+  uint8_t                isRealtime;
+  uint8_t                exitThread;
+  uint8_t                isExit;
+} dataIF_ctrl;
 
 typedef struct {
+  uint8_t                isCSV;
+  uint8_t                isFirstFrame;
+  double                 timeInitSys;
+  double                 timeInitSen;
   uint16_t               idRect;
   uint16_t               idCore;
   uint16_t               idPnts;
   uint16_t               idAuto;
   uint16_t               idCalb;
-  IMU_rect_config        *configRect;
-  IMU_core_config        *configCore;
-  IMU_pnts_config        *configPnts;
-  IMU_auto_config        *configAuto;
-} dataParse_state;
+  IMU_pnts_entry         *pnt;
+  IMU_FOM_core           FOM[3];
+} dataIF_state;
 
 // define input sensor data structure
 typedef struct {
@@ -63,37 +66,21 @@ typedef struct {
   float                  magnCor[3];
   float                  magnFltr[3];
   float                  time;
-} dataParse_sensor; 
+} dataIF_sensor; 
 
-// define IMU estimate data structure
-typedef struct {
-  float                  *q_org;
-  float                  q[4];
-  float                  ang[3];
-  float                  move[3];  
-  IMU_pnts_entry         *pnt;
-  IMU_FOM_core           FOMcore[3];
-  IMU_FOM_calb           FOMcalib;
-} dataParse_estim;
-
-
-// define the sensor data structure
-extern dataParse_ctrl    ctrl;
-extern dataParse_sensor  sensor;
-extern dataParse_estim   estim;
-extern dataParse_state   state;
 
 // initialization function
-void data_init(char* file_rect, char* file_core, 
-               char* file_pnts, char* file_calb);
+void dataIF_init        (uint16_t idRect, uint16_t idCore, 
+                         uint16_t idPnts, uint16_t idAuto);
+void dataIF_getSensor   (dataIF_sensor **sensor);
 
 // access functions
-void data_start_log      (const char* filename);
-void data_start_UDP      (int portno);
-void data_start_CSV      (const char* filename);
-void data_close          ();
-void data_process_datum  ();
-void *data_run           (void* id);
+void dataIF_startUDP    (int         portno);
+void dataIF_startCSV    (const char* filename);
+void dataIF_process     ();
+void dataIF_exit        ();
+void *dataIF_run        (void* id);
+
 
 #ifdef __cplusplus
 }

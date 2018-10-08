@@ -21,7 +21,7 @@
 #include <QDesktopWidget>
 #include <pthread.h>
 #include "windowGUI.h"
-#include "dataParse.h"
+#include "dataIF.h"
 
 // define internal constants
 const int       port_no = 5555;
@@ -29,11 +29,16 @@ const int       port_no = 5555;
 int main(int argc, char *argv[])
 {
   // define internal variables
-  int           data_thread_id;
-  pthread_t     data_thread;
+  int           dataIF_thread_id;
+  pthread_t     dataIF_thread;
+  int           imuIF_thread_id;
+  pthread_t     imuIF_thread;
 
   // initialize the IMU data structures
-  data_init(NULL, NULL, NULL, NULL);
+  imuIF_state *state;
+  imuIF_init(NULL, NULL, NULL, NULL);
+  imuIF_getState(&state);
+  dataIF_init(state->idRect, state->idCore, state->idPnts, state->idAuto);
 
   // create the display
   QApplication  app    (argc,   argv);
@@ -42,12 +47,13 @@ int main(int argc, char *argv[])
     window.initIMU(argv[1], argv[2]);
   window.show(); 
 
-  // launch data parser (seperate thread)
+  // launch data parser and IMU interface (seperate threads)
   if (argc < 4) 
-    data_start_UDP(port_no);
+    dataIF_startUDP(port_no);
   else
-    data_start_CSV(argv[3]);
-  pthread_create(&data_thread, NULL, data_run, &data_thread_id);
+    dataIF_startCSV(argv[3]);
+  pthread_create(&dataIF_thread, NULL, dataIF_run, &dataIF_thread_id);
+  pthread_create(&imuIF_thread,  NULL, imuIF_run,  &imuIF_thread_id);
 
   // start the main app
   app.exec();

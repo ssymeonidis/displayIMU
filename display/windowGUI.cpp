@@ -19,7 +19,6 @@
 
 // include statements 
 #include <QFileDialog>
-#include "dataParse.h"
 #include "IMU_file.h"
 #include "windowGUI.h"
 #include "ui_windowGUI.h"
@@ -36,8 +35,10 @@ windowGUI::windowGUI(QWidget *parent) :
   // create and place window widgets
   ui->setupUi(this);
 
-  // initialize display parameters
+  // initialize display/config parameters
+  imuIF_getState(&state);
   load_json((char *)"../config/displayIMU.json");
+  
   glWidget_update();
 }
 
@@ -75,7 +76,7 @@ void windowGUI::initIMU(char* rect_config_file, char* core_config_file)
 
 void windowGUI::config_write()
 {
-  IMU_core_config *core = state.configCore;
+  IMU_core_config *core = state->configCore;
   ui->noGyro->setChecked(!core->isGyro);
   ui->noAccl->setChecked(!core->isAccl);
   ui->noMagn->setChecked(!core->isMagn);
@@ -102,7 +103,7 @@ void windowGUI::config_write()
 
 void windowGUI::config_read()
 {
-  IMU_core_config *core = state.configCore;
+  IMU_core_config *core = state->configCore;
   core->isGyro       = !ui->noGyro->isChecked();
   core->isAccl       = !ui->noAccl->isChecked();
   core->isMagn       = !ui->noMagn->isChecked();
@@ -129,7 +130,7 @@ void windowGUI::config_read()
 
 void windowGUI::calib_write()
 {
-  IMU_rect_config *config = state.configRect;
+  IMU_rect_config *config = state->configRect;
   ui->gBias0->setText(QString::number(config->gBias[0], 'f', 2));
   ui->gBias1->setText(QString::number(config->gBias[1], 'f', 2));
   ui->gBias2->setText(QString::number(config->gBias[2], 'f', 2));
@@ -175,7 +176,7 @@ void windowGUI::calib_write()
 
 void windowGUI::calib_read()
 {
-  IMU_rect_config *config = state.configRect;
+  IMU_rect_config *config = state->configRect;
   config->gBias[0] = ui->gBias0->text().toFloat();
   config->gBias[1] = ui->gBias1->text().toFloat();
   config->gBias[2] = ui->gBias2->text().toFloat();

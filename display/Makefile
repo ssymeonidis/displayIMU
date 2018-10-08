@@ -50,12 +50,14 @@ OBJECTS_DIR   = obj/
 
 SOURCES       = glWidget.cpp \
 		windowGUI.cpp \
-		../common/dataParse.c \
+		../common/imuIF.c \
+		../common/dataIF.c \
 		main.cpp moc_glWidget.cpp \
 		moc_windowGUI.cpp
 OBJECTS       = obj/glWidget.o \
 		obj/windowGUI.o \
-		obj/dataParse.o \
+		obj/imuIF.o \
+		obj/dataIF.o \
 		obj/main.o \
 		obj/moc_glWidget.o \
 		obj/moc_windowGUI.o
@@ -117,9 +119,11 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		displayIMU.pro glWidget.h \
 		windowGUI.h \
-		../common/dataParse.h glWidget.cpp \
+		../common/imuIF.h \
+		../common/dataIF.h glWidget.cpp \
 		windowGUI.cpp \
-		../common/dataParse.c \
+		../common/imuIF.c \
+		../common/dataIF.c \
 		main.cpp
 QMAKE_TARGET  = displayIMU
 DESTDIR       = ../bin/#avoid trailing-slash linebreak
@@ -289,8 +293,8 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents glWidget.h windowGUI.h ../common/dataParse.h $(DISTDIR)/
-	$(COPY_FILE) --parents glWidget.cpp windowGUI.cpp ../common/dataParse.c main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents glWidget.h windowGUI.h ../common/imuIF.h ../common/dataIF.h $(DISTDIR)/
+	$(COPY_FILE) --parents glWidget.cpp windowGUI.cpp ../common/imuIF.c ../common/dataIF.c main.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents windowGUI.ui $(DISTDIR)/
 
 
@@ -317,12 +321,24 @@ compiler_rcc_clean:
 compiler_moc_header_make_all: moc_glWidget.cpp moc_windowGUI.cpp
 compiler_moc_header_clean:
 	-$(DEL_FILE) moc_glWidget.cpp moc_windowGUI.cpp
-moc_glWidget.cpp: glWidget.h
-	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU/display -I/home/simeon.symeonidis/Projects/displayIMU/imu -I/home/simeon.symeonidis/Projects/displayIMU/common -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glWidget.h -o moc_glWidget.cpp
-
-moc_windowGUI.cpp: ../imu/IMU_rect.h \
+moc_glWidget.cpp: ../common/dataIF.h \
+		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
 		../imu/IMU_FOM.h \
+		../imu/IMU_pnts.h \
+		../imu/IMU_auto.h \
+		../imu/IMU_calb.h \
+		../common/imuIF.h \
+		glWidget.h
+	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU/display -I/home/simeon.symeonidis/Projects/displayIMU/imu -I/home/simeon.symeonidis/Projects/displayIMU/common -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glWidget.h -o moc_glWidget.cpp
+
+moc_windowGUI.cpp: ../common/imuIF.h \
+		../imu/IMU_rect.h \
+		../imu/IMU_core.h \
+		../imu/IMU_FOM.h \
+		../imu/IMU_pnts.h \
+		../imu/IMU_auto.h \
+		../imu/IMU_calb.h \
 		windowGUI.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU/display -I/home/simeon.symeonidis/Projects/displayIMU/imu -I/home/simeon.symeonidis/Projects/displayIMU/common -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include windowGUI.h -o moc_windowGUI.cpp
 
@@ -332,7 +348,15 @@ compiler_uic_make_all: ui_windowGUI.h
 compiler_uic_clean:
 	-$(DEL_FILE) ui_windowGUI.h
 ui_windowGUI.h: windowGUI.ui \
-		glWidget.h
+		glWidget.h \
+		../common/dataIF.h \
+		../imu/IMU_rect.h \
+		../imu/IMU_core.h \
+		../imu/IMU_FOM.h \
+		../imu/IMU_pnts.h \
+		../imu/IMU_auto.h \
+		../imu/IMU_calb.h \
+		../common/imuIF.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/uic windowGUI.ui -o ui_windowGUI.h
 
 compiler_yacc_decl_make_all:
@@ -346,47 +370,60 @@ compiler_clean: compiler_moc_header_clean compiler_uic_clean
 ####### Compile
 
 obj/glWidget.o: glWidget.cpp glWidget.h \
-		windowGUI.h \
-		../imu/IMU_rect.h \
-		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
-		../common/dataParse.h \
-		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
-		../imu/IMU_calb.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/glWidget.o glWidget.cpp
-
-obj/windowGUI.o: windowGUI.cpp ../common/dataParse.h \
+		../common/dataIF.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
 		../imu/IMU_FOM.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_calb.h \
-		../imu/IMU_file.h \
+		../common/imuIF.h \
+		windowGUI.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/glWidget.o glWidget.cpp
+
+obj/windowGUI.o: windowGUI.cpp ../imu/IMU_file.h \
+		../imu/IMU_rect.h \
+		../imu/IMU_core.h \
+		../imu/IMU_FOM.h \
+		../imu/IMU_pnts.h \
+		../imu/IMU_auto.h \
 		windowGUI.h \
+		../common/imuIF.h \
+		../imu/IMU_calb.h \
 		ui_windowGUI.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/windowGUI.o windowGUI.cpp
 
-obj/dataParse.o: ../common/dataParse.c ../imu/IMU_file.h \
+obj/imuIF.o: ../common/imuIF.c ../imu/IMU_file.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
 		../imu/IMU_FOM.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_math.h \
-		../common/dataParse.h \
+		../common/dataIF.h \
 		../imu/IMU_calb.h
-	$(CC) -c $(CFLAGS) $(INCPATH) -o obj/dataParse.o ../common/dataParse.c
+	$(CC) -c $(CFLAGS) $(INCPATH) -o obj/imuIF.o ../common/imuIF.c
 
-obj/main.o: main.cpp windowGUI.h \
+obj/dataIF.o: ../common/dataIF.c ../imu/IMU_file.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
 		../imu/IMU_FOM.h \
-		../common/dataParse.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
+		../imu/IMU_math.h \
+		../common/dataIF.h \
 		../imu/IMU_calb.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o obj/dataIF.o ../common/dataIF.c
+
+obj/main.o: main.cpp windowGUI.h \
+		../common/imuIF.h \
+		../imu/IMU_rect.h \
+		../imu/IMU_core.h \
+		../imu/IMU_FOM.h \
+		../imu/IMU_pnts.h \
+		../imu/IMU_auto.h \
+		../imu/IMU_calb.h \
+		../common/dataIF.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o main.cpp
 
 obj/moc_glWidget.o: moc_glWidget.cpp 

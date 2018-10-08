@@ -88,6 +88,17 @@ int IMU_auto_getState(
 * process gyroscope, accelerometer, and magnetometer vectors
 ******************************************************************************/
 
+int IMU_auto_reset(
+  uint16_t                id)
+{
+  return 0;
+}
+
+
+/******************************************************************************
+* process gyroscope, accelerometer, and magnetometer vectors
+******************************************************************************/
+
 int IMU_auto_newFOM(
   uint16_t                id,  
   IMU_FOM_core            *FOM,

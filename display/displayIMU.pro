@@ -9,11 +9,13 @@ OBJECTS_DIR       = ./obj
 
 HEADERS          += glWidget.h          \
                     windowGUI.h         \
-                    dataParse.h
+                    imuIF.h             \
+                    dataIF.h
 
 SOURCES          += glWidget.cpp        \
                     windowGUI.cpp       \
-                    dataParse.c         \
+                    imuIF.c             \
+                    dataIF.c            \
                     main.cpp 
 
 VPATH            += ../common

@@ -24,7 +24,7 @@
 #include <math.h>
 #include "glWidget.h"
 #include "windowGUI.h"
-#include "dataParse.h"
+#include "dataIF.h"
 #include "IMU_core.h"
 
 // internal constants
@@ -59,6 +59,10 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), p
   scaleAccl  = 1;
   scaleMagn  = 1;
   scaleGyro  = 1; 
+  
+  // get pointer to sensor and imu data
+  dataIF_getSensor(&sensor);
+  imuIF_getPntr(&estm);
 
   // create timer
   refresh_timer = new QTimer(this);
@@ -129,25 +133,25 @@ void GLWidget::paintGL()
 
   // draw gyroscope state
   if (isGyro == true) 
-    drawVector(gyroColor, sensor.gyroRaw, scaleGyro);
+    drawVector(gyroColor, sensor->gyroRaw, scaleGyro);
 
   // draw accelerometer state
   if (isAccl == true) 
-    drawVector(acclColor, sensor.acclRaw, scaleAccl);
+    drawVector(acclColor, sensor->acclRaw, scaleAccl);
 
   // draw magnetometer state
   if (isMagn == true) 
-    drawVector(magnColor, sensor.magnRaw, scaleMagn);
+    drawVector(magnColor, sensor->magnRaw, scaleMagn);
 
   // draw imu state
   if (isIMU == true) {
     glPushMatrix();
-    glRotatef(estim.ang[2], 1.0, 0.0, 0.0);
-    glRotatef(estim.ang[1], 0.0, 0.0, 1.0);
-    glRotatef(estim.ang[0], 0.0, 1.0, 0.0);
-    glTranslatef(estim.move[0]/scaleIMU,
-                 estim.move[2]/scaleIMU,
-                 estim.move[1]/scaleIMU);
+    glRotatef(estm->ang[2], 1.0, 0.0, 0.0);
+    glRotatef(estm->ang[1], 0.0, 0.0, 1.0);
+    glRotatef(estm->ang[0], 0.0, 1.0, 0.0);
+    glTranslatef(estm->move[0]/scaleIMU,
+                 estm->move[2]/scaleIMU,
+                 estm->move[1]/scaleIMU);
     GLfloat vector1[3]    = { 0.0,  1.0,  0.0};
     drawVector(gyroColor, vector1, 1.0);
     GLfloat vector2[3]    = {-0.0,  0.0,  1.0};

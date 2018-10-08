@@ -22,6 +22,9 @@
 
 #include <QGLWidget>
 #include <GL/glu.h>
+#include "dataIF.h"
+#include "imuIF.h"
+
 
 class GLWidget : public QGLWidget
 {
@@ -61,8 +64,10 @@ class GLWidget : public QGLWidget
     void drawGrid();
 
     // internal objects/parameters
+    dataIF_sensor   *sensor;
+    imuIF_estm      *estm;
     GLUquadricObj   *obj;
-    QTimer*         refresh_timer;
+    QTimer          *refresh_timer;
     QPoint          lastPos;
 };
 
