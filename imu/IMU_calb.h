@@ -24,6 +24,7 @@
 #include "IMU_core.h"
 #include "IMU_pnts.h"
 #include "IMU_auto.h"
+#include "IMU_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,7 +32,7 @@ extern "C" {
 
 // include statements
 #include <stdint.h>
-#include "IMU_FOM.h"
+#include "IMU_type.h"
 
 // define status codes
 #define IMU_CALB_UPDATED         1
@@ -53,17 +54,24 @@ typedef enum {
 typedef struct  {
   IMU_calb_mode             mode;
   IMU_rect_config           rect;
+  IMU_rect_config           rect_org;
   IMU_core_config           core;
+  IMU_core_config           core_org;
+  IMU_calb_FOM              FOM;
   uint16_t                  numPnts;
 } IMU_calb_state;
 
 
-// general operation 
-int IMU_calb_init (uint16_t*);
-int IMU_calb_start(uint16_t, IMU_calb_mode, IMU_rect_config*, IMU_core_config*); 
-int IMU_calb_pnts (uint16_t, IMU_pnts_entry*, IMU_FOM_calb*);
-int IMU_calb_save (uint16_t, IMU_rect_config*);
-int IMU_calb_auto (uint16_t, IMU_auto_state*, IMU_rect_config*, IMU_core_config*);
+// control side functions 
+int IMU_calb_init   (uint16_t* id, IMU_rect_config*, IMU_core_config*);
+int IMU_calb_refresh (uint16_t id, IMU_rect_config*, IMU_core_config*);
+int IMU_calb_start   (uint16_t id, IMU_calb_mode);
+int IMU_calb_status  (uint16_t id, IMU_calb_FOM**);
+int IMU_calb_save    (uint16_t id, IMU_rect_config*, IMU_core_config*);
+
+// sensor side functions
+int IMU_calb_pnts    (uint16_t id, IMU_pnts_entry*); 
+int IMU_calb_auto    (uint16_t id, IMU_auto_state*);
 
 
 #ifdef __cplusplus

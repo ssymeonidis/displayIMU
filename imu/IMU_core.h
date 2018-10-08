@@ -29,7 +29,7 @@ extern "C" {
 #if IMU_USE_PTHREAD
 #include <pthread.h>
 #endif
-#include "IMU_FOM.h"
+#include "IMU_type.h"
 
 // define status codes
 #define IMU_CORE_FNC_DISABLED    1
@@ -69,7 +69,7 @@ typedef struct {
 // define internal state struct (captures internal IMU state)
 typedef struct {
   float                t;              // last datum time
-  float                t_move;         // last "unstable" time
+  float                tMove ;         // last "unstable" time
   float                SEq[4];         // current quaterion
   float                A[3];           // last acceleration estimate
   unsigned char        aReset;         // accelerometer reset signal
@@ -82,22 +82,18 @@ typedef struct {
 
 
 // data structure access functions
-int IMU_core_init      (uint16_t *id, IMU_core_config **config);
-int IMU_core_getConfig (uint16_t id,  IMU_core_config **config);
-int IMU_core_getState  (uint16_t id,  IMU_core_state  **state);
+int IMU_core_init     (uint16_t *id, IMU_core_config **config);
+int IMU_core_getConfig (uint16_t id, IMU_core_config **config);
+int IMU_core_getState  (uint16_t id, IMU_core_state  **state);
 
-// general update/command operation functions 
-int IMU_core_reset   (uint16_t id);
-int IMU_core_zero    (uint16_t id, float t, IMU_TYPE *a, IMU_TYPE *m);
-int IMU_core_newGyro (uint16_t id, float t, IMU_TYPE *g, IMU_FOM_core*);
-int IMU_core_newAccl (uint16_t id, float t, IMU_TYPE *a, IMU_FOM_core*);
-int IMU_core_newMagn (uint16_t id, float t, IMU_TYPE *m, IMU_FOM_core*);
-int IMU_core_newAll  (uint16_t id, float t, IMU_TYPE *g, IMU_TYPE *a, 
-                      IMU_TYPE *m, IMU_FOM_core FOM[3]);
+// general update/command operation functions
+int IMU_core_reset     (uint16_t id);
+int IMU_core_datum     (uint16_t id, IMU_datum*);
+int IMU_core_data3     (uint16_t id, IMU_data3*);
 
 // state estimateion functions
-int IMU_core_estmQuat (uint16_t id, float* estm);
-int IMU_core_estmAccl (uint16_t id, float* estm);
+int IMU_core_estmQuat  (uint16_t id, float* estm);
+int IMU_core_estmAccl  (uint16_t id, float* estm);
 
 
 #ifdef __cplusplus

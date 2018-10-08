@@ -60,7 +60,7 @@ int IMU_auto_getState  (uint16_t id,  IMU_auto_state  **state);
 
 // general operation functions 
 int IMU_auto_reset   (uint16_t id);
-int IMU_auto_newFOM  (uint16_t id, IMU_FOM_core*, uint16_t size);
+int IMU_auto_newFOM  (uint16_t id, IMU_core_FOM*, uint16_t size);
 
 
 #ifdef __cplusplus

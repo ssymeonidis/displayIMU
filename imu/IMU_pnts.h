@@ -26,6 +26,7 @@ extern "C" {
 
 // include statements
 #include <stdint.h>
+#include "IMU_type.h"
 
 // define error codes
 #define IMU_PNTS_INST_OVERFLOW -1
@@ -79,24 +80,21 @@ typedef struct {
 
 
 // data structure access function
-int IMU_pnts_init      (uint16_t *id, IMU_pnts_config**);
-int IMU_pnts_getConfig (uint16_t id,  IMU_pnts_config**);
-int IMU_pnts_getState  (uint16_t id,  IMU_pnts_state**);
+int IMU_pnts_init     (uint16_t *id, IMU_pnts_config**);
+int IMU_pnts_getConfig (uint16_t id, IMU_pnts_config**);
+int IMU_pnts_getState  (uint16_t id, IMU_pnts_state**);
 
 // points table access function
 #if IMU_CALIB_TABLE_SIZE > 1
-int IMU_pnts_getCount (uint16_t id, uint16_t *count);
-int IMU_pnts_getEntry (uint16_t id, uint16_t index, IMU_pnts_entry**);
+int IMU_pnts_getCount  (uint16_t id, uint16_t *count);
+int IMU_pnts_getEntry  (uint16_t id, uint16_t index, IMU_pnts_entry**);
 #endif
 
 // general operation functions 
-int IMU_pnts_start   (uint16_t id, uint16_t numPnts);
-int IMU_pnts_stop    (uint16_t id);
-int IMU_pnts_newGyro (uint16_t id, float t, float *g, IMU_pnts_entry**);
-int IMU_pnts_newAccl (uint16_t id, float t, float *a, IMU_pnts_entry**);
-int IMU_pnts_newMagn (uint16_t id, float t, float *m, IMU_pnts_entry**);
-int IMU_pnts_newAll  (uint16_t id, float t, float *g, float *a, float *m,
-                      IMU_pnts_entry**); 
+int IMU_pnts_start     (uint16_t id, uint16_t numPnts);
+int IMU_pnts_stop      (uint16_t id);
+int IMU_pnts_datum     (uint16_t id, IMU_datum*, IMU_pnts_entry**);
+int IMU_pnts_data3     (uint16_t id, IMU_data3*, IMU_pnts_entry**);
 
 
 #ifdef __cplusplus

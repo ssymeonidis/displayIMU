@@ -101,7 +101,7 @@ int IMU_auto_reset(
 
 int IMU_auto_newFOM(
   uint16_t                id,  
-  IMU_FOM_core            *FOM,
+  IMU_core_FOM            *FOM,
   uint16_t                size)
 {
   return 0;

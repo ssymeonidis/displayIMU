@@ -38,8 +38,18 @@
 // internally managed structures
 IMU_core_config  config [IMU_MAX_INST]; 
 IMU_core_state   state  [IMU_MAX_INST];
+IMU_core_FOM     staticFOM;
 uint16_t         numInstCore = 0;
-IMU_FOM_core     staticFOM[3];
+
+// internally defined functions
+inline float  norm3(IMU_TYPE *in, float *out);
+inline float* norm4(float *v);
+inline float* scale(float *v, float m);  
+inline float* decrm(float *v, float *d);
+int IMU_core_newGyro (uint16_t id, float t, IMU_TYPE *g, IMU_core_FOM*);
+int IMU_core_newAccl (uint16_t id, float t, IMU_TYPE *a, IMU_core_FOM*);
+int IMU_core_newMagn (uint16_t id, float t, IMU_TYPE *m, IMU_core_FOM*);
+int IMU_core_zero    (uint16_t id, float t, IMU_TYPE *a, IMU_TYPE *m);
 
 
 /******************************************************************************
@@ -84,15 +94,6 @@ inline void mutex_unlock(
 }
 
 
-/******************************************************************************
-* define miscellaneous function (definitions at end of file)
-******************************************************************************/
-inline float  norm3(IMU_TYPE *in, float *out);
-inline float* norm4(float *v);
-inline float* scale(float *v, float m);  
-inline float* decrm(float *v, float *d);
-  
-  
 /******************************************************************************
 * function to return config structure handle
 ******************************************************************************/
@@ -231,6 +232,66 @@ int IMU_core_zero(
 
 
 /******************************************************************************
+* initialize state and autocal to known state
+******************************************************************************/
+
+int IMU_core_datum(
+  uint16_t              id,
+  IMU_datum             *datum)
+{
+  // check sensor type and execute
+  if      (datum->type == IMU_gyro)
+    return IMU_core_newGyro(id, datum->t, datum->val, datum->FOM);
+  else if (datum->type == IMU_accl)
+    return IMU_core_newAccl(id, datum->t, datum->val, datum->FOM);
+  else if (datum->type == IMU_magn)
+    return IMU_core_newMagn(id, datum->t, datum->val, datum->FOM);
+  return 0;
+}
+
+
+/******************************************************************************
+* estimate euler angle given gyroscope, accelerometer, and magnetometer data 
+******************************************************************************/
+
+int IMU_core_data3(
+  uint16_t              id, 
+  IMU_data3             *data3)
+{
+  // check for out-of-bounds condition
+  if (id > numInstCore - 1)
+    return IMU_CORE_BAD_INST; 
+    
+  // check for reset conditions
+  if (state[id].mReset || state[id].aReset) {
+    // initialize to known value
+    if (data3->FOM != NULL) {
+      // initialize figure of merits
+      data3->FOM[0].isValid    = 0;
+      data3->FOM[1].isValid    = 0;
+      data3->FOM[2].isValid    = 0;
+    }
+    
+    // zero the system to the current sensor
+    IMU_core_zero(id, data3->t, data3->a, data3->m);
+    return IMU_CORE_FNC_ZEROED;
+  }
+  
+  // update system state w/ each sensor
+  if (data3->FOM != NULL) {
+    IMU_core_newGyro(id, data3->t, data3->g, &(data3->FOM[0]));
+    IMU_core_newAccl(id, data3->t, data3->a, &(data3->FOM[1]));
+    IMU_core_newMagn(id, data3->t, data3->m, &(data3->FOM[2]));
+  } else {
+    IMU_core_newGyro(id, data3->t, data3->g, NULL);
+    IMU_core_newAccl(id, data3->t, data3->a, NULL);
+    IMU_core_newMagn(id, data3->t, data3->m, NULL);
+  }
+  return 0;
+}
+
+
+/******************************************************************************
 * apply gyroscope rates
 ******************************************************************************/
 
@@ -238,22 +299,19 @@ int IMU_core_newGyro(
   uint16_t              id, 
   float                 t, 
   IMU_TYPE              *g_in,
-  IMU_FOM_core          *pntr)
+  IMU_core_FOM          *pntr)
 {
   // check for out-of-bounds condition
   if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // initialize figure of merit
-  IMU_FOM_core_gyro     *FOM;
+  IMU_core_FOM_gyro     *FOM;
   if (pntr != NULL) {
-    pntr->type          = IMU_FOM_gyro;
-    pntr->t             = t;
     pntr->isValid       = 1;
-    memcpy(pntr->val, g_in, 3*sizeof(IMU_TYPE));
-    FOM                 = &pntr->data.gyro;
+    FOM                 = &pntr->FOM.gyro;
   } else {
-    FOM                 = &staticFOM[0].data.gyro;
+    FOM                 = &staticFOM.FOM.gyro;
   }
   
   // determine whether the function needs to be executed
@@ -270,8 +328,8 @@ int IMU_core_newGyro(
   FOM->isStable         = 0;
   if (config[id].isStable) {
     if (FOM->magSqrd > config[id].gThresh * config[id].gThresh)
-      state[id].t_move  = t;
-    else if (t - state[id].t_move > config[id].gThreshTime) {
+      state[id].tMove   = t;
+    else if (t - state[id].tMove > config[id].gThreshTime) {
       FOM->isStable     = 1;
       return IMU_CORE_GYRO_STABLE;
     }
@@ -303,22 +361,19 @@ int IMU_core_newAccl(
   uint16_t              id, 
   float                 t, 
   IMU_TYPE              *a_in, 
-  IMU_FOM_core          *pntr)
+  IMU_core_FOM          *pntr)
 {
   // check for out-of-bounds condition
   if (id > numInstCore - 1)
     return IMU_CORE_BAD_INST; 
 
   // initialize figure of merit
-  IMU_FOM_core_accl     *FOM;
+  IMU_core_FOM_accl     *FOM;
   if (pntr != NULL) {
-    pntr->type          = IMU_FOM_accl;
-    pntr->t             = t;
     pntr->isValid       = !state[id].aReset && config[id].isFOM;
-    memcpy(pntr->val, a_in, 3*sizeof(IMU_TYPE));
-    FOM                 = &pntr->data.accl;               
+    FOM                 = &pntr->FOM.accl;               
   } else {
-    FOM                 = &staticFOM[1].data.accl;
+    FOM                 = &staticFOM.FOM.accl;
   }
   
   // determine whether the functions needs to be executed
@@ -420,22 +475,19 @@ int IMU_core_newMagn(
   uint16_t              id, 
   float                 t, 
   IMU_TYPE              *m_in,
-  IMU_FOM_core          *pntr)
+  IMU_core_FOM          *pntr)
 {
   // check for out-of-bounds condition
   if (id > numInstCore-1)
     return IMU_CORE_BAD_INST; 
 
   // initialize figure of merit
-  IMU_FOM_core_magn     *FOM;
+  IMU_core_FOM_magn     *FOM;
   if (pntr != NULL) {
-    pntr->type          = IMU_FOM_magn;
-    pntr->t             = t;
     pntr->isValid       = !state[id].mReset && config[id].isFOM;
-    memcpy(pntr->val, m_in, 3*sizeof(IMU_TYPE));
-    FOM                 = &pntr->data.magn;               
+    FOM                 = &pntr->FOM.magn;               
   } else {
-    FOM                 = &staticFOM[2].data.magn;
+    FOM                 = &staticFOM.FOM.magn;
   }
   
   // determine whether the functions needs to be executed
@@ -529,54 +581,6 @@ int IMU_core_newMagn(
   mutex_unlock(id);
 
   // exit function
-  return 0;
-}
-
-
-/******************************************************************************
-* estimate euler angle given gyroscope, accelerometer, and magnetometer data 
-******************************************************************************/
-
-int IMU_core_newAll(
-  uint16_t              id, 
-  float                 t, 
-  IMU_TYPE              *g, 
-  IMU_TYPE              *a, 
-  IMU_TYPE              *m,
-  IMU_FOM_core          FOM[3])
-{
-  // check for out-of-bounds condition
-  if (id > numInstCore - 1)
-    return IMU_CORE_BAD_INST; 
-
-  // check for reset conditions
-  if (state[id].mReset && state[id].aReset) {
-    // initialize to known value
-    if (FOM != NULL) {
-      // initialize figure of merits
-      FOM[0].type             = IMU_FOM_gyro;
-      FOM[1].type             = IMU_FOM_accl;
-      FOM[2].type             = IMU_FOM_magn;
-      FOM[0].t                = t;
-      FOM[1].t                = t;
-      FOM[2].t                = t;
-      FOM[0].isValid          = 0;
-      FOM[1].isValid          = 0;
-      FOM[2].isValid          = 0;
-      memcpy(FOM[0].val, g, sizeof(FOM[0].val));
-      memcpy(FOM[1].val, a, sizeof(FOM[1].val));
-      memcpy(FOM[2].val, m, sizeof(FOM[2].val));
-    }
-    
-    // zero the system to the current sensor
-    IMU_core_zero(id, t, a, m);
-    return IMU_CORE_FNC_ZEROED;
-  }
-  
-  // update system state w/ each sensor
-  IMU_core_newGyro(id, t, g, &FOM[0]);
-  IMU_core_newAccl(id, t, a, &FOM[1]);
-  IMU_core_newMagn(id, t, m, &FOM[2]);
   return 0;
 }
 

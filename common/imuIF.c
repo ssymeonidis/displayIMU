@@ -50,11 +50,11 @@ void imuIF_init(
   char                   *file_auto)
 {
   // initialize and get handles to all IMU functions
-  IMU_rect_init  (&state.idRect,  &state.configRect);
-  IMU_core_init  (&state.idCore,  &state.configCore);
-  IMU_pnts_init  (&state.idPnts,  &state.configPnts);
-  IMU_auto_init  (&state.idAuto,  &state.configAuto);
-  IMU_calb_init  (&state.idCalb);
+  IMU_rect_init  (&state.idRect, &state.configRect);
+  IMU_core_init  (&state.idCore, &state.configCore);
+  IMU_pnts_init  (&state.idPnts, &state.configPnts);
+  IMU_auto_init  (&state.idAuto, &state.configAuto);
+  IMU_calb_init  (&state.idCalb, state.configRect, state.configAuto);
 
   // read config structures from json files
   if (!file_rect) IMU_file_rectOpen  (file_rect, state.configRect);

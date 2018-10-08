@@ -147,49 +147,71 @@ void dataIF_process()
 
   // process synced data (all three sensors)
   if (datum_type == 0) {
+    IMU_data3    data3;
+    data3.t      = sensor.time;
+    data3.FOM    = &state.FOM;
     sscanf(line, "%*d, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
       &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2],
       &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2],
       &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
     IMU_rect_all(state.idRect, sensor.gyroRaw, sensor.acclRaw, sensor.magnRaw,
       sensor.gyroCor, sensor.acclCor, sensor.magnCor);
-    IMU_pnts_newAll(state.idPnts, sensor.time, sensor.gyroRaw, 
-      sensor.acclRaw, sensor.magnRaw, &state.pnt); state.pnt = NULL; 
-    IMU_core_newAll(state.idCore, sensor.time, sensor.gyroCor, sensor.acclCor, 
-      sensor.magnCor, state.FOM);
+    memcpy(data3.g, sensor.gyroCor, sizeof(data3.g));
+    memcpy(data3.a, sensor.acclCor, sizeof(data3.a));
+    memcpy(data3.m, sensor.magnCor, sizeof(data3.m));
+    IMU_pnts_data3(state.idPnts, &data3, &state.pnt);
+    IMU_core_data3(state.idCore, &data3);
+    IMU_auto_newFOM(state.idAuto, state.FOM, 3);
   }
 
   // process gyroscope data (async sensors)
   else if (datum_type == 1) {
+    IMU_datum    datum;
+    datum.type   = IMU_gyro;
+    datum.t      = sensor.time;
+    datum.FOM    = &state.FOM;
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.gyroRaw[0], &sensor.gyroRaw[1], &sensor.gyroRaw[2]);
     IMU_rect_gyro(state.idRect, sensor.gyroRaw, sensor.gyroCor);
-    IMU_pnts_newGyro(state.idPnts, sensor.time, sensor.gyroRaw, &state.pnt);
-    IMU_core_newGyro(state.idCore, sensor.time, sensor.gyroCor, state.FOM);
+    memcpy(datum.val, sensor.gyroCor, sizeof(datum.val));
+    IMU_pnts_newGyro(state.idPnts, &datum, &state.pnt);
+    IMU_core_newGyro(state.idCore, &datum);
+    IMU_auto_newFOM(state.idAuto, state.FOM, 1);
   }
 
   // process accelerometer data (async sensors)
   else if (datum_type == 2) {
+    IMU_datum    datum;
+    datum.type   = IMU_accl;
+    datum.t      = sensor.time;
+    datum.FOM    = &state.FOM;
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.acclRaw[0], &sensor.acclRaw[1], &sensor.acclRaw[2]);
     IMU_rect_accl(state.idRect, sensor.acclRaw, sensor.acclCor);
-    IMU_pnts_newAccl(state.idPnts, sensor.time, sensor.acclRaw, &state.pnt);
-    IMU_core_newAccl(state.idCore, sensor.time, sensor.acclCor, state.FOM);
+    memcpy(datum.val, sensor.acclCor, sizeof(datum.val));
+    IMU_pnts_newAccl(state.idPnts, &datum, &state.pnt);
+    IMU_core_newAccl(state.idCore, &datum);
+    IMU_auto_newFOM(state.idAuto, state.FOM, 1);
   }
 
   // process magnetometer data (async sensors)
   else if (datum_type == 3) {
+    IMU_datum    datum;
+    datum.type   = IMU_magn;
+    datum.t      = sensor.time;
+    datum.FOM    = &state.FOM;
     sscanf(line, "%*d, %*f, %f, %f, %f", 
       &sensor.magnRaw[0], &sensor.magnRaw[1], &sensor.magnRaw[2]);
     IMU_rect_magn(state.idRect, sensor.magnRaw, sensor.magnCor);
-    IMU_pnts_newMagn(state.idPnts, sensor.time, sensor.magnRaw, &state.pnt);
-    IMU_core_newMagn(state.idCore, sensor.time, sensor.magnCor, state.FOM);
+    memcpy(datum.val, sensor.acclCor, sizeof(datum.val));
+    IMU_pnts_newMagn(state.idPnts, &datum, &state.pnt);
+    IMU_core_newMagn(state.idCore, &datum);
+    IMU_auto_newFOM(state.idAuto, state.FOM, 1);
   }
   
   // update IMU manual and automated calibration blocks
   if (state.pnt != NULL) 
-    IMU_calb_pnts(state.idCalb, state.pnt, &state.FOM);
-  IMU_auto_newFOM(state.idAuto, state.FOM, 1);
+    IMU_calb_pnts(state.idCalb, state.pnt);
 }
 
 

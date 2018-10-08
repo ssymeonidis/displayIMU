@@ -60,7 +60,7 @@ typedef struct {
   float                  q[4];
   float                  ang[3];
   float                  move[3];
-  IMU_FOM_calb           FOMcalib;
+  IMU_calb_FOM           FOMcalib;
 } imuIF_estm;
 
 

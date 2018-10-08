@@ -51,20 +51,20 @@ typedef struct {
   uint16_t               idAuto;
   uint16_t               idCalb;
   IMU_pnts_entry         *pnt;
-  IMU_FOM_core           FOM[3];
+  IMU_core_FOM           FOM[3];
 } dataIF_state;
 
 // define input sensor data structure
 typedef struct {
-  float                  gyroRaw[3];
-  float                  gyroCor[3];
-  float                  gyroFltr[3];
-  float                  acclRaw[3];
-  float                  acclCor[3];
-  float                  acclFltr[3];
-  float                  magnRaw[3];
-  float                  magnCor[3];
-  float                  magnFltr[3];
+  IMU_TYPE               gyroRaw[3];
+  IMU_TYPE               gyroCor[3];
+  IMU_TYPE               gyroFltr[3];
+  IMU_TYPE               acclRaw[3];
+  IMU_TYPE               acclCor[3];
+  IMU_TYPE               acclFltr[3];
+  IMU_TYPE               magnRaw[3];
+  IMU_TYPE               magnCor[3];
+  IMU_TYPE               magnFltr[3];
   float                  time;
 } dataIF_sensor; 
 

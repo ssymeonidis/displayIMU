@@ -29,6 +29,11 @@ IMU_pnts_state   state  [IMU_MAX_INST];
 IMU_pnts_entry   table  [IMU_MAX_INST][IMU_PNTS_SIZE];
 uint16_t         numInstPnts = 0;
 
+// internally defined functions
+int IMU_pnts_newGyro (uint16_t id, float t, float *g, IMU_pnts_entry**);
+int IMU_pnts_newAccl (uint16_t id, float t, float *a, IMU_pnts_entry**);
+int IMU_pnts_newMagn (uint16_t id, float t, float *m, IMU_pnts_entry**);
+
 
 /******************************************************************************
 * utility function - break stable
@@ -159,6 +164,49 @@ int IMU_pnts_stop(
   state[id].aClock        = 0;
   state[id].mClock        = 0;
   return 0;
+}
+
+
+/******************************************************************************
+* initialize state and autocal to known state
+******************************************************************************/
+
+int IMU_pnts_datum(
+  uint16_t                id,
+  IMU_datum               *datum,
+  IMU_pnts_entry          **pntr)
+{
+  // check sensor type and execute
+  if      (datum->type == IMU_gyro)
+    return IMU_pnts_newGyro(id, datum->t, datum->val, pntr);
+  else if (datum->type == IMU_accl)
+    return IMU_pnts_newAccl(id, datum->t, datum->val, pntr);
+  else if (datum->type == IMU_magn)
+    return IMU_pnts_newMagn(id, datum->t, datum->val, pntr);
+  return 0;
+}
+
+
+/******************************************************************************
+* process gyroscope, accelerometer, and magnetometer vectors 
+******************************************************************************/
+
+int IMU_pnts_data3(
+  uint16_t                id,
+  IMU_data3               *data3,
+  IMU_pnts_entry          **pntr)
+{
+  // define local variables
+  IMU_pnts_entry          *entry;
+
+  // update all three vectors
+  IMU_pnts_newGyro(id, data3->t, data3->g, &entry);
+  *pntr = entry; 
+  IMU_pnts_newAccl(id, data3->t, data3->a, &entry); 
+  *pntr = (entry != NULL) ? entry : *pntr; 
+  IMU_pnts_newMagn(id, data3->t, data3->m, &entry); 
+  *pntr = (entry != NULL) ? entry : *pntr;
+  return state[id].curPnts;
 }
 
 
@@ -349,31 +397,5 @@ int IMU_pnts_newMagn(
   entry->mFltr[2]       = alpha * m[2] + (1 - alpha) * entry->mFltr[2];
 
   // exit function
-  return state[id].curPnts;
-}
-
-
-/******************************************************************************
-* process gyroscope, accelerometer, and magnetometer vectors 
-******************************************************************************/
-
-int IMU_pnts_newAll(
-  uint16_t                id, 
-  float                   t, 
-  float                   *g, 
-  float                   *a, 
-  float                   *m,  
-  IMU_pnts_entry          **pntr)
-{
-  // define local variables
-  IMU_pnts_entry          *entry;
-
-  // update all three vectors
-  IMU_pnts_newGyro(id, t, g, &entry);
-  *pntr = entry; 
-  IMU_pnts_newAccl(id, t, a, &entry); 
-  *pntr = (entry != NULL) ? entry : *pntr; 
-  IMU_pnts_newMagn(id, t, m, &entry); 
-  *pntr = (entry != NULL) ? entry : *pntr; 
   return state[id].curPnts;
 }

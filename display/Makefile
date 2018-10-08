@@ -324,7 +324,7 @@ compiler_moc_header_clean:
 moc_glWidget.cpp: ../common/dataIF.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_calb.h \
@@ -335,7 +335,7 @@ moc_glWidget.cpp: ../common/dataIF.h \
 moc_windowGUI.cpp: ../common/imuIF.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_calb.h \
@@ -352,7 +352,7 @@ ui_windowGUI.h: windowGUI.ui \
 		../common/dataIF.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_calb.h \
@@ -373,7 +373,7 @@ obj/glWidget.o: glWidget.cpp glWidget.h \
 		../common/dataIF.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_calb.h \
@@ -384,7 +384,7 @@ obj/glWidget.o: glWidget.cpp glWidget.h \
 obj/windowGUI.o: windowGUI.cpp ../imu/IMU_file.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		windowGUI.h \
@@ -396,18 +396,18 @@ obj/windowGUI.o: windowGUI.cpp ../imu/IMU_file.h \
 obj/imuIF.o: ../common/imuIF.c ../imu/IMU_file.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_math.h \
-		../common/dataIF.h \
+		../common/imuIF.h \
 		../imu/IMU_calb.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o obj/imuIF.o ../common/imuIF.c
 
 obj/dataIF.o: ../common/dataIF.c ../imu/IMU_file.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_math.h \
@@ -419,7 +419,7 @@ obj/main.o: main.cpp windowGUI.h \
 		../common/imuIF.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_core.h \
-		../imu/IMU_FOM.h \
+		../imu/IMU_type.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_auto.h \
 		../imu/IMU_calb.h \

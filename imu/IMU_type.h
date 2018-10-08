@@ -28,50 +28,60 @@ extern "C" {
 #include <stdint.h>
 
 
-// define datum enumertation type for FOM structure
+// define global datum enumertations
+typedef struct IMU_core_FOM IMU_core_FOM;
 typedef enum {
-  IMU_FOM_all         = 0,
-  IMU_FOM_gyro        = 1,
-  IMU_FOM_accl        = 2,
-  IMU_FOM_magn        = 3
-} IMU_FOM_sensor;
+  IMU_gyro             = 1,
+  IMU_accl             = 2,
+  IMU_magn             = 3
+} IMU_sensor;
+typedef struct {
+  IMU_sensor           type;
+  float                t;
+  IMU_TYPE             val[3];
+  IMU_core_FOM         *FOM;
+} IMU_datum;
+typedef struct {
+  float                t;
+  IMU_TYPE             g[3];
+  IMU_TYPE             a[3];
+  IMU_TYPE             m[3];
+  IMU_core_FOM         *FOM;
+} IMU_data3;
 
 // define sensor figure of merit
 typedef struct {
   float                magSqrd;
   uint8_t              isStable;
-} IMU_FOM_core_gyro;
+} IMU_core_FOM_gyro;
 typedef struct {
   float                mag;
   float                magFOM;
   float                delt;
-} IMU_FOM_core_accl;
+} IMU_core_FOM_accl;
 typedef struct {
   float                mag;
   float                magFOM;
   float                ang;
   float                angFOM;
   float                delt;
-} IMU_FOM_core_magn; 
+} IMU_core_FOM_magn; 
 
 // define figure of merit 
-typedef struct {
-  IMU_FOM_sensor       type;
-  float                t;
-  uint8_t              isValid;
-  IMU_TYPE             val[3];
+struct IMU_core_FOM{
   union {
-    IMU_FOM_core_gyro  gyro;
-    IMU_FOM_core_accl  accl;
-    IMU_FOM_core_magn  magn;
-  }                    data;
-} IMU_FOM_core;
+    IMU_core_FOM_gyro  gyro;
+    IMU_core_FOM_accl  accl;
+    IMU_core_FOM_magn  magn;
+  }                    FOM;
+  uint8_t              isValid;
+};
 
 
 // define figure of merit
 typedef struct {
   float                empty;
-} IMU_FOM_calb;
+} IMU_calb_FOM;
 
 
 
