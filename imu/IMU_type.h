@@ -17,8 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _IMU_FOM_H
-#define _IMU_FOM_H
+#ifndef _IMU_TYPE_H
+#define _IMU_TYPE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,12 +69,12 @@ typedef struct {
 
 // define figure of merit 
 struct IMU_core_FOM{
+  uint8_t              isValid;
   union {
     IMU_core_FOM_gyro  gyro;
     IMU_core_FOM_accl  accl;
     IMU_core_FOM_magn  magn;
   }                    FOM;
-  uint8_t              isValid;
 };
 
 

@@ -237,15 +237,16 @@ int IMU_core_zero(
 
 int IMU_core_datum(
   uint16_t              id,
-  IMU_datum             *datum)
+  IMU_datum             *datum,
+  IMU_core_FOM          *FOM)
 {
   // check sensor type and execute
   if      (datum->type == IMU_gyro)
-    return IMU_core_newGyro(id, datum->t, datum->val, datum->FOM);
+    return IMU_core_newGyro(id, datum->t, datum->val, FOM);
   else if (datum->type == IMU_accl)
-    return IMU_core_newAccl(id, datum->t, datum->val, datum->FOM);
+    return IMU_core_newAccl(id, datum->t, datum->val, FOM);
   else if (datum->type == IMU_magn)
-    return IMU_core_newMagn(id, datum->t, datum->val, datum->FOM);
+    return IMU_core_newMagn(id, datum->t, datum->val, FOM);
   return 0;
 }
 
@@ -256,7 +257,8 @@ int IMU_core_datum(
 
 int IMU_core_data3(
   uint16_t              id, 
-  IMU_data3             *data3)
+  IMU_data3             *data3,
+  IMU_core_FOM          *FOM)
 {
   // check for out-of-bounds condition
   if (id > numInstCore - 1)
@@ -279,9 +281,9 @@ int IMU_core_data3(
   
   // update system state w/ each sensor
   if (data3->FOM != NULL) {
-    IMU_core_newGyro(id, data3->t, data3->g, &(data3->FOM[0]));
-    IMU_core_newAccl(id, data3->t, data3->a, &(data3->FOM[1]));
-    IMU_core_newMagn(id, data3->t, data3->m, &(data3->FOM[2]));
+    IMU_core_newGyro(id, data3->t, data3->g, &FOM[0]);
+    IMU_core_newAccl(id, data3->t, data3->a, &FOM[1]);
+    IMU_core_newMagn(id, data3->t, data3->m, &FOM[2]);
   } else {
     IMU_core_newGyro(id, data3->t, data3->g, NULL);
     IMU_core_newAccl(id, data3->t, data3->a, NULL);

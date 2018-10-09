@@ -259,8 +259,8 @@ int IMU_file_getField(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_coreOpen(
-  char*                 filename,
+int IMU_file_coreLoad(
+  const char*           filename,
   IMU_core_config       *config)
 {
   // define internal variables
@@ -332,7 +332,7 @@ int IMU_file_coreOpen(
 ******************************************************************************/
 
 int IMU_file_coreSave(
-  char                  *filename,
+  const char            *filename,
   IMU_core_config       *config)
 {
   // define internal variables
@@ -374,8 +374,8 @@ int IMU_file_coreSave(
 * reads calibration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_rectOpen( 
-  char                  *filename,
+int IMU_file_rectLoad( 
+  const char            *filename,
   IMU_rect_config       *config)
 {
   // define internal variables
@@ -426,7 +426,7 @@ int IMU_file_rectOpen(
 ******************************************************************************/
 
 int IMU_file_rectSave(
-  char                  *filename,
+  const char            *filename,
   IMU_rect_config       *config)
 {
   // define internal variables
@@ -457,8 +457,8 @@ int IMU_file_rectSave(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_pntsOpen(
-  char                  *filename,
+int IMU_file_pntsLoad(
+  const char            *filename,
   IMU_pnts_config       *config)
 {
   // define internal variables
@@ -515,7 +515,7 @@ int IMU_file_pntsOpen(
 ******************************************************************************/
 
 int IMU_file_pntsSave(
-  char                  *filename,
+  const char            *filename,
   IMU_pnts_config       *config)
 {
   // define internal variables
@@ -549,8 +549,8 @@ int IMU_file_pntsSave(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_autoOpen(
-  char                  *filename,
+int IMU_file_autoLoad(
+  const char            *filename,
   IMU_auto_config       *config)
 {
   // define internal variables
@@ -601,7 +601,7 @@ int IMU_file_autoOpen(
 ******************************************************************************/
 
 int IMU_file_autoSave(
-  char                 *filename,
+  const char           *filename,
   IMU_auto_config      *config)
 {
   // define internal variables

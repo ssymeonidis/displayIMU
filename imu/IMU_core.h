@@ -36,7 +36,7 @@ extern "C" {
 #define IMU_CORE_FNC_IN_RESET    2
 #define IMU_CORE_FNC_ZEROED      3
 #define IMU_CORE_NO_WEIGHT       4
-#define IMU_CORE_GYRO_STABLE     4
+#define IMU_CORE_GYRO_STABLE     5
 
 // define error codes
 #define IMU_CORE_INST_OVERFLOW  -1
@@ -88,10 +88,10 @@ int IMU_core_getState  (uint16_t id, IMU_core_state  **state);
 
 // general update/command operation functions
 int IMU_core_reset     (uint16_t id);
-int IMU_core_datum     (uint16_t id, IMU_datum*);
-int IMU_core_data3     (uint16_t id, IMU_data3*);
+int IMU_core_datum     (uint16_t id, IMU_datum*, IMU_core_FOM*);
+int IMU_core_data3     (uint16_t id, IMU_data3*, IMU_core_FOM*);
 
-// state estimateion functions
+// state estimation functions
 int IMU_core_estmQuat  (uint16_t id, float* estm);
 int IMU_core_estmAccl  (uint16_t id, float* estm);
 

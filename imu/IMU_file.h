@@ -43,14 +43,14 @@ int IMU_file_getLine  (FILE *file, char **field, char **args);
 int IMU_file_getField (char *field, const char *names[], int size);
 
 // functions to access imu specfic json readers and writers 
-int IMU_file_rectOpen (char *filename, IMU_rect_config *config);
-int IMU_file_rectSave (char *filename, IMU_rect_config *config);
-int IMU_file_coreOpen (char *filename, IMU_core_config *config);
-int IMU_file_coreSave (char *filename, IMU_core_config *config);
-int IMU_file_pntsOpen (char *filename, IMU_pnts_config *config);
-int IMU_file_pntsSave (char *filename, IMU_pnts_config *config);
-int IMU_file_autoOpen (char *filename, IMU_auto_config *config);
-int IMU_file_autoSave (char *filename, IMU_auto_config *config);
+int IMU_file_coreLoad (const char *filename, IMU_core_config *config);
+int IMU_file_coreSave (const char *filename, IMU_core_config *config);
+int IMU_file_rectLoad (const char *filename, IMU_rect_config *config);
+int IMU_file_rectSave (const char *filename, IMU_rect_config *config);
+int IMU_file_pntsLoad (const char *filename, IMU_pnts_config *config);
+int IMU_file_pntsSave (const char *filename, IMU_pnts_config *config);
+int IMU_file_autoLoad (const char *filename, IMU_auto_config *config);
+int IMU_file_autoSave (const char *filename, IMU_auto_config *config);
 
 
 #ifdef __cplusplus

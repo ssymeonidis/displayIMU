@@ -91,8 +91,8 @@ int IMU_pnts_getEntry  (uint16_t id, uint16_t index, IMU_pnts_entry**);
 #endif
 
 // general operation functions 
+int IMU_pnts_reset     (uint16_t id);
 int IMU_pnts_start     (uint16_t id, uint16_t numPnts);
-int IMU_pnts_stop      (uint16_t id);
 int IMU_pnts_datum     (uint16_t id, IMU_datum*, IMU_pnts_entry**);
 int IMU_pnts_data3     (uint16_t id, IMU_data3*, IMU_pnts_entry**);
 

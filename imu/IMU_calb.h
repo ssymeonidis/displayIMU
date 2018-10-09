@@ -63,9 +63,10 @@ typedef struct  {
 
 
 // control side functions 
-int IMU_calb_init   (uint16_t* id, IMU_rect_config*, IMU_core_config*);
+int IMU_calb_init   (uint16_t *id, IMU_rect_config*, IMU_core_config*);
 int IMU_calb_refresh (uint16_t id, IMU_rect_config*, IMU_core_config*);
 int IMU_calb_start   (uint16_t id, IMU_calb_mode);
+int IMU_calb_reset   (uint16_t id);
 int IMU_calb_status  (uint16_t id, IMU_calb_FOM**);
 int IMU_calb_save    (uint16_t id, IMU_rect_config*, IMU_core_config*);
 
