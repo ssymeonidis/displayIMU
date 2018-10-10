@@ -110,7 +110,7 @@ int IMU_core_init(
   int err  = mutex_init(numInstCore);
   if (err) return IMU_CORE_FAILED_MUTEX;
 
-  // return handle and calib pointer
+  // return handle and config pointer
   *id      = numInstCore; 
   *pntr    = &config[*id];
   numInstCore++;
@@ -593,6 +593,7 @@ int IMU_core_newMagn(
 
 int IMU_core_estmQuat(
   uint16_t              id,
+  float                 t,
   float                 *estm)
 {
   // copy current orientation state and return
@@ -609,6 +610,7 @@ int IMU_core_estmQuat(
 
 int IMU_core_estmAccl(
   uint16_t              id,
+  float                 t,
   float                 *estm)
 {
   // copy internal variables 

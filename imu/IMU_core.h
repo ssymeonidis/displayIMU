@@ -53,6 +53,7 @@ typedef struct {
   unsigned char        isStable;        // enable detection of no movement
   unsigned char        isFOM;           // enable weight based on FOM
   unsigned char        isMove;          // enable acceleration estimate
+  unsigned char        isPredict;       // enable extrapolation of estim
   float                gThresh;         // no motion threshold value
   float                gThreshTime;     // no motion threhsold time
   float                aWeight;         // accelerometer IMU weight
@@ -76,7 +77,7 @@ typedef struct {
   unsigned char        mReset;         // magnetometer reset signal
   unsigned char        estmValid;      // flag to insure valid state
 #if IMU_USE_PTHREAD
-  pthread_mutex_t      lock;           // mutex (for async operation)
+  pthread_mutex_t      lock;           // mutex (async operation)
 #endif
 } IMU_core_state;
 
@@ -92,8 +93,8 @@ int IMU_core_datum     (uint16_t id, IMU_datum*, IMU_core_FOM*);
 int IMU_core_data3     (uint16_t id, IMU_data3*, IMU_core_FOM*);
 
 // state estimation functions
-int IMU_core_estmQuat  (uint16_t id, float* estm);
-int IMU_core_estmAccl  (uint16_t id, float* estm);
+int IMU_core_estmQuat  (uint16_t id, float t, float* estm);
+int IMU_core_estmAccl  (uint16_t id, float t, float* estm);
 
 
 #ifdef __cplusplus

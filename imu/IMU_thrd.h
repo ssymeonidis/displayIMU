@@ -35,7 +35,6 @@ extern "C" {
 ******************************************************************************/
 
 inline int IMU_thrd_mutex_init(
-  uint16_t              id,
   #if IMU_USE_PTHREAD
   pthread_mutex_t       *lock)
   #endif
@@ -53,7 +52,6 @@ inline int IMU_thrd_mutex_init(
 ******************************************************************************/
 
 inline void IMU_thrd_mutex_lock(
-  uint16_t              id,
   #if IMU_USE_PTHREAD
   pthread_mutex_t       *lock)
   #endif
@@ -69,7 +67,6 @@ inline void IMU_thrd_mutex_lock(
 ******************************************************************************/
 
 inline void IMU_thrd_mutex_unlock(
-  uint16_t              id,
   #if IMU_USE_PTHREAD
   pthread_mutex_t       *lock)
   #endif
@@ -78,3 +75,6 @@ inline void IMU_thrd_mutex_unlock(
   pthread_mutex_unlock(lock);
   #endif
 }
+
+
+#endif

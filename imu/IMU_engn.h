@@ -34,6 +34,10 @@ extern "C" {
 #include "IMU_auto.h"
 #include "IMU_calb.h"
 
+// define status codes
+#define IMU_ENGN_CALBFNC_SAVED           1
+#define IMU_ENGN_CALBFNC_REJECTED        2
+
 // define error codes
 #define IMU_ENGN_INST_OVERFLOW           -1
 #define IMU_ENGN_BAD_ENGN_TYPE           -2
@@ -49,6 +53,7 @@ extern "C" {
 #define IMU_ENGN_FAILED_THREAD           -13
 #define IMU_ENGN_FAILED_MUTEX            -14
 #define IMU_ENGN_QUEUE_OVERFLOW          -15
+#define IMU_ENGN_BAD_PNTR                -16
 
 
 // define the configuration structure (values tuned for a part)
@@ -60,6 +65,7 @@ typedef struct {
   uint8_t               isEstmAccl;
   uint8_t               isFOM;
   uint8_t               isSensorStruct;
+  float                 threshFOM;
 } IMU_engn_config;
 
 typedef struct {
@@ -74,8 +80,9 @@ typedef struct {
   IMU_rect_config       *configRect;
   IMU_pnts_config       *configPnts;
   IMU_auto_config       *configAuto;
-  int                   *fncCalb();
+  IMU_calb_config       *configCalb;
   float                 q_ref[4];
+  int                   (*fncCalb)(uint16_t, IMU_calb_FOM*);    // test only
 } IMU_engn_state;
 
 typedef enum {
@@ -91,7 +98,8 @@ typedef enum {
   IMU_engn_rect         = 1,
   IMU_engn_pnts         = 2,
   IMU_engn_auto         = 3,
-  IMU_engn_calb         = 4
+  IMU_engn_calb         = 4,
+  IMU_engn_self         = 5
 } IMU_engn_system;
 
 typedef struct {
@@ -135,7 +143,7 @@ int IMU_engn_getConfig  (uint16_t id, IMU_engn_config**);
 int IMU_engn_getState   (uint16_t id, IMU_engn_state**);
 int IMU_engn_getSysID   (uint16_t id, IMU_engn_system, uint16_t *sysID);
 int IMU_engn_getSensor  (uint16_t id, IMU_engn_sensor**);
-int IMU_engn_setCalbFnc (uint16_t id, TBD);
+int IMU_engn_setCalbFnc (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
 
 // enable/disable controls for queue
 #if IMU_ENGN_QUEUE_SIZE
@@ -149,7 +157,7 @@ int IMU_engn_save       (uint16_t id, const char* filename, IMU_engn_system);
 
 // 
 int IMU_engn_reset      (uint16_t id);
-int IMU_engn_setRef     (uinti6_t id, float* ref);
+int IMU_engn_setRef     (uint16_t id, float* ref);
 int IMU_engn_setRefCur  (uint16_t id);
 int IMU_engn_calbStart  (uint16_t id, IMU_calb_mode);
 int IMU_engn_calbSave   (uint16_t id);
@@ -157,7 +165,7 @@ int IMU_engn_calbSave   (uint16_t id);
 // 
 int IMU_engn_datum      (uint16_t id, IMU_datum*);
 int IMU_engn_data3      (uint16_t id, IMU_data3*);
-int IMU_engn_getEstm    (uint16_t id, IMU_engn_estm*);
+int IMU_engn_getEstm    (uint16_t id, float t, IMU_engn_estm*);
 
 
 #ifdef __cplusplus

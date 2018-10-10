@@ -50,7 +50,7 @@ int IMU_rect_getConfig  (uint16_t id, IMU_rect_config **config);
 
 // raw data correction functions
 int IMU_rect_datum (uint16_t id, IMU_datum*, IMU_TYPE*);
-int IMU_rect_data3 (uint16_t id, IMU_data3*, IMU_TYPE*, IMU_TYPE*, IMU_TYPE*);
+int IMU_rect_data3 (uint16_t id, IMU_data3*);
 int IMU_rect_gyro  (uint16_t id, IMU_TYPE *g_raw, IMU_TYPE *g);
 int IMU_rect_accl  (uint16_t id, IMU_TYPE *a_raw, IMU_TYPE *a);
 int IMU_rect_magn  (uint16_t id, IMU_TYPE *m_raw, IMU_TYPE *m);

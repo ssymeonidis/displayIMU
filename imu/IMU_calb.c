@@ -22,8 +22,9 @@
 #include "IMU_calb.h"
 
 // internally managed variables
-IMU_calb_state   state [IMU_MAX_INST];     
-IMU_pnts_entry   table [IMU_MAX_INST][IMU_CALB_SIZE]; 
+IMU_calb_config  config [IMU_MAX_INST];
+IMU_calb_state   state  [IMU_MAX_INST];
+IMU_pnts_entry   table  [IMU_MAX_INST][IMU_CALB_SIZE]; 
 uint16_t         numInstCalb = 0;
 uint16_t         modePnts[2] = {4, 6};
 
@@ -38,19 +39,15 @@ void calb_6pnt(uint16_t id);
 
 int IMU_calb_init(
   uint16_t                *id,
-  IMU_rect_config         *rect, 
-  IMU_core_config         *core)
+  IMU_calb_config         **pntr)
 {
   // check for device count overflow
   if (numInstCalb >= IMU_MAX_INST)
     return IMU_CALB_INST_OVERFLOW;
 
-  // copy rectify and core structures
-  memcpy(&state[numInstCalb].rect_org, rect, sizeof(IMU_rect_config));
-  memcpy(&state[numInstCalb].core_org, rect, sizeof(IMU_core_config)); 
-  
   // return inst handle and config struct
   *id   = numInstCalb; 
+  *pntr    = &config[*id];
   numInstCalb++;
   
   // exit function
@@ -59,17 +56,35 @@ int IMU_calb_init(
 
 
 /******************************************************************************
+* function to copy config structure
+******************************************************************************/
+
+int IMU_core_getConfig( 
+  uint16_t                id,  
+  IMU_core_config         **pntr)
+{
+  // check for out-of-bounds condition
+  if (id >= numInstCalb)
+    return IMU_CALB_BAD_INST; 
+
+  // return state
+  *pntr = &config[id];
+  return 0;
+}
+
+
+/******************************************************************************
 * function to create new instance
 ******************************************************************************/
 
-int IMU_calb_refresh(
+int IMU_calb_setStruct(
   uint16_t                id,
   IMU_rect_config         *rect, 
   IMU_core_config         *core)
 {
   // check for device count overflow
-  if (numInstCalb >= IMU_MAX_INST)
-    return IMU_CALB_INST_OVERFLOW;
+  if (id >= numInstCalb)
+    return IMU_CALB_BAD_INST;
 
   // copy rectify and core structures
   memcpy(&state[id].rect_org, rect, sizeof(IMU_rect_config));
@@ -89,7 +104,7 @@ int IMU_calb_start(
   IMU_calb_mode           mode)
 {
   // check for out-of-bounds condition
-  if (id > numInstCalb-1)
+  if (id >= numInstCalb)
     return IMU_CALB_BAD_INST;
 
   // copy current entry to the table
@@ -108,7 +123,7 @@ int IMU_calb_pnts(
   IMU_pnts_entry          *pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInstCalb-1)
+  if (id >= numInstCalb)
     return IMU_CALB_BAD_INST; 
 
   // copy current entry to the table
@@ -143,7 +158,7 @@ int IMU_calb_save(
   IMU_core_config         *core)
 {
   // check for out-of-bounds condition
-  if (id > numInstCalb-1)
+  if (id >= numInstCalb)
     return IMU_CALB_BAD_INST;
 
   // copy current entry to the IMU rectify config 
@@ -162,7 +177,7 @@ int IMU_calb_status(
   IMU_calb_FOM            **FOM)
 {
   // check for out-of-bounds condition
-  if (id > numInstCalb-1)
+  if (id >= numInstCalb)
     return IMU_CALB_BAD_INST;
 
   // determine whether enough points were collected

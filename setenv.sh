@@ -1,3 +1,4 @@
+export IMU_ENGN_QUEUE_SIZE=0
 export IMU_USE_PTHREAD=1
 export IMU_MAX_INST=4
 export IMU_TYPE=float

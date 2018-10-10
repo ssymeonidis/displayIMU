@@ -80,9 +80,8 @@ struct IMU_core_FOM{
 
 // define figure of merit
 typedef struct {
-  float                empty;
+  float                calbFOM;
 } IMU_calb_FOM;
-
 
 
 #ifdef __cplusplus

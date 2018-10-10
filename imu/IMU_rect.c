@@ -89,10 +89,7 @@ int IMU_rect_datum(
 
 int IMU_rect_data3(
   uint16_t              id, 
-  IMU_data3             *data3,
-  IMU_TYPE              *g,     
-  IMU_TYPE              *a,     
-  IMU_TYPE              *m)
+  IMU_data3             *data3)
 {
   // check execution condition
   if (id > numInstRect-1)
@@ -101,9 +98,9 @@ int IMU_rect_data3(
     return 0;
 
   // rectify all the sensors
-  IMU_rect_gyro(id, g, data3->g);
-  IMU_rect_accl(id, a, data3->a);
-  IMU_rect_magn(id, m, data3->m);
+  IMU_rect_gyro(id, data3->g, data3->g);
+  IMU_rect_accl(id, data3->a, data3->a);
+  IMU_rect_magn(id, data3->m, data3->m);
   return 0;
 }
 

@@ -626,3 +626,51 @@ int IMU_file_autoSave(
   fclose(file);
   return 0;
 }
+
+
+/******************************************************************************
+* reads configuration json file into memory (structure)
+******************************************************************************/
+
+int IMU_file_calbLoad(
+  const char           *filename, 
+  IMU_calb_config      *config)
+{
+  return 0;
+}
+
+
+/******************************************************************************
+* writes configuration structure to a json file
+******************************************************************************/
+
+int IMU_file_calbSave(
+  const char           *filename, 
+  IMU_calb_config      *config)
+{
+  return 0;
+}
+
+
+/******************************************************************************
+* reads configuration json file into memory (structure)
+******************************************************************************/
+
+int IMU_file_engnLoad(
+  const char           *filename, 
+  IMU_engn_config      *config)
+{
+  return 0;
+}
+
+
+/******************************************************************************
+* writes configuration structure to a json file
+******************************************************************************/
+
+int IMU_file_engnSave(
+  const char           *filename, 
+  IMU_engn_config      *config)
+{
+  return 0;
+}
