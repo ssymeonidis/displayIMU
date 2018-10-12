@@ -35,51 +35,57 @@ extern "C" {
 #include "IMU_type.h"
 
 // define status codes
-#define IMU_CALB_UPDATED         1
+#define IMU_CALB_UPDATED                 1
+#define IMU_CALB_CALBFNC_SAVED           2
+#define IMU_CALB_CALBFNC_REJECTED        3
 
 // define error codes
-#define IMU_CALB_INST_OVERFLOW  -1
-#define IMU_CALB_BAD_INST       -2
-#define IMU_CALB_BAD_MODE       -3
+#define IMU_CALB_INST_OVERFLOW          -1
+#define IMU_CALB_BAD_INST               -2
+#define IMU_CALB_BAD_MODE               -3
+#define IMU_CALB_BAD_PNTR               -4
 
 
 // define calibration types
 typedef enum {
-  IMU_calb_NA               = -1,
-  IMU_calb_4pnt             = 0,
-  IMU_calb_6pnt             = 1
+  IMU_calb_NA           = -1,
+  IMU_calb_4pnt         = 0,
+  IMU_calb_6pnt         = 1
 } IMU_calb_mode;
 
+// configuration structure definition
 typedef struct  {
-  uint8_t                   empty;
+  float                 threshFOM;
 } IMU_calb_config;
 
-// define internal state
+// subsystem state structure definition
 typedef struct  {
-  IMU_calb_mode             mode;
-  IMU_rect_config           rect;
-  IMU_rect_config           rect_org;
-  IMU_core_config           core;
-  IMU_core_config           core_org;
-  IMU_calb_FOM              FOM;
-  uint16_t                  numPnts;
+  IMU_calb_mode         mode;
+  IMU_rect_config       rect;
+  IMU_rect_config       rect_org;
+  IMU_core_config       core;
+  IMU_core_config       core_org;
+  IMU_calb_FOM          FOM;
+  uint16_t              numPnts;
+  int                   (*fnc)(uint16_t, IMU_calb_FOM*);
 } IMU_calb_state;
 
 
 // control side functions 
-int IMU_calb_init     (uint16_t *id, IMU_calb_config**);
-int IMU_calb_getConfig (uint16_t id, IMU_calb_config**);
-int IMU_calb_setStruct (uint16_t id, IMU_rect_config*, IMU_core_config*);
+int IMU_calb_init       (uint16_t *id, IMU_calb_config**);
+int IMU_calb_getConfig  (uint16_t id, IMU_calb_config**);
+int IMU_calb_setStruct  (uint16_t id, IMU_rect_config*, IMU_core_config*);
+int IMU_calb_setFnc     (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
 
 // system access function
-int IMU_calb_reset     (uint16_t id);
-int IMU_calb_start     (uint16_t id, IMU_calb_mode);
-int IMU_calb_status    (uint16_t id, IMU_calb_FOM**);
-int IMU_calb_save      (uint16_t id, IMU_rect_config*, IMU_core_config*);
+int IMU_calb_reset      (uint16_t id);
+int IMU_calb_start      (uint16_t id, IMU_calb_mode);
+int IMU_calb_status     (uint16_t id, IMU_calb_FOM**);
+int IMU_calb_save       (uint16_t id, IMU_rect_config*, IMU_core_config*);
 
 // sensor interface functions
-int IMU_calb_pnts      (uint16_t id, IMU_pnts_entry*); 
-int IMU_calb_auto      (uint16_t id, IMU_auto_state*);
+int IMU_calb_pnts       (uint16_t id, IMU_pnts_entry*); 
+int IMU_calb_auto       (uint16_t id, IMU_auto_state*);
 
 
 #ifdef __cplusplus

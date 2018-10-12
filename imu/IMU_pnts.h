@@ -31,10 +31,9 @@ extern "C" {
 // define error codes
 #define IMU_PNTS_INST_OVERFLOW -1
 #define IMU_PNTS_BAD_INST      -2
-#define IMU_PNTS_EMPTY_TABLE   -3
 
 
-// define configuration structure
+// configuration structure definition
 typedef struct {
   uint8_t                enable;          // to disable entire function
   uint8_t                isAccl;          // process accelerometer data
@@ -56,7 +55,7 @@ typedef enum {
   IMU_pnts_enum_stable  = 3
 } IMU_pnts_enum;
 
-// define internal state 
+// subsystem state structure definition
 typedef struct {
   IMU_pnts_enum          state;
   uint16_t               numPnts;

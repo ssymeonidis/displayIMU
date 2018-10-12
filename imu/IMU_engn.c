@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// definitions for increased readability
+// definitions (increase readability)
 #define NULL 0
 #define max(a,b)              \
   ({__typeof__ (a) _a = (a);  \
@@ -111,8 +111,12 @@ int IMU_engn_init(
   }
   config[numInstEngn].isFOM          = 0;
   config[numInstEngn].isSensorStruct = 0;
-  config[numInstEngn].threshFOM      = 0;
-  state[numInstEngn].fncCalb         = IMU_engn_calbFnc;
+  
+  // initialize the quaternion reference
+  state[numInstEngn].q_ref[0]        = 1;
+  state[numInstEngn].q_ref[1]        = 0;
+  state[numInstEngn].q_ref[2]        = 0;
+  state[numInstEngn].q_ref[3]        = 0;
   
   // create IMU subsystem instances
   IMU_engn_state *cur = &state[numInstEngn];
@@ -127,16 +131,24 @@ int IMU_engn_init(
     status  += max(0,IMU_calb_init(&cur->idCalb, &cur->configCalb));
   if (status < 0)
     return IMU_ENGN_FAILED_SYS_INIT;
-    
-  // ensure instance reseted to known state
-  status     = IMU_engn_reset(numInstEngn);
-  if (status < 0)
-    return IMU_ENGN_FAILED_RESET;
+
+  // create pthread mutex
+  #if IMU_USE_PTHREAD
+  int err  = IMU_thrd_mutex_init(&engnLock);
+  if (err) return IMU_CORE_FAILED_MUTEX;
+  #endif
 
   // pass handle and config structure
   *id        = numInstEngn;
   *pntr      = &config[*id];
   numInstEngn++;
+
+  // ensure instance reseted to known state
+  status     = IMU_engn_reset(*id);
+  if (status < 0)
+    return IMU_ENGN_FAILED_RESET;
+
+  // exit (no errors)
   return 0;
 }
 
@@ -187,7 +199,7 @@ int IMU_engn_getConfig(
   // check out-of-bounds condition
   if (id >= numInstEngn)
     return IMU_ENGN_BAD_INST; 
-  if (!IMU_engn_typeCheck(id, system))
+  if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
 
   // pass subsystem config structure
@@ -223,7 +235,7 @@ int IMU_engn_getState(
   // check out-of-bounds condition
   if (id >= numInstEngn)
     return IMU_ENGN_BAD_INST;
-  if (!IMU_engn_typeCheck(id, system))
+  if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
 
   // pass subsystem state structure
@@ -282,8 +294,7 @@ int IMU_engn_setCalbFnc(
     return IMU_ENGN_UNINITIALIZE_SYS;
 
   // pass sensor structure and exit
-  state[id].fncCalb = pntr;
-  return 0;
+  return IMU_calb_setFnc(id, pntr);
 }
 
 
@@ -335,7 +346,7 @@ int IMU_engn_load(
   // check out-of-bounds condition
   if (id >= numInstEngn)
     return IMU_ENGN_BAD_INST;
-  if (!IMU_engn_typeCheck(id, system))
+  if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
     
   // load respective json file
@@ -368,12 +379,12 @@ int IMU_engn_save(
   // check out-of-bounds condition
   if (id >= numInstEngn)
     return IMU_ENGN_BAD_INST;
-  if (!IMU_engn_typeCheck(id, system))
+  if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
     
   // load respective json file
   if      (system == IMU_engn_core)
-    return   IMU_file_coreSave(filename, state[id].configCore);
+    return IMU_file_coreSave(filename, state[id].configCore);
   else if (system == IMU_engn_rect)
     return IMU_file_rectSave(filename, state[id].configRect);
   else if (system == IMU_engn_pnts)
@@ -422,7 +433,6 @@ int IMU_engn_reset(
     status  += max(0,IMU_calb_reset(state[id].idCalb));
   if (status < 0)
     return IMU_ENGN_FAILED_RESET;
-  state[id].fncCalb = NULL;
     
   // exit function
   return 0;
@@ -621,30 +631,6 @@ int IMU_engn_getEstm(
 
 
 /******************************************************************************
-* function to estimate orientation and acceleration
-******************************************************************************/
-
-int IMU_engn_calbFnc(
-  uint16_t              id, 
-  IMU_calb_FOM          *FOM)
-{
-  // check out-of-bounds condition
-  if (id >= numInstEngn)
-    return IMU_ENGN_BAD_INST;
-  if (FOM == NULL)
-    return IMU_ENGN_BAD_PNTR;
-  
-  // verify FOM is above threshold and save+
-  if (FOM->calbFOM > config[id].threshFOM) {
-    IMU_engn_calbSave(id);
-    return IMU_ENGN_CALBFNC_SAVED;
-  } else {
-    return IMU_ENGN_CALBFNC_REJECTED;
-  }
-}
-
-
-/******************************************************************************
 * "continous run" function handle for recreating a thread 
 ******************************************************************************/
 
@@ -665,12 +651,12 @@ void *dataIF_run(
       usleep(engnSleepTime);
     
     // remove datum from queue
-    IMU_thrd_mutex_lock(engnLock);
+    IMU_thrd_mutex_lock(&engnLock);
     id                  = queue.id[queue.start];
     memcpy(datum, &queue.datum[queue.first], sizeof(IMU_datum));
     queue.count         = queue.count - 1;
     queue.first         = queue.first + 1;
-    IMU_thrd_mutex_unlock(engnLock);
+    IMU_thrd_mutex_unlock(&engnLock);
           
     // process datum
     IMU_engn_process(id, datum);
@@ -691,7 +677,7 @@ int IMU_engn_addQueue(
   IMU_datum             *datum)
 {
   // entering critical section
-  IMU_thrd_mutex_lock(engnLock);
+  IMU_thrd_mutex_lock(&engnLock);
 
   // check queue overflow
   if (queue.count >= IMU_ENGN_QUEUE_SIZE) {
@@ -711,7 +697,7 @@ int IMU_engn_addQueue(
   memcpy(&queue.datum[queue.last], datum, sizeof(IMU_datum));
   
   // exiting critical section
-  IMU_thrd_mutex_unlock(engnLock);
+  IMU_thrd_mutex_unlock(&engnLock);
 }
 #endif
 

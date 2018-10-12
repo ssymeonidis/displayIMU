@@ -21,7 +21,6 @@
 #define _IMU_FILE_H
 
 // include statements
-#include <stdio.h>
 #include "IMU_rect.h"
 #include "IMU_core.h"
 #include "IMU_pnts.h"
@@ -40,10 +39,6 @@ extern "C" {
 #define IMU_FILE_MISSING_ARGS   -4
 #define IMU_FILE_INVALID_BOOL   -5
 
-
-// functions used to create custom json reader 
-int IMU_file_getLine  (FILE *file, char **field, char **args);
-int IMU_file_getField (char *field, const char *names[], int size);
 
 // functions to access imu specfic json readers and writers 
 int IMU_file_coreLoad (const char *filename, IMU_core_config *config);

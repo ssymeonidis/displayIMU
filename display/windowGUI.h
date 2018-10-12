@@ -23,6 +23,7 @@
 // include statements
 #include <QMainWindow>
 #include "IMU_engn.h"
+#include "configGUI.h"
 
 // create abreviated namespace for windowGUI (qtcreator codegen)
 namespace Ui {class windowGUI;}
@@ -34,7 +35,7 @@ class windowGUI : public QMainWindow {
 public:
   explicit windowGUI(QWidget *parent = 0);
   ~windowGUI();
-  void initIMU(char* core_config_file, char* rect_config_file);
+  void initIMU(configGUI *config);
 
 private slots:
   void config_read();
@@ -59,9 +60,6 @@ private:
   IMU_core_config     *configCore;
   IMU_rect_config     *configRect;
   Ui::windowGUI       *ui;
-
-  // internal functions
-  void load_json(char* filename);
 };
 
 #endif // WINDOWGUI_H

@@ -31,50 +31,54 @@ uint16_t         modePnts[2] = {4, 6};
 // internally defined functions
 void calb_4pnt(uint16_t id);
 void calb_6pnt(uint16_t id);
+int IMU_calb_defaultFnc(uint16_t id, IMU_calb_FOM*);
 
 
 /******************************************************************************
-* function to create new instance
+* initialize new instance (constructor) 
 ******************************************************************************/
 
 int IMU_calb_init(
   uint16_t                *id,
   IMU_calb_config         **pntr)
 {
-  // check for device count overflow
+  // check device count overflow
   if (numInstCalb >= IMU_MAX_INST)
     return IMU_CALB_INST_OVERFLOW;
 
-  // return inst handle and config struct
+  // assign internal calb function
+  state[numInstCalb].fnc  = IMU_calb_defaultFnc;
+  
+  // pass handle and config pointer
   *id   = numInstCalb; 
-  *pntr    = &config[*id];
+  *pntr = &config[*id];
   numInstCalb++;
   
-  // exit function
+  // exit function (no errors)
   return 0;
 }
 
 
 /******************************************************************************
-* function to copy config structure
+* return config structure
 ******************************************************************************/
 
 int IMU_calb_getConfig( 
   uint16_t                id,  
   IMU_calb_config         **pntr)
 {
-  // check for out-of-bounds condition
+  // check out-of-bounds condition
   if (id >= numInstCalb)
     return IMU_CALB_BAD_INST; 
 
-  // return state
+  // pass config and exit (no errors)
   *pntr = &config[id];
   return 0;
 }
 
 
 /******************************************************************************
-* function to create new instance
+* copies rect and core subsystem configuration structures
 ******************************************************************************/
 
 int IMU_calb_setStruct(
@@ -82,7 +86,7 @@ int IMU_calb_setStruct(
   IMU_rect_config         *rect, 
   IMU_core_config         *core)
 {
-  // check for device count overflow
+  // check device count overflow
   if (id >= numInstCalb)
     return IMU_CALB_BAD_INST;
 
@@ -90,56 +94,126 @@ int IMU_calb_setStruct(
   memcpy(&state[id].rect_org, rect, sizeof(IMU_rect_config));
   memcpy(&state[id].core_org, core, sizeof(IMU_rect_config)); 
   
-  // exit function
+  // exit function (no errors)
   return 0;
 }
 
 
 /******************************************************************************
-* function to reset state of calib subsystem
+* copies rect and core subsystem configuration structures
+******************************************************************************/
+
+int IMU_calb_setFnc(
+  uint16_t                id,
+  int                     (*fncCalb)(uint16_t, IMU_calb_FOM*))
+{
+  // check device count overflow
+  if (id >= numInstCalb)
+    return IMU_CALB_BAD_INST;
+  if (fncCalb == NULL);
+    return IMU_CALB_BAD_PNTR;
+
+  // copy rectify and core structures
+  state[id].fnc = fncCalb; 
+  
+  // exit function (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* reset states of calb subsystem
 ******************************************************************************/
 
 int IMU_calb_reset(
   uint16_t                id)
 {
-  // check for out-of-bounds condition
+  // check out-of-bounds condition
   if (id >= numInstCalb)
     return IMU_CALB_BAD_INST;
 
   // copy current entry to the table
   state[id].numPnts       = 0;
+  
+  // exit function (no errors)
   return 0;
 }
 
 
 /******************************************************************************
-* function to return instance state pointer
+* starts calibration
 ******************************************************************************/
 
 int IMU_calb_start(
   uint16_t                id,
   IMU_calb_mode           mode)
 {
-  // check for out-of-bounds condition
+  // check out-of-bounds condition
   if (id >= numInstCalb)
     return IMU_CALB_BAD_INST;
 
   // copy current entry to the table
   state[id].numPnts       = 0;
   state[id].mode          = mode;
+  
+  // exit function (no errors)
   return 0;
 }
 
 
 /******************************************************************************
-* function to return instance state pointer
+* save results to rect and core configuation structures
+******************************************************************************/
+
+int IMU_calb_save(
+  uint16_t                id,
+  IMU_rect_config         *rect,
+  IMU_core_config         *core)
+{
+  // check out-of-bounds condition
+  if (id >= numInstCalb)
+    return IMU_CALB_BAD_INST;
+
+  // copy current entry to the IMU rectify config 
+  memcpy(rect, &state[id].rect, sizeof(IMU_rect_config));
+  memcpy(core, &state[id].core, sizeof(IMU_core_config));
+  
+  // exit function (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* reports status of calibration
+******************************************************************************/
+
+int IMU_calb_status(
+  uint16_t                id,
+  IMU_calb_FOM            **FOM)
+{
+  // check out-of-bounds condition
+  if (id >= numInstCalb)
+    return IMU_CALB_BAD_INST;
+
+  // determine whether enough points were collected
+  if (state[id].numPnts < modePnts[state[id].mode])
+    return 0;
+  
+  // pass FOM structure
+  *FOM = &state[id].FOM;
+  return IMU_CALB_UPDATED;
+}
+
+
+/******************************************************************************
+* adds points for calibration
 ******************************************************************************/
 
 int IMU_calb_pnts(
   uint16_t                id, 
   IMU_pnts_entry          *pntr)
 {
-  // check for out-of-bounds condition
+  // check out-of-bounds condition
   if (id >= numInstCalb)
     return IMU_CALB_BAD_INST; 
 
@@ -161,48 +235,6 @@ int IMU_calb_pnts(
     return IMU_CALB_BAD_MODE; 
     
   // exit fuction
-  return IMU_CALB_UPDATED;
-}
-
-
-/******************************************************************************
-* copy calibration result to IMU_correct structure 
-******************************************************************************/
-
-int IMU_calb_save(
-  uint16_t                id,
-  IMU_rect_config         *rect,
-  IMU_core_config         *core)
-{
-  // check for out-of-bounds condition
-  if (id >= numInstCalb)
-    return IMU_CALB_BAD_INST;
-
-  // copy current entry to the IMU rectify config 
-  memcpy(rect, &state[id].rect, sizeof(IMU_rect_config));
-  memcpy(core, &state[id].core, sizeof(IMU_core_config));
-  return 0;
-}
-
-
-/******************************************************************************
-* copy calibration result to IMU_correct structure 
-******************************************************************************/
-
-int IMU_calb_status(
-  uint16_t                id,
-  IMU_calb_FOM            **FOM)
-{
-  // check for out-of-bounds condition
-  if (id >= numInstCalb)
-    return IMU_CALB_BAD_INST;
-
-  // determine whether enough points were collected
-  if (state[id].numPnts < modePnts[state[id].mode])
-    return 0;
-  
-  // return FOM structure
-  *FOM = &state[id].FOM;
   return IMU_CALB_UPDATED;
 }
 
@@ -281,3 +313,29 @@ void calb_6pnt(
     rect->mBias[2]  += table[id][i].mFltr[2];
   }
 }
+
+
+/******************************************************************************
+* function to estimate orientation and acceleration
+******************************************************************************/
+
+int IMU_calb_defaultFnc(
+  uint16_t              id, 
+  IMU_calb_FOM          *FOM)
+{
+  // check out-of-bounds condition
+  if (id >= numInstCalb)
+    return IMU_CALB_BAD_INST;
+  if (FOM == NULL)
+    return IMU_CALB_BAD_PNTR;
+  
+  // verify FOM is above threshold and save+
+  if (FOM->calbFOM > config[id].threshFOM) {
+    IMU_engn_calbSave(id);
+    return IMU_CALB_CALBFNC_SAVED;
+  } else {
+    return IMU_CALB_CALBFNC_REJECTED;
+  }
+}
+
+

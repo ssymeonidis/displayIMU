@@ -43,7 +43,6 @@ windowGUI::windowGUI(QWidget *parent) :
   configRect = configUnion.configRect;
 
   // initialize display/sensor IF parameters
-  load_json((char *)"../config/displayIMU.json");
   glWidget_update();
 }
 
@@ -62,16 +61,14 @@ windowGUI::~windowGUI()
 * iniatialize IMU structures and GUI elements 
 ******************************************************************************/
 
-void windowGUI::initIMU(char* core_config_file, char* rect_config_file)
+void windowGUI::initIMU(configGUI *config)
 {
-  if (core_config_file != NULL) {
-    IMU_engn_load(0, core_config_file, IMU_engn_core);
-    config_write();
-  }
-  if (rect_config_file  != NULL) {
-    IMU_engn_load(0, rect_config_file, IMU_engn_rect);
-    calib_write();
-  }
+  // initialize display/sensor IF parameters
+  ui->dispScaleGyro->setText(QString::number(config->gyro, 'f', 1));
+  ui->dispScaleAccl->setText(QString::number(config->accl, 'f', 1));
+  ui->dispScaleMagn->setText(QString::number(config->magn, 'f', 1));
+  ui->dispScaleIMU->setText(QString::number(config->imu, 'f', 1));
+  glWidget_update();
 }
 
 
@@ -214,53 +211,6 @@ void windowGUI::calib_read()
   configRect->mMult[6] = ui->mMult6->text().toFloat();
   configRect->mMult[7] = ui->mMult7->text().toFloat();
   configRect->mMult[8] = ui->mMult8->text().toFloat();
-}
-
-
-/******************************************************************************
-* saves calib structure to json file
-******************************************************************************/
-
-void windowGUI::load_json(char* filename)
-{
-  // define internal variables
-  FILE*     file;
-  char*     field;
-  char*     args;
-  float     val;
-  int       status;
-
-  // open json file containing config struct
-  file = fopen(filename, "r");
-  if (file == NULL)
-    return;
-
-  // main loop that parse json file line by line
-  while (1) {
-
-    // read line and parse field/args
-    status = IMU_file_getLine(file, &field, &args);
-    if (status > 1 || status < 0)
-      break;
-
-    // extract arguments for the specified field
-    if        (strcmp(field, "gyro") == 0) {
-      sscanf(args, "%f", &val);
-      ui->dispScaleGyro->setText(QString::number(val, 'f', 1));
-    } else if (strcmp(field, "accl") == 0) {
-      sscanf(args, "%f", &val);
-      ui->dispScaleAccl->setText(QString::number(val, 'f', 1));
-    } else if (strcmp(field, "magn") == 0) {
-      sscanf(args, "%f", &val);
-      ui->dispScaleMagn->setText(QString::number(val, 'f', 1));
-    } else if (strcmp(field, "IMU") == 0) {
-      sscanf(args, "%f", &val);
-      ui->dispScaleIMU->setText(QString::number(val, 'f', 1));
-    }
-  }
-
-  // exit function
-  fclose(file);
 }
 
 

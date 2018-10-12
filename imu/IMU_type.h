@@ -27,10 +27,12 @@ extern "C" {
 // include statements
 #include <stdint.h>
 
+// structure definitions
+typedef struct IMU_core_FOM IMU_core_FOM;
 
 // define global datum enumertations
-typedef struct IMU_core_FOM IMU_core_FOM;
 typedef enum {
+  IMU_sync             = 0,
   IMU_gyro             = 1,
   IMU_accl             = 2,
   IMU_magn             = 3
@@ -39,15 +41,14 @@ typedef struct {
   IMU_sensor           type;
   float                t;
   IMU_TYPE             val[3];
-  IMU_core_FOM         *FOM;
 } IMU_datum;
 typedef struct {
   float                t;
   IMU_TYPE             g[3];
   IMU_TYPE             a[3];
   IMU_TYPE             m[3];
-  IMU_core_FOM         *FOM;
 } IMU_data3;
+
 
 // define sensor figure of merit
 typedef struct {
@@ -67,8 +68,14 @@ typedef struct {
   float                delt;
 } IMU_core_FOM_magn; 
 
-// define figure of merit 
+
+// define datum/data3 figure of merit 
+typedef union {
+  IMU_datum            *datum;
+  IMU_data3            *data3;
+} IMU_core_pntr;
 struct IMU_core_FOM{
+  IMU_core_pntr        pntr;
   uint8_t              isValid;
   union {
     IMU_core_FOM_gyro  gyro;
@@ -78,7 +85,7 @@ struct IMU_core_FOM{
 };
 
 
-// define figure of merit
+// define calibration figure of merit
 typedef struct {
   float                calbFOM;
 } IMU_calb_FOM;

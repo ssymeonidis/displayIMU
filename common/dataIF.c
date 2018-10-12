@@ -39,8 +39,8 @@ FILE*                    dataIF_file;
 
 // define internal/utility functions
 void dataIF_error(const char *msg);
-void dataIF_lineUPD(char* line);
-void dataIF_lineCSV(char* line);
+void dataIF_lineUPD(char* line, int line_size);
+void dataIF_lineCSV(char* line, int line_size);
 
 
 /******************************************************************************
@@ -55,7 +55,9 @@ void dataIF_init(IMU_engn_type type)
   config.isRealtime      = 0;
   
   // intialize the IMU engine
-  IMU_engn_init(type, &state.imuID, &state.imuConfig);
+  int status = IMU_engn_init(type, &state.imuID, &state.imuConfig);
+  if (status < 0)
+    printf("initialization error #%d\n", status);
 }
 
 
@@ -130,9 +132,9 @@ void dataIF_process()
 
   // extract data line
   if (!state.isCSV)
-    dataIF_lineUPD(line);
+    dataIF_lineUPD(line, line_size);
   else 
-    dataIF_lineCSV(line);
+    dataIF_lineCSV(line, line_size);
 
   // determine the datum type
   sscanf(line, "%d", &datum_type);
@@ -210,9 +212,10 @@ void dataIF_error(
 ******************************************************************************/
 
 void dataIF_lineUPD(
-  char                   *line)
+  char                   *line,
+  int                    line_size)
 {
-  int rc = recv(dataIF_socket, line, sizeof(line), 0);
+  int rc = recv(dataIF_socket, line, line_size, 0);
   line[rc] = (char)0;
 }
 
@@ -222,7 +225,8 @@ void dataIF_lineUPD(
 ******************************************************************************/
 
 void dataIF_lineCSV(
-  char                   *line)
+  char                   *line,
+  int                    line_size)
 {
   // define local variables
   struct timeval         time;
@@ -232,18 +236,18 @@ void dataIF_lineCSV(
   char                   *results;
 
   // extracts one line (repeats when the file ends)
-  results = fgets(line, sizeof(line), dataIF_file);
+  results = fgets(line, line_size, dataIF_file);
   if (results == NULL) {
     fseek(dataIF_file, 0, SEEK_SET);
     state.isFirstFrame = 1;
-    results = fgets(line, sizeof(line), dataIF_file);
+    results = fgets(line, line_size, dataIF_file);
   } 
 
   // determine the datum type
   float sensor_time;
   sscanf(line, "%*d, %f", &sensor_time);
 
-  // inject delay if running csv file
+  // inject csv file delay 
   if (config.isRealtime && !state.isFirstFrame) {
     while (1) { 
       gettimeofday(&time, NULL);

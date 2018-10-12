@@ -9,10 +9,12 @@ OBJECTS_DIR       = ./obj
 
 HEADERS          += glWidget.h          \
                     windowGUI.h         \
+                    configGUI.h         \
                     dataIF.h
 
 SOURCES          += glWidget.cpp        \
                     windowGUI.cpp       \
+                    configGUI.cpp       \ 
                     dataIF.c            \
                     main.cpp 
 

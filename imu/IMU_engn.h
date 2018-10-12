@@ -33,10 +33,6 @@ extern "C" {
 #include "IMU_auto.h"
 #include "IMU_calb.h"
 
-// define status codes
-#define IMU_ENGN_CALBFNC_SAVED           1
-#define IMU_ENGN_CALBFNC_REJECTED        2
-
 // define error codes
 #define IMU_ENGN_INST_OVERFLOW           -1
 #define IMU_ENGN_BAD_ENGN_TYPE           -2
@@ -52,66 +48,47 @@ extern "C" {
 #define IMU_ENGN_FAILED_THREAD           -12
 #define IMU_ENGN_FAILED_MUTEX            -13
 #define IMU_ENGN_QUEUE_OVERFLOW          -14
-#define IMU_ENGN_BAD_PNTR                -15
 
 
-// define the configuration structure (values tuned for a part)
+// configuration structure definition
 typedef struct {
-  uint8_t               isRect;
-  uint8_t               isPnts;
-  uint8_t               isAuto;
-  uint8_t               isCalb;
-  uint8_t               isEstmAccl;
-  uint8_t               isQuatOnly;
-  uint8_t               isFOM;
-  uint8_t               isSensorStruct;
-  float                 threshFOM;
+  uint8_t               isRect;          // enable rectify subsystem
+  uint8_t               isPnts;          // enable stable point collection
+  uint8_t               isAuto;          // enable continous metric collection
+  uint8_t               isCalb;          // enable calibration subsystem 
+  uint8_t               isEstmAccl;      // enable accl estm (minus gravity) 
+  uint8_t               isQuatOnly;      // disable conversion to Euler angles
+  uint8_t               isFOM;           // disable caluculation of FOMs
+  uint8_t               isSensorStruct;  // enable storage of sensor data
 } IMU_engn_config;
 
+// system state structure definition
 typedef struct {
-  uint16_t              exitThread;
-  uint16_t              isExit;
-  uint16_t              idCore;
-  uint16_t              idRect;
-  uint16_t              idPnts;
-  uint16_t              idAuto;
-  uint16_t              idCalb;
-  IMU_core_config       *configCore;
-  IMU_rect_config       *configRect;
-  IMU_pnts_config       *configPnts;
-  IMU_auto_config       *configAuto;
-  IMU_calb_config       *configCalb;
-  float                 q_ref[4];
-  int                   (*fncCalb)(uint16_t, IMU_calb_FOM*);    // test only
+  uint16_t              idCore;          // core subsystem id
+  uint16_t              idRect;          // rect subsystem id
+  uint16_t              idPnts;          // pnts subsystem id
+  uint16_t              idAuto;          // auto subsystem id
+  uint16_t              idCalb;          // calb subsystem id
+  IMU_core_config       *configCore;     // core configuration pointer
+  IMU_rect_config       *configRect;     // rect configuration pointer
+  IMU_pnts_config       *configPnts;     // pnts configuration pointer
+  IMU_auto_config       *configAuto;     // auto configuration pointer
+  IMU_calb_config       *configCalb;     // calb configuration pointer
+  uint16_t              isExit;          // commands thread to exit
+  uint16_t              exitThread;      // confirms thread has exited 
+  float                 q_ref[4];        // quaternion reference
 } IMU_engn_state;
 
-// define the configuration structure
-typedef union {
-  IMU_core_config       *configCore;
-  IMU_rect_config       *configRect;
-  IMU_pnts_config       *configPnts;
-  IMU_auto_config       *configAuto;
-  IMU_calb_config       *configCalb;
-  IMU_engn_config       *configEngn;
-} IMU_union_config;
-
-// define the state structure 
-typedef union {
-  IMU_core_state        *stateCore;
-  IMU_pnts_state        *statePnts;
-  IMU_auto_state        *stateAuto;
-  IMU_calb_state        *stateCalb;
-  IMU_engn_state        *stateEngn;
-} IMU_union_state;
-
-typedef enum {
-  IMU_engn_core_only    = 0,
-  IMU_engn_rect_core    = 1,
-  IMU_engn_calb_pnts    = 2,
-  IMU_engn_calb_auto    = 3,
-  IMU_engn_calb_full    = 4
+// define which subsystems are running
+typedef enum {                           // input to IMU_engn_init
+  IMU_engn_core_only    = 0,             // core subystem only
+  IMU_engn_rect_core    = 1,             // rect and core
+  IMU_engn_calb_pnts    = 2,             // rect, pnts, calb, and core
+  IMU_engn_calb_auto    = 3,             // rect, auto, calb, and core
+  IMU_engn_calb_full    = 4              // all susbsystems running
 } IMU_engn_type;
 
+// input to multiple functions
 typedef enum {
   IMU_engn_core         = 0,
   IMU_engn_rect         = 1,
@@ -121,6 +98,26 @@ typedef enum {
   IMU_engn_self         = 5
 } IMU_engn_system;
 
+// input to IMU_engn_getConfig
+typedef union {
+  IMU_core_config       *configCore;
+  IMU_rect_config       *configRect;
+  IMU_pnts_config       *configPnts;
+  IMU_auto_config       *configAuto;
+  IMU_calb_config       *configCalb;
+  IMU_engn_config       *configEngn;
+} IMU_union_config;
+
+// input to IMU_engn_getState
+typedef union {
+  IMU_core_state        *stateCore;
+  IMU_pnts_state        *statePnts;
+  IMU_auto_state        *stateAuto;
+  IMU_calb_state        *stateCalb;
+  IMU_engn_state        *stateEngn;
+} IMU_union_state;
+
+// sensor data structure 
 typedef struct {
   float                 time;
   IMU_TYPE              gRaw[3];
@@ -137,7 +134,7 @@ typedef struct {
   IMU_core_FOM_magn     mFOM;
 } IMU_engn_sensor;
 
-// define IMU estimate data structure
+// estimate data structure
 typedef struct {
   float                 q_org[4];
   float                 q[4];
@@ -164,24 +161,24 @@ int IMU_engn_getState   (uint16_t id, IMU_engn_system, IMU_union_state*);
 int IMU_engn_getSensor  (uint16_t id, IMU_engn_sensor**);
 int IMU_engn_setCalbFnc (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
 
-// enable/disable controls for queue
+// enable/disable queue controls
 #if IMU_ENGN_QUEUE_SIZE
 int IMU_engn_start      ();
 int IMU_engn_stop       ();
 #endif
 
-// functions to read/write config structures
+// read/write config fimctopms
 int IMU_engn_load       (uint16_t id, const char* filename, IMU_engn_system);
 int IMU_engn_save       (uint16_t id, const char* filename, IMU_engn_system);
 
-// 
+// system control functions
 int IMU_engn_reset      (uint16_t id);
 int IMU_engn_setRef     (uint16_t id, float* ref);
 int IMU_engn_setRefCur  (uint16_t id);
 int IMU_engn_calbStart  (uint16_t id, IMU_calb_mode);
 int IMU_engn_calbSave   (uint16_t id);
 
-// 
+// state update/estimation functions
 int IMU_engn_datum      (uint16_t id, IMU_datum*);
 int IMU_engn_data3      (uint16_t id, IMU_data3*);
 int IMU_engn_getEstm    (uint16_t id, float t, IMU_engn_estm*);

@@ -31,7 +31,7 @@ extern "C" {
 
 
 /******************************************************************************
-* used to create mutex for managing critical sections 
+* create mutex (for managing critical sections)
 ******************************************************************************/
 
 inline int IMU_thrd_mutex_init(
@@ -50,7 +50,7 @@ inline int IMU_thrd_mutex_init(
 
 
 /******************************************************************************
-* used prior to entering critical section 
+* critical section lock
 ******************************************************************************/
 
 inline void IMU_thrd_mutex_lock(
@@ -67,7 +67,7 @@ inline void IMU_thrd_mutex_lock(
 
 
 /******************************************************************************
-* utility function - used prior to leaving critical section
+* critical section unlock
 ******************************************************************************/
 
 inline void IMU_thrd_mutex_unlock(

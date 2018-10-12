@@ -1,5 +1,5 @@
 /*
- * This file is part of quaternion-based displayIMU C/C/C++/QT code base
+ * This file is part of quaternion-based displayIMU C/C++/QT code base
  * (https://github.com/ssymeonidis/displayIMU.git)
  * Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
  * Time (SMRT) Processing Solutions
@@ -17,22 +17,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _IMU_MATH_H
-#define _IMU_MATH_H
+#ifndef _CONFIG_GUI_H
+#define _CONFIG_GUI_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+// include statements
+#include <stdio.h>
 
-// modify/convert quaternion functions
-float* IMU_math_quatToUp     (float* q, float* v);
-float* IMU_math_quatToFrwd   (float* q, float* v);
-float* IMU_math_upFrwdToQuat (float* u, float* f, float* q);
-float* IMU_math_quatToEuler  (float* q, float* E);
-float* IMU_math_applyRef     (float* q, float* ref, float* q_out);
 
-#ifdef __cplusplus
-}
-#endif
+// define the overarching class (started with qtcreator codegen)
+class configGUI {
+
+public:
+  // constructor
+  configGUI(const char* filename);
+
+  // user accessible variables
+  float      gyro;
+  float      accl;
+  float      magn;
+  float      imu;
+  int        port;
+
+private:
+  // parse json line
+  int        getLine(FILE* file, char **field, char **args);
+};
 
 #endif

@@ -28,12 +28,17 @@ extern "C" {
 #include <stdint.h>
 #include "IMU_type.h"
 
+// define status codes
+#define IMU_RECT_FNC_DISABLED    1
+
 // define error codes
 #define IMU_RECT_INST_OVERFLOW  -1
 #define IMU_RECT_BAD_INST       -2
+#define IMU_RECT_INVALID_SENSOR -3
+#define IMU_RECT_RECTIFY_ERROR  -4
 
 
-// define the calibration structure (values tuned for each unit)
+// configuration structure definition
 typedef struct {
   uint8_t        enable;          // enable IMU sensor correction
   float          gBias[3];        // gyroscope biases
@@ -49,11 +54,11 @@ int IMU_rect_init      (uint16_t *id, IMU_rect_config **config);
 int IMU_rect_getConfig  (uint16_t id, IMU_rect_config **config);
 
 // raw data correction functions
-int IMU_rect_datum (uint16_t id, IMU_datum*, IMU_TYPE*);
-int IMU_rect_data3 (uint16_t id, IMU_data3*);
-int IMU_rect_gyro  (uint16_t id, IMU_TYPE *g_raw, IMU_TYPE *g);
-int IMU_rect_accl  (uint16_t id, IMU_TYPE *a_raw, IMU_TYPE *a);
-int IMU_rect_magn  (uint16_t id, IMU_TYPE *m_raw, IMU_TYPE *m);
+int IMU_rect_datum  (uint16_t id, IMU_datum*, IMU_TYPE*);
+int IMU_rect_data3  (uint16_t id, IMU_data3*);
+int IMU_rect_gyro   (uint16_t id, IMU_TYPE *g_raw, IMU_TYPE *g);
+int IMU_rect_accl   (uint16_t id, IMU_TYPE *a_raw, IMU_TYPE *a);
+int IMU_rect_magn   (uint16_t id, IMU_TYPE *m_raw, IMU_TYPE *m);
 
 
 #ifdef __cplusplus

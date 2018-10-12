@@ -17,7 +17,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// definitions for increased readability
+// definitions (increase readability)
 #define NULL 0
 
 // include statements 
@@ -33,69 +33,70 @@ uint16_t         numInstPnts = 0;
 int IMU_pnts_newGyro (uint16_t id, float t, float *g, IMU_pnts_entry**);
 int IMU_pnts_newAccl (uint16_t id, float t, float *a, IMU_pnts_entry**);
 int IMU_pnts_newMagn (uint16_t id, float t, float *m, IMU_pnts_entry**);
+inline void break_stable_state(uint16_t id);
 
 
 /******************************************************************************
-* utility function - break stable
-******************************************************************************/
-
-inline void break_stable_state(
-  uint16_t                id)
-{
-  state[id].curPnts++;
-  state[id].index++;
-  if (state[id].index >= IMU_PNTS_SIZE)
-    state[id].index         = 0;
-  if (state[id].curPnts != 0 && state[id].curPnts >= state[id].numPnts)
-    state[id].state         = IMU_pnts_enum_stop;
-  else
-    state[id].state         = IMU_pnts_enum_reset; 
-}
-
-
-/******************************************************************************
-* function to create new instance
+* initialize new instance (constructor) 
 ******************************************************************************/
 
 int IMU_pnts_init(
   uint16_t                *id, 
   IMU_pnts_config         **pntr)
 {
-  // check for device count overflow
+  // check device count overflow
   if (numInstPnts >= IMU_MAX_INST)
     return IMU_PNTS_INST_OVERFLOW;
 
-  // return inst handle and config struct
+  // pass inst handle and config pointer
   *id   = numInstPnts; 
   *pntr = &config[*id];
   numInstPnts++;
   
   // initialize instance state  
-  state[*id].numPnts             = 0;
-  state[*id].curPnts             = 0;
-  state[*id].state               = IMU_pnts_enum_stop;
-  state[*id].index               = 0; 
-  state[*id].aClock              = 0;
-  state[*id].mClock              = 0;
+  state[*id].numPnts      = 0;
+  state[*id].curPnts      = 0;
+  state[*id].state        = IMU_pnts_enum_stop;
+  state[*id].index        = 0; 
+  state[*id].aClock       = 0;
+  state[*id].mClock       = 0;
   
-  // exit function
+  // exit function (no errors)
   return 0;
 }
 
 
 /******************************************************************************
-* function to return instance state pointer
+* return config structure
+******************************************************************************/
+
+int IMU_pnts_getConfig( 
+  uint16_t                id,  
+  IMU_pnts_config         **pntr)
+{
+  // check out-of-bounds condition
+  if (id >= numInstPnts)
+    return IMU_PNTS_BAD_INST; 
+
+  // pass state and exit (no errors)
+  *pntr = &config[id];
+  return 0;
+}
+
+
+/******************************************************************************
+* return state structure
 ******************************************************************************/
 
 int IMU_pnts_getState( 
-  uint16_t               id,  
-  IMU_pnts_state         **pntr)
+  uint16_t                id,  
+  IMU_pnts_state          **pntr)
 {
-  // check for out-of-bounds condition
-  if (id > numInstPnts - 1)
+  // check out-of-bounds condition
+  if (id >= numInstPnts)
     return IMU_PNTS_BAD_INST; 
 
-  // return state
+  // pass state and exit (no errors)
   *pntr = &state[id];
   return 0;
 }
@@ -105,24 +106,26 @@ int IMU_pnts_getState(
 * function to return instance last entry pointer
 ******************************************************************************/
 
+#if IMU_CALIB_TABLE_SIZE > 1
 int IMU_pnts_getEntry(
   uint16_t                id, 
   uint16_t                index,
   IMU_pnts_entry          **pntr)
 {
-  // check for out-of-bounds condition
-  if (id > numInstPnts - 1)
+  // check out-of-bounds condition
+  if (id >= numInstPnts)
     return IMU_PNTS_BAD_INST;
-  if (state[id].numPnts < 1)
-    return IMU_PNTS_EMPTY_TABLE;
 
-  // return state
+  // pass pointer to table entry
   short i = index - state[id].index - 1;
   if (i < 0)
     i += IMU_PNTS_SIZE;
   *pntr = &table[id][i];
+
+  // exit function (no errors)
   return 0;
 }
+#endif
 
 
 /******************************************************************************
@@ -132,16 +135,18 @@ int IMU_pnts_getEntry(
 int IMU_pnts_reset(
   uint16_t                id)
 {
-  // check for out-of-bounds condition
-  if (id > numInstPnts - 1)
+  // check out-of-bounds condition
+  if (id >= numInstPnts)
     return IMU_PNTS_BAD_INST;
 
-  // ininitialize inst state 
+  // ininitialize instance state 
   state[id].curPnts             = 0;
   state[id].state               = IMU_pnts_enum_reset;
   state[id].index               = 0; 
   state[id].aClock              = 0;
   state[id].mClock              = 0;
+
+  // exit function (no errors)
   return 0;
 }
 
@@ -154,8 +159,8 @@ int IMU_pnts_start(
   uint16_t                id,
   uint16_t                numPnts)
 {
-  // check for out-of-bounds condition
-  if (id > numInstPnts - 1)
+  // check out-of-bounds condition
+  if (id >= numInstPnts)
     return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state 
@@ -165,6 +170,8 @@ int IMU_pnts_start(
   state[id].index               = 0; 
   state[id].aClock              = 0;
   state[id].mClock              = 0;
+
+  // exit function (no errors)
   return 0;
 }
 
@@ -176,14 +183,16 @@ int IMU_pnts_start(
 int IMU_pnts_stop(
   uint16_t                id)
 {
-  // check for out-of-bounds condition
-  if (id > numInstPnts - 1)
+  // check out-of-bounds condition
+  if (id >= numInstPnts)
     return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state
   state[id].state         = IMU_pnts_enum_stop;
   state[id].aClock        = 0;
   state[id].mClock        = 0;
+
+  // exit function (no errors)
   return 0;
 }
 
@@ -204,6 +213,8 @@ int IMU_pnts_datum(
     return IMU_pnts_newAccl(id, datum->t, datum->val, pntr);
   else if (datum->type == IMU_magn)
     return IMU_pnts_newMagn(id, datum->t, datum->val, pntr);
+
+  // exit function (no errors)
   return 0;
 }
 
@@ -242,9 +253,9 @@ int IMU_pnts_newGyro(
   IMU_pnts_entry          **pntr)
 {
   // initialize entry pointer to NULL
-  *pntr                 = NULL;
+  *pntr                   = NULL;
 
-  // check for stop condition
+  // check stop condition
   if (state[id].state == IMU_pnts_enum_stop)
     return state[id].curPnts;
 
@@ -419,4 +430,22 @@ int IMU_pnts_newMagn(
 
   // exit function
   return state[id].curPnts;
+}
+
+
+/******************************************************************************
+* utility function - break stable
+******************************************************************************/
+
+inline void break_stable_state(
+  uint16_t                id)
+{
+  state[id].curPnts++;
+  state[id].index++;
+  if (state[id].index >= IMU_PNTS_SIZE)
+    state[id].index         = 0;
+  if (state[id].curPnts != 0 && state[id].curPnts >= state[id].numPnts)
+    state[id].state         = IMU_pnts_enum_stop;
+  else
+    state[id].state         = IMU_pnts_enum_reset; 
 }

@@ -42,7 +42,9 @@ static GLfloat gridColor[4] = {1.0, 0.0, 1.0, 1.0};
 * constructor for the OpenGL sensor/IMU display widget
 ******************************************************************************/
 
-GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
+GLWidget::GLWidget(QWidget *parent) : 
+  QGLWidget(QGLFormat(QGL::SampleBuffers), 
+  parent)
 {
   // initialize internal display variables
   xRot       = 120;
@@ -59,6 +61,9 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), p
   scaleGyro  = 1; 
   
   // get pointer to the sensor data
+  IMU_union_config configIMU;
+  IMU_engn_getConfig(0, IMU_engn_self, &configIMU);
+  configIMU.configEngn->isSensorStruct = 1;
   IMU_engn_getSensor(0, &sensor);
 
   // create timer

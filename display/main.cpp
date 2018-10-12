@@ -20,31 +20,36 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <pthread.h>
-#include "windowGUI.h"
 #include "dataIF.h"
+#include "windowGUI.h"
+#include "configGUI.h"
 
-// define internal constants
-const int       port_no = 5555;
+
+/******************************************************************************
+* main function - everything starts here
+******************************************************************************/
 
 int main(int argc, char *argv[])
 {
-  // initialize the IMU and its data parser
+  // define local variables
   int           dataIF_thread_id;
   pthread_t     dataIF_thread;
+
+  // initialize the IMU and its data parser
   dataIF_init(IMU_engn_rect_core);
 
   // create the display
-  QApplication  app(argc, argv);
-  windowGUI     window;
-  if (argc > 2)
-    window.initIMU(argv[1], argv[2]);
+  QApplication app(argc, argv);
+  configGUI config("../config/displayIMU.json");
+  windowGUI window;
+  window.initIMU(&config);
   window.show(); 
 
   // launch data parser and IMU interface (seperate threads)
-  if (argc < 4) 
-    dataIF_startUDP(port_no);
+  if (argc < 2) 
+    dataIF_startUDP(config.port);
   else
-    dataIF_startCSV(argv[3]);
+    dataIF_startCSV(argv[1]);
   pthread_create(&dataIF_thread, NULL, dataIF_run, &dataIF_thread_id);
 
   // start the main app

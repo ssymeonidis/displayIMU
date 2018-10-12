@@ -56,8 +56,7 @@ float* IMU_math_quatToFrwd(
 
 
 /******************************************************************************
-* utility function - get forward component from quaternion
-* (this function needs to be written)
+* utility function - get quaternion from forward and up vectors
 ******************************************************************************/
 
 float* IMU_math_upFrwdToQuat(
@@ -70,7 +69,7 @@ float* IMU_math_upFrwdToQuat(
   float f[3]            = {f_in[0] - n*u[0], 
                            f_in[1] - n*u[1], 
                            f_in[2] - n*u[2]};
-  n                     = sqrt(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]);
+  n                     = sqrtf(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]);
   f[0]                  = f[0] / n;
   f[1]                  = f[1] / n;
   f[2]                  = f[2] / n;
@@ -83,25 +82,25 @@ float* IMU_math_upFrwdToQuat(
   // calculate the quaternion
   n                     = f[0]+r[1]+u[2];
   if (n > 0) {
-    n                   = sqrt(1.0+n)*2;
+    n                   = sqrtf(1.0+n)*2;
     q[0]                = 0.25*n;
     q[1]                = (u[1]-r[2])/n;
     q[2]                = (f[2]-u[0])/n;
     q[3]                = (r[0]-f[1])/n;
   } else if (f[0] > r[1] && f[0] > u[2]) {
-    n                   = sqrt(1.0+f[0]-r[1]-u[2])*2;
+    n                   = sqrtf(1.0+f[0]-r[1]-u[2])*2;
     q[0]                = (u[1]-r[2])/n;
     q[1]                = 0.25*n;
     q[2]                = (f[1]+r[0])/n;
     q[3]                = (f[2]+u[0])/n;
   } else if (r[1] > u[2]) {
-    n                   = sqrt(1.0+r[1]-f[0]-u[2])*2;
+    n                   = sqrtf(1.0+r[1]-f[0]-u[2])*2;
     q[0]                = (f[2]-u[0])/n;
     q[1]                = (f[1]+r[0])/n;
     q[2]                = 0.25*n;
     q[3]                = (r[2]+u[1])/n;
   } else {
-    n                   = sqrt(1.0+u[2]-f[0]-r[1])*2;
+    n                   = sqrtf(1.0+u[2]-f[0]-r[1])*2;
     q[0]                = (r[0]-f[1])/n;
     q[1]                = (f[2]+u[0])/n;
     q[2]                = (r[2]+u[1])/n;
@@ -113,7 +112,7 @@ float* IMU_math_upFrwdToQuat(
 
 
 /******************************************************************************
-* calculate euler angle
+* convert quaternion to Euler angle
 ******************************************************************************/
 
 float* IMU_math_quatToEuler(
@@ -121,15 +120,15 @@ float* IMU_math_quatToEuler(
   float                 *E)
 {
   float Q[4] = {q[0]*q[0], q[1]*q[1], q[2]*q[2], q[3]*q[3]};
-  E[0] = 180 * atan2(2*(q[1]*q[3]+q[3]*q[0]),  Q[1]-Q[2]-Q[3]+Q[0]) / M_PI;
-  E[1] = 180 * asin(-2*(q[1]*q[3]-q[2]*q[0])) / M_PI;
-  E[2] = 180 * atan2(2*(q[2]*q[3]+q[1]*q[0]), -Q[1]-Q[2]+Q[3]+Q[0]) / M_PI;
+  E[0] = 180 * atan2f(2*(q[1]*q[3]+q[3]*q[0]),  Q[1]-Q[2]-Q[3]+Q[0]) / M_PI;
+  E[1] = 180 * asinf(-2*(q[1]*q[3]-q[2]*q[0])) / M_PI;
+  E[2] = 180 * atan2f(2*(q[2]*q[3]+q[1]*q[0]), -Q[1]-Q[2]+Q[3]+Q[0]) / M_PI;
   return E;      // allows function to be used as function argument
 }
 
 
 /******************************************************************************
-* apply reference quaterion to current state
+* apply reference quaterion to current orientation
 ******************************************************************************/
 
 float* IMU_math_applyRef(

@@ -44,7 +44,7 @@ extern "C" {
 #define IMU_CORE_FAILED_MUTEX   -3
 
 
-// define the configuration structure (values tuned for a part)
+// configuration structure definition
 typedef struct {
   unsigned char        enable;          // enable IMU core capability
   unsigned char        isGyro;          // enable gyroscope data
@@ -67,7 +67,7 @@ typedef struct {
   float                moveAlpha;       // acceleration estimate alpha
 } IMU_core_config;
 
-// define internal state struct (captures internal IMU state)
+// subsystem state structure definition
 typedef struct {
   float                t;              // last datum time
   float                tMove ;         // last "unstable" time
@@ -87,7 +87,7 @@ int IMU_core_init     (uint16_t *id, IMU_core_config **config);
 int IMU_core_getConfig (uint16_t id, IMU_core_config **config);
 int IMU_core_getState  (uint16_t id, IMU_core_state  **state);
 
-// general update/command operation functions
+// state update functions
 int IMU_core_reset     (uint16_t id);
 int IMU_core_datum     (uint16_t id, IMU_datum*, IMU_core_FOM*);
 int IMU_core_data3     (uint16_t id, IMU_data3*, IMU_core_FOM*);
