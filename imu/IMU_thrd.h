@@ -37,6 +37,8 @@ extern "C" {
 inline int IMU_thrd_mutex_init(
   #if IMU_USE_PTHREAD
   pthread_mutex_t       *lock)
+  #else
+  )
   #endif
 {
   #if IMU_USE_PTHREAD
@@ -54,6 +56,8 @@ inline int IMU_thrd_mutex_init(
 inline void IMU_thrd_mutex_lock(
   #if IMU_USE_PTHREAD
   pthread_mutex_t       *lock)
+  #else
+  )
   #endif
 {
   #if IMU_USE_PTHREAD
@@ -69,6 +73,8 @@ inline void IMU_thrd_mutex_lock(
 inline void IMU_thrd_mutex_unlock(
   #if IMU_USE_PTHREAD
   pthread_mutex_t       *lock)
+  #else
+  )
   #endif
 {
   #if IMU_USE_PTHREAD

@@ -27,9 +27,11 @@
 // include statements 
 #if IMU_USE_PTHREAD
 #include <pthread.h>
+#include <unistd.h>
 #endif
 #include <string.h>
 #include "IMU_file.h"
+#include "IMU_thrd.h"
 #include "IMU_math.h"
 #include "IMU_engn.h"
 
@@ -46,21 +48,22 @@ IMU_engn_queue    engnQueue;
 useconds_t        engnSleepTime = 100;
 pthread_mutex_t   engnLock;
 int               engnThreadID;
-pthread           engnThread;
+pthread_t         engnThread;
 uint8_t           engnExitThread;
 uint8_t           engnIsExit;
 #endif
 
 // internally defined functions
-int IMU_engn_calbFnc  (uint16_t id, IMU_calb_FOM*);
-int IMU_engn_process  (uint16_t id, IMU_datum*);
-int IMU_copy_datumRaw (uint16_t id, IMU_datum*);
-int IMU_copy_data3Raw (uint16_t id, IMU_data3*);
-int IMU_copy_results1 (uint16_t id, IMU_datum*, IMU_core_FOM*);
-int IMU_copy_results3 (uint16_t id, IMU_data3*, IMU_core_FOM*);
+int IMU_engn_calbFnc   (uint16_t id, IMU_calb_FOM*);
+int IMU_engn_process   (uint16_t id, IMU_datum*);
+int IMU_copy_datumRaw  (uint16_t id, IMU_datum*);
+int IMU_copy_data3Raw  (uint16_t id, IMU_data3*);
+int IMU_copy_results1  (uint16_t id, IMU_datum*, IMU_core_FOM*);
+int IMU_copy_results3  (uint16_t id, IMU_data3*, IMU_core_FOM*);
+int IMU_engn_typeCheck (uint16_t id, IMU_engn_system);
 #if IMU_ENGN_QUEUE_SIZE
-int IMU_engn_addQueue (uint16_t id, IMU_datum*);
-void* IMU_engn_run    (void*);
+int IMU_engn_addQueue  (uint16_t id, IMU_datum*);
+void* IMU_engn_run     (void*);
 #endif
 
 
@@ -139,42 +142,6 @@ int IMU_engn_init(
 
 
 /******************************************************************************
-* function to return config structure
-******************************************************************************/
-
-int IMU_engn_getConfig( 
-  uint16_t              id,  
-  IMU_engn_config       **pntr)
-{
-  // check out-of-bounds condition
-  if (id >= numInstEngn)
-    return IMU_ENGN_BAD_INST; 
-
-  // pass config structure and exit
-  *pntr = &config[id];
-  return 0;
-}
-
-
-/******************************************************************************
-* function to return state structure
-******************************************************************************/
-
-int IMU_engn_getState( 
-  uint16_t		id,  
-  IMU_engn_state        **pntr)
-{
-  // check out-of-bounds condition
-  if (id >= numInstEngn)
-    return IMU_ENGN_BAD_INST; 
-
-  // pass state structure and exit
-  *pntr = &state[id];
-  return 0;
-}
-
-
-/******************************************************************************
 * function to return subsystem ID
 ******************************************************************************/
 
@@ -185,36 +152,97 @@ int IMU_engn_getSysID(
 {
   // check out-of-bounds condition
   if (id >= numInstEngn)
-    return IMU_ENGN_BAD_INST; 
+    return IMU_ENGN_BAD_INST;
+  if (!IMU_engn_typeCheck(id, system))
+    return IMU_ENGN_UNINITIALIZE_SYS;    
 
   // pass subsystem handle (id)
-  if        (system == IMU_engn_core) {
+  if      (system == IMU_engn_core)
     *sysID              = state[id].idCore;
-  } else if (system == IMU_engn_rect) {
-    if (config[id].isRect)
-      *sysID            = state[id].idRect;
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_pnts) {
-    if (config[id].isPnts)
-      *sysID            = state[id].idPnts;
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_auto) {
-    if (config[id].isAuto)
-      *sysID            = state[id].idAuto;
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_calb) {
-    if (config[id].isCalb)
-      *sysID            = state[id].idCalb;
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else {
+  else if (system == IMU_engn_rect) 
+    *sysID              = state[id].idRect;
+  else if (system == IMU_engn_pnts) 
+    *sysID              = state[id].idPnts;
+  else if (system == IMU_engn_auto) 
+    *sysID              = state[id].idAuto;
+  else if (system == IMU_engn_calb)
+    *sysID              = state[id].idCalb;
+  else
     return IMU_ENGN_NONEXISTANT_SYSID;
-  }
   
   // exit (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* function to return config structure
+******************************************************************************/
+
+int IMU_engn_getConfig( 
+  uint16_t              id,  
+  IMU_engn_system       system, 
+  IMU_union_config      *pntr)
+{
+  // check out-of-bounds condition
+  if (id >= numInstEngn)
+    return IMU_ENGN_BAD_INST; 
+  if (!IMU_engn_typeCheck(id, system))
+    return IMU_ENGN_UNINITIALIZE_SYS;    
+
+  // pass subsystem config structure
+  if      (system == IMU_engn_core) 
+    pntr->configCore    = state[id].configCore;
+  else if (system == IMU_engn_rect) 
+    pntr->configRect    = state[id].configRect;
+  else if (system == IMU_engn_pnts)
+    pntr->configPnts    = state[id].configPnts;
+  else if (system == IMU_engn_auto)
+    pntr->configAuto    = state[id].configAuto;
+  else if (system == IMU_engn_calb)
+    pntr->configCalb    = state[id].configCalb;
+  else if (system == IMU_engn_self) 
+    pntr->configEngn    = &config[id];
+  else
+    return IMU_ENGN_NONEXISTANT_SYSID;
+  
+  // exit (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* function to return state structure
+******************************************************************************/
+
+int IMU_engn_getState( 
+  uint16_t		id,  
+  IMU_engn_system       system, 
+  IMU_union_state       *pntr)
+{
+  // check out-of-bounds condition
+  if (id >= numInstEngn)
+    return IMU_ENGN_BAD_INST;
+  if (!IMU_engn_typeCheck(id, system))
+    return IMU_ENGN_UNINITIALIZE_SYS;    
+
+  // pass subsystem state structure
+  if      (system == IMU_engn_core) 
+    IMU_core_getState(state[id].idCore, &pntr->stateCore);
+  else if (system == IMU_engn_rect)
+    return IMU_ENGN_NONEXISTANT_STRUCT;
+  else if (system == IMU_engn_pnts)
+    IMU_pnts_getState(state[id].idPnts, &pntr->statePnts);
+  else if (system == IMU_engn_auto)
+    IMU_auto_getState(state[id].idAuto, &pntr->stateAuto);
+  else if (system == IMU_engn_calb)
+    return IMU_ENGN_NONEXISTANT_STRUCT;
+  else if (system == IMU_engn_self)
+    pntr->stateEngn     = &state[id];
+  else
+    return IMU_ENGN_NONEXISTANT_SYSID;
+
+  // pass state structure and exit
   return 0;
 }
 
@@ -307,35 +335,24 @@ int IMU_engn_load(
   // check out-of-bounds condition
   if (id >= numInstEngn)
     return IMU_ENGN_BAD_INST;
+  if (!IMU_engn_typeCheck(id, system))
+    return IMU_ENGN_UNINITIALIZE_SYS;    
     
   // load respective json file
-  if        (system == IMU_engn_core) {
+  if      (system == IMU_engn_core)
     return   IMU_file_coreLoad(filename, state[id].configCore);
-  } else if (system == IMU_engn_rect) {
-    if   (config[id].isRect) 
-      return IMU_file_rectLoad(filename, state[id].configRect);
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_pnts) {
-    if   (config[id].isPnts) 
-      return IMU_file_pntsLoad(filename, state[id].configPnts);
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_auto) {
-    if   (config[id].isAuto) 
-      return IMU_file_autoLoad(filename, state[id].configAuto);
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_calb) {
-    if   (config[id].isCalb) 
-      return IMU_file_calbLoad(filename, state[id].configCalb);
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_self) {
+  else if (system == IMU_engn_rect)
+    return IMU_file_rectLoad(filename, state[id].configRect);
+  else if (system == IMU_engn_pnts)
+    return IMU_file_pntsLoad(filename, state[id].configPnts);
+  else if (system == IMU_engn_auto)
+    return IMU_file_autoLoad(filename, state[id].configAuto);
+  else if (system == IMU_engn_calb) 
     return IMU_file_calbLoad(filename, state[id].configCalb);
-  } else {
+  else if (system == IMU_engn_self) 
+    return IMU_file_engnLoad(filename, &config[id]);
+  else
     return IMU_ENGN_NONEXISTANT_SYSID;
-  }
 }
 
 
@@ -351,33 +368,24 @@ int IMU_engn_save(
   // check out-of-bounds condition
   if (id >= numInstEngn)
     return IMU_ENGN_BAD_INST;
+  if (!IMU_engn_typeCheck(id, system))
+    return IMU_ENGN_UNINITIALIZE_SYS;    
     
   // load respective json file
-  if        (system == IMU_engn_core) {
+  if      (system == IMU_engn_core)
     return   IMU_file_coreSave(filename, state[id].configCore);
-  } else if (system == IMU_engn_rect) {
-    if   (config[id].isRect) 
-      return IMU_file_rectSave(filename, state[id].configRect);
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_pnts) {
-    if   (config[id].isPnts) 
-      return IMU_file_pntsSave(filename, state[id].configPnts);
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_auto) {
-    if   (config[id].isAuto) 
-      return IMU_file_autoSave(filename, state[id].configAuto);
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else if (system == IMU_engn_calb) {
-    if   (config[id].isCalb) 
-      return IMU_ENGN_NONEXISTANT_CONFIG;
-    else
-      return IMU_ENGN_UNINITIALIZE_SYS;
-  } else {
+  else if (system == IMU_engn_rect)
+    return IMU_file_rectSave(filename, state[id].configRect);
+  else if (system == IMU_engn_pnts)
+    return IMU_file_pntsSave(filename, state[id].configPnts);
+  else if (system == IMU_engn_auto)
+    return IMU_file_autoSave(filename, state[id].configAuto);
+  else if (system == IMU_engn_calb)
+    return IMU_file_calbSave(filename, state[id].configCalb);
+  else if (system == IMU_engn_self) 
+    return IMU_file_engnSave(filename, &config[id]);
+  else
     return IMU_ENGN_NONEXISTANT_SYSID;
-  }
 }
 
 
@@ -600,8 +608,10 @@ int IMU_engn_getEstm(
   int status = max(0,IMU_core_estmQuat(state[id].idCore, t, estm->q_org));
   if (config[id].isEstmAccl)
     status  += max(0,IMU_core_estmAccl(state[id].idCore, t, estm->move));
-  IMU_math_applyRef(estm->q_org, state[id].q_ref, estm->q);
-  IMU_math_quatToEuler(estm->q, estm->ang);
+  if (!config[id].isQuatOnly) {
+    IMU_math_applyRef(estm->q_org, state[id].q_ref, estm->q);
+    IMU_math_quatToEuler(estm->q, estm->ang);
+  }
   
   // exit function
   if (status < 0)
@@ -614,7 +624,7 @@ int IMU_engn_getEstm(
 * function to estimate orientation and acceleration
 ******************************************************************************/
 
-int *IMU_engn_calbFnc(
+int IMU_engn_calbFnc(
   uint16_t              id, 
   IMU_calb_FOM          *FOM)
 {
@@ -624,12 +634,13 @@ int *IMU_engn_calbFnc(
   if (FOM == NULL)
     return IMU_ENGN_BAD_PNTR;
   
-  // verify FOM is above threshold and save
-  if (IMU_calb_FOM->calbFOM > config[id].threshFOM)
+  // verify FOM is above threshold and save+
+  if (FOM->calbFOM > config[id].threshFOM) {
     IMU_engn_calbSave(id);
     return IMU_ENGN_CALBFNC_SAVED;
-  else
-    return IMU_ENGN_CALBFNC_REJECTED
+  } else {
+    return IMU_ENGN_CALBFNC_REJECTED;
+  }
 }
 
 
@@ -732,18 +743,18 @@ int IMU_engn_process(
 
   // process datum by subsystems
   if (config[id].isRect)
-    status += max(0,IMU_rect_datum(state[id].idRect, &datum, datum->val));
+    status += max(0,IMU_rect_datum(state[id].idRect, datum, datum->val));
   if (config[id].isPnts)
-    status += max(0,IMU_pnts_datum(state[id].idPnts, &datum, &pnt));
-  status   += max(0,IMU_core_datum(state[id].idCore, &datum, FOM));
+    status += max(0,IMU_pnts_datum(state[id].idPnts, datum, &pnt));
+  status   += max(0,IMU_core_datum(state[id].idCore, datum, FOM));
   if (config[id].isAuto)
-    status += max(0,IMU_auto_process(state[id].idAuto, FOM, 1));
+    status += max(0,IMU_auto_update(state[id].idAuto, FOM, 1));
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
   // save data to sensor structure
   if (config[id].isSensorStruct)
-    status = IMU_copy_results1(id, datum, pnt, FOM);
+    status = IMU_copy_results1(id, datum, FOM);
   if (status < 0)
     return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
     
@@ -761,11 +772,11 @@ int IMU_copy_datumRaw(
   IMU_datum             *datum)
 {
   if      (datum->type == IMU_gyro) 
-    memcpy(sensor[id].gRaw, datum->val, sizeof(data.gRaw));
+    memcpy(sensor[id].gRaw, datum->val, sizeof(sensor[id].gRaw));
   else if (datum->type == IMU_accl)
-    memcpy(sensor[id].aRaw, datum->val, sizeof(data.aRaw));
+    memcpy(sensor[id].aRaw, datum->val, sizeof(sensor[id].aRaw));
   else if (datum->type == IMU_magn)
-    memcpy(sensor[id].mRaw, datum->val, sizeof(data.mRaw));
+    memcpy(sensor[id].mRaw, datum->val, sizeof(sensor[id].mRaw));
   else
     return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   return 0;
@@ -780,9 +791,9 @@ int IMU_copy_data3Raw(
   uint16_t              id, 
   IMU_data3             *data3)
 {
-  memcpy(sensor[id].gRaw, datum->g, sizeof(data.gRaw));
-  memcpy(sensor[id].aRaw, datum->a, sizeof(data.aRaw));
-  memcpy(sensor[id].mRaw, datum->m, sizeof(data.mRaw));
+  memcpy(sensor[id].gRaw, data3->g, sizeof(sensor[id].gRaw));
+  memcpy(sensor[id].aRaw, data3->a, sizeof(sensor[id].aRaw));
+  memcpy(sensor[id].mRaw, data3->m, sizeof(sensor[id].mRaw));
   return 0;
 }
 
@@ -797,21 +808,21 @@ int IMU_copy_results1(
   IMU_core_FOM          *FOM)
 {
   if        (datum->type == IMU_gyro) {
-    memcpy(sensor[id].gCor, datum->val, sizeof(data.gCor));
+    memcpy(sensor[id].gCor, datum->val, sizeof(sensor[id].gCor));
     if (FOM != NULL && FOM->isValid)
-      memcpy(sensor[id].gFOM, FOM->FOM.gyro, sizeof(IMU_core_FOM_gyro));
+      memcpy(&sensor[id].gFOM, &FOM->FOM.gyro, sizeof(IMU_core_FOM_gyro));
     else
       sensor[id].gFOM = (IMU_core_FOM_gyro){0};
   } else if (datum->type == IMU_accl) {
-    memcpy(sensor[id].aCor, datum->val, sizeof(data.aCor));
+    memcpy(sensor[id].aCor, datum->val, sizeof(sensor[id].aCor));
     if (FOM != NULL && FOM->isValid)
-      memcpy(sensor[id].aFOM, FOM->FOM.accl, sizeof(IMU_core_FOM_accl));
+      memcpy(&sensor[id].aFOM, &FOM->FOM.accl, sizeof(IMU_core_FOM_accl));
     else
       sensor[id].aFOM = (IMU_core_FOM_accl){0};
   } else if (datum->type == IMU_magn) {
-    memcpy(sensor[id].mCor, datum->val, sizeof(data.mCor));
+    memcpy(sensor[id].mCor, datum->val, sizeof(sensor[id].mCor));
     if (FOM != NULL && FOM->isValid)
-      memcpy(sensor[id].gFOM, FOM->FOM.magn, sizeof(IMU_core_FOM_magn));
+      memcpy(&sensor[id].gFOM, &FOM->FOM.magn, sizeof(IMU_core_FOM_magn));
     else
       sensor[id].mFOM = (IMU_core_FOM_magn){0};
   } else {
@@ -830,20 +841,41 @@ int IMU_copy_results3(
   IMU_data3             *data3,
   IMU_core_FOM          *FOM)
 {
-  memcpy(sensor[id].gCor, datum->g, sizeof(data.gRaw));
-  memcpy(sensor[id].aCor, datum->a, sizeof(data.aRaw));
-  memcpy(sensor[id].mCor, datum->m, sizeof(data.mRaw));
+  memcpy(&sensor[id].gCor, &data3->g, sizeof(sensor[id].gCor));
+  memcpy(&sensor[id].aCor, &data3->a, sizeof(sensor[id].aCor));
+  memcpy(&sensor[id].mCor, &data3->m, sizeof(sensor[id].mCor));
   if (FOM != NULL && FOM[0].isValid)
-    memcpy(sensor[id].gFOM, FOM[0].FOM.gyro, sizeof(IMU_core_FOM_gyro));
+    memcpy(&sensor[id].gFOM, &FOM[0].FOM.gyro, sizeof(IMU_core_FOM_gyro));
   else
     sensor[id].gFOM = (IMU_core_FOM_gyro){0};
   if (FOM != NULL && FOM[1].isValid)
-    memcpy(sensor[id].aFOM, FOM[1].FOM.accl, sizeof(IMU_core_FOM_accl));
+    memcpy(&sensor[id].aFOM, &FOM[1].FOM.accl, sizeof(IMU_core_FOM_accl));
   else
     sensor[id].aFOM = (IMU_core_FOM_accl){0};
   if (FOM != NULL && FOM[2].isValid)
-    memcpy(sensor[id].gFOM, FOM[2].FOM.magn, sizeof(IMU_core_FOM_magn));
+    memcpy(&sensor[id].gFOM, &FOM[2].FOM.magn, sizeof(IMU_core_FOM_magn));
   else
     sensor[id].mFOM = (IMU_core_FOM_magn){0};
   return 0;
 }
+
+
+/******************************************************************************
+* internal function - verify subsystem is enabled
+******************************************************************************/
+
+int IMU_engn_typeCheck(
+  uint16_t              id, 
+  IMU_engn_system       system)
+{
+  if (system == IMU_engn_rect && !config[id].isRect)
+    return IMU_ENGN_UNINITIALIZE_SYS;
+  if (system == IMU_engn_pnts && !config[id].isPnts)
+    return IMU_ENGN_UNINITIALIZE_SYS;
+  if (system == IMU_engn_auto && !config[id].isAuto)
+    return IMU_ENGN_UNINITIALIZE_SYS;
+  if (system == IMU_engn_calb && !config[id].isCalb)
+    return IMU_ENGN_UNINITIALIZE_SYS;    
+  return 0;
+}
+

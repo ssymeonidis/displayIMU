@@ -72,8 +72,8 @@ int IMU_calb_getConfig (uint16_t id, IMU_calb_config**);
 int IMU_calb_setStruct (uint16_t id, IMU_rect_config*, IMU_core_config*);
 
 // system access function
-int IMU_calb_start     (uint16_t id, IMU_calb_mode);
 int IMU_calb_reset     (uint16_t id);
+int IMU_calb_start     (uint16_t id, IMU_calb_mode);
 int IMU_calb_status    (uint16_t id, IMU_calb_FOM**);
 int IMU_calb_save      (uint16_t id, IMU_rect_config*, IMU_core_config*);
 

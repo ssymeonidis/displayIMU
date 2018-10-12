@@ -22,10 +22,8 @@
 #include <QtOpenGL>
 #include <QTimer>
 #include <math.h>
-#include "glWidget.h"
 #include "windowGUI.h"
-#include "dataIF.h"
-#include "IMU_core.h"
+#include "glWidget.h"
 
 // internal constants
 static const float arrowSize      = 0.5;
@@ -60,9 +58,8 @@ GLWidget::GLWidget(QWidget *parent) : QGLWidget(QGLFormat(QGL::SampleBuffers), p
   scaleMagn  = 1;
   scaleGyro  = 1; 
   
-  // get pointer to sensor and imu data
-  dataIF_getPntr(&data);
-  imuIF_getPntr(&estm);
+  // get pointer to the sensor data
+  IMU_engn_getSensor(0, &sensor);
 
   // create timer
   refresh_timer = new QTimer(this);
@@ -133,25 +130,27 @@ void GLWidget::paintGL()
 
   // draw gyroscope state
   if (isGyro == true) 
-    drawVector(gyroColor, data->gRaw, scaleGyro);
+    drawVector(gyroColor, sensor->gRaw, scaleGyro);
 
   // draw accelerometer state
   if (isAccl == true) 
-    drawVector(acclColor, data->aRaw, scaleAccl);
+    drawVector(acclColor, sensor->aRaw, scaleAccl);
 
   // draw magnetometer state
   if (isMagn == true) 
-    drawVector(magnColor, data->mRaw, scaleMagn);
+    drawVector(magnColor, sensor->mRaw, scaleMagn);
 
   // draw imu state
   if (isIMU == true) {
+    IMU_engn_estm estm;
+    IMU_engn_getEstm(0, 0, &estm);
     glPushMatrix();
-    glRotatef(estm->ang[2], 1.0, 0.0, 0.0);
-    glRotatef(estm->ang[1], 0.0, 0.0, 1.0);
-    glRotatef(estm->ang[0], 0.0, 1.0, 0.0);
-    glTranslatef(estm->move[0]/scaleIMU,
-                 estm->move[2]/scaleIMU,
-                 estm->move[1]/scaleIMU);
+    glRotatef(estm.ang[2], 1.0, 0.0, 0.0);
+    glRotatef(estm.ang[1], 0.0, 0.0, 1.0);
+    glRotatef(estm.ang[0], 0.0, 1.0, 0.0);
+    glTranslatef(estm.move[0]/scaleIMU,
+                 estm.move[2]/scaleIMU,
+                 estm.move[1]/scaleIMU);
     GLfloat vector1[3]    = { 0.0,  1.0,  0.0};
     drawVector(gyroColor, vector1, 1.0);
     GLfloat vector2[3]    = {-0.0,  0.0,  1.0};
@@ -160,13 +159,6 @@ void GLWidget::paintGL()
     drawVector(magnColor, vector3, 1.0);
     glPopMatrix();
   }
-
-  // update debug params
-  /*deltaGrav->setText(QString::number(delta_G));
-  deltaNorm->setText(QString::number(delta_M));
-  deltaAng->setText(QString::number(delta_ang));
-  deltaAccl->setText(QString::number(delta_a));
-  deltaMag->setText(QString::number(delta_m));*/
 }
 
 

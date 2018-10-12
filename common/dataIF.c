@@ -22,50 +22,40 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/types.h> 
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include "IMU_file.h"
-#include "IMU_math.h"
 #include "dataIF.h"
 
 // define the data interface structures
-dataIF_ctrl              ctrl;
-dataIF_data              data;
+dataIF_config            config;
 dataIF_state             state;
 
 // define internal/external variables
-int                      data_socket;
-FILE*                    csv_file;
+int                      dataIF_socket;
+FILE*                    dataIF_file;
 
 // define internal/utility functions
 void dataIF_error(const char *msg);
 void dataIF_lineUPD(char* line);
 void dataIF_lineCSV(char* line);
-void dataIF_copyData3(IMU_data3 *data3);
-void dataIF_copyDatum(IMU_datum *datum, IMU_TYPE *val);
 
 
 /******************************************************************************
 * constructor for dataParse functions
 ******************************************************************************/
 
-void dataIF_init(
-  uint16_t               idRect, 
-  uint16_t               idCore, 
-  uint16_t               idPnts, 
-  uint16_t               idAuto)
+void dataIF_init(IMU_engn_type type)
 {
-  // initialize and get handles to all IMU functions
-  state.idRect           = idRect;
-  state.idCore           = idCore;
-  state.idPnts           = idPnts;
-  state.idAuto           = idAuto;
+  // initialize internal structures
   state.isFirstFrame     = 1;
-  ctrl.isRealtime        = 0;
-  ctrl.isExit            = 1;
+  state.isExit           = 1;
+  config.isRealtime      = 0;
+  
+  // intialize the IMU engine
+  IMU_engn_init(type, &state.imuID, &state.imuConfig);
 }
 
 
@@ -73,10 +63,10 @@ void dataIF_init(
 * get pointer to sensor structure
 ******************************************************************************/
 
-void dataIF_getPntr(
-  dataIF_data            **pntr)
+void dataIF_getConfig(
+  dataIF_config          **pntr)
 {
-  *pntr                  = &data;
+  *pntr                  = &config;
 }
 
 
@@ -88,23 +78,23 @@ void dataIF_startUDP(
   int                    portno)
 {
   // define internal variables
-  struct sockaddr_in     serv_addr;
+  struct sockaddr_in     addr;
   int                    status;
  
   // init IMU and data_stream state
   state.isCSV = 0;
 
   // open socket
-  data_socket = socket(AF_INET, SOCK_DGRAM, 0);
-  if (data_socket < 0) 
+  dataIF_socket = socket(AF_INET, SOCK_DGRAM, 0);
+  if (dataIF_socket < 0) 
     dataIF_error("ERROR opening socket");
 
   // bind port 
-  bzero((char *)&serv_addr, sizeof(serv_addr));
-  serv_addr.sin_family       = AF_INET;
-  serv_addr.sin_addr.s_addr  = INADDR_ANY;
-  serv_addr.sin_port         = htons(portno);
-  status = bind(data_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+  bzero((char *)&addr, sizeof(addr));
+  addr.sin_family        = AF_INET;
+  addr.sin_addr.s_addr   = INADDR_ANY;
+  addr.sin_port          = htons(portno);
+  status = bind(dataIF_socket, (struct sockaddr *)&addr, sizeof(addr));
   if (status < 0) 
     dataIF_error("ERROR on binding");
 }
@@ -121,8 +111,8 @@ void dataIF_startCSV(
   state.isCSV = 1;
 
   // fopen file  
-  csv_file    = fopen(filename, "r");
-  if (!csv_file)
+  dataIF_file = fopen(filename, "r");
+  if (!dataIF_file)
     dataIF_error("ERROR opening csv file"); 
 }
 
@@ -145,37 +135,26 @@ void dataIF_process()
     dataIF_lineCSV(line);
 
   // determine the datum type
-  sscanf(line, "%d, %f", &datum_type, &data.time);
+  sscanf(line, "%d", &datum_type);
 
   // process synced data (all three sensors)
   if (datum_type == 0) {
     IMU_data3    data3;
-    data3.t      = data.time;
-    data3.FOM    = state.FOM;
-    sscanf(line, "%*d, %*f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
-      &data.gRaw[0], &data.gRaw[1], &data.gRaw[2],
-      &data.aRaw[0], &data.aRaw[1], &data.aRaw[2],
-      &data.mRaw[0], &data.mRaw[1], &data.mRaw[2]);
-    IMU_rect_data3(state.idRect, &data3, data.gRaw, data.aRaw, data.mRaw);
-    IMU_pnts_data3(state.idPnts, &data3, &state.pnt);
-    IMU_core_data3(state.idCore, &data3);
-    IMU_auto_update(state.idAuto, data3.FOM, 3);
-    dataIF_copyData3(&data3);
+    sscanf(line, "%*d, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
+      &data3.t,
+      &data3.g[0], &data3.g[1], &data3.g[2], 
+      &data3.a[0], &data3.a[1], &data3.a[2],
+      &data3.m[0], &data3.m[1], &data3.m[2]);
+    IMU_engn_data3(0, &data3);
   }
 
   // process sensor datum (asynchrous feeds)
   else if (datum_type < 4) {
     IMU_datum    datum;
-    IMU_TYPE     val[3];
-    datum.type   = datum_type;
-    datum.t      = data.time;
-    datum.FOM    = state.FOM;
-    sscanf(line, "%*d, %*f, %f, %f, %f", &val[0], &val[1], &val[2]);
-    IMU_rect_datum(state.idRect, &datum, val);
-    IMU_pnts_datum(state.idPnts, &datum, &state.pnt);
-    IMU_core_datum(state.idCore, &datum);
-    IMU_auto_update(state.idAuto, state.FOM, 1);
-    dataIF_copyDatum(&datum, val);
+    sscanf(line, "%d, %f, %f, %f, %f", 
+      &datum.type, &datum.t,
+      &datum.val[0], &datum.val[1], &datum.val[2]);
+    IMU_engn_datum(0, &datum);
   }
 }
 
@@ -186,13 +165,13 @@ void dataIF_process()
 
 void dataIF_exit()
 {
-  ctrl.exitThread = 1;
-  while(!ctrl.isExit)
+  state.exitThread = 1;
+  while(!state.isExit)
     usleep(100); 
   if (!state.isCSV)
-    close(data_socket);
+    close(dataIF_socket);
   else
-    fclose(csv_file);
+    fclose(dataIF_file);
 }
 
 
@@ -200,15 +179,16 @@ void dataIF_exit()
 * "continous run" function handle for recreating a thread 
 ******************************************************************************/
 
-void* dataIF_run(void* id)
+void* dataIF_run(
+  void                   *id)
 {
   // main processing loop
-  ctrl.exitThread = 0;
-  ctrl.isExit     = 0;
-  while(!ctrl.exitThread) {
+  state.exitThread = 0;
+  state.isExit     = 0;
+  while(!state.exitThread) {
     dataIF_process();
   }
-  ctrl.isExit     = 1;
+  state.isExit     = 1;
   return 0;
 }
 
@@ -232,7 +212,7 @@ void dataIF_error(
 void dataIF_lineUPD(
   char                   *line)
 {
-  int rc = recv(data_socket, line, sizeof(line), 0);
+  int rc = recv(dataIF_socket, line, sizeof(line), 0);
   line[rc] = (char)0;
 }
 
@@ -252,11 +232,11 @@ void dataIF_lineCSV(
   char                   *results;
 
   // extracts one line (repeats when the file ends)
-  results = fgets(line, sizeof(line), csv_file);
+  results = fgets(line, sizeof(line), dataIF_file);
   if (results == NULL) {
-    fseek(csv_file, 0, SEEK_SET);
+    fseek(dataIF_file, 0, SEEK_SET);
     state.isFirstFrame = 1;
-    results = fgets(line, sizeof(line), csv_file);
+    results = fgets(line, sizeof(line), dataIF_file);
   } 
 
   // determine the datum type
@@ -264,7 +244,7 @@ void dataIF_lineCSV(
   sscanf(line, "%*d, %f", &sensor_time);
 
   // inject delay if running csv file
-  if (ctrl.isRealtime && !state.isFirstFrame) {
+  if (config.isRealtime && !state.isFirstFrame) {
     while (1) { 
       gettimeofday(&time, NULL);
       time_cur         = time.tv_sec * 1000000 + time.tv_usec;
@@ -283,39 +263,5 @@ void dataIF_lineCSV(
     state.timeInitSys  = time.tv_sec * 1000000 + time.tv_usec;
     state.timeInitSen  = sensor_time;
     state.isFirstFrame = 0;
-  }
-}
-
-
-/******************************************************************************
-* copies corrected and filtered data to internal structure
-******************************************************************************/
-
-void dataIF_copyData3(
-  IMU_data3              *data3)
-{
-  memcpy(data.gCor, data3->g, sizeof(data.gCor));
-  memcpy(data.aCor, data3->a, sizeof(data.aCor));
-  memcpy(data.mCor, data3->m, sizeof(data.mCor));
-}
-
-
-/******************************************************************************
-* copies corrected and filtered data to internal structure
-******************************************************************************/
-
-void dataIF_copyDatum(
-  IMU_datum              *datum,
-  IMU_TYPE               *val)
-{
-  if        (datum->type == IMU_gyro) {
-    memcpy(data.gRaw, val,        sizeof(data.gRaw));
-    memcpy(data.gCor, datum->val, sizeof(data.gCor));
-  } else if (datum->type == IMU_accl) {
-    memcpy(data.aRaw, val,        sizeof(data.aRaw));
-    memcpy(data.aCor, datum->val, sizeof(data.aCor));
-  } else if (datum->type == IMU_magn) {
-    memcpy(data.mRaw, val,        sizeof(data.mRaw));
-    memcpy(data.mCor, datum->val, sizeof(data.mCor));
   }
 }

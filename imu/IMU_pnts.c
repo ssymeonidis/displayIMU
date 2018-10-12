@@ -129,6 +129,27 @@ int IMU_pnts_getEntry(
 * function to reset instance state
 ******************************************************************************/
 
+int IMU_pnts_reset(
+  uint16_t                id)
+{
+  // check for out-of-bounds condition
+  if (id > numInstPnts - 1)
+    return IMU_PNTS_BAD_INST;
+
+  // ininitialize inst state 
+  state[id].curPnts             = 0;
+  state[id].state               = IMU_pnts_enum_reset;
+  state[id].index               = 0; 
+  state[id].aClock              = 0;
+  state[id].mClock              = 0;
+  return 0;
+}
+
+
+/******************************************************************************
+* function to reset instance state
+******************************************************************************/
+
 int IMU_pnts_start(
   uint16_t                id,
   uint16_t                numPnts)

@@ -59,9 +59,9 @@ int IMU_calb_init(
 * function to copy config structure
 ******************************************************************************/
 
-int IMU_core_getConfig( 
+int IMU_calb_getConfig( 
   uint16_t                id,  
-  IMU_core_config         **pntr)
+  IMU_calb_config         **pntr)
 {
   // check for out-of-bounds condition
   if (id >= numInstCalb)
@@ -91,6 +91,23 @@ int IMU_calb_setStruct(
   memcpy(&state[id].core_org, core, sizeof(IMU_rect_config)); 
   
   // exit function
+  return 0;
+}
+
+
+/******************************************************************************
+* function to reset state of calib subsystem
+******************************************************************************/
+
+int IMU_calb_reset(
+  uint16_t                id)
+{
+  // check for out-of-bounds condition
+  if (id >= numInstCalb)
+    return IMU_CALB_BAD_INST;
+
+  // copy current entry to the table
+  state[id].numPnts       = 0;
   return 0;
 }
 

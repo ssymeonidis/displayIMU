@@ -35,10 +35,15 @@ windowGUI::windowGUI(QWidget *parent) :
   // create and place window widgets
   ui->setupUi(this);
 
-  // initialize display/config parameters
-  imuIF_getState(&state);
+  // get pointers to config and state structures
+  IMU_union_config configUnion;
+  IMU_engn_getConfig(0, IMU_engn_core, &configUnion);
+  configCore = configUnion.configCore;
+  IMU_engn_getConfig(0, IMU_engn_rect, &configUnion);
+  configRect = configUnion.configRect;
+
+  // initialize display/sensor IF parameters
   load_json((char *)"../config/displayIMU.json");
-  
   glWidget_update();
 }
 
@@ -57,15 +62,15 @@ windowGUI::~windowGUI()
 * iniatialize IMU structures and GUI elements 
 ******************************************************************************/
 
-void windowGUI::initIMU(char* rect_config_file, char* core_config_file)
+void windowGUI::initIMU(char* core_config_file, char* rect_config_file)
 {
-  if (rect_config_file  != NULL) {
-    IMU_file_rectOpen(rect_config_file, rect_config);
-    calib_write();
-  }
   if (core_config_file != NULL) {
-    IMU_file_coreOpen(core_config_file, core_config);
+    IMU_engn_load(0, core_config_file, IMU_engn_core);
     config_write();
+  }
+  if (rect_config_file  != NULL) {
+    IMU_engn_load(0, rect_config_file, IMU_engn_rect);
+    calib_write();
   }
 }
 
@@ -76,24 +81,23 @@ void windowGUI::initIMU(char* rect_config_file, char* core_config_file)
 
 void windowGUI::config_write()
 {
-  IMU_core_config *core = state->configCore;
-  ui->noGyro->setChecked(!core->isGyro);
-  ui->noAccl->setChecked(!core->isAccl);
-  ui->noMagn->setChecked(!core->isMagn);
-  ui->noStable->setChecked(!core->isStable);
-  ui->noFOM->setChecked(!core->isFOM);
-  ui->noMove->setChecked(!core->isMove);
-  ui->gThresh->setText(QString::number(core->gThresh, 'f', 2));
-  ui->gThreshTime->setText(QString::number(core->gThreshTime, 'f', 2));
-  ui->aWeight->setText(QString::number(core->aWeight, 'f', 2));
-  ui->aMag->setText(QString::number(core->aMag, 'f', 2));
-  ui->aMagThresh->setText(QString::number(core->aMagThresh, 'f', 2));
-  ui->mWeight->setText(QString::number(core->mWeight, 'f', 2));
-  ui->mMag->setText(QString::number(core->mMag, 'f', 2));
-  ui->mMagThresh->setText(QString::number(core->mMagThresh, 'f', 2));
-  ui->mAng->setText(QString::number(core->mAng, 'f', 2));
-  ui->mAngThresh->setText(QString::number(core->mAngThresh, 'f', 2));
-  ui->moveAlpha->setText(QString::number(core->moveAlpha, 'f', 2));
+  ui->noGyro->setChecked(!configCore->isGyro);
+  ui->noAccl->setChecked(!configCore->isAccl);
+  ui->noMagn->setChecked(!configCore->isMagn);
+  ui->noStable->setChecked(!configCore->isStable);
+  ui->noFOM->setChecked(!configCore->isFOM);
+  ui->noMove->setChecked(!configCore->isMove);
+  ui->gThresh->setText(QString::number(configCore->gThresh, 'f', 2));
+  ui->gThreshTime->setText(QString::number(configCore->gThreshTime, 'f', 2));
+  ui->aWeight->setText(QString::number(configCore->aWeight, 'f', 2));
+  ui->aMag->setText(QString::number(configCore->aMag, 'f', 2));
+  ui->aMagThresh->setText(QString::number(configCore->aMagThresh, 'f', 2));
+  ui->mWeight->setText(QString::number(configCore->mWeight, 'f', 2));
+  ui->mMag->setText(QString::number(configCore->mMag, 'f', 2));
+  ui->mMagThresh->setText(QString::number(configCore->mMagThresh, 'f', 2));
+  ui->mAng->setText(QString::number(configCore->mAng, 'f', 2));
+  ui->mAngThresh->setText(QString::number(configCore->mAngThresh, 'f', 2));
+  ui->moveAlpha->setText(QString::number(configCore->moveAlpha, 'f', 2));
 }
 
 
@@ -103,24 +107,23 @@ void windowGUI::config_write()
 
 void windowGUI::config_read()
 {
-  IMU_core_config *core = state->configCore;
-  core->isGyro       = !ui->noGyro->isChecked();
-  core->isAccl       = !ui->noAccl->isChecked();
-  core->isMagn       = !ui->noMagn->isChecked();
-  core->isStable     = !ui->noStable->isChecked();
-  core->isFOM        = !ui->noFOM->isChecked();
-  core->isMove       = !ui->noMove->isChecked();
-  core->gThresh      = ui->gThresh->text().toFloat();
-  core->gThreshTime  = ui->gThreshTime->text().toFloat();
-  core->aWeight      = ui->aWeight->text().toFloat();
-  core->aMag         = ui->aMag->text().toFloat();
-  core->aMagThresh   = ui->aMagThresh->text().toFloat();
-  core->mWeight      = ui->mWeight->text().toFloat();
-  core->mMag         = ui->mMag->text().toFloat();
-  core->mMagThresh   = ui->mMagThresh->text().toFloat();
-  core->mAng         = ui->mAng->text().toFloat();
-  core->mAngThresh   = ui->mAngThresh->text().toFloat();
-  core->moveAlpha    = ui->moveAlpha->text().toFloat();
+  configCore->isGyro       = !ui->noGyro->isChecked();
+  configCore->isAccl       = !ui->noAccl->isChecked();
+  configCore->isMagn       = !ui->noMagn->isChecked();
+  configCore->isStable     = !ui->noStable->isChecked();
+  configCore->isFOM        = !ui->noFOM->isChecked();
+  configCore->isMove       = !ui->noMove->isChecked();
+  configCore->gThresh      = ui->gThresh->text().toFloat();
+  configCore->gThreshTime  = ui->gThreshTime->text().toFloat();
+  configCore->aWeight      = ui->aWeight->text().toFloat();
+  configCore->aMag         = ui->aMag->text().toFloat();
+  configCore->aMagThresh   = ui->aMagThresh->text().toFloat();
+  configCore->mWeight      = ui->mWeight->text().toFloat();
+  configCore->mMag         = ui->mMag->text().toFloat();
+  configCore->mMagThresh   = ui->mMagThresh->text().toFloat();
+  configCore->mAng         = ui->mAng->text().toFloat();
+  configCore->mAngThresh   = ui->mAngThresh->text().toFloat();
+  configCore->moveAlpha    = ui->moveAlpha->text().toFloat();
 }
 
 
@@ -130,43 +133,42 @@ void windowGUI::config_read()
 
 void windowGUI::calib_write()
 {
-  IMU_rect_config *config = state->configRect;
-  ui->gBias0->setText(QString::number(config->gBias[0], 'f', 2));
-  ui->gBias1->setText(QString::number(config->gBias[1], 'f', 2));
-  ui->gBias2->setText(QString::number(config->gBias[2], 'f', 2));
-  ui->gMult0->setText(QString::number(config->gMult[0], 'f', 2));
-  ui->gMult1->setText(QString::number(config->gMult[1], 'f', 2));
-  ui->gMult2->setText(QString::number(config->gMult[2], 'f', 2));
-  ui->gMult3->setText(QString::number(config->gMult[3], 'f', 2));
-  ui->gMult4->setText(QString::number(config->gMult[4], 'f', 2));
-  ui->gMult5->setText(QString::number(config->gMult[5], 'f', 2));
-  ui->gMult6->setText(QString::number(config->gMult[6], 'f', 2));
-  ui->gMult7->setText(QString::number(config->gMult[7], 'f', 2));
-  ui->gMult8->setText(QString::number(config->gMult[8], 'f', 2));
-  ui->aBias0->setText(QString::number(config->aBias[0], 'f', 2));
-  ui->aBias1->setText(QString::number(config->aBias[1], 'f', 2));
-  ui->aBias2->setText(QString::number(config->aBias[2], 'f', 2));
-  ui->aMult0->setText(QString::number(config->aMult[0], 'f', 2));
-  ui->aMult1->setText(QString::number(config->aMult[1], 'f', 2));
-  ui->aMult2->setText(QString::number(config->aMult[2], 'f', 2));
-  ui->aMult3->setText(QString::number(config->aMult[3], 'f', 2));
-  ui->aMult4->setText(QString::number(config->aMult[4], 'f', 2));
-  ui->aMult5->setText(QString::number(config->aMult[5], 'f', 2));
-  ui->aMult6->setText(QString::number(config->aMult[6], 'f', 2));
-  ui->aMult7->setText(QString::number(config->aMult[7], 'f', 2));
-  ui->aMult8->setText(QString::number(config->aMult[8], 'f', 2));
-  ui->mBias0->setText(QString::number(config->mBias[0], 'f', 2));
-  ui->mBias1->setText(QString::number(config->mBias[1], 'f', 2));
-  ui->mBias2->setText(QString::number(config->mBias[2], 'f', 2));
-  ui->mMult0->setText(QString::number(config->mMult[0], 'f', 2));
-  ui->mMult1->setText(QString::number(config->mMult[1], 'f', 2));
-  ui->mMult2->setText(QString::number(config->mMult[2], 'f', 2));
-  ui->mMult3->setText(QString::number(config->mMult[3], 'f', 2));
-  ui->mMult4->setText(QString::number(config->mMult[4], 'f', 2));
-  ui->mMult5->setText(QString::number(config->mMult[5], 'f', 2));
-  ui->mMult6->setText(QString::number(config->mMult[6], 'f', 2));
-  ui->mMult7->setText(QString::number(config->mMult[7], 'f', 2));
-  ui->mMult8->setText(QString::number(config->mMult[8], 'f', 2));
+  ui->gBias0->setText(QString::number(configRect->gBias[0], 'f', 2));
+  ui->gBias1->setText(QString::number(configRect->gBias[1], 'f', 2));
+  ui->gBias2->setText(QString::number(configRect->gBias[2], 'f', 2));
+  ui->gMult0->setText(QString::number(configRect->gMult[0], 'f', 2));
+  ui->gMult1->setText(QString::number(configRect->gMult[1], 'f', 2));
+  ui->gMult2->setText(QString::number(configRect->gMult[2], 'f', 2));
+  ui->gMult3->setText(QString::number(configRect->gMult[3], 'f', 2));
+  ui->gMult4->setText(QString::number(configRect->gMult[4], 'f', 2));
+  ui->gMult5->setText(QString::number(configRect->gMult[5], 'f', 2));
+  ui->gMult6->setText(QString::number(configRect->gMult[6], 'f', 2));
+  ui->gMult7->setText(QString::number(configRect->gMult[7], 'f', 2));
+  ui->gMult8->setText(QString::number(configRect->gMult[8], 'f', 2));
+  ui->aBias0->setText(QString::number(configRect->aBias[0], 'f', 2));
+  ui->aBias1->setText(QString::number(configRect->aBias[1], 'f', 2));
+  ui->aBias2->setText(QString::number(configRect->aBias[2], 'f', 2));
+  ui->aMult0->setText(QString::number(configRect->aMult[0], 'f', 2));
+  ui->aMult1->setText(QString::number(configRect->aMult[1], 'f', 2));
+  ui->aMult2->setText(QString::number(configRect->aMult[2], 'f', 2));
+  ui->aMult3->setText(QString::number(configRect->aMult[3], 'f', 2));
+  ui->aMult4->setText(QString::number(configRect->aMult[4], 'f', 2));
+  ui->aMult5->setText(QString::number(configRect->aMult[5], 'f', 2));
+  ui->aMult6->setText(QString::number(configRect->aMult[6], 'f', 2));
+  ui->aMult7->setText(QString::number(configRect->aMult[7], 'f', 2));
+  ui->aMult8->setText(QString::number(configRect->aMult[8], 'f', 2));
+  ui->mBias0->setText(QString::number(configRect->mBias[0], 'f', 2));
+  ui->mBias1->setText(QString::number(configRect->mBias[1], 'f', 2));
+  ui->mBias2->setText(QString::number(configRect->mBias[2], 'f', 2));
+  ui->mMult0->setText(QString::number(configRect->mMult[0], 'f', 2));
+  ui->mMult1->setText(QString::number(configRect->mMult[1], 'f', 2));
+  ui->mMult2->setText(QString::number(configRect->mMult[2], 'f', 2));
+  ui->mMult3->setText(QString::number(configRect->mMult[3], 'f', 2));
+  ui->mMult4->setText(QString::number(configRect->mMult[4], 'f', 2));
+  ui->mMult5->setText(QString::number(configRect->mMult[5], 'f', 2));
+  ui->mMult6->setText(QString::number(configRect->mMult[6], 'f', 2));
+  ui->mMult7->setText(QString::number(configRect->mMult[7], 'f', 2));
+  ui->mMult8->setText(QString::number(configRect->mMult[8], 'f', 2));
 }
 
 
@@ -176,43 +178,42 @@ void windowGUI::calib_write()
 
 void windowGUI::calib_read()
 {
-  IMU_rect_config *config = state->configRect;
-  config->gBias[0] = ui->gBias0->text().toFloat();
-  config->gBias[1] = ui->gBias1->text().toFloat();
-  config->gBias[2] = ui->gBias2->text().toFloat();
-  config->gMult[0] = ui->gMult0->text().toFloat();
-  config->gMult[1] = ui->gMult1->text().toFloat();
-  config->gMult[2] = ui->gMult2->text().toFloat();
-  config->gMult[3] = ui->gMult3->text().toFloat();
-  config->gMult[4] = ui->gMult4->text().toFloat();
-  config->gMult[5] = ui->gMult5->text().toFloat();
-  config->gMult[6] = ui->gMult6->text().toFloat();
-  config->gMult[7] = ui->gMult7->text().toFloat();
-  config->gMult[8] = ui->gMult8->text().toFloat();
-  config->aBias[0] = ui->aBias0->text().toFloat();
-  config->aBias[1] = ui->aBias1->text().toFloat();
-  config->aBias[2] = ui->aBias2->text().toFloat();
-  config->aMult[0] = ui->aMult0->text().toFloat();
-  config->aMult[1] = ui->aMult1->text().toFloat();
-  config->aMult[2] = ui->aMult2->text().toFloat();
-  config->aMult[3] = ui->aMult3->text().toFloat();
-  config->aMult[4] = ui->aMult4->text().toFloat();
-  config->aMult[5] = ui->aMult5->text().toFloat();
-  config->aMult[6] = ui->aMult6->text().toFloat();
-  config->aMult[7] = ui->aMult7->text().toFloat();
-  config->aMult[8] = ui->aMult8->text().toFloat();
-  config->mBias[0] = ui->mBias0->text().toFloat();
-  config->mBias[1] = ui->mBias1->text().toFloat();
-  config->mBias[2] = ui->mBias2->text().toFloat();
-  config->mMult[0] = ui->mMult0->text().toFloat();
-  config->mMult[1] = ui->mMult1->text().toFloat();
-  config->mMult[2] = ui->mMult2->text().toFloat();
-  config->mMult[3] = ui->mMult3->text().toFloat();
-  config->mMult[4] = ui->mMult4->text().toFloat();
-  config->mMult[5] = ui->mMult5->text().toFloat();
-  config->mMult[6] = ui->mMult6->text().toFloat();
-  config->mMult[7] = ui->mMult7->text().toFloat();
-  config->mMult[8] = ui->mMult8->text().toFloat();
+  configRect->gBias[0] = ui->gBias0->text().toFloat();
+  configRect->gBias[1] = ui->gBias1->text().toFloat();
+  configRect->gBias[2] = ui->gBias2->text().toFloat();
+  configRect->gMult[0] = ui->gMult0->text().toFloat();
+  configRect->gMult[1] = ui->gMult1->text().toFloat();
+  configRect->gMult[2] = ui->gMult2->text().toFloat();
+  configRect->gMult[3] = ui->gMult3->text().toFloat();
+  configRect->gMult[4] = ui->gMult4->text().toFloat();
+  configRect->gMult[5] = ui->gMult5->text().toFloat();
+  configRect->gMult[6] = ui->gMult6->text().toFloat();
+  configRect->gMult[7] = ui->gMult7->text().toFloat();
+  configRect->gMult[8] = ui->gMult8->text().toFloat();
+  configRect->aBias[0] = ui->aBias0->text().toFloat();
+  configRect->aBias[1] = ui->aBias1->text().toFloat();
+  configRect->aBias[2] = ui->aBias2->text().toFloat();
+  configRect->aMult[0] = ui->aMult0->text().toFloat();
+  configRect->aMult[1] = ui->aMult1->text().toFloat();
+  configRect->aMult[2] = ui->aMult2->text().toFloat();
+  configRect->aMult[3] = ui->aMult3->text().toFloat();
+  configRect->aMult[4] = ui->aMult4->text().toFloat();
+  configRect->aMult[5] = ui->aMult5->text().toFloat();
+  configRect->aMult[6] = ui->aMult6->text().toFloat();
+  configRect->aMult[7] = ui->aMult7->text().toFloat();
+  configRect->aMult[8] = ui->aMult8->text().toFloat();
+  configRect->mBias[0] = ui->mBias0->text().toFloat();
+  configRect->mBias[1] = ui->mBias1->text().toFloat();
+  configRect->mBias[2] = ui->mBias2->text().toFloat();
+  configRect->mMult[0] = ui->mMult0->text().toFloat();
+  configRect->mMult[1] = ui->mMult1->text().toFloat();
+  configRect->mMult[2] = ui->mMult2->text().toFloat();
+  configRect->mMult[3] = ui->mMult3->text().toFloat();
+  configRect->mMult[4] = ui->mMult4->text().toFloat();
+  configRect->mMult[5] = ui->mMult5->text().toFloat();
+  configRect->mMult[6] = ui->mMult6->text().toFloat();
+  configRect->mMult[7] = ui->mMult7->text().toFloat();
+  configRect->mMult[8] = ui->mMult8->text().toFloat();
 }
 
 
@@ -288,7 +289,7 @@ void windowGUI::on_configOpen_clicked()
 {
   QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config",
     ("json (*.json)"));
-  IMU_file_coreOpen((char *)file.toStdString().c_str(), core_config);
+  IMU_engn_load(0, (char *)file.toStdString().c_str(), IMU_engn_core);
   config_write();
 }
 
@@ -301,7 +302,7 @@ void windowGUI::on_configSave_clicked()
 {
   QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
-  IMU_file_coreSave((char *)file.toStdString().c_str(), core_config);
+  IMU_engn_save(0, (char *)file.toStdString().c_str(), IMU_engn_core);
 }
 
 
@@ -313,7 +314,7 @@ void windowGUI::on_calibOpen_clicked()
 {
   QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config", 
     ("json (*.json)"));
-  IMU_file_rectOpen((char *)file.toStdString().c_str(), rect_config);
+  IMU_engn_load(0, (char *)file.toStdString().c_str(), IMU_engn_rect);
   calib_write();
 }
 
@@ -326,7 +327,7 @@ void windowGUI::on_calibSave_clicked()
 {
   QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
-  IMU_file_rectSave((char *)file.toStdString().c_str(), rect_config);
+  IMU_engn_save(0, (char *)file.toStdString().c_str(), IMU_engn_rect);
 }
 
 

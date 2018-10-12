@@ -28,20 +28,13 @@ const int       port_no = 5555;
 
 int main(int argc, char *argv[])
 {
-  // define internal variables
+  // initialize the IMU and its data parser
   int           dataIF_thread_id;
   pthread_t     dataIF_thread;
-  int           imuIF_thread_id;
-  pthread_t     imuIF_thread;
-
-  // initialize the IMU data structures
-  imuIF_state *state;
-  imuIF_init(NULL, NULL, NULL, NULL);
-  imuIF_getState(&state);
-  dataIF_init(state->idRect, state->idCore, state->idPnts, state->idAuto);
+  dataIF_init(IMU_engn_rect_core);
 
   // create the display
-  QApplication  app    (argc,   argv);
+  QApplication  app(argc, argv);
   windowGUI     window;
   if (argc > 2)
     window.initIMU(argv[1], argv[2]);
@@ -53,7 +46,6 @@ int main(int argc, char *argv[])
   else
     dataIF_startCSV(argv[3]);
   pthread_create(&dataIF_thread, NULL, dataIF_run, &dataIF_thread_id);
-  pthread_create(&imuIF_thread,  NULL, imuIF_run,  &imuIF_thread_id);
 
   // start the main app
   app.exec();

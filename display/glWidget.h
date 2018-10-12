@@ -22,8 +22,7 @@
 
 #include <QGLWidget>
 #include <GL/glu.h>
-#include "dataIF.h"
-#include "imuIF.h"
+#include "IMU_engn.h"
 
 
 class GLWidget : public QGLWidget
@@ -48,27 +47,26 @@ class GLWidget : public QGLWidget
     float  scaleIMU;
 
   public slots:
-    void updateFrame();
+    void   updateFrame();
 
   protected:
-    void initializeGL();
-    void paintGL();
-    void resizeGL(int width, int height);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
+    void   initializeGL();
+    void   paintGL();
+    void   resizeGL(int width, int height);
+    void   mousePressEvent(QMouseEvent *event);
+    void   mouseMoveEvent(QMouseEvent *event);
 
   private:
     // internal functions
-    void drawArrow(GLfloat faceColor[4], GLfloat scale, GLfloat angles[2]);
-    void drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale);
-    void drawGrid();
+    void   drawArrow(GLfloat faceColor[4], GLfloat scale, GLfloat angles[2]);
+    void   drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale);
+    void   drawGrid();
 
     // internal objects/parameters
-    dataIF_data     *data;
-    imuIF_estm      *estm;
-    GLUquadricObj   *obj;
-    QTimer          *refresh_timer;
-    QPoint          lastPos;
+    IMU_engn_sensor  *sensor;
+    GLUquadricObj    *obj;
+    QTimer           *refresh_timer;
+    QPoint           lastPos;
 };
 
 #endif

@@ -26,53 +26,29 @@ extern "C" {
 
 // include statements
 #include <stdint.h>
-#include "IMU_rect.h"
-#include "IMU_core.h"
-#include "IMU_pnts.h"
-#include "IMU_auto.h"
-#include "IMU_calb.h"
+#include "IMU_engn.h"
 
 
 // define IMU state structure
 typedef struct {
   uint8_t                isRealtime;
-  uint8_t                exitThread;
-  uint8_t                isExit;
-} dataIF_ctrl;
+} dataIF_config;
 
 typedef struct {
+  uint16_t               imuID;
+  IMU_engn_config        *imuConfig;
   uint8_t                isCSV;
   uint8_t                isFirstFrame;
   double                 timeInitSys;
   double                 timeInitSen;
-  uint16_t               idRect;
-  uint16_t               idCore;
-  uint16_t               idPnts;
-  uint16_t               idAuto;
-  uint16_t               idCalb;
-  IMU_pnts_entry         *pnt;
-  IMU_core_FOM           FOM[3];
+  uint8_t                exitThread;
+  uint8_t                isExit;
 } dataIF_state;
-
-// define input sensor data structure
-typedef struct {
-  IMU_TYPE               gRaw[3];
-  IMU_TYPE               gCor[3];
-  IMU_TYPE               gFltr[3];
-  IMU_TYPE               aRaw[3];
-  IMU_TYPE               aCor[3];
-  IMU_TYPE               aFltr[3];
-  IMU_TYPE               mRaw[3];
-  IMU_TYPE               mCor[3];
-  IMU_TYPE               mFltr[3];
-  float                  time;
-} dataIF_data; 
 
 
 // initialization function
-void dataIF_init        (uint16_t idRect, uint16_t idCore, 
-                         uint16_t idPnts, uint16_t idAuto);
-void dataIF_getPntr     (dataIF_data**);
+void dataIF_init        (IMU_engn_type);
+void dataIF_getConfig   (dataIF_config**);
 
 // access functions
 void dataIF_startUDP    (int         portno);

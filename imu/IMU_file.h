@@ -21,6 +21,7 @@
 #define _IMU_FILE_H
 
 // include statements
+#include <stdio.h>
 #include "IMU_rect.h"
 #include "IMU_core.h"
 #include "IMU_pnts.h"

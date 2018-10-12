@@ -9,12 +9,10 @@ OBJECTS_DIR       = ./obj
 
 HEADERS          += glWidget.h          \
                     windowGUI.h         \
-                    imuIF.h             \
                     dataIF.h
 
 SOURCES          += glWidget.cpp        \
                     windowGUI.cpp       \
-                    imuIF.c             \
                     dataIF.c            \
                     main.cpp 
 
@@ -33,4 +31,4 @@ LIBS             += -L../bin            \
 
 DESTDIR           = ../bin
 
-DEFINES          += IMU_TYPE=${IMU_TYPE}
+DEFINES          += IMU_TYPE=${IMU_TYPE} 

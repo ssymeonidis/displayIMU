@@ -27,7 +27,6 @@ extern "C" {
 // include statements
 #include <stdint.h>
 #include "IMU_type.h"
-#include "IMU_thrd.h"
 #include "IMU_core.h"
 #include "IMU_rect.h"
 #include "IMU_pnts.h"
@@ -46,14 +45,14 @@ extern "C" {
 #define IMU_ENGN_BAD_INST                -5
 #define IMU_ENGN_UNINITIALIZE_SYS        -6
 #define IMU_ENGN_NONEXISTANT_SYSID       -7
-#define IMU_ENGN_NONEXISTANT_CONFIG      -9
-#define IMU_ENGN_DISABLED_SENSOR_STRUCT  -10
-#define IMU_ENGN_SUBSYSTEM_FAILURE       -11
-#define IMU_ENGN_SENSOR_STRUCT_COPY_FAIL -12
-#define IMU_ENGN_FAILED_THREAD           -13
-#define IMU_ENGN_FAILED_MUTEX            -14
-#define IMU_ENGN_QUEUE_OVERFLOW          -15
-#define IMU_ENGN_BAD_PNTR                -16
+#define IMU_ENGN_NONEXISTANT_STRUCT      -8
+#define IMU_ENGN_DISABLED_SENSOR_STRUCT  -9
+#define IMU_ENGN_SUBSYSTEM_FAILURE       -10
+#define IMU_ENGN_SENSOR_STRUCT_COPY_FAIL -11
+#define IMU_ENGN_FAILED_THREAD           -12
+#define IMU_ENGN_FAILED_MUTEX            -13
+#define IMU_ENGN_QUEUE_OVERFLOW          -14
+#define IMU_ENGN_BAD_PNTR                -15
 
 
 // define the configuration structure (values tuned for a part)
@@ -63,6 +62,7 @@ typedef struct {
   uint8_t               isAuto;
   uint8_t               isCalb;
   uint8_t               isEstmAccl;
+  uint8_t               isQuatOnly;
   uint8_t               isFOM;
   uint8_t               isSensorStruct;
   float                 threshFOM;
@@ -84,6 +84,25 @@ typedef struct {
   float                 q_ref[4];
   int                   (*fncCalb)(uint16_t, IMU_calb_FOM*);    // test only
 } IMU_engn_state;
+
+// define the configuration structure
+typedef union {
+  IMU_core_config       *configCore;
+  IMU_rect_config       *configRect;
+  IMU_pnts_config       *configPnts;
+  IMU_auto_config       *configAuto;
+  IMU_calb_config       *configCalb;
+  IMU_engn_config       *configEngn;
+} IMU_union_config;
+
+// define the state structure 
+typedef union {
+  IMU_core_state        *stateCore;
+  IMU_pnts_state        *statePnts;
+  IMU_auto_state        *stateAuto;
+  IMU_calb_state        *stateCalb;
+  IMU_engn_state        *stateEngn;
+} IMU_union_state;
 
 typedef enum {
   IMU_engn_core_only    = 0,
@@ -139,9 +158,9 @@ typedef struct {
 
 // data structure access functions
 int IMU_engn_init       (IMU_engn_type, uint16_t *id, IMU_engn_config**);
-int IMU_engn_getConfig  (uint16_t id, IMU_engn_config**);
-int IMU_engn_getState   (uint16_t id, IMU_engn_state**);
 int IMU_engn_getSysID   (uint16_t id, IMU_engn_system, uint16_t *sysID);
+int IMU_engn_getConfig  (uint16_t id, IMU_engn_system, IMU_union_config*);
+int IMU_engn_getState   (uint16_t id, IMU_engn_system, IMU_union_state*);
 int IMU_engn_getSensor  (uint16_t id, IMU_engn_sensor**);
 int IMU_engn_setCalbFnc (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
 
