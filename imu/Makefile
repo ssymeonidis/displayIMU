@@ -1,6 +1,7 @@
 CC          = gcc 
 CFLAGS      = -fPIC -Wall -Wextra -O2 -g 
 LDFLAGS     = -shared  
+LIBS        = -lm
 BINDIR      = ../bin
 OBJDIR      = obj
 RM          = rm -f  
@@ -19,13 +20,12 @@ SRCS        = IMU_file.c  \
               IMU_auto.c  \
               IMU_core.c  \
               IMU_engn.c
-
-OBJS = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 all: ${TARGET_LIB}
 
 $(TARGET_LIB): $(OBJS)
-	$(CC) ${LDFLAGS} ${DEFINES} -o $@ $^
+	$(CC) ${LDFLAGS} ${DEFINES} -o $@ $^ ${LIBS}
 
 $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) ${DEFINES} -c $< -o $@

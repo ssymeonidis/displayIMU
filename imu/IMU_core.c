@@ -134,6 +134,7 @@ int IMU_core_reset(
   #endif
 
   // initialize state to known value
+  printf("#3a1 - %p %p\n", &state[0], &config[0]);
   state[id].SEq[0]      = 1.0;
   state[id].SEq[1]      = 0.0;
   state[id].SEq[2]      = 0.0;
@@ -141,11 +142,13 @@ int IMU_core_reset(
   state[id].aReset      = config[id].isAccl;
   state[id].mReset      = config[id].isMagn;
   state[id].estmValid   = 0;
+  printf("#3a2 - %p\n", &config[0]);
 
   // unlock function and exit (no errors)
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_unlock(&state[id].lock);
   #endif
+  printf("#3a3 - %p\n", &config[0]);
   return 0;
 }
 

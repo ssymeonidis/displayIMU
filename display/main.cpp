@@ -29,11 +29,13 @@
 * main function - everything starts here
 ******************************************************************************/
 
-int main(int argc, char *argv[])
+int main(
+  int                argc, 
+  char               *argv[])
 {
   // define local variables
-  int           dataIF_thread_id;
-  pthread_t     dataIF_thread;
+  int                dataIF_thread_id;
+  pthread_t          dataIF_thread;
 
   // initialize the IMU and its data parser
   dataIF_init(IMU_engn_rect_core);

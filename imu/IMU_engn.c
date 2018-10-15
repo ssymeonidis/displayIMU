@@ -35,6 +35,17 @@
 #include "IMU_math.h"
 #include "IMU_engn.h"
 
+// internally defined types
+#if IMU_ENGN_QUEUE_SIZE
+typedef struct {
+  uint16_t              id    [IMU_ENGN_QUEUE_SIZE+1];
+  IMU_datum             datum [IMU_ENGN_QUEUE_SIZE+1];
+  int                   first;
+  int                   last;
+  int                   count;
+} IMU_engn_queue;
+#endif
+
 // internally managed structures
 IMU_core_FOM      datumFOM [3];
 IMU_engn_config   config   [IMU_MAX_INST]; 
@@ -302,36 +313,44 @@ int IMU_engn_setCalbFnc(
 * function to set calibration callback
 ******************************************************************************/
 
-#if IMU_ENGN_QUEUE_SIZE
 int IMU_engn_start()
 {
+  // zero queue size pass through
+  #if IMU_ENGN_QUEUE_SIZE == 0
+  return 0;
+  #endif
+  
+  // currently supports pthread only
   #if IMU_USE_PTHREAD
   engnExitThread = 0;
-  return pthread_create(&engnThreadID, NULL, IMU_engn_run, &engnThreadID);
+  return pthread_create(&engnThread, NULL, IMU_engn_run, &engnThreadID);
   #else
   return IMU_ENGN_FAILED_THREAD;
   #endif
 }
-#endif
 
 
 /******************************************************************************
 * function to set calibration callback
 ******************************************************************************/
 
-#if IMU_ENGN_QUEUE_SIZE
 int IMU_engn_stop()
 {
+  // zero queue size pass through
+  #if IMU_ENGN_QUEUE_SIZE == 0
+  return 0;
+  #endif
+  
   #if IMU_USE_PTHREAD
   engnExitThread = 1;
   while (!engnIsExit)
     usleep(engnSleepTime);
   pthread_join(engnThreadID, NULL);
+  return 0;
   #else
   return IMU_ENGN_FAILED_THREAD;
   #endif
 }
-#endif
 
 
 /******************************************************************************
@@ -424,7 +443,10 @@ int IMU_engn_reset(
   memset(sensor[id].mFlt, 0, 3*sizeof(IMU_TYPE));
   
   // reset all open subsystems
-  int status = max(0,IMU_core_reset(state[id].idCore));
+  printf("#3a - %p %p\n", &state, state[0].configCore);
+  int status;
+  IMU_core_reset(0);
+  printf("#3b - %p %p\n", &state, state[0].configCore);
   if (config[id].isPnts)
     status  += max(0,IMU_pnts_reset(state[id].idPnts));
   if (config[id].isAuto)
@@ -433,7 +455,7 @@ int IMU_engn_reset(
     status  += max(0,IMU_calb_reset(state[id].idCalb));
   if (status < 0)
     return IMU_ENGN_FAILED_RESET;
-    
+   
   // exit function
   return 0;
 }
@@ -635,7 +657,7 @@ int IMU_engn_getEstm(
 ******************************************************************************/
 
 #if IMU_ENGN_QUEUE_SIZE
-void *dataIF_run(
+void *IMU_engn_run(
   void                  *NA)
 {
   // define local variables
@@ -647,19 +669,19 @@ void *dataIF_run(
   while(engnExitThread) {
   
     // wait until queue contains datum
-    while (queue.count == 0)
+    while (engnQueue.count == 0)
       usleep(engnSleepTime);
     
     // remove datum from queue
     IMU_thrd_mutex_lock(&engnLock);
-    id                  = queue.id[queue.start];
-    memcpy(datum, &queue.datum[queue.first], sizeof(IMU_datum));
-    queue.count         = queue.count - 1;
-    queue.first         = queue.first + 1;
+    id                  = engnQueue.id[engnQueue.first];
+    memcpy(&datum, &engnQueue.datum[engnQueue.first], sizeof(IMU_datum));
+    engnQueue.count     = engnQueue.count - 1;
+    engnQueue.first     = engnQueue.first + 1;
     IMU_thrd_mutex_unlock(&engnLock);
           
     // process datum
-    IMU_engn_process(id, datum);
+    IMU_engn_process(id, &datum);
   }
   engnIsExit            = 1;
   return 0;
@@ -676,28 +698,38 @@ int IMU_engn_addQueue(
   uint16_t		id,
   IMU_datum             *datum)
 {
+  // define local variables
+  int                   status = 0;
+
   // entering critical section
   IMU_thrd_mutex_lock(&engnLock);
 
   // check queue overflow
-  if (queue.count >= IMU_ENGN_QUEUE_SIZE) {
-    queue.count         = queue.count - 1;
-    queue.start         = queue.start + 1;
-    if (queue.start >= IMU_ENGN_QUEUE_SIZE)
-      queue.start       = 0; 
+  if (engnQueue.count >= IMU_ENGN_QUEUE_SIZE) {
+    engnQueue.count     = engnQueue.count - 1;
+    engnQueue.first     = engnQueue.first + 1;
+    if (engnQueue.first >= IMU_ENGN_QUEUE_SIZE)
+      engnQueue.first   = 0; 
     status = IMU_ENGN_QUEUE_OVERFLOW;
   }
   
   // add datum to queue
-  queue.count           = queue.count + 1;
-  queue.last            = queue.last  + 1;
-  if (queue.last >= IMU_ENGN_QUEUE_SIZE)
-    queue.last          = 0;
-  queue.id[queue.last]  = id;
-  memcpy(&queue.datum[queue.last], datum, sizeof(IMU_datum));
+  engnQueue.count       = engnQueue.count + 1;
+  engnQueue.last        = engnQueue.last  + 1;
+  if (engnQueue.last >= IMU_ENGN_QUEUE_SIZE)
+    engnQueue.last      = 0;
+  int idx               = engnQueue.last;
+  engnQueue.id[idx]     = id;
+  memcpy(&engnQueue.datum[idx], datum, sizeof(IMU_datum));
   
   // exiting critical section
   IMU_thrd_mutex_unlock(&engnLock);
+  
+  // exit function (pass error message or queue count)
+  if (status < 0)
+    return status;
+  else 
+    return engnQueue.count;
 }
 #endif
 

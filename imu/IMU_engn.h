@@ -142,16 +142,6 @@ typedef struct {
   float                 move[3];
 } IMU_engn_estm;
 
-#if IMU_ENGN_QUEUE_SIZE
-typedef struct {
-  uint16_t              id    [IMU_ENGN_QUEUE_SIZE+1];
-  IMU_datum             datum [IMU_ENGN_QUEUE_SIZE+1];
-  int                   first;
-  int                   last;
-  int                   count;
-} IMU_engn_queue;
-#endif
-
 
 // data structure access functions
 int IMU_engn_init       (IMU_engn_type, uint16_t *id, IMU_engn_config**);
@@ -162,10 +152,8 @@ int IMU_engn_getSensor  (uint16_t id, IMU_engn_sensor**);
 int IMU_engn_setCalbFnc (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
 
 // enable/disable queue controls
-#if IMU_ENGN_QUEUE_SIZE
 int IMU_engn_start      ();
 int IMU_engn_stop       ();
-#endif
 
 // read/write config fimctopms
 int IMU_engn_load       (uint16_t id, const char* filename, IMU_engn_system);
