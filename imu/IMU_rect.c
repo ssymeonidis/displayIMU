@@ -42,6 +42,9 @@ int IMU_rect_init(
   // check device count overflow
   if (numInst >= IMU_MAX_INST)
     return IMU_RECT_INST_OVERFLOW;
+    
+  // enable subystem
+  config[numInst].enable = 1;
 
   // pass handle and config pointer
   *id    = numInst; 
@@ -193,9 +196,9 @@ int IMU_rect_magn(
 
   // apply bias
   float *bias  = config[id].mBias;
-  float m[3]   = {(float)m_raw[0] - bias[0],
-                  (float)m_raw[1] - bias[1],
-                  (float)m_raw[2] - bias[2]};
+  float m[3]   = {(float)m_raw[0] + bias[0],
+                  (float)m_raw[1] + bias[1],
+                  (float)m_raw[2] + bias[2]};
 
   // apply transform
   float *mult  = config[id].mMult; 

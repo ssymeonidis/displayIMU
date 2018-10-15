@@ -44,16 +44,17 @@ The project organization is as follows
 - bin <- stores libIMU.so library and displayIMU executable
 - common <- stores shared c/c++ and header files 
 - config <- stores json configuration and calibration files
-- csv <- source code for appliction for processing CSV files
 - display <- source code for QT diplay application
 - doc <- support documentation 
 - imu <- source code for IMU library
+- test <- unit test source (regression testing)
 
 The IMU library is broken down into smaller components to provide flexibility on
 how the code is integrated into a project.  For example, the correction function
 which applies calibration factors to raw data can be colocated with the sensors
 and whereas the core functions can be placed in the main application.  The files
 along with their descriptions are captured below:
+- IMU_engn <- functions that manage the overall IMU system (top-level I/F) 
 - IMU_core <- functions that fuse corrected sensor data (generate estimates) 
 - IMU_rect <- functions that applies calibarion factors to raw data
 - IMU_pnts <- functions that extracts points for multi-point calibrations
@@ -61,6 +62,8 @@ along with their descriptions are captured below:
 - IMU_calb <- functions that generates correct structures from pnts/auto
 - IMU_file <- functions for reading/writting structs to json files 
 - IMU_math <- functions for converting/orienting quaternion IMU states
+- IMU_thrd <- functions for managing critical sections of code (mutex)
+- IMU_type <- type definitions for sensor data and figure of merits
 
 Note: QT may generate an "Attempt to set a screen on a child window" message
 from QWindowPrivate::setTopLevelScreen.  According to stackoverlflow, question

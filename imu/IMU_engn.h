@@ -119,7 +119,7 @@ typedef union {
 
 // sensor data structure 
 typedef struct {
-  float                 time;
+  IMU_TYPE              time;
   IMU_TYPE              gRaw[3];
   IMU_TYPE              gCor[3];
   float                 gFlt[3];

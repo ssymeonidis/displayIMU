@@ -45,6 +45,9 @@ int main(
   int                status;
   int                i;
 
+  // start datum test
+  printf("starting test_datum...\n");
+
   // initialize the IMU and its data parser
   status = IMU_engn_init(IMU_engn_rect_core, &id, &imuConfig);
   if (status < 0) {
@@ -82,7 +85,7 @@ int main(
     exit(0);
   }
   
-  // inject accelerometer inputs
+  // inject accelerometer input
   datum.type    = IMU_gyro;
   datum.t       = 10;
   datum.val[0]  = 100;
@@ -96,10 +99,83 @@ int main(
   
   // verify sensor structure
   usleep(msg_delay);
-  printf("%f, %f, %f, %f, %f, %f, %f\n", sensor->time,
+  printf("%d, %d, %d, %d, %d, %d, %d\n", sensor->time,
     sensor->gRaw[0], sensor->gRaw[1], sensor->gRaw[2],
     sensor->gCor[0], sensor->gCor[1], sensor->gCor[2]);
+  if (sensor->time    != 10) {
+    printf("error: time failure\n");
+    exit(0);
+  }
+  if (sensor->gRaw[0] != 100 || sensor->gRaw[1] != 200 || sensor->gRaw[2] != 300) {
+    printf("error: gRaw failure\n");
+    exit(0);
+  }
+  if (sensor->gCor[0] != 220 || sensor->gCor[1] != 330 || sensor->gCor[2] != 110) {
+    printf("error: gCor failure\n");
+    exit(0);
+  }
   
+  // inject accelerometer input
+  datum.type    = IMU_accl;
+  datum.t       = 20;
+  datum.val[0]  = 400;
+  datum.val[1]  = 500;
+  datum.val[2]  = 600;
+  status = IMU_engn_datum(id, &datum);
+  if (status < 0) {
+    printf("error: IMU_engn_start failure #%d\n", status);
+    exit(0);
+  }
+  
+  // verify sensor structure
+  usleep(msg_delay);
+  printf("%d, %d, %d, %d, %d, %d, %d\n", sensor->time,
+    sensor->aRaw[0], sensor->aRaw[1], sensor->aRaw[2],
+    sensor->aCor[0], sensor->aCor[1], sensor->aCor[2]);
+  if (sensor->time    != 20) {
+    printf("error: time failure\n");
+    exit(0);
+  }
+  if (sensor->aRaw[0] != 400 || sensor->aRaw[1] != 500 || sensor->aRaw[2] != 600) {
+    printf("error: aRaw failure\n");
+    exit(0);
+  }
+  if (sensor->aCor[0] != 660 || sensor->aCor[1] != 440 || sensor->aCor[2] != 550) {
+    printf("error: aCor failure\n");
+    exit(0);
+  }
+
+  // inject magnetomter input
+  datum.type    = IMU_magn;
+  datum.t       = 30;
+  datum.val[0]  = 700;
+  datum.val[1]  = 800;
+  datum.val[2]  = 900;
+  status = IMU_engn_datum(id, &datum);
+  if (status < 0) {
+    printf("error: IMU_engn_start failure #%d\n", status);
+    exit(0);
+  }
+  
+  // verify sensor structure
+  usleep(msg_delay);
+  printf("%d, %d, %d, %d, %d, %d, %d\n", sensor->time,
+    sensor->mRaw[0], sensor->mRaw[1], sensor->mRaw[2],
+    sensor->mCor[0], sensor->mCor[1], sensor->mCor[2]);
+  if (sensor->time    != 30) {
+    printf("error: time failure\n");
+    exit(0);
+  }
+  if (sensor->mRaw[0] != 700 || sensor->mRaw[1] != 800 || sensor->mRaw[2] != 900) {
+    printf("error: mRaw failure\n");
+    exit(0);
+  }
+  if (sensor->mCor[0] != 770 || sensor->mCor[1] != 880 || sensor->mCor[2] != 990) {
+    printf("error: mCor failure\n");
+    exit(0);
+  }
+
   // exit program
+  printf("pass: test_datum\n\n");
   return 0;
 }

@@ -67,8 +67,9 @@ typedef enum {
 } core_config_enum;
 
 // rect subsystem parsing inputs
-static const int   rect_config_size = 6;
+static const int   rect_config_size = 7;
 static const char* rect_config_name[] = {
+  "enable",
   "gBias",
   "gMult",
   "aBias",
@@ -77,12 +78,13 @@ static const char* rect_config_name[] = {
   "mMult"
 };
 typedef enum {
-  gBias   = 0,
-  gMult   = 1,
-  aBias   = 2,
-  aMult   = 3,
-  mBias   = 4,
-  mMult   = 5
+  enable  = 0,
+  gBias   = 1,
+  gMult   = 2,
+  aBias   = 3,
+  aMult   = 4,
+  mBias   = 5,
+  mMult   = 6
 } rect_config_enum;
 
 // pnts subsystem parsing inputs
@@ -291,7 +293,9 @@ int IMU_file_rectLoad(
 
     // extract arguments for the specified field 
     type = IMU_file_getField(field, rect_config_name, rect_config_size);
-    if      (type == gBias) 
+    if      (type == enable) 
+      get_bool(args, &config->enable);
+    else if (type == gBias) 
       get_floats(args, config->gBias, 3);
     else if (type == gMult)
       get_floats(args, config->gMult, 9);
@@ -329,12 +333,13 @@ int IMU_file_rectSave(
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
-  fprintf(file, "  \"gBias\": ");  write_floats(file, config->gBias, 3);
-  fprintf(file, "  \"gMult\": ");  write_floats(file, config->gMult, 9);
-  fprintf(file, "  \"aBias\": ");  write_floats(file, config->aBias, 3);
-  fprintf(file, "  \"aMult\": ");  write_floats(file, config->aMult, 9);
-  fprintf(file, "  \"mBias\": ");  write_floats(file, config->mBias, 3);
-  fprintf(file, "  \"mMult\": ");  write_floats(file, config->mMult, 9);
+  fprintf(file, "  \"enable\": ");  write_bool  (file, config->enable);
+  fprintf(file, "  \"gBias\": ");   write_floats(file, config->gBias, 3);
+  fprintf(file, "  \"gMult\": ");   write_floats(file, config->gMult, 9);
+  fprintf(file, "  \"aBias\": ");   write_floats(file, config->aBias, 3);
+  fprintf(file, "  \"aMult\": ");   write_floats(file, config->aMult, 9);
+  fprintf(file, "  \"mBias\": ");   write_floats(file, config->mBias, 3);
+  fprintf(file, "  \"mMult\": ");   write_floats(file, config->mMult, 9);
   fprintf(file, "}\n");
 
   // exit function
