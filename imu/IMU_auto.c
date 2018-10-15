@@ -21,9 +21,9 @@
 #include "IMU_auto.h"
 
 // internally managed structures
-IMU_auto_config  config [IMU_MAX_INST]; 
-IMU_auto_state   state  [IMU_MAX_INST];
-uint16_t         numInstAuto = 0;
+static IMU_auto_config  config [IMU_MAX_INST]; 
+static IMU_auto_state   state  [IMU_MAX_INST];
+static uint16_t         numInst = 0;
 
 
 /******************************************************************************
@@ -35,13 +35,13 @@ int IMU_auto_init(
   IMU_auto_config         **pntr)
 {
   // check for device count overflow
-  if (numInstAuto >= IMU_MAX_INST)
+  if (numInst >= IMU_MAX_INST)
     return IMU_AUTO_INST_OVERFLOW;
 
   // return inst handle and config struct
-  *id   = numInstAuto; 
+  *id   = numInst; 
   *pntr = &config[*id];
-  numInstAuto++;
+  numInst++;
   
   // exit function
   return 0;
@@ -57,7 +57,7 @@ int IMU_auto_getConfig(
   IMU_auto_config         **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInstAuto-1)
+  if (id > numInst-1)
     return IMU_AUTO_BAD_INST;
 
   // return state
@@ -75,7 +75,7 @@ int IMU_auto_getState(
   IMU_auto_state          **pntr)
 {
   // check for out-of-bounds condition
-  if (id > numInstAuto-1)
+  if (id > numInst-1)
     return IMU_AUTO_BAD_INST; 
 
   // return state

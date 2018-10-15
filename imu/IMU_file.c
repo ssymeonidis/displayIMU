@@ -139,10 +139,10 @@ static char temp[line_size];
 // internal function defintions
 int  IMU_file_getLine  (FILE *file, char **field, char **args);
 int  IMU_file_getField (char *field, const char *names[], int size);
-int  get_floats(char *args, float *vals, int size);
-int  get_bool(char *args, uint8_t *val);
-void write_floats(FILE *file, float *vals, int size);
-void write_bool(FILE *file, uint8_t val);
+static int  get_floats(char *args, float *vals, int size);
+static int  get_bool(char *args, uint8_t *val);
+static void write_floats(FILE *file, float *vals, int size);
+static void write_bool(FILE *file, uint8_t val);
 
 
 /******************************************************************************

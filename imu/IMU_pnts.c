@@ -24,10 +24,10 @@
 #include "IMU_pnts.h"
 
 // internally managed structures
-IMU_pnts_config  config [IMU_MAX_INST]; 
-IMU_pnts_state   state  [IMU_MAX_INST];
-IMU_pnts_entry   table  [IMU_MAX_INST][IMU_PNTS_SIZE];
-uint16_t         numInstPnts = 0;
+static IMU_pnts_config  config [IMU_MAX_INST]; 
+static IMU_pnts_state   state  [IMU_MAX_INST];
+static IMU_pnts_entry   table  [IMU_MAX_INST][IMU_PNTS_SIZE];
+static uint16_t         numInst = 0;
 
 // internally defined functions
 int IMU_pnts_newGyro (uint16_t id, float t, float *g, IMU_pnts_entry**);
@@ -45,13 +45,13 @@ int IMU_pnts_init(
   IMU_pnts_config         **pntr)
 {
   // check device count overflow
-  if (numInstPnts >= IMU_MAX_INST)
+  if (numInst >= IMU_MAX_INST)
     return IMU_PNTS_INST_OVERFLOW;
 
   // pass inst handle and config pointer
-  *id   = numInstPnts; 
+  *id   = numInst; 
   *pntr = &config[*id];
-  numInstPnts++;
+  numInst++;
   
   // initialize instance state  
   state[*id].numPnts      = 0;
@@ -75,7 +75,7 @@ int IMU_pnts_getConfig(
   IMU_pnts_config         **pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstPnts)
+  if (id >= numInst)
     return IMU_PNTS_BAD_INST; 
 
   // pass state and exit (no errors)
@@ -93,7 +93,7 @@ int IMU_pnts_getState(
   IMU_pnts_state          **pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstPnts)
+  if (id >= numInst)
     return IMU_PNTS_BAD_INST; 
 
   // pass state and exit (no errors)
@@ -113,7 +113,7 @@ int IMU_pnts_getEntry(
   IMU_pnts_entry          **pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstPnts)
+  if (id >= numInst)
     return IMU_PNTS_BAD_INST;
 
   // pass pointer to table entry
@@ -136,7 +136,7 @@ int IMU_pnts_reset(
   uint16_t                id)
 {
   // check out-of-bounds condition
-  if (id >= numInstPnts)
+  if (id >= numInst)
     return IMU_PNTS_BAD_INST;
 
   // ininitialize instance state 
@@ -160,7 +160,7 @@ int IMU_pnts_start(
   uint16_t                numPnts)
 {
   // check out-of-bounds condition
-  if (id >= numInstPnts)
+  if (id >= numInst)
     return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state 
@@ -184,7 +184,7 @@ int IMU_pnts_stop(
   uint16_t                id)
 {
   // check out-of-bounds condition
-  if (id >= numInstPnts)
+  if (id >= numInst)
     return IMU_PNTS_BAD_INST;
 
   // ininitialize inst state

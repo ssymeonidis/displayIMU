@@ -20,10 +20,11 @@
 // include statements
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "IMU_engn.h"
 
 // define constants
-const int msg_delay   = 20;
+const int msg_delay   = 200;
 const int num_samples = 10;
 
 
@@ -60,9 +61,7 @@ int main(
   }
     
   // disable core (not under test)
-  printf("here #1\n");
   status = IMU_engn_getConfig(id, IMU_engn_core, &configIMU);
-  printf("here #2 (%p) - status %d\n", configIMU.configCore, status);
   if (status < 0) {
     printf("error: IMU_engn_getSensor failure #%d\n", status);
     exit(0);
@@ -70,8 +69,7 @@ int main(
   configIMU.configCore->enable = 0;
 
   // read IMU_rect json config file
-  printf("here #3\n");
-  status = IMU_engn_load(id, "test_datum_rect.json", IMU_engn_rect);
+  status = IMU_engn_load(id, "../test_datum_rect.json", IMU_engn_rect);
   if (status < 0) {
     printf("error: IMU_engn_load failure #%d\n", status);
     exit(0);
@@ -97,6 +95,7 @@ int main(
   }
   
   // verify sensor structure
+  usleep(msg_delay);
   printf("%f, %f, %f, %f, %f, %f, %f\n", sensor->time,
     sensor->gRaw[0], sensor->gRaw[1], sensor->gRaw[2],
     sensor->gCor[0], sensor->gCor[1], sensor->gCor[2]);

@@ -37,16 +37,16 @@
 #include "IMU_core.h"
 
 // internally managed structures
-IMU_core_config  config [IMU_MAX_INST]; 
-IMU_core_state   state  [IMU_MAX_INST];
-IMU_core_FOM     staticFOM;
-uint16_t         numInstCore = 0;
+static IMU_core_config  config [IMU_MAX_INST]; 
+static IMU_core_state   state  [IMU_MAX_INST];
+static IMU_core_FOM     staticFOM;
+static uint16_t         numInst = 0;
 
 // internal functions definitions
-inline float  norm3(IMU_TYPE *in, float *out);
-inline float* norm4(float *v);
-inline float* scale(float *v, float m);  
-inline float* decrm(float *v, float *d);
+static inline float  norm3(IMU_TYPE *in, float *out);
+static inline float* norm4(float *v);
+static inline float* scale(float *v, float m);  
+static inline float* decrm(float *v, float *d);
 int IMU_core_newGyro (uint16_t id, float t, IMU_TYPE *g, IMU_core_FOM*);
 int IMU_core_newAccl (uint16_t id, float t, IMU_TYPE *a, IMU_core_FOM*);
 int IMU_core_newMagn (uint16_t id, float t, IMU_TYPE *m, IMU_core_FOM*);
@@ -62,19 +62,19 @@ int IMU_core_init(
   IMU_core_config       **pntr)
 {
   // check device count overflow
-  if (numInstCore >= IMU_MAX_INST)
+  if (numInst >= IMU_MAX_INST)
     return IMU_CORE_INST_OVERFLOW;
 
   // create pthread mutex
   #if IMU_USE_PTHREAD
-  int err  = IMU_thrd_mutex_init(&state[numInstCore].lock);
+  int err  = IMU_thrd_mutex_init(&state[numInst].lock);
   if (err) return IMU_CORE_FAILED_MUTEX;
   #endif
 
   // pass handle and config pointer
-  *id      = numInstCore; 
+  *id      = numInst; 
   *pntr    = &config[*id];
-  numInstCore++;
+  numInst++;
 
   // exit function (no errors)
   return 0;
@@ -90,7 +90,7 @@ int IMU_core_getConfig(
   IMU_core_config        **pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
 
   // pass config and exit (no errors)
@@ -108,7 +108,7 @@ int IMU_core_getState(
   IMU_core_state        **pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
 
   // pass state and exit (no errors)
@@ -125,7 +125,7 @@ int IMU_core_reset(
   uint16_t              id)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
 
   // lock before modifying state
@@ -134,7 +134,6 @@ int IMU_core_reset(
   #endif
 
   // initialize state to known value
-  printf("#3a1 - %p %p\n", &state[0], &config[0]);
   state[id].SEq[0]      = 1.0;
   state[id].SEq[1]      = 0.0;
   state[id].SEq[2]      = 0.0;
@@ -142,13 +141,11 @@ int IMU_core_reset(
   state[id].aReset      = config[id].isAccl;
   state[id].mReset      = config[id].isMagn;
   state[id].estmValid   = 0;
-  printf("#3a2 - %p\n", &config[0]);
 
   // unlock function and exit (no errors)
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_unlock(&state[id].lock);
   #endif
-  printf("#3a3 - %p\n", &config[0]);
   return 0;
 }
 
@@ -165,7 +162,7 @@ int IMU_core_zero(
   IMU_TYPE              *m_in)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST;
   if (!config[id].enable)
     return IMU_CORE_FNC_DISABLED;
@@ -215,7 +212,7 @@ int IMU_core_datum(
   IMU_core_FOM          *FOM)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
     
   // set FOM pointer to datum
@@ -245,7 +242,7 @@ int IMU_core_data3(
   IMU_core_FOM          *FOM)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
     
   // set FOM pointer to data3
@@ -294,7 +291,7 @@ int IMU_core_newGyro(
   IMU_core_FOM          *pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
 
   // initialize figure of merit
@@ -360,7 +357,7 @@ int IMU_core_newAccl(
   IMU_core_FOM          *pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST;
 
   // initialize figure of merit
@@ -486,7 +483,7 @@ int IMU_core_newMagn(
   IMU_core_FOM          *pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
 
   // initialize figure of merit
@@ -617,7 +614,7 @@ int IMU_core_estmQuat(
   float                 *estm)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
   if (!config[id].enable)
     return IMU_CORE_FNC_DISABLED;
@@ -654,7 +651,7 @@ int IMU_core_estmAccl(
   float                 *estm)
 {
   // check out-of-bounds condition
-  if (id >= numInstCore)
+  if (id >= numInst)
     return IMU_CORE_BAD_INST; 
   if (!config[id].enable)
     return IMU_CORE_FNC_DISABLED;

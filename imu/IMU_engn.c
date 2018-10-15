@@ -47,21 +47,21 @@ typedef struct {
 #endif
 
 // internally managed structures
-IMU_core_FOM      datumFOM [3];
-IMU_engn_config   config   [IMU_MAX_INST]; 
-IMU_engn_state    state    [IMU_MAX_INST];
-IMU_engn_sensor   sensor   [IMU_MAX_INST];
-uint16_t          numInstEngn = 0;
+static IMU_core_FOM      datumFOM [3];
+static IMU_engn_config   config   [IMU_MAX_INST]; 
+static IMU_engn_state    state    [IMU_MAX_INST];
+static IMU_engn_sensor   sensor   [IMU_MAX_INST];
+static uint16_t          numInst = 0;
 #if IMU_ENGN_QUEUE_SIZE
-IMU_engn_queue    engnQueue;
+static IMU_engn_queue    engnQueue;
 #endif
 #if IMU_USE_PTHREAD
-useconds_t        engnSleepTime = 100;
-pthread_mutex_t   engnLock;
-int               engnThreadID;
-pthread_t         engnThread;
-uint8_t           engnExitThread;
-uint8_t           engnIsExit;
+static useconds_t        engnSleepTime = 20;
+static pthread_mutex_t   engnLock;
+static int               engnThreadID;
+static pthread_t         engnThread;
+static uint8_t           engnExitThread;
+static uint8_t           engnIsExit;
 #endif
 
 // internally defined functions
@@ -88,57 +88,57 @@ int IMU_engn_init(
   IMU_engn_config       **pntr)
 {
   // check device count overflow
-  if (numInstEngn >= IMU_MAX_INST)
+  if (numInst >= IMU_MAX_INST)
     return IMU_ENGN_INST_OVERFLOW;
 
   // initialize config structure
   if        (type == IMU_engn_core_only) {
-    config[numInstEngn].isRect = 0;
-    config[numInstEngn].isPnts = 0;
-    config[numInstEngn].isAuto = 0;
-    config[numInstEngn].isCalb = 0;
+    config[numInst].isRect       = 0;
+    config[numInst].isPnts       = 0;
+    config[numInst].isAuto       = 0;
+    config[numInst].isCalb       = 0;
   } else if (type == IMU_engn_rect_core) {
-    config[numInstEngn].isRect = 1;
-    config[numInstEngn].isPnts = 0;
-    config[numInstEngn].isAuto = 0;
-    config[numInstEngn].isCalb = 0;
+    config[numInst].isRect       = 1;
+    config[numInst].isPnts       = 0;
+    config[numInst].isAuto       = 0;
+    config[numInst].isCalb       = 0;
   } else if (type == IMU_engn_calb_pnts) {
-    config[numInstEngn].isRect = 1;
-    config[numInstEngn].isPnts = 1;
-    config[numInstEngn].isAuto = 0;
-    config[numInstEngn].isCalb = 1;
+    config[numInst].isRect       = 1;
+    config[numInst].isPnts       = 1;
+    config[numInst].isAuto       = 0;
+    config[numInst].isCalb       = 1;
   } else if (type == IMU_engn_calb_auto) {
-    config[numInstEngn].isRect = 1;
-    config[numInstEngn].isPnts = 0;
-    config[numInstEngn].isAuto = 1;
-    config[numInstEngn].isCalb = 1;
+    config[numInst].isRect       = 1;
+    config[numInst].isPnts       = 0;
+    config[numInst].isAuto       = 1;
+    config[numInst].isCalb       = 1;
   } else if (type == IMU_engn_calb_full) {
-    config[numInstEngn].isRect = 1;
-    config[numInstEngn].isPnts = 1;
-    config[numInstEngn].isAuto = 1;
-    config[numInstEngn].isCalb = 1;
+    config[numInst].isRect       = 1;
+    config[numInst].isPnts       = 1;
+    config[numInst].isAuto       = 1;
+    config[numInst].isCalb       = 1;
   } else {
     return IMU_ENGN_BAD_ENGN_TYPE;
   }
-  config[numInstEngn].isFOM          = 0;
-  config[numInstEngn].isSensorStruct = 0;
+  config[numInst].isFOM          = 0;
+  config[numInst].isSensorStruct = 0;
   
   // initialize the quaternion reference
-  state[numInstEngn].q_ref[0]        = 1;
-  state[numInstEngn].q_ref[1]        = 0;
-  state[numInstEngn].q_ref[2]        = 0;
-  state[numInstEngn].q_ref[3]        = 0;
+  state[numInst].q_ref[0]        = 1;
+  state[numInst].q_ref[1]        = 0;
+  state[numInst].q_ref[2]        = 0;
+  state[numInst].q_ref[3]        = 0;
   
   // create IMU subsystem instances
-  IMU_engn_state *cur = &state[numInstEngn];
+  IMU_engn_state *cur = &state[numInst];
   int status = max(0,IMU_core_init(&cur->idCore, &cur->configCore));
-  if (config[numInstEngn].isRect)
+  if (config[numInst].isRect)
     status  += max(0,IMU_rect_init(&cur->idRect, &cur->configRect));
-  if (config[numInstEngn].isPnts)
+  if (config[numInst].isPnts)
     status  += max(0,IMU_pnts_init(&cur->idPnts, &cur->configPnts));
-  if (config[numInstEngn].isAuto)
+  if (config[numInst].isAuto)
     status  += max(0,IMU_auto_init(&cur->idAuto, &cur->configAuto));
-  if (config[numInstEngn].isCalb)
+  if (config[numInst].isCalb)
     status  += max(0,IMU_calb_init(&cur->idCalb, &cur->configCalb));
   if (status < 0)
     return IMU_ENGN_FAILED_SYS_INIT;
@@ -150,9 +150,9 @@ int IMU_engn_init(
   #endif
 
   // pass handle and config structure
-  *id        = numInstEngn;
+  *id        = numInst;
   *pntr      = &config[*id];
-  numInstEngn++;
+  numInst++;
 
   // ensure instance reseted to known state
   status     = IMU_engn_reset(*id);
@@ -174,7 +174,7 @@ int IMU_engn_getSysID(
   uint16_t              *sysID)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
   if (!IMU_engn_typeCheck(id, system))
     return IMU_ENGN_UNINITIALIZE_SYS;    
@@ -208,7 +208,7 @@ int IMU_engn_getConfig(
   IMU_union_config      *pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST; 
   if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
@@ -244,7 +244,7 @@ int IMU_engn_getState(
   IMU_union_state       *pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
   if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
@@ -279,7 +279,7 @@ int IMU_engn_getSensor(
   IMU_engn_sensor       **pntr)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST; 
   if (!config[id].isSensorStruct)
     return IMU_ENGN_DISABLED_SENSOR_STRUCT;
@@ -299,7 +299,7 @@ int IMU_engn_setCalbFnc(
   int                   (*pntr)(uint16_t, IMU_calb_FOM*))
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
   if (!config[id].isCalb)
     return IMU_ENGN_UNINITIALIZE_SYS;
@@ -319,6 +319,11 @@ int IMU_engn_start()
   #if IMU_ENGN_QUEUE_SIZE == 0
   return 0;
   #endif
+  
+  // initialize datum queue
+  engnQueue.first = 0;
+  engnQueue.last  = IMU_ENGN_QUEUE_SIZE - 1;
+  engnQueue.count = 0;
   
   // currently supports pthread only
   #if IMU_USE_PTHREAD
@@ -363,7 +368,7 @@ int IMU_engn_load(
   IMU_engn_system       system)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
   if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
@@ -396,7 +401,7 @@ int IMU_engn_save(
   IMU_engn_system       system)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
   if (IMU_engn_typeCheck(id, system) != 0)
     return IMU_ENGN_UNINITIALIZE_SYS;    
@@ -427,7 +432,7 @@ int IMU_engn_reset(
   uint16_t              id)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST; 
     
   // initialize sensor structure
@@ -443,10 +448,8 @@ int IMU_engn_reset(
   memset(sensor[id].mFlt, 0, 3*sizeof(IMU_TYPE));
   
   // reset all open subsystems
-  printf("#3a - %p %p\n", &state, state[0].configCore);
-  int status;
+  int status = max(0,IMU_core_reset(state[id].idCore));
   IMU_core_reset(0);
-  printf("#3b - %p %p\n", &state, state[0].configCore);
   if (config[id].isPnts)
     status  += max(0,IMU_pnts_reset(state[id].idPnts));
   if (config[id].isAuto)
@@ -470,7 +473,7 @@ int IMU_engn_setRef(
   float                 *ref)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
 
   // copy contents of input vector
@@ -492,7 +495,7 @@ int IMU_engn_setRefCur(
   uint16_t		id)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
 
   // define local variables
@@ -524,7 +527,7 @@ int IMU_engn_calbStart(
   IMU_calb_mode         mode)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
 
   // get current orientation and pass to setRef
@@ -545,7 +548,7 @@ int IMU_engn_calbSave(
   uint16_t		id)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
 
   // get current orientation and pass to setRef
@@ -568,7 +571,7 @@ int IMU_engn_datum(
   IMU_datum             *datum)
 {
   // check out-of-bounds condition
-  if (id >= numInstEngn)
+  if (id >= numInst)
     return IMU_ENGN_BAD_INST;
     
   // non-blocking call will add datum to queue
@@ -666,7 +669,7 @@ void *IMU_engn_run(
 
   // main processing loop
   engnIsExit            = 0;
-  while(engnExitThread) {
+  while(!engnExitThread) {
   
     // wait until queue contains datum
     while (engnQueue.count == 0)
@@ -825,6 +828,10 @@ int IMU_copy_results1(
   IMU_datum             *datum,
   IMU_core_FOM          *FOM)
 {
+  // copy datum time
+  sensor[id].time = datum->t;
+
+  // copy datum value
   if        (datum->type == IMU_gyro) {
     memcpy(sensor[id].gCor, datum->val, sizeof(sensor[id].gCor));
     if (FOM != NULL && FOM->isValid)
