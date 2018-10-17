@@ -296,6 +296,82 @@ int main(void)
     exit(0);
   }
 
+  // testing initalization of gyroscope related state values
+  datum.type    = IMU_gyro;
+  datum.t       = 420;
+  datum.val[0]  = 10;
+  datum.val[1]  = 20;
+  datum.val[2]  = 30;
+  status = IMU_engn_datum(id, &datum);
+  if (status < 0) {
+    printf("error: IMU_engn_datum failure #%d\n", status);
+    exit(0);
+  }
+  
+  // verify IMU_pnts state structure
+  usleep(msg_delay);
+  print_gyro(datum.t, sensor, pntsState);
+  
+  // testing initalization of gyroscope related state values
+  datum.type    = IMU_gyro;
+  datum.t       = 480;
+  datum.val[0]  = 10;
+  datum.val[1]  = 20;
+  datum.val[2]  = 30;
+  status = IMU_engn_datum(id, &datum);
+  if (status < 0) {
+    printf("error: IMU_engn_datum failure #%d\n", status);
+    exit(0);
+  }
+  
+  // verify IMU_pnts state structure
+  usleep(msg_delay);
+  print_gyro(datum.t, sensor, pntsState);
+  if (datum.t-pntsState->tStable < 60) {
+    printf("error: IMU time stability error #%d\n", status);
+    exit(0);
+  }
+  
+  // testing initalization of gyroscope related state values
+  datum.type    = IMU_gyro;
+  datum.t       = 500;
+  datum.val[0]  = 40;
+  datum.val[1]  = 40;
+  datum.val[2]  = 40;
+  status = IMU_engn_datum(id, &datum);
+  if (status < 0) {
+    printf("error: IMU_engn_datum failure #%d\n", status);
+    exit(0);
+  }
+  
+  // verify IMU_pnts state structure
+  usleep(msg_delay);
+  print_gyro(datum.t, sensor, pntsState);
+  if (pntsState->state == IMU_pnts_enum_stable) {
+    printf("error: IMU state should not be stable\n");
+    exit(0);
+  }
+   
+  // testing initalization of gyroscope related state values
+  datum.type    = IMU_gyro;
+  datum.t       = 560;
+  datum.val[0]  = 10;
+  datum.val[1]  = 20;
+  datum.val[2]  = 30;
+  status = IMU_engn_datum(id, &datum);
+  if (status < 0) {
+    printf("error: IMU_engn_datum failure #%d\n", status);
+    exit(0);
+  }
+  
+  // verify IMU_pnts state structure
+  usleep(msg_delay);
+  print_gyro(datum.t, sensor, pntsState);
+  if (pntsState->state == IMU_pnts_enum_stable) {
+    printf("error: IMU state should not be stable\n");
+    exit(0);
+  }
+   
   // exit program
   printf("pass: test_datum\n\n");
   return 0;

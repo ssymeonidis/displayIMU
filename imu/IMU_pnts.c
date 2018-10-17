@@ -312,7 +312,7 @@ int IMU_pnts_newGyro(
   float std = calc_std(state[id].gMean, g);
   apply_alpha(state[id].gMean, g, config[id].gAlpha);
 
-  // determine whether signal meets stability requirements 
+  // determine whether signal meets stability requirements
   int       stable        = 0;
   IMU_TYPE  tStable       = state[id].tStable;
   if (std > config[id].gThresh * config[id].gThresh)
