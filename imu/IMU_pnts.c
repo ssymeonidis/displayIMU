@@ -30,14 +30,14 @@ static IMU_pnts_entry   table  [IMU_MAX_INST][IMU_PNTS_SIZE];
 static uint16_t         numInst = 0;
 
 // internally defined functions
-int IMU_pnts_newGyro (uint16_t id, float t, float *g, IMU_pnts_entry**);
-int IMU_pnts_newAccl (uint16_t id, float t, float *a, IMU_pnts_entry**);
-int IMU_pnts_newMagn (uint16_t id, float t, float *m, IMU_pnts_entry**);
-inline void break_stable_state(uint16_t id);
+static inline IMU_pnts_entry* break_stable(uint16_t id, IMU_TYPE, IMU_TYPE);
+static inline float calc_std(float *val1, IMU_TYPE *val2);
+static inline void  apply_alpha(float *prev, IMU_TYPE *cur, float alpha);
+static inline void  copy_val(float *val1, IMU_TYPE *val2);
 
 
 /******************************************************************************
-* initialize new instance (constructor) 
+* function for creating new instance
 ******************************************************************************/
 
 int IMU_pnts_init(
@@ -53,13 +53,15 @@ int IMU_pnts_init(
   *pntr = &config[*id];
   numInst++;
   
-  // initialize instance state  
+  // initialize instance state
+  state[*id].state        = IMU_pnts_enum_stop;
+  state[*id].firstFrame   = 1;
   state[*id].numPnts      = 0;
   state[*id].curPnts      = 0;
-  state[*id].state        = IMU_pnts_enum_stop;
   state[*id].index        = 0; 
   state[*id].aClock       = 0;
   state[*id].mClock       = 0;
+  state[*id].current      = NULL;
   
   // exit function (no errors)
   return 0;
@@ -67,7 +69,7 @@ int IMU_pnts_init(
 
 
 /******************************************************************************
-* return config structure
+* function to return config structure
 ******************************************************************************/
 
 int IMU_pnts_getConfig( 
@@ -85,7 +87,7 @@ int IMU_pnts_getConfig(
 
 
 /******************************************************************************
-* return state structure
+* function to return state structure
 ******************************************************************************/
 
 int IMU_pnts_getState( 
@@ -103,29 +105,79 @@ int IMU_pnts_getState(
 
 
 /******************************************************************************
+* function to return number of calibration points
+******************************************************************************/
+
+int IMU_pnts_getCount(
+  uint16_t                id, 
+  uint16_t                *count)
+{
+  // initialize count
+  *count = 0;
+
+  // check out-of-bounds condition
+  if (id >= numInst)
+    return IMU_PNTS_BAD_INST;
+
+  // exit function (no errors)
+  *count = state[id].curPnts;
+  return 0;
+}
+
+
+/******************************************************************************
 * function to return instance last entry pointer
 ******************************************************************************/
 
-#if IMU_CALIB_TABLE_SIZE > 1
 int IMU_pnts_getEntry(
   uint16_t                id, 
   uint16_t                index,
   IMU_pnts_entry          **pntr)
 {
+  // initialize pointer
+  *pntr = NULL;
+
+  // check out-of-bounds condition
+  if (id >= numInst)
+    return IMU_PNTS_BAD_INST;
+  if (index >= state[id].curPnts || index >= IMU_PNTS_SIZE)
+    return IMU_PNTS_BAD_INDEX;
+
+  // pass pointer to table entry
+  int i = state[id].index - index;
+  if (i < 0)
+    i += IMU_PNTS_SIZE;
+  *pntr = &table[id][i];
+ 
+  // exit function (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* function to start instance state
+******************************************************************************/
+
+int IMU_pnts_start(
+  uint16_t                id,
+  uint16_t                numPnts)
+{
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_PNTS_BAD_INST;
 
-  // pass pointer to table entry
-  short i = index - state[id].index - 1;
-  if (i < 0)
-    i += IMU_PNTS_SIZE;
-  *pntr = &table[id][i];
+  // ininitialize inst state
+  state[id].state         = IMU_pnts_enum_reset;
+  state[id].numPnts       = numPnts;
+  state[id].curPnts       = 0;
+  state[id].index         = 0; 
+  state[id].aClock        = 0;
+  state[id].mClock        = 0;
+  state[id].current       = &table[id][0];
 
   // exit function (no errors)
   return 0;
 }
-#endif
 
 
 /******************************************************************************
@@ -140,36 +192,12 @@ int IMU_pnts_reset(
     return IMU_PNTS_BAD_INST;
 
   // ininitialize instance state 
-  state[id].curPnts             = 0;
-  state[id].state               = IMU_pnts_enum_reset;
-  state[id].index               = 0; 
-  state[id].aClock              = 0;
-  state[id].mClock              = 0;
-
-  // exit function (no errors)
-  return 0;
-}
-
-
-/******************************************************************************
-* function to reset instance state
-******************************************************************************/
-
-int IMU_pnts_start(
-  uint16_t                id,
-  uint16_t                numPnts)
-{
-  // check out-of-bounds condition
-  if (id >= numInst)
-    return IMU_PNTS_BAD_INST;
-
-  // ininitialize inst state 
-  state[id].numPnts             = numPnts;
-  state[id].curPnts             = 0;
-  state[id].state               = IMU_pnts_enum_reset;
-  state[id].index               = 0; 
-  state[id].aClock              = 0;
-  state[id].mClock              = 0;
+  state[id].state         = IMU_pnts_enum_reset;
+  state[id].curPnts       = 0;
+  state[id].index         = 0;
+  state[id].aClock        = 0;
+  state[id].mClock        = 0;
+  state[id].current       = &table[id][0];
 
   // exit function (no errors)
   return 0;
@@ -189,8 +217,12 @@ int IMU_pnts_stop(
 
   // ininitialize inst state
   state[id].state         = IMU_pnts_enum_stop;
+  state[id].numPnts       = 0;
+  state[id].curPnts       = 0;
+  state[id].index         = 0; 
   state[id].aClock        = 0;
   state[id].mClock        = 0;
+  state[id].current       = NULL;
 
   // exit function (no errors)
   return 0;
@@ -248,11 +280,11 @@ int IMU_pnts_data3(
 
 int IMU_pnts_newGyro(
   uint16_t                id,
-  float                   t,
-  float                   *g,
+  IMU_TYPE                t,
+  IMU_TYPE                *g,
   IMU_pnts_entry          **pntr)
 {
-  // initialize entry pointer to NULL
+  // initialize output to NULL
   *pntr                   = NULL;
 
   // check stop condition
@@ -260,66 +292,64 @@ int IMU_pnts_newGyro(
     return state[id].curPnts;
 
   // define the variable
-  IMU_pnts_entry *entry = &table[id][state[id].index];
+  IMU_pnts_entry *entry   = &table[id][state[id].index];
 
-  // calculate gyroscope deviation (estimates movement w/o bias) 
-  float diff;
-  float std;
-  float alpha           = config[id].gAlpha;
-  state[id].gMean[0]    = alpha * g[0] + (1-alpha) * state[id].gMean[0];
-  state[id].gMean[1]    = alpha * g[1] + (1-alpha) * state[id].gMean[1];
-  state[id].gMean[2]    = alpha * g[2] + (1-alpha) * state[id].gMean[2];
-  diff                  = state[id].gMean[0] - g[0];  
-  std                   = diff * diff;
-  diff                  = state[id].gMean[1] - g[1];  
-  std                  += diff * diff;
-  diff                  = state[id].gMean[2] - g[2];  
-  std                  += diff * diff;
+  // only update gMean given first frame
+  if (state[id].firstFrame) {
+    state[id].state       = IMU_pnts_enum_unstable;
+    state[id].firstFrame  = 0;
+    state[id].tStable     = t;
+    copy_val(state[id].gMean, g);
+    entry->tStart         = t;
+    entry->gAccum[0]      = (float)g[0];
+    entry->gAccum[1]      = (float)g[1];
+    entry->gAccum[2]      = (float)g[2];
+    return 0;
+  }
+  
+  // calculate gyroscope deviation (estimates movement w/o bias)
+  float std = calc_std(state[id].gMean, g);
+  apply_alpha(state[id].gMean, g, config[id].gAlpha);
 
   // determine whether signal meets stability requirements 
-  unsigned int stable   = 0;
+  int       stable        = 0;
+  IMU_TYPE  tStable       = state[id].tStable;
   if (std > config[id].gThresh * config[id].gThresh)
-    state[id].tStable   = t;
-  else if (t - state[id].tStable > config[id].gThreshTime) 
-    stable              = 1;
+    state[id].tStable     = t;
+  else if (t - state[id].tStable >= config[id].gInitTime)
+    stable                = 1;
 
-  // state entered upon initialization or stability break 
+  // state entered upon initialization or lost stability 
   if (state[id].state == IMU_pnts_enum_reset) {
-    entry->gAccum[0]    = g[0];
-    entry->gAccum[1]    = g[1];
-    entry->gAccum[2]    = g[2];
-    state[id].tStable   = t;
-    entry->tStart       = t;
-    state[id].state     = IMU_pnts_enum_moving;
+    state[id].state       = IMU_pnts_enum_unstable;
+    state[id].tStable     = t;
+    entry->tStart         = t;
+    entry->gAccum[0]      = g[0];
+    entry->gAccum[1]      = g[1];
+    entry->gAccum[2]      = g[2];
   } 
 
   // state occurs prior to reaching "stable" 
-  else if (state[id].state == IMU_pnts_enum_moving) {
+  else if (state[id].state == IMU_pnts_enum_unstable) {
     if (!stable) {
-      entry->gAccum[0] += g[0];
-      entry->gAccum[1] += g[1];
-      entry->gAccum[2] += g[2];
-      entry->tEnd       = t;
+      entry->gAccum[0]   += g[0];
+      entry->gAccum[1]   += g[1];
+      entry->gAccum[2]   += g[2];
+      entry->tEnd         = t;
     } else {
-      entry->gFltr[0]   = g[0];
-      entry->gFltr[1]   = g[1];
-      entry->gFltr[2]   = g[2];
-      state[id].state   = IMU_pnts_enum_stable;
-      state[id].aClock  = 1;
-      state[id].mClock  = 1;
-    } 
+      state[id].state     = IMU_pnts_enum_stable;
+      state[id].aClock    = 1;
+      state[id].mClock    = 1;
+      copy_val(entry->gFltr, g);
+    }
   }
 
   // state occurs after reaching "stable" 
   else if (state[id].state == IMU_pnts_enum_stable) {
-    if (stable) {
-      entry->gFltr[0]   = alpha * g[0] + (1 - alpha) * entry->gFltr[0];
-      entry->gFltr[1]   = alpha * g[1] + (1 - alpha) * entry->gFltr[1]; 
-      entry->gFltr[2]   = alpha * g[2] + (1 - alpha) * entry->gFltr[2];
-    } else {
-      *pntr             = entry; 
-      break_stable_state(id);
-    }
+    if (stable) 
+      apply_alpha(entry->gFltr, g, config[id].gAlpha);
+    else
+      *pntr = break_stable(id, t, tStable);
   } 
 
   // exit function
@@ -333,47 +363,36 @@ int IMU_pnts_newGyro(
 
 int IMU_pnts_newAccl(
   uint16_t                id, 
-  float                   t, 
-  float                   *a,
+  IMU_TYPE                t, 
+  IMU_TYPE                *a,
   IMU_pnts_entry          **pntr)
 {
-  // initialize entry pointer to NULL
-  *pntr                 = NULL;
+  // initialize pointer
+  *pntr                   = NULL;
 
   // verify system state (stable and sensor is enabled)  
   if (!config[id].isAccl || state[id].state != IMU_pnts_enum_stable)
     return state[id].curPnts;
 
-  // define the variable
-  IMU_pnts_entry *entry  = &table[id][state[id].index];
+  // define local variables
+  IMU_pnts_entry *entry   = &table[id][state[id].index];
 
-  // save accelerometer data
+  // clock sensor data
   if (state[id].aClock) {
-    entry->aFltr[0]     = a[0];
-    entry->aFltr[1]     = a[1];
-    entry->aFltr[2]     = a[2];
-    state[id].aClock    = 0;
+    copy_val(entry->aFltr, a);
+    state[id].aClock      = 0;
     return state[id].curPnts;
   }
 
-  // check for break-lock or bad data
-  float diff            = entry->aFltr[0] - a[0];
-  float std             = diff * diff;
-  diff                  = entry->aFltr[1] - a[1];
-  std                  += diff * diff;
-  diff                  = entry->aFltr[2] - a[2];
-  std                  += diff * diff;
+  // stability loss check
+  float std = calc_std(entry->aFltr, a);
   if (std > config[id].aThresh * config[id].aThresh) {
-    *pntr               = entry; 
-    break_stable_state(id);
+    *pntr = break_stable(id, t, state[id].tStable);
     return state[id].curPnts;
   }
 
-  // initialize figure of merit
-  float alpha           = config[id].aAlpha;
-  entry->aFltr[0]       = alpha * a[0] + (1 - alpha) * entry->aFltr[0];
-  entry->aFltr[1]       = alpha * a[1] + (1 - alpha) * entry->aFltr[1]; 
-  entry->aFltr[2]       = alpha * a[2] + (1 - alpha) * entry->aFltr[2];
+  // update points entry
+  apply_alpha(entry->aFltr, a, config[id].aAlpha);
 
   // exit function
   return state[id].curPnts;
@@ -386,47 +405,36 @@ int IMU_pnts_newAccl(
 
 int IMU_pnts_newMagn(
   uint16_t                id, 
-  float                   t, 
-  float                   *m, 
+  IMU_TYPE                t, 
+  IMU_TYPE                *m, 
   IMU_pnts_entry          **pntr)
 {
   // initialize entry pointer to NULL
-  *pntr                 = NULL;
+  *pntr                   = NULL;
 
   // verify system state (stable and sensor is enabled)
   if (!config[id].isMagn || state[id].state != IMU_pnts_enum_stable)
     return state[id].curPnts;
 
-  // define the variable
-  IMU_pnts_entry *entry = &table[id][state[id].index];
+  // define local variables
+  IMU_pnts_entry *entry   = &table[id][state[id].index];
 
-  // save accelerometer data
+  // clock sensor data
   if (state[id].mClock) {
-    entry->mFltr[0]     = m[0];
-    entry->mFltr[1]     = m[1];
-    entry->mFltr[2]     = m[2];
-    state[id].mClock    = 0;
+    copy_val(entry->mFltr, m);
+    state[id].mClock      = 0;
     return state[id].curPnts;
   }
 
-  // check for break-lock or bad data
-  float diff            = entry->mFltr[0] - m[0];
-  float std             = diff * diff;
-  diff                  = entry->mFltr[1] - m[1];
-  std                  += diff * diff;
-  diff                  = entry->mFltr[2] - m[2];
-  std                  += diff * diff;
+  // stability loss check
+  float std = calc_std(entry->mFltr, m);
   if (std > config[id].mThresh * config[id].mThresh) {
-    *pntr               = entry; 
-    break_stable_state(id);
+    *pntr = break_stable(id, t, state[id].tStable);
     return state[id].curPnts;
   }
 
-  // initialize figure of merit
-  float alpha           = config[id].mAlpha;
-  entry->mFltr[0]       = alpha * m[0] + (1 - alpha) * entry->mFltr[0];
-  entry->mFltr[1]       = alpha * m[1] + (1 - alpha) * entry->mFltr[1];
-  entry->mFltr[2]       = alpha * m[2] + (1 - alpha) * entry->mFltr[2];
+  // update points entry
+  apply_alpha(entry->mFltr, m, config[id].mAlpha);
 
   // exit function
   return state[id].curPnts;
@@ -437,15 +445,76 @@ int IMU_pnts_newMagn(
 * utility function - break stable
 ******************************************************************************/
 
-inline void break_stable_state(
-  uint16_t                id)
+inline IMU_pnts_entry* break_stable(
+  uint16_t                id,
+  IMU_TYPE                t,
+  IMU_TYPE                tStable)
 {
+  // reset state machine provided min hold time is not met
+  if (t - tStable < config[id].gInitTime + config[id].gHoldTime) {
+    state[id].state       = IMU_pnts_enum_reset;
+    return NULL;
+  }
+
+  // pass pointer to update entry and update state machine
+  IMU_pnts_entry *entry   = &table[id][state[id].index];
   state[id].curPnts++;
   state[id].index++;
   if (state[id].index >= IMU_PNTS_SIZE)
-    state[id].index         = 0;
-  if (state[id].curPnts != 0 && state[id].curPnts >= state[id].numPnts)
-    state[id].state         = IMU_pnts_enum_stop;
+    state[id].index       = 0;
+  if (state[id].numPnts != 0 && state[id].curPnts >= state[id].numPnts)
+    state[id].state       = IMU_pnts_enum_stop;
   else
-    state[id].state         = IMU_pnts_enum_reset; 
+    state[id].state       = IMU_pnts_enum_reset; 
+  return entry;
+}
+
+
+/******************************************************************************
+* utility function - apply alpha 
+******************************************************************************/
+
+inline float calc_std(
+  float                   *val1, 
+  IMU_TYPE                *val2)
+{
+  float diff              = val1[0] - (float)val2[0];  
+  float std               = diff * diff;
+  diff                    = val1[1] - (float)val2[1];  
+  std                    += diff * diff;
+  diff                    = val1[2] - (float)val2[2];  
+  std                    += diff * diff;
+  return std;
+
+}
+
+
+/******************************************************************************
+* utility function - apply alpha 
+******************************************************************************/
+
+inline void apply_alpha(
+  float                   *prev, 
+  IMU_TYPE                *cur, 
+  float                   alpha)
+{
+  prev[0]                 = alpha * (float)cur[0] + (1-alpha) * prev[0];
+  prev[1]                 = alpha * (float)cur[1] + (1-alpha) * prev[1]; 
+  prev[2]                 = alpha * (float)cur[2] + (1-alpha) * prev[2];
+
+}
+
+
+/******************************************************************************
+* utility function - apply alpha 
+******************************************************************************/
+
+inline void copy_val(
+  float                   *val1, 
+  IMU_TYPE                *val2)
+{
+  val1[0]                 = val2[0];
+  val1[1]                 = val2[1]; 
+  val1[2]                 = val2[2];
+
 }

@@ -151,6 +151,8 @@ int IMU_calb_start(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_CALB_BAD_INST;
+  if (!config[id].enable)
+    return IMU_CALB_FNC_DISABLED;
 
   // copy current entry to the table
   state[id].numPnts       = 0;
@@ -173,6 +175,8 @@ int IMU_calb_save(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_CALB_BAD_INST;
+  if (!config[id].enable)
+    return IMU_CALB_FNC_DISABLED;
 
   // copy current entry to the IMU rectify config 
   memcpy(rect, &state[id].rect, sizeof(IMU_rect_config));
@@ -194,6 +198,8 @@ int IMU_calb_status(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_CALB_BAD_INST;
+  if (!config[id].enable)
+    return IMU_CALB_FNC_DISABLED;
 
   // determine whether enough points were collected
   if (state[id].numPnts < modePnts[state[id].mode])
@@ -216,6 +222,8 @@ int IMU_calb_pnts(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_CALB_BAD_INST; 
+  if (!config[id].enable)
+    return IMU_CALB_FNC_DISABLED;
 
   // copy current entry to the table
   IMU_pnts_entry *entry = &table[id][state[id].numPnts]; 

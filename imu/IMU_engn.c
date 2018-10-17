@@ -531,7 +531,8 @@ int IMU_engn_calbStart(
     return IMU_ENGN_BAD_INST;
 
   // get current orientation and pass to setRef
-  int status = IMU_calb_start(state[id].idCalb, mode);
+  int status = max(0, IMU_pnts_start(state[id].idPnts, 0));
+  status    += max(0, IMU_calb_start(state[id].idCalb, mode));
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
@@ -681,6 +682,8 @@ void *IMU_engn_run(
     memcpy(&datum, &engnQueue.datum[engnQueue.first], sizeof(IMU_datum));
     engnQueue.count     = engnQueue.count - 1;
     engnQueue.first     = engnQueue.first + 1;
+    if (engnQueue.first >= IMU_ENGN_QUEUE_SIZE)
+      engnQueue.first   = 0;
     IMU_thrd_mutex_unlock(&engnLock);
           
     // process datum
@@ -828,24 +831,61 @@ int IMU_copy_results1(
   IMU_datum             *datum,
   IMU_core_FOM          *FOM)
 {
+  // get IMU_pnts state
+  IMU_union_state       unionState;
+  IMU_pnts_state        *pntsState;
+  if (config[id].isPnts) {
+    int status = IMU_engn_getState(id, IMU_engn_pnts, &unionState);
+    if (status < 0)
+      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+    pntsState = unionState.statePnts;
+    if (pntsState == NULL)
+      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+  }
+
   // copy datum time
   sensor[id].time = datum->t;
 
-  // copy datum value
+  // copy gyroscope info
   if        (datum->type == IMU_gyro) {
-    memcpy(sensor[id].gCor, datum->val, sizeof(sensor[id].gCor));
+    if (config[id].isRect && state[id].configRect->enable)
+      memcpy(sensor[id].gCor, datum->val, sizeof(sensor[id].gCor));
+    else
+      memset(sensor[id].gCor, 0, 3*sizeof(float));
+    if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable)
+      memcpy(sensor[id].gFlt, pntsState->current->gFltr, 3*sizeof(float));
+    else
+      memset(sensor[id].gFlt, 0, 3*sizeof(float));
     if (FOM != NULL && FOM->isValid)
       memcpy(&sensor[id].gFOM, &FOM->FOM.gyro, sizeof(IMU_core_FOM_gyro));
     else
       sensor[id].gFOM = (IMU_core_FOM_gyro){0};
+      
+  // copy accelerometer info
   } else if (datum->type == IMU_accl) {
-    memcpy(sensor[id].aCor, datum->val, sizeof(sensor[id].aCor));
+    if (config[id].isRect && state[id].configRect->enable)
+      memcpy(sensor[id].aCor, datum->val, sizeof(sensor[id].aCor));
+    else
+      memset(sensor[id].aCor, 0, 3*sizeof(float));
+    if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable)
+      memcpy(sensor[id].aFlt, pntsState->current->aFltr, 3*sizeof(float));
+    else
+      memset(sensor[id].aFlt, 0, 3*sizeof(float));
     if (FOM != NULL && FOM->isValid)
       memcpy(&sensor[id].aFOM, &FOM->FOM.accl, sizeof(IMU_core_FOM_accl));
     else
       sensor[id].aFOM = (IMU_core_FOM_accl){0};
+      
+  // copy magnetometer info
   } else if (datum->type == IMU_magn) {
-    memcpy(sensor[id].mCor, datum->val, sizeof(sensor[id].mCor));
+    if (config[id].isRect && state[id].configRect->enable)
+      memcpy(sensor[id].mCor, datum->val, sizeof(sensor[id].mCor));
+    else
+      memset(sensor[id].mCor, 0, 3*sizeof(float));
+    if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable)
+      memcpy(sensor[id].mFlt, pntsState->current->mFltr, 3*sizeof(float));
+    else
+      memset(sensor[id].mFlt, 0, 3*sizeof(float));
     if (FOM != NULL && FOM->isValid)
       memcpy(&sensor[id].gFOM, &FOM->FOM.magn, sizeof(IMU_core_FOM_magn));
     else
@@ -866,9 +906,44 @@ int IMU_copy_results3(
   IMU_data3             *data3,
   IMU_core_FOM          *FOM)
 {
-  memcpy(&sensor[id].gCor, &data3->g, sizeof(sensor[id].gCor));
-  memcpy(&sensor[id].aCor, &data3->a, sizeof(sensor[id].aCor));
-  memcpy(&sensor[id].mCor, &data3->m, sizeof(sensor[id].mCor));
+  // get IMU_pnts state
+  IMU_union_state       unionState;
+  IMU_pnts_state        *pntsState;
+  if (config[id].isPnts) {
+    int status = IMU_engn_getState(id, IMU_engn_pnts, &unionState);
+    if (status < 0)
+      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+    pntsState = unionState.statePnts;
+    if (pntsState == NULL)
+      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+  }
+
+  // copy datum time
+  sensor[id].time = data3->t;
+
+  // copy rectified data
+  if (config[id].isRect && state[id].configRect->enable) {
+    memcpy(sensor[id].gCor, data3->g, sizeof(sensor[id].gCor));
+    memcpy(sensor[id].aCor, data3->a, sizeof(sensor[id].aCor));
+    memcpy(sensor[id].mCor, data3->m, sizeof(sensor[id].mCor));
+  } else {
+    memset(sensor[id].gCor, 0, 3*sizeof(float));
+    memset(sensor[id].aCor, 0, 3*sizeof(float));
+    memset(sensor[id].mCor, 0, 3*sizeof(float));
+  }
+
+  // copy filtered data
+  if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable) {
+    memcpy(sensor[id].aFlt, pntsState->current->mFltr, 3*sizeof(float));
+    memcpy(sensor[id].gFlt, pntsState->current->mFltr, 3*sizeof(float));
+    memcpy(sensor[id].mFlt, pntsState->current->mFltr, 3*sizeof(float));
+  } else {
+    memset(sensor[id].gFlt, 0, 3*sizeof(float));
+    memset(sensor[id].aFlt, 0, 3*sizeof(float));
+    memset(sensor[id].mFlt, 0, 3*sizeof(float));
+  }
+
+  // copy figure of merit
   if (FOM != NULL && FOM[0].isValid)
     memcpy(&sensor[id].gFOM, &FOM[0].FOM.gyro, sizeof(IMU_core_FOM_gyro));
   else

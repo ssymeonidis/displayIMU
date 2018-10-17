@@ -31,6 +31,7 @@ extern "C" {
 // define error codes
 #define IMU_PNTS_INST_OVERFLOW -1
 #define IMU_PNTS_BAD_INST      -2
+#define IMU_PNTS_BAD_INDEX     -3
 
 
 // configuration structure definition
@@ -40,7 +41,8 @@ typedef struct {
   uint8_t                isMagn;          // process magnetometer data
   float                  gAlpha;          // mean/std calc filter value 
   float                  gThresh;         // no motion threshold value
-  float                  gThreshTime;     // no motion threhsold time
+  float                  gInitTime;       // no motion threhsold time
+  float                  gHoldTime;       // no motion minimum hold time
   float                  aAlpha;          // accelerometer filter value
   float                  aThresh;         // no motion threshold value
   float                  mAlpha;          // magnetometer filter value
@@ -49,33 +51,36 @@ typedef struct {
 
 // point collection internal state
 typedef enum {
-  IMU_pnts_enum_stop    = 0,
-  IMU_pnts_enum_reset   = 1,
-  IMU_pnts_enum_moving  = 2,
-  IMU_pnts_enum_stable  = 3
+  IMU_pnts_enum_stop     = 0,
+  IMU_pnts_enum_reset    = 1,
+  IMU_pnts_enum_unstable = 2,
+  IMU_pnts_enum_stable   = 3
 } IMU_pnts_enum;
 
 // subsystem state structure definition
+typedef struct IMU_pnts_entry IMU_pnts_entry;
 typedef struct {
   IMU_pnts_enum          state;
+  uint8_t                firstFrame;
   uint16_t               numPnts;
   uint16_t	         curPnts;
   uint16_t               index;
   uint8_t                aClock;
   uint8_t                mClock;
-  float                  tStable;
+  IMU_TYPE               tStable;
   float                  gMean[3];
+  IMU_pnts_entry         *current;
 } IMU_pnts_state;
 
 // define report fo calibration point
-typedef struct {
-  float                  tStart;
-  float                  tEnd;
+struct IMU_pnts_entry{
+  IMU_TYPE               tStart;
+  IMU_TYPE               tEnd;
   float                  gAccum[3];
   float                  gFltr[3];
   float                  aFltr[3]; 
   float                  mFltr[3];
-} IMU_pnts_entry;
+};
 
 
 // data structure access function
@@ -83,17 +88,21 @@ int IMU_pnts_init     (uint16_t *id, IMU_pnts_config**);
 int IMU_pnts_getConfig (uint16_t id, IMU_pnts_config**);
 int IMU_pnts_getState  (uint16_t id, IMU_pnts_state**);
 
-// points table access function
-#if IMU_CALIB_TABLE_SIZE > 1
+// points table access function (use give calib_table_size greater than one)
 int IMU_pnts_getCount  (uint16_t id, uint16_t *count);
 int IMU_pnts_getEntry  (uint16_t id, uint16_t index, IMU_pnts_entry**);
-#endif
 
 // general operation functions 
-int IMU_pnts_reset     (uint16_t id);
 int IMU_pnts_start     (uint16_t id, uint16_t numPnts);
+int IMU_pnts_reset     (uint16_t id);
+int IMU_pnts_stop      (uint16_t id);
 int IMU_pnts_datum     (uint16_t id, IMU_datum*, IMU_pnts_entry**);
 int IMU_pnts_data3     (uint16_t id, IMU_data3*, IMU_pnts_entry**);
+
+// alternate asynchronous interface
+int IMU_pnts_newGyro   (uint16_t id, IMU_TYPE t, IMU_TYPE *g, IMU_pnts_entry**);
+int IMU_pnts_newAccl   (uint16_t id, IMU_TYPE t, IMU_TYPE *a, IMU_pnts_entry**);
+int IMU_pnts_newMagn   (uint16_t id, IMU_TYPE t, IMU_TYPE *m, IMU_pnts_entry**);
 
 
 #ifdef __cplusplus

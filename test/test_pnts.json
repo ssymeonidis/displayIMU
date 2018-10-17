@@ -1,0 +1,13 @@
+{
+  "enable": true,
+  "isAccl": true,
+  "isMagn": true,
+  "gAlpha": 0.1,
+  "gThresh": 20,
+  "gInitTime": 100,
+  "gHoldTime": 100,
+  "aAlpha": 0.05,
+  "aThresh": 30,
+  "mAlpha": 0.02,
+  "mThresh": 40
+}

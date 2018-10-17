@@ -24,8 +24,9 @@
 #include "IMU_file.h"
 
 // core subsystem parsing inputs
-static const int   core_config_size = 18;
-static const char* core_config_name[] = {
+static const int   IMU_core_config_size = 19;
+static const char* IMU_core_config_name[] = {
+  "enable",
   "isGyro", 
   "isAccl",
   "isMagn",
@@ -46,29 +47,30 @@ static const char* core_config_name[] = {
   "moveAlpha"
 };
 typedef enum {
-  isGyro            = 0,
-  isAccl            = 1,
-  isMagn            = 2,
-  isStable          = 3,
-  isFOM             = 4,
-  isMove            = 5,
-  isPredict         = 6,
-  gThresh           = 7,
-  gThreshTime       = 8,
-  aWeight           = 9,
-  aMag              = 10,
-  aMagThresh        = 11,
-  mWeight           = 12,
-  mMag              = 13,
-  mMagThresh        = 14,
-  mAng              = 15,
-  mAngThresh        = 16,
-  moveAlpha         = 17
-} core_config_enum;
+  IMU_core_enable       = 0,
+  IMU_core_isGyro       = 1,
+  IMU_core_isAccl       = 2,
+  IMU_core_isMagn       = 3,
+  IMU_core_isStable     = 4,
+  IMU_core_isFOM        = 5,
+  IMU_core_isMove       = 6,
+  IMU_core_isPredict    = 7,
+  IMU_core_gThresh      = 8,
+  IMU_core_gThreshTime  = 9,
+  IMU_core_aWeight      = 10,
+  IMU_core_aMag         = 11,
+  IMU_core_aMagThresh   = 12,
+  IMU_core_mWeight      = 13,
+  IMU_core_mMag         = 14,
+  IMU_core_mMagThresh   = 15,
+  IMU_core_mAng         = 16,
+  IMU_core_mAngThresh   = 17,
+  IMU_core_moveAlpha    = 18
+} IMU_core_config_enum;
 
 // rect subsystem parsing inputs
-static const int   rect_config_size = 7;
-static const char* rect_config_name[] = {
+static const int   IMU_rect_config_size = 7;
+static const char* IMU_rect_config_name[] = {
   "enable",
   "gBias",
   "gMult",
@@ -78,43 +80,48 @@ static const char* rect_config_name[] = {
   "mMult"
 };
 typedef enum {
-  enable  = 0,
-  gBias   = 1,
-  gMult   = 2,
-  aBias   = 3,
-  aMult   = 4,
-  mBias   = 5,
-  mMult   = 6
-} rect_config_enum;
+  IMU_rect_enable       = 0,
+  IMU_rect_gBias        = 1,
+  IMU_rect_gMult        = 2,
+  IMU_rect_aBias        = 3,
+  IMU_rect_aMult        = 4,
+  IMU_rect_mBias        = 5,
+  IMU_rect_mMult        = 6
+} IMU_rect_config_enum;
 
 // pnts subsystem parsing inputs
-static const int   pnts_config_size = 9;
-static const char* pnts_config_name[] = {
+static const int   IMU_pnts_config_size = 11;
+static const char* IMU_pnts_config_name[] = {
+  "enable",
   "isAccl",
   "isMagn",
   "gAlpha",
   "gThresh",
-  "gThreshTime",
+  "gInitTime",
+  "gHoldTime",
   "aAlpha",
   "aThresh",
   "mAlpha",
   "mThresh"
 };
 typedef enum {
-  pnts_isAccl      = 0,
-  pnts_isMagn      = 1,
-  pnts_gAlpha      = 2,
-  pnts_gThresh     = 3,
-  pnts_gThreshTime = 4,
-  pnts_aAlpha      = 5,
-  pnts_aThresh     = 6,
-  pnts_mAlpha      = 7,
-  pnts_mThresh     = 8
-} pnts_config_enum;
+  IMU_pnts_enable       = 0,
+  IMU_pnts_isAccl       = 1,
+  IMU_pnts_isMagn       = 2,
+  IMU_pnts_gAlpha       = 3,
+  IMU_pnts_gThresh      = 4,
+  IMU_pnts_gInitTime    = 5,
+  IMU_pnts_gHoldTime    = 6,
+  IMU_pnts_aAlpha       = 7,
+  IMU_pnts_aThresh      = 8,
+  IMU_pnts_mAlpha       = 9,
+  IMU_pnts_mThresh      = 10
+} IMU_pnts_config_enum;
 
 // auto subsystem parsing inputs
-static const int   auto_config_size = 7;
-static const char* auto_config_name[] = {
+static const int   IMU_auto_config_size = 7;
+static const char* IMU_auto_config_name[] = {
+  "enable",
   "isGyro",
   "isAccl",
   "isMagn",
@@ -123,14 +130,15 @@ static const char* auto_config_name[] = {
   "mAlpha"
 };
 typedef enum {
-  auto_isGyro      = 0,
-  auto_isAccl      = 1,
-  auto_isMagn      = 2,
-  auto_gAlpha      = 3,
-  auto_gThresh     = 4,
-  auto_aAlpha      = 5,
-  auto_mAlpha      = 6,
-} auto_config_enum;
+  IMU_auto_enable      = 0,
+  IMU_auto_isGyro      = 0,
+  IMU_auto_isAccl      = 1,
+  IMU_auto_isMagn      = 2,
+  IMU_auto_gAlpha      = 3,
+  IMU_auto_gThresh     = 4,
+  IMU_auto_aAlpha      = 5,
+  IMU_auto_mAlpha      = 6,
+} IMU_auto_config_enum;
 
 // parsing line buffers
 #define line_size 128
@@ -139,12 +147,12 @@ static char temp[line_size];
 
 
 // internal function defintions
-int  IMU_file_getLine  (FILE *file, char **field, char **args);
-int  IMU_file_getField (char *field, const char *names[], int size);
-static int  get_floats(char *args, float *vals, int size);
-static int  get_bool(char *args, uint8_t *val);
-static void write_floats(FILE *file, float *vals, int size);
-static void write_bool(FILE *file, uint8_t val);
+static int  get_line   (FILE *file, char **field, char **args);
+static int  get_field  (char *field, const char *names[], int size);
+static int  get_floats (char *args, float *vals, int size);
+static int  get_bool   (char *args, uint8_t *val);
+static void write_floats (FILE *file, float *vals, int size);
+static void write_bool   (FILE *file, uint8_t val);
 
 
 /******************************************************************************
@@ -159,10 +167,10 @@ int IMU_file_coreLoad(
   FILE                  *file;
   char                  *field;
   char                  *args;
-  core_config_enum      type;
+  IMU_core_config_enum  type;
   int                   status;
 
-  // open configuration json file 
+  // open configuration json file
   file = fopen(filename, "r");
   if (file == NULL)
     return IMU_FILE_INVALID_FILE;
@@ -171,45 +179,47 @@ int IMU_file_coreLoad(
   while (1) {
 
     // read line and parse field/args
-    status = IMU_file_getLine(file, &field, &args);
+    status = get_line(file, &field, &args);
     if (status > 1 || status < 0)
       break;
 
-    // extract arguments for the specified field
-    type = IMU_file_getField(field, core_config_name, core_config_size);
-    if      (type == isGyro)
+    // extract specified field arguments  
+    type = get_field(field, IMU_core_config_name, IMU_core_config_size);
+    if      (type == IMU_core_enable)
+      get_bool(args, &config->enable);
+    else if (type == IMU_core_isGyro)
       get_bool(args, &config->isGyro);
-    else if (type == isAccl)
+    else if (type == IMU_core_isAccl)
       get_bool(args, &config->isAccl);
-    else if (type == isMagn)
+    else if (type == IMU_core_isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == isStable)
+    else if (type == IMU_core_isStable)
       get_bool(args, &config->isStable);
-    else if (type == isFOM)
+    else if (type == IMU_core_isFOM)
       get_bool(args, &config->isFOM);
-    else if (type == isMove)
+    else if (type == IMU_core_isMove)
       get_bool(args, &config->isMove);
-    else if (type == gThresh)
+    else if (type == IMU_core_gThresh)
       sscanf(args, "%f", &config->gThresh);
-    else if (type == gThreshTime)
+    else if (type == IMU_core_gThreshTime)
       sscanf(args, "%f", &config->gThreshTime);
-    else if (type == aWeight)
+    else if (type == IMU_core_aWeight)
       sscanf(args, "%f", &config->aWeight);
-    else if (type == aMag)
+    else if (type == IMU_core_aMag)
       sscanf(args, "%f", &config->aMag);
-    else if (type == aMagThresh)
+    else if (type == IMU_core_aMagThresh)
       sscanf(args, "%f", &config->aMagThresh);
-    else if (type == mWeight)
+    else if (type == IMU_core_mWeight)
       sscanf(args, "%f", &config->mWeight);
-    else if (type == mMag)
+    else if (type == IMU_core_mMag)
       sscanf(args, "%f", &config->mMag);
-    else if (type == mMagThresh)
+    else if (type == IMU_core_mMagThresh)
       sscanf(args, "%f", &config->mMagThresh);
-    else if (type == mAng)
+    else if (type == IMU_core_mAng)
       sscanf(args, "%f", &config->mAng);
-    else if (type == mAngThresh)
+    else if (type == IMU_core_mAngThresh)
       sscanf(args, "%f", &config->mAngThresh);
-    else if (type == moveAlpha)
+    else if (type == IMU_core_moveAlpha)
       sscanf(args, "%f", &config->moveAlpha);
   }
 
@@ -237,6 +247,7 @@ int IMU_file_coreSave(
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
+  fprintf(file, "  \"enable\": ");      write_bool(file, config->enable);
   fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
   fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
@@ -274,7 +285,7 @@ int IMU_file_rectLoad(
   FILE                  *file;
   char                  *field;
   char                  *args;
-  rect_config_enum      type;
+  IMU_rect_config_enum  type;
   int                   status;
 
   // open configuration json file 
@@ -285,27 +296,27 @@ int IMU_file_rectLoad(
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = IMU_file_getLine(file, &field, &args);
+    status = get_line(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
       break;
 
-    // extract arguments for the specified field 
-    type = IMU_file_getField(field, rect_config_name, rect_config_size);
-    if      (type == enable) 
+    // extract specified field arguments  
+    type = get_field(field, IMU_rect_config_name, IMU_rect_config_size);
+    if      (type == IMU_rect_enable) 
       get_bool(args, &config->enable);
-    else if (type == gBias) 
+    else if (type == IMU_rect_gBias) 
       get_floats(args, config->gBias, 3);
-    else if (type == gMult)
+    else if (type == IMU_rect_gMult)
       get_floats(args, config->gMult, 9);
-    else if (type == aBias)
+    else if (type == IMU_rect_aBias)
       get_floats(args, config->aBias, 3);
-    else if (type == aMult)
+    else if (type == IMU_rect_aMult)
       get_floats(args, config->aMult, 9);
-    else if (type == mBias)
+    else if (type == IMU_rect_mBias)
       get_floats(args, config->mBias, 3);
-    else if (type == mMult)
+    else if (type == IMU_rect_mMult)
       get_floats(args, config->mMult, 9);
   }
 
@@ -360,7 +371,7 @@ int IMU_file_pntsLoad(
   FILE*                 file;
   char*                 field;
   char*                 args;
-  pnts_config_enum      type;     
+  IMU_pnts_config_enum  type;     
   int                   status;
 
   // open configuration json file 
@@ -371,31 +382,35 @@ int IMU_file_pntsLoad(
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = IMU_file_getLine(file, &field, &args);
+    status = get_line(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
       break;
 
-    // extract arguments for the specified field
-    type = IMU_file_getField(field, pnts_config_name, pnts_config_size);
-    if      (type == pnts_isAccl)
+    // extract specified field arguments  
+    type = get_field(field, IMU_pnts_config_name, IMU_pnts_config_size);
+    if      (type == IMU_pnts_enable)
+      get_bool(args, &config->enable);
+    else if (type == IMU_pnts_isAccl)
       get_bool(args, &config->isAccl);
-    else if (type == pnts_isMagn)
+    else if (type == IMU_pnts_isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == pnts_gAlpha)
+    else if (type == IMU_pnts_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
-    else if (type == pnts_gThresh)
+    else if (type == IMU_pnts_gThresh)
       sscanf(args, "%f", &config->gThresh);
-    else if (type == pnts_gThreshTime)
-      sscanf(args, "%f", &config->gThreshTime);
-    else if (type == pnts_aAlpha)
+    else if (type == IMU_pnts_gInitTime)
+      sscanf(args, "%f", &config->gInitTime);
+    else if (type == IMU_pnts_gHoldTime)
+      sscanf(args, "%f", &config->gHoldTime);
+    else if (type == IMU_pnts_aAlpha)
       sscanf(args, "%f", &config->aAlpha);
-    else if (type == pnts_aThresh)
+    else if (type == IMU_pnts_aThresh)
       sscanf(args, "%f", &config->aThresh);
-    else if (type == pnts_mAlpha)
+    else if (type == IMU_pnts_mAlpha)
       sscanf(args, "%f", &config->mAlpha);
-    else if (type == pnts_mThresh)
+    else if (type == IMU_pnts_mThresh)
       sscanf(args, "%f", &config->mThresh);
   }
 
@@ -423,11 +438,13 @@ int IMU_file_pntsSave(
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
+  fprintf(file, "  \"enable\": ");      write_bool(file, config->enable);
   fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
   fprintf(file, "  \"gAlpha\": %0.2f,\n",          config->gAlpha);
   fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
-  fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
+  fprintf(file, "  \"gInitTime\": %0.2f,\n",       config->gInitTime);
+  fprintf(file, "  \"gHoldTime\": %0.2f,\n",       config->gHoldTime);
   fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
   fprintf(file, "  \"aThresh\": %0.2f,\n",         config->aThresh);
   fprintf(file, "  \"mAlpha\": %0.2f,\n",          config->mAlpha);
@@ -452,7 +469,7 @@ int IMU_file_autoLoad(
   FILE                  *file;
   char                  *field;
   char                  *args;
-  auto_config_enum      type;     
+  IMU_auto_config_enum  type;     
   int                   status;
 
   // open configuration json file 
@@ -463,25 +480,25 @@ int IMU_file_autoLoad(
   // main loop that parse json file line by line
   while (1) {
     // read line and parse field/args
-    status = IMU_file_getLine(file, &field, &args);
+    status = get_line(file, &field, &args);
     if (status == 1)
       continue;
     if (status > 1 || status < 0)
       break;
 
-    // extract arguments for the specified field
-    type = IMU_file_getField(field, auto_config_name, auto_config_size);
-    if      (type == auto_isGyro)
+    // extract specified field arguments  
+    type = get_field(field, IMU_auto_config_name, IMU_auto_config_size);
+    if      (type == IMU_auto_isGyro)
       get_bool(args, &config->isGyro);
-    else if (type == auto_isAccl)
+    else if (type == IMU_auto_isAccl)
       get_bool(args, &config->isAccl);
-    else if (type == auto_isMagn)
+    else if (type == IMU_auto_isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == auto_gAlpha)
+    else if (type == IMU_auto_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
-    else if (type == auto_aAlpha)
+    else if (type == IMU_auto_aAlpha)
       sscanf(args, "%f", &config->aAlpha);
-    else if (type == auto_mAlpha)
+    else if (type == IMU_auto_mAlpha)
       sscanf(args, "%f", &config->mAlpha);
   }
 
@@ -575,7 +592,7 @@ int IMU_file_engnSave(
 * utility function - gets a line and seperates field from arguments
 ******************************************************************************/
 
-int IMU_file_getLine(
+int get_line(
   FILE                 *file, 
   char                 **field, 
   char                 **args)
@@ -603,7 +620,7 @@ int IMU_file_getLine(
 * utility function - matches field string with respective enum type
 ******************************************************************************/
 
-int IMU_file_getField(
+int get_field(
   char                  *field, 
   const char            *names[], 
   int                   size)

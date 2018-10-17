@@ -35,9 +35,10 @@ extern "C" {
 #include "IMU_type.h"
 
 // define status codes
-#define IMU_CALB_UPDATED                 1
-#define IMU_CALB_CALBFNC_SAVED           2
-#define IMU_CALB_CALBFNC_REJECTED        3
+#define IMU_CALB_FNC_DISABLED            1
+#define IMU_CALB_UPDATED                 2
+#define IMU_CALB_CALBFNC_SAVED           3
+#define IMU_CALB_CALBFNC_REJECTED        4
 
 // define error codes
 #define IMU_CALB_INST_OVERFLOW          -1
@@ -55,6 +56,7 @@ typedef enum {
 
 // configuration structure definition
 typedef struct  {
+  uint8_t               enable;
   float                 threshFOM;
 } IMU_calb_config;
 

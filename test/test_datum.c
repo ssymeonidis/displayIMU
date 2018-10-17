@@ -24,17 +24,14 @@
 #include "IMU_engn.h"
 
 // define constants
-const int msg_delay   = 200;
-const int num_samples = 10;
+static const int msg_delay   = 200;
 
 
 /******************************************************************************
 * main function - simple test of datum queue and correction block
 ******************************************************************************/
 
-int main(
-  int                argc, 
-  char               *argv[])
+int main(void)
 {
   // define local variable
   IMU_datum          datum;
@@ -43,7 +40,6 @@ int main(
   IMU_engn_sensor    *sensor;
   uint16_t           id;
   int                status;
-  int                i;
 
   // start datum test
   printf("starting test_datum...\n");
@@ -72,7 +68,7 @@ int main(
   configIMU.configCore->enable = 0;
 
   // read IMU_rect json config file
-  status = IMU_engn_load(id, "../test_datum_rect.json", IMU_engn_rect);
+  status = IMU_engn_load(id, "../test_datum.json", IMU_engn_rect);
   if (status < 0) {
     printf("error: IMU_engn_load failure #%d\n", status);
     exit(0);
@@ -85,7 +81,7 @@ int main(
     exit(0);
   }
   
-  // inject accelerometer input
+  // inject gyroscope input
   datum.type    = IMU_gyro;
   datum.t       = 10;
   datum.val[0]  = 100;
@@ -93,7 +89,7 @@ int main(
   datum.val[2]  = 300;
   status = IMU_engn_datum(id, &datum);
   if (status < 0) {
-    printf("error: IMU_engn_start failure #%d\n", status);
+    printf("error: IMU_engn_datum failure #%d\n", status);
     exit(0);
   }
   
