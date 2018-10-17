@@ -934,8 +934,8 @@ int IMU_copy_results3(
 
   // copy filtered data
   if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable) {
-    memcpy(sensor[id].aFlt, pntsState->current->mFltr, 3*sizeof(float));
-    memcpy(sensor[id].gFlt, pntsState->current->mFltr, 3*sizeof(float));
+    memcpy(sensor[id].aFlt, pntsState->current->aFltr, 3*sizeof(float));
+    memcpy(sensor[id].gFlt, pntsState->current->gFltr, 3*sizeof(float));
     memcpy(sensor[id].mFlt, pntsState->current->mFltr, 3*sizeof(float));
   } else {
     memset(sensor[id].gFlt, 0, 3*sizeof(float));

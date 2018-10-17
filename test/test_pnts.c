@@ -247,7 +247,7 @@ int main(void)
   usleep(msg_delay);
   print_gyro(datum.t, sensor, pntsState);
   if (pntsState->state != IMU_pnts_enum_unstable) {
-    printf("error: IMU state not unstable\n", status);
+    printf("error: IMU state not unstable\n");
     exit(0);
   }
 
@@ -267,7 +267,7 @@ int main(void)
   usleep(msg_delay);
   print_gyro(datum.t, sensor, pntsState);
   if (pntsState->state != IMU_pnts_enum_stable) {
-    printf("error: IMU state not stable\n", status);
+    printf("error: IMU state not stable\n");
     exit(0);
   }
   
@@ -287,12 +287,12 @@ int main(void)
   usleep(msg_delay);
   print_gyro(datum.t, sensor, pntsState);
   if (pntsState->curPnts != 1) {
-    printf("error: min hold time violated\n", status);
+    printf("error: min hold time violated\n");
     exit(0);
   }
   verify_vector(sensor->gFlt, zero);
   if (pntsState->state == IMU_pnts_enum_stable) {
-    printf("error: IMU state should not be stable\n", status);
+    printf("error: IMU state should not be stable\n");
     exit(0);
   }
 

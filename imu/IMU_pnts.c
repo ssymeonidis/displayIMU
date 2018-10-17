@@ -21,6 +21,7 @@
 #define NULL 0
 
 // include statements 
+#include <string.h>
 #include "IMU_pnts.h"
 
 // internally managed structures
@@ -33,6 +34,7 @@ static uint16_t         numInst = 0;
 static inline IMU_pnts_entry* break_stable(uint16_t id, IMU_TYPE, IMU_TYPE);
 static inline float calc_std(float *val1, IMU_TYPE *val2);
 static inline void  apply_alpha(float *prev, IMU_TYPE *cur, float alpha);
+static inline void  accum_gyro(float *prev, IMU_TYPE *cur, IMU_TYPE t);
 static inline void  copy_val(float *val1, IMU_TYPE *val2);
 
 
@@ -301,9 +303,8 @@ int IMU_pnts_newGyro(
     state[id].tStable     = t;
     copy_val(state[id].gMean, g);
     entry->tStart         = t;
-    entry->gAccum[0]      = (float)g[0];
-    entry->gAccum[1]      = (float)g[1];
-    entry->gAccum[2]      = (float)g[2];
+    entry->tEnd           = t;
+    memset(entry->gAccum, 0, 3*sizeof(float));
     return 0;
   }
   
@@ -324,32 +325,34 @@ int IMU_pnts_newGyro(
     state[id].state       = IMU_pnts_enum_unstable;
     state[id].tStable     = t;
     entry->tStart         = t;
-    entry->gAccum[0]      = g[0];
-    entry->gAccum[1]      = g[1];
-    entry->gAccum[2]      = g[2];
+    entry->tEnd           = t;
+    memset(entry->gAccum, 0, 3*sizeof(float));
   } 
 
   // state occurs prior to reaching "stable" 
   else if (state[id].state == IMU_pnts_enum_unstable) {
     if (!stable) {
-      entry->gAccum[0]   += g[0];
-      entry->gAccum[1]   += g[1];
-      entry->gAccum[2]   += g[2];
+      accum_gyro(entry->gAccum, g, t - entry->tEnd);
       entry->tEnd         = t;
     } else {
       state[id].state     = IMU_pnts_enum_stable;
       state[id].aClock    = 1;
       state[id].mClock    = 1;
+      entry->gCount       = 1;
+      entry->aCount       = 0;
+      entry->mCount       = 0;
       copy_val(entry->gFltr, g);
     }
   }
 
   // state occurs after reaching "stable" 
   else if (state[id].state == IMU_pnts_enum_stable) {
-    if (stable) 
+    if (stable) {
       apply_alpha(entry->gFltr, g, config[id].gAlpha);
-    else
+      entry->gCount++;
+    } else {
       *pntr = break_stable(id, t, tStable);
+    }
   } 
 
   // exit function
@@ -379,8 +382,9 @@ int IMU_pnts_newAccl(
 
   // clock sensor data
   if (state[id].aClock) {
-    copy_val(entry->aFltr, a);
     state[id].aClock      = 0;
+    entry->aCount         = 1;
+    copy_val(entry->aFltr, a);
     return state[id].curPnts;
   }
 
@@ -393,6 +397,7 @@ int IMU_pnts_newAccl(
 
   // update points entry
   apply_alpha(entry->aFltr, a, config[id].aAlpha);
+  entry->aCount++;
 
   // exit function
   return state[id].curPnts;
@@ -421,8 +426,9 @@ int IMU_pnts_newMagn(
 
   // clock sensor data
   if (state[id].mClock) {
-    copy_val(entry->mFltr, m);
     state[id].mClock      = 0;
+    entry->mCount         = 1;
+    copy_val(entry->mFltr, m);
     return state[id].curPnts;
   }
 
@@ -435,6 +441,7 @@ int IMU_pnts_newMagn(
 
   // update points entry
   apply_alpha(entry->mFltr, m, config[id].mAlpha);
+  entry->mCount++;
 
   // exit function
   return state[id].curPnts;
@@ -509,12 +516,29 @@ inline void apply_alpha(
 * utility function - apply alpha 
 ******************************************************************************/
 
+inline void accum_gyro(
+  float                   *prev, 
+  IMU_TYPE                *cur, 
+  IMU_TYPE                time)
+{
+  float time_s            = (float)time / 1000000;
+  prev[0]                += time_s * (float)cur[0];
+  prev[1]                += time_s * (float)cur[1]; 
+  prev[2]                += time_s * (float)cur[2];
+
+}
+
+
+/******************************************************************************
+* utility function - apply alpha 
+******************************************************************************/
+
 inline void copy_val(
   float                   *val1, 
   IMU_TYPE                *val2)
 {
-  val1[0]                 = val2[0];
-  val1[1]                 = val2[1]; 
-  val1[2]                 = val2[2];
+  val1[0]                 = (float)val2[0];
+  val1[1]                 = (float)val2[1]; 
+  val1[2]                 = (float)val2[2];
 
 }

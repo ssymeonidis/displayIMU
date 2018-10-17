@@ -80,6 +80,9 @@ struct IMU_pnts_entry{
   float                  gFltr[3];
   float                  aFltr[3]; 
   float                  mFltr[3];
+  uint16_t               gCount;
+  uint16_t               aCount;
+  uint16_t               mCount;
 };
 
 
