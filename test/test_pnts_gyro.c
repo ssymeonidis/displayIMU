@@ -51,7 +51,7 @@ int main(void)
   int                status;
 
   // start datum test
-  printf("starting test_pnts...\n");
+  printf("starting test_pnts_gyro...\n");
 
   // initialize the IMU and its data parser
   status = IMU_engn_init(IMU_engn_calb_pnts, &id, &imuConfig);
@@ -373,7 +373,7 @@ int main(void)
   }
    
   // exit program
-  printf("pass: test_datum\n\n");
+  printf("pass: test_ptns_gyro\n\n");
   return 0;
 }
 

@@ -112,18 +112,91 @@ float* IMU_math_upFrwdToQuat(
 
 
 /******************************************************************************
-* convert quaternion to Euler angle
+* convert quaternion to Euler angles
+* https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 ******************************************************************************/
 
 float* IMU_math_quatToEuler(
   float                 *q, 
   float                 *E)
 {
-  float Q[4] = {q[0]*q[0], q[1]*q[1], q[2]*q[2], q[3]*q[3]};
-  E[0] = 180 * atan2f(2*(q[1]*q[3]+q[3]*q[0]),  Q[1]-Q[2]-Q[3]+Q[0]) / M_PI;
-  E[1] = 180 * asinf(-2*(q[1]*q[3]-q[2]*q[0])) / M_PI;
-  E[2] = 180 * atan2f(2*(q[2]*q[3]+q[1]*q[0]), -Q[1]-Q[2]+Q[3]+Q[0]) / M_PI;
-  return E;      // allows function to be used as function argument
+  // roll (x-axis rotation)
+  float sinr_cosp = 2.0 * (q[0]*q[1] + q[2]*q[3]);
+  float cosr_cosp = 1.0 - 2.0 * (q[1]*q[1] + q[2]*q[2]);
+  E[2]  = atan2(sinr_cosp, cosr_cosp);
+
+  // pitch (y-axis rotation)
+  float sinp = 2.0 * (q[0]*q[2] - q[3]*q[1]);
+  if (fabs(sinp) >= 1)
+    E[1] = copysign(M_PI/2, sinp);
+  else
+    E[1] = asin(sinp);
+
+  // yaw (z-axis rotation)
+  float siny_cosp = 2.0 * (q[0]*q[3] + q[1]*q[2]);
+  float cosy_cosp = 1.0 - 2.0 * (q[2]*q[2] + q[3]*q[3]);
+  E[0]  = atan2(siny_cosp, cosy_cosp);
+  
+  // pass Euler angle
+  return E; 
+}
+
+
+/******************************************************************************
+* convert Euler angles to quaternion
+* https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+******************************************************************************/
+
+float* IMU_math_eulerToQuat(
+  float                 *E, 
+  float                 *q)
+{
+  // angle function abreviations
+  float cy = cos(E[0] * 0.5);
+  float sy = sin(E[0] * 0.5);
+  float cr = cos(E[2] * 0.5);
+  float sr = sin(E[2] * 0.5);
+  float cp = cos(E[1] * 0.5);
+  float sp = sin(E[1] * 0.5);
+
+  // conversion to quaternion
+  q[0] = cy*cr*cp + sy*sr*sp;
+  q[1] = cy*sr*cp - sy*cr*sp;
+  q[2] = cy*cr*sp + sy*sr*cp;
+  q[3] = sy*cr*cp - cy*sr*sp;
+  return q;  
+}
+
+
+/******************************************************************************
+* convert radians to degrees
+******************************************************************************/
+
+float* IMU_math_radToDeg(
+  float                 *r, 
+  float                 *d)
+{
+  float scale = 180 / M_PI;
+  d[0]        = scale * r[0];
+  d[1]        = scale * r[1];
+  d[2]        = scale * r[2];
+  return d;
+}
+
+
+/******************************************************************************
+* convert radians to degrees
+******************************************************************************/
+
+float* IMU_math_degToRad(
+  float                 *d, 
+  float                 *r)
+{
+  float scale = M_PI / 180;
+  r[0]        = scale * d[0];
+  r[1]        = scale * d[1];
+  r[2]        = scale * d[2];
+  return r;
 }
 
 
