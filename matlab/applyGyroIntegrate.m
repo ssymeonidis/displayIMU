@@ -15,7 +15,7 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function q = applyGyro(q, gyro, dt)
+function q = applyGyroIntegrate(q, gyro, dt)
 
 tmp(1) = - 0.5*q(2)*gyro(1) - 0.5*q(3)*gyro(2) - 0.5*q(4)*gyro(3);
 tmp(2) =   0.5*q(1)*gyro(1) + 0.5*q(3)*gyro(3) - 0.5*q(4)*gyro(2);

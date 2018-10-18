@@ -15,12 +15,19 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function q = quatMultiply(in1,in2)
+% define simulation inputs/constants
+q      = [0.7, 0.3, 0.3, 0.0];
+q      = q / sqrt(sum(q.^2));
+magn   = [0, 0, 1];
+alpha  = 0.01;
+iter   = 70;
 
-q(1)  = in2(1)*in1(1) - in2(2)*in1(2) - in2(3)*in1(3) - in2(4)*in1(4);
-q(2)  = in2(1)*in1(2) + in2(2)*in1(1) - in2(3)*in1(4) + in2(4)*in1(3);
-q(3)  = in2(1)*in1(3) + in2(2)*in1(4) + in2(3)*in1(1) - in2(4)*in1(2);
-q(4)  = in2(1)*in1(4) - in2(2)*in1(3) + in2(3)*in1(2) + in2(4)*in1(1);
-
+% apply current acceleration
+FOM    = [];
+for i=1:iter
+ [q, FOM(i)] = applyMagnGradient(q, magn, alpha);
 end
+
+% graph results
+q
+plot(FOM);

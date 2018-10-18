@@ -16,20 +16,22 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 function q = quatForwardUp(f,u)
-  % normalize reference (up) vector
-  u = u./norm(u);
 
-  % ortho normalize forward vector 
-  D = sum(f.*u);
-  f = f - D*u; 
-  f = f./norm(f);
+% normalize reference (up) vector
+u = u./norm(u);
 
-  % calculate right vector
-  r = cross(u,f);
+% ortho normalize forward vector 
+D = sum(f.*u);
+f = f - D*u; 
+f = f./norm(f);
 
-  % calcuate the quaternion
-  M = [f(1), r(1), u(1); ...
-       f(2), r(2), u(2); ...
-       f(3), r(3), u(3)];
-  q = matrixToQuat(M);
+% calculate right vector
+r = cross(u,f);
+
+% calcuate the quaternion
+M = [f(1), r(1), u(1); ...
+     f(2), r(2), u(2); ...
+     f(3), r(3), u(3)];
+q = matrixToQuat(M);
+
 end

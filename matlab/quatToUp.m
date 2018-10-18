@@ -15,10 +15,29 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function out = quatToUp(q)
+%%
+% ASSUMPTION - normalized input quaternion (use quatNormalize function)
 
-out(1) =  q(4)*q(2) - q(3)*q(1) + q(2)*q(4) - q(1)*q(3);
-out(2) =  q(4)*q(3) + q(3)*q(4) + q(2)*q(1) + q(1)*q(2);
-out(3) =  q(4)*q(4) - q(3)*q(3) - q(2)*q(2) + q(1)*q(1);
+function out = quatToUp(q, method)
 
+% check number of arguments
+if (nargin < 2)
+  method = "full";
+end
+
+if (method == "full")
+  up     = [0, 0, 0, 1];
+  tmp    = quatMultiply(up,q);
+  out    = quatMultiply(quatConjugate(q),tmp);
+  out    = out(2:4);
+
+elseif (method == "optimized")
+  out(1) = 2*q(2)*q(4) - 2*q(1)*q(3);
+  out(2) = 2*q(3)*q(4) + 2*q(1)*q(2);
+  out(3) = q(4)*q(4) - q(3)*q(3) - q(2)*q(2) + q(1)*q(1);
+
+else
+  error("invalid method");
+end
+  
 end

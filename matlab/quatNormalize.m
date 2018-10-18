@@ -16,11 +16,12 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-% This function insures unit quaternins (needed for rotation quaternion)
 function q = quatNormalize(q)
-  mag_sq                = sum(q.^2);
-  if (abs(mag_sq) > 0.00001) && (abs(mag_sq-1) > 0.00001)
-    mag                 = sqrt(mag_sq);
-    q                   = q ./ mag;
-  end
+
+mag_sq                = sum(q.^2);
+if (abs(mag_sq) > 0.00001) && (abs(mag_sq-1) > 0.00001)
+  mag                 = sqrt(mag_sq);
+  q                   = q ./ mag;
+end
+
 end

@@ -478,7 +478,7 @@ int IMU_core_newAccl(
 
 int IMU_core_newMagn(
   uint16_t              id, 
-  float                 t, 
+  float                 t,
   IMU_TYPE              *m_in,
   IMU_core_FOM          *pntr)
 {

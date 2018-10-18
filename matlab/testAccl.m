@@ -16,17 +16,17 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 % define simulation inputs/constants
-q      = [0.9, 0.1, 0.1, 0] /  sqrt(sum(q.^2));
+q      = [0.7, 0.3, 0.3, 0.0];
+q      = q / sqrt(sum(q.^2));
 accl   = [0, 0, 1];
-alpha  = 0.2;
-iter   = 20;
+alpha  = 0.01;
+iter   = 70;
 
 % apply current acceleration
 FOM    = [];
 for i=1:iter
- [q, FOM(i)] = applyAccl(q, accl, alpha);
+ [q, FOM(i)] = applyAcclGradient(q, accl, alpha);
 end
 
 % graph results
 plot(FOM);
-q

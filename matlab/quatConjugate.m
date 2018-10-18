@@ -16,8 +16,8 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-% This function reports the conjegate, which is the quaternion inverse
-% provided it is of unit length.  This is needed to perform a roration
 function q = quatConjugate(q)
-  q        = [q(1), -q(2), -q(3), -q(4)];
+
+q          = [q(1), -q(2), -q(3), -q(4)];
+
 end

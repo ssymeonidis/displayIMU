@@ -21,6 +21,8 @@
 % conversions/matrixToQuaternion/
 function a = matrixToEuler(M)
 
-  a(3) = atan2(M(3,2),M(3,3));
-  a(2) = atan2(-M(3,1),sqrt(M(3,2)*M(3,2)+M(3,3)*M(3,3)));
-  a(1) = atan2(M(2,1),M(1,1));
+a(3) = atan2(M(3,2),M(3,3));
+a(2) = atan2(-M(3,1),sqrt(M(3,2)*M(3,2)+M(3,3)*M(3,3)));
+a(1) = atan2(M(2,1),M(1,1));
+
+end

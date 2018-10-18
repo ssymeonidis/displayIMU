@@ -16,20 +16,30 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-% This rotates this quaterion, representing a unit vector, by the input
-% quaternion
-function out = quatRotate(in, q, method)
-  q          = quatNormalize(q);
-  if     (method == 1)
-    in       = [0, in];
-    tmp      = quatMultiply(in,quatConjugate(q));
-    out      = quatMultiply(q,tmp);
-    out      = out(2:4);
-  elseif (method == 2)
-    u        = q(2:4);
-    s        = q(1);
-    out      = 2.0 * dot(u, in) * u    ...
-             + (s*s - dot(u, u)) * in  ...
-             + 2.0 * s * cross(u, in);
-  end
+% ASSUMPTION - normalized input quaternion (use quatNormalize function)
+
+function out = quatRotateVector(in, q, method)
+
+% check number of arguments
+if (nargin < 3)
+  method = "full";
+end
+
+if     (method == "full")
+  in       = [0, in];
+  tmp      = quatMultiply(in,quatConjugate(q));
+  out      = quatMultiply(q,tmp);
+  out      = out(2:4);
+
+elseif (method == "better")
+  u        = q(2:4);
+  s        = q(1);
+  out      =  2.0 * dot(u, in) * u    ...
+           + (s*s - dot(u, u)) * in   ...
+           + 2.0 * s * cross(u, in);
+
+else
+  error("invalid method");
+end
+
 end

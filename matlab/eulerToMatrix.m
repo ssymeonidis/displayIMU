@@ -22,15 +22,15 @@
 
 function M = eulerToMatrix(angles) 
 
-  ch = cos(angles(1));
-  sh = sin(angles(1));
-  ca = cos(angles(2));
-  sa = sin(angles(2));
-  cb = cos(angles(3));
-  sb = sin(angles(3));
+ch = cos(angles(1));
+sh = sin(angles(1));
+ca = cos(angles(2));
+sa = sin(angles(2));
+cb = cos(angles(3));
+sb = sin(angles(3));
 
-  M  = [ ca*ch,   -cb*sh + sb*sa*ch,    sb*sh + cb*sa*ch;
-         ca*sh,    cb*ch + sb*sa*sh,   -sb*ch + cb*sa*sh;
-        -sa,       sb*ca,               cb*ca]; 
+M  = [ ca*ch,   -cb*sh + sb*sa*ch,    sb*sh + cb*sa*ch;
+       ca*sh,    cb*ch + sb*sa*sh,   -sb*ch + cb*sa*sh;
+      -sa,       sb*ca,               cb*ca]; 
 
-
+end
