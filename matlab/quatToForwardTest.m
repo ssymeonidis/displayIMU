@@ -19,7 +19,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % define simulation inputs
-method          = "full";
+method          = "optimized";
 step_size_deg   = 2;
 
 % test yaw(positive sweep)
