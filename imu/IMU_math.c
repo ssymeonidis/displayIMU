@@ -164,7 +164,7 @@ float* IMU_math_eulerToQuat(
   q[1] = cy*sr*cp - sy*cr*sp;
   q[2] = cy*cr*sp + sy*sr*cp;
   q[3] = sy*cr*cp - cy*sr*sp;
-  return q;  
+  return q;
 }
 
 

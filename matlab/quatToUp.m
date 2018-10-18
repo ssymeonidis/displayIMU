@@ -26,18 +26,18 @@ if (nargin < 2)
 end
 
 if (method == "full")
-  up     = [0, 0, 0, 1];
-  tmp    = quatMultiply(up,q);
-  out    = quatMultiply(quatConjugate(q),tmp);
-  out    = out(2:4);
+  up      = [0, 0, 0, 1];
+  tmp     = quatMultiply(q, up);
+  out     = quatMultiply(tmp, quatConjugate(q));
+  out     = out(2:4);
 
 elseif (method == "optimized")
-  out(1) = 2*q(2)*q(4) - 2*q(1)*q(3);
-  out(2) = 2*q(3)*q(4) + 2*q(1)*q(2);
-  out(3) = q(4)*q(4) - q(3)*q(3) - q(2)*q(2) + q(1)*q(1);
+  out(1)  = -2*q(2)*q(4) + 2*q(1)*q(3);
+  out(2)  = -2*q(3)*q(4) - 2*q(1)*q(2);
+  out(3)  = q(4)*q(4) - q(3)*q(3) - q(2)*q(2) + q(1)*q(1);
 
 else
   error("invalid method");
 end
-  
+
 end

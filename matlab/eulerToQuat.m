@@ -16,18 +16,20 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-function q = eulerToQuat(angles)
+function q = eulerToQuat(E)
 
-cos_z                 = cos(angles(1)/2);
-cos_y                 = cos(angles(2)/2);
-cos_x                 = cos(angles(3)/2);
-sin_z                 = sin(angles(1)/2);
-sin_y                 = sin(angles(2)/2);
-sin_x                 = sin(angles(3)/2);
-    
-q(1)                  = cos_z*cos_y*cos_x + sin_z*sin_y*sin_x;
-q(2)                  = cos_z*cos_y*sin_x - sin_z*sin_y*cos_x;
-q(3)                  = cos_z*sin_y*cos_x + sin_z*cos_y*sin_x;
-q(4)                  = sin_z*cos_y*cos_y - cos_z*sin_y*sin_x;
+% angle function abreviations
+cy = cos(E(1) * 0.5);
+sy = sin(E(1) * 0.5);
+cr = cos(E(3) * 0.5);
+sr = sin(E(3) * 0.5);
+cp = cos(E(2) * 0.5);
+sp = sin(E(2) * 0.5);
+
+% conversion to quaternion
+q(1) = cy*cr*cp + sy*sr*sp;
+q(2) = cy*sr*cp - sy*cr*sp;
+q(3) = cy*cr*sp + sy*sr*cp;
+q(4) = sy*cr*cp - cy*sr*sp;
 
 end

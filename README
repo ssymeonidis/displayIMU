@@ -12,16 +12,20 @@ The displayIMU project provides an Inertial Measurement Unit (IMU) that takes
 in gyroscope, accelerometer, and magnetoeter data and estimates an orientation,
 i.e. where the system is pointed.  Also available is an acceleration estimate
 minus gravity.  Orientation is represeted as a quaternion, but math utilities
-are provided to convert that state into Euler angles along with applying a user
-specified reference.  The "core" IMU codebase is written in C and is configured
-to create a shared object file that can be statically or dynamically linked into
-another application.
+are provided to convert that state into Euler angles.  The "core" IMU codebase
+is written in C and is configured to create a shared object file that can be
+statically or dynamically linked into another application.
 
-The algorithm assumes the following: x points forward, y points right, and z points up.  A 3x3 tranformation is avaible to swap/invert axes for each sensor
+The algorithm uses a right-handed coordinate system, where positive x, y, and z axes face forward, right, and up.  Under nominal conditions, i.e. no yaw, pitch, or roll, the acclerometer y value should be positive (x and z being near zero) 
+and the magnetometer z value should be positive (y being negative and z being near zero).  A 3x3 tranformation is avaible to swap/invert axes for each sensor
 and a reference is available to "tear" or rotate the final quaternion into the
-final coordinate system.  The algorithm supports synchronous and asychronous
-sensors.  For synchronous operation, use the "data3" data structure, along with
-its corresponding data calls.  Otherwise, use the "datum" interface associated.
+final coordinate system.  
+
+The software supports both synchronous and asychronous sensors.  For synchronous
+operation, use the "data3" data structure, along with its corresponding function
+calls.  Otherwise, use the "datum" interface associated.  If the multi-threaded 
+compiler directive is enabled (see setenv.sh), asynchronous data can be read in
+a queue, enabling a non-blocking input/output interface.  
 
 Also provided is a QT application that provides the tools to diplay IMU data,
 read/write calibration/configuration files, and stream live raw data via UPD or 
