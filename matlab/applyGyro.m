@@ -1,7 +1,7 @@
 % This file is part of quaternion-based displayIMU C++/QT code base
 % (https://github.com/ssymeonidis/displayIMU.git)
 % Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
-% Time (SMRT) Processing Solutions
+% Time (SMRT) Processing Solutions)
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -15,21 +15,13 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function q = quatForwardUp(f,u)
-  % normalize reference (up) vector
-  u = u./norm(u);
+function q = applyGyro(q, gyro, dt)
 
-  % ortho normalize forward vector 
-  D = sum(f.*u);
-  f = f - D*u; 
-  f = f./norm(f);
+tmp(1) = - 0.5*q(2)*gyro(1) - 0.5*q(3)*gyro(2) - 0.5*q(4)*gyro(3);
+tmp(2) =   0.5*q(1)*gyro(1) + 0.5*q(3)*gyro(3) - 0.5*q(4)*gyro(2);
+tmp(3) =   0.5*q(1)*gyro(2) - 0.5*q(2)*gyro(3) + 0.5*q(4)*gyro(1);
+tmp(4) =   0.5*q(1)*gyro(3) + 0.5*q(2)*gyro(2) - 0.5*q(3)*gyro(1);
+q      =   q + dt*tmp;
 
-  % calculate right vector
-  r = cross(u,f);
-
-  % calcuate the quaternion
-  M = [f(1), r(1), u(1); ...
-       f(2), r(2), u(2); ...
-       f(3), r(3), u(3)] 
-  q = matrixToQuat(M);
 end
+

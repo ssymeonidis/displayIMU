@@ -2,7 +2,7 @@
  * This file is part of quaternion-based displayIMU C/C++/QT code base
  * (https://github.com/ssymeonidis/displayIMU.git)
  * Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
- * Time (SMRT) Processing Solutions
+ * Time (SMRT) Processing Solutions)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  * documented in the paper "An efficient orientation Filter for inertial and
  * inertial/magnetic sensor arrays. Changes were made to turn on/off sensors 
  * and to adapted the filter for human activity recoginition.  Significant
- * changes were made for adding hooks and increasing readabilty 
+ * changes were made for adding hooks and increasing readabilty.
 */
 
 // definitions (increased readability)

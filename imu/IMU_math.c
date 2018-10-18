@@ -2,7 +2,7 @@
  * This file is part of quaternion-based displayIMU C/C++/QT code base
  * (https://github.com/ssymeonidis/displayIMU.git)
  * Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
- * Time (SMRT) Processing Solutions
+ * Time (SMRT) Processing Solutions)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 ******************************************************************************/
 
 float* IMU_math_quatToUp(
-  float*                q, 
+  float*                q,
   float*                v)
 {
   v[0]                  =  q[3]*q[1] - q[2]*q[0] + q[1]*q[3] - q[0]*q[2];

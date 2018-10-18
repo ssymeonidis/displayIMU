@@ -1,7 +1,7 @@
 % This file is part of quaternion-based displayIMU C++/QT code base
 % (https://github.com/ssymeonidis/displayIMU.git)
 % Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
-% Time (SMRT) Processing Solutions
+% Time (SMRT) Processing Solutions)
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -16,15 +16,21 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-% convert quaternion to matrix
-function M = quatToMatrix(q)
+% This function will convert a quaternion to a rotation matrix 
+% based on http://www.euclideanspace.com/maths/geometry/rotations/
+% conversions/matrixToQuaternion/
 
-q = quatNormalize(q);
-w = q(1);
-x = q(2);
-y = q(3);
-z = q(4);
+function M = eulerToMatrix(angles) 
 
-M = [1-2*y*y-2*z*z,    2*x*y-2*w*z,    2*x*z+2*w*y;
-       2*x*y+2*w*z,  1-2*x*x-2*z*z,    2*y*z-2*w*x;
-       2*x*z-2*w*y,    2*y*z+2*w*x,  1-2*x*x-2*y*y]; 
+  ch = cos(angles(1));
+  sh = sin(angles(1));
+  ca = cos(angles(2));
+  sa = sin(angles(2));
+  cb = cos(angles(3));
+  sb = sin(angles(3));
+
+  M  = [ ca*ch,   -cb*sh + sb*sa*ch,    sb*sh + cb*sa*ch;
+         ca*sh,    cb*ch + sb*sa*sh,   -sb*ch + cb*sa*sh;
+        -sa,       sb*ca,               cb*ca]; 
+
+

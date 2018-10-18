@@ -1,7 +1,7 @@
 % This file is part of quaternion-based displayIMU C++/QT code base
 % (https://github.com/ssymeonidis/displayIMU.git)
 % Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
-% Time (SMRT) Processing Solutions
+% Time (SMRT) Processing Solutions)
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -15,11 +15,18 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-% Multipling two quaternions
-function q = quatMultiply(in1,in2)
-  q(1)  = in2(1)*in1(1) - in2(2)*in1(2) - in2(3)*in1(3) - in2(4)*in1(4);
-  q(2)  = in2(1)*in1(2) + in2(2)*in1(1) - in2(3)*in1(4) + in2(4)*in1(3);
-  q(3)  = in2(1)*in1(3) + in2(2)*in1(4) + in2(3)*in1(1) - in2(4)*in1(2);
-  q(4)  = in2(1)*in1(4) - in2(2)*in1(3) + in2(3)*in1(2) + in2(4)*in1(1);
+% define simulation inputs/constants
+q      = [0.9, 0.1, 0.1, 0] /  sqrt(sum(q.^2));
+accl   = [0, 0, 1];
+alpha  = 0.2;
+iter   = 20;
+
+% apply current acceleration
+FOM    = [];
+for i=1:iter
+ [q, FOM(i)] = applyAccl(q, accl, alpha);
 end
+
+% graph results
+plot(FOM);
+q

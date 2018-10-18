@@ -1,7 +1,7 @@
 % This file is part of quaternion-based displayIMU C++/QT code base
 % (https://github.com/ssymeonidis/displayIMU.git)
 % Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
-% Time (SMRT) Processing Solutions
+% Time (SMRT) Processing Solutions)
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by

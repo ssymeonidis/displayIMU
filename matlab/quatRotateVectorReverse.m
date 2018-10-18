@@ -1,7 +1,7 @@
 % This file is part of quaternion-based displayIMU C++/QT code base
 % (https://github.com/ssymeonidis/displayIMU.git)
 % Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
-% Time (SMRT) Processing Solutions
+% Time (SMRT) Processing Solutions)
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ function out = quatRotateReverse(in,q)
                 2*in(3)*(q(1)*q(2)+q(3)*q(4))     , ...
                 2*in(1)*(q(1)*q(3)+q(2)*q(4))     + ...
                 2*in(2)*(q(3)*q(4)-q(1)*q(2))     + ...
-                2*in(3)*(0.5-q(2)*q(2)-q(3)*q(3))]
+                2*in(3)*(0.5-q(2)*q(2)-q(3)*q(3))];
   end 
 end
 

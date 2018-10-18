@@ -2,7 +2,7 @@
  * This file is part of quaternion-based displayIMU C/C/C++/QT code base
  * (https://github.com/ssymeonidis/displayIMU.git)
  * Copyright (c) 2018 Simeon Symeonidis (formerly Sensor Management Real
- * Time (SMRT) Processing Solutions
+ * Time (SMRT) Processing Solutions)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,17 @@
 extern "C" {
 #endif
 
-// modify/convert quaternion functions
+// converting between quaternions and pointing vectors
 float* IMU_math_quatToUp     (float *q, float *v);
 float* IMU_math_quatToFrwd   (float *q, float *v);
 float* IMU_math_upFrwdToQuat (float *u, float *f, float *q);
+
+// converting between quaternions and Euler angles
 float* IMU_math_quatToEuler  (float *q, float *E);
 float* IMU_math_eulerToQuat  (float *E, float *q);
 float* IMU_math_radToDeg     (float *r, float *d);
 float* IMU_math_degToRad     (float *d, float *r);
+
 float* IMU_math_applyRef     (float *q, float *ref, float *q_out);
 
 #ifdef __cplusplus
