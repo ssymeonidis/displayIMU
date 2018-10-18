@@ -21,7 +21,7 @@ function plotVector(varargin)
 % internal constants
 grid_count = 9;
 max_val    = 1;
-color      = {'red', 'blue', 'green'};
+color      = {'red', 'green', 'blue'};
 
 % clear plot area
 newplot;
@@ -34,15 +34,20 @@ for i=-max_val:spacing:max_val
   plot3([i, i], [-max_val, max_val], [0, 0], 'Color', [0.1, 0.1, 0.1]);
 end
 
-% draw vector(s)
-for i = 1:length(varargin)
+% draw shaddows(s)
+for i = length(varargin):-1:1
   val = varargin{i};
-  plot3([0, val(1)], [0, val(2)], [0, val(3)], 'LineWidth', 5, 'Color', color{i});
   plot3([0, val(1)], [0, val(2)], [0, 0],      'LineWidth', 2, 'Color', color{i});
 end
-hold off;
+
+% draw vector(s)
+for i = length(varargin):-1:1
+  val = varargin{i};
+  plot3([0, val(1)], [0, val(2)], [0, val(3)], 'LineWidth', 5, 'Color', color{i});
+end
 
 % ensure "zero" will be center of plot
+hold off;
 axis([-max_val, max_val, -max_val, max_val, -max_val, max_val]);
 set(gca,'Ydir','reverse');
 

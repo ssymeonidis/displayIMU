@@ -18,25 +18,18 @@
 %%
 % ASSUMPTION - normalized input quaternion (use quatNormalize function)
 
-function out = quatRotateVector(in, q, method)
+function out = quatToForward(q, method)
 
 % check number of arguments
-if (nargin < 3)
+if (nargin < 2)
   method = "full";
 end
 
-if     (method == "full")
-  in       = [0, in];
-  tmp      = quatMultiply(in,quatConjugate(q));
-  out      = quatMultiply(q,tmp);
-  out      = out(2:4);
-
-elseif (method == "better")
-  u        = q(2:4);
-  s        = q(1);
-  out      =  2.0 * dot(u, in) * u    ...
-           + (s*s - dot(u, u)) * in   ...
-           + 2.0 * s * cross(u, in);
+if (method == "full")
+  forward = [0, 1, 0, 0];
+  tmp     = quatMultiply(q, forward);
+  out     = quatMultiply(tmp, quatConjugate(q));
+  out     = out(2:4);
 
 else
   error("invalid method");
