@@ -17,7 +17,7 @@
 
 % This function is based off the work performed by Sebastian O.H. Madgwick,
 % documented in the paper "An efficient orientation Filter for inertial and
-% inertial/magnetic sensor arrays. 
+% inertial/magnetic sensor arrays".
 
 %%
 % ASSUMPTION - normalized input quaternion (use quatNormalize function)

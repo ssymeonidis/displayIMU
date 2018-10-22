@@ -19,31 +19,51 @@
 clear all; close all;
 
 % test zero-pitch, zero-tilt
-q      = [0.7, 0.3, 0.3, 0.0];
-q      = q / sqrt(sum(q.^2));
+euler  = [15, 15, 15];
 accl   = [0, 0, 1];
-run_sim(q, accl);
+run_sim(euler, accl)
 
 % test 90deg-pitch, zero-tilt
-% q      = [sqrt(0.5), 0.0, sqrt(0.5), 0.1];
-% q      = q / sqrt(sum(q.^2));
-% accl   = [1, 0, 0];
-% run_sim(q, accl);
+euler  = [15, 75, 15];
+accl   = [-1, 0, 0];
+run_sim(euler, accl)
+
+% test zero-pitch, 90deg-tilt
+euler  = [15, 15, 75];
+accl   = [0, 1, 0];
+run_sim(euler, accl)
+
+% test zero-pitch, 180deg-tilt
+euler  = [15, 15, 165];
+accl   = [0, 0, -1];
+run_sim(euler, accl)
+
+% test neg90-pitch, zero-tilt
+euler  = [-15, -75, -15];
+accl   = [1, 0, 0];
+run_sim(euler, accl)
+
+% test zero-pitch, neg90-tilt
+euler  = [-15, -15, -75];
+accl   = [0, -1, 0];
+run_sim(euler, accl)
 
 
-
-
-%% updates the display
+%% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function run_sim(q, accl)
+function euler = run_sim(euler, accl)
 
   % define local constants
-  alpha  = 0.01;
-  iter   = 100;
-  method = "gradient";
+  alpha      = 0.005;
+  iter       = 100;
+  method     = "gradient";
 
-  figure(1);
+  % convert orientation angles to quaternion
+  euler_rad  = pi * euler / 180;
+  q          = eulerToQuat(euler_rad);
+  
+  % main processing loop
   FOM    = [];
   for i=1:iter
     if     (method == "gradient")
@@ -51,12 +71,12 @@ function run_sim(q, accl)
     elseif (method == "rotate")
       q           = applyAcclRotate   (q, accl, alpha);
     end
-  display_state(q);
+    display_state(q);
   end
 
-  % graph results
-  figure;
-  plot(FOM); 
+  % print results
+  euler_rad  = quatToEuler(q);
+  euler      = 180 * euler_rad / pi;
 end
 
 
@@ -68,7 +88,7 @@ function display_state(q)
   f             = quatRotate([1, 0, 0], q, "full");
   r             = quatRotate([0, 1, 0], q, "full");
   plotVector(u, f, r);
-  title('eulerToQuatTest');
+  title('applyAcclTest');
   delete(findall(gcf,'type','annotation'));
   loc           = [.75 .67 .6 .3];
   str{1}        = 'red = up';

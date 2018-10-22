@@ -17,7 +17,7 @@
 
 % This function is based off the work performed by Sebastian O.H. Madgwick,
 % documented in the paper "An efficient orientation Filter for inertial and
-% inertial/magnetic sensor arrays. 
+% inertial/magnetic sensor arrays".
 
 %%
 % ASSUMPTION - normalized input quaternion (use quatNormalize function)
@@ -28,17 +28,17 @@ function [q, FOM] = applyMagnGradient(q, magn, alpha)
 magn        = magn / sqrt(sum(magn.^2));
 
 % compute the objective function 
-twox        = 2 * magn(3);
-twoz        = 2 * magn(1);
+twox        = 2 * magn(1);
+twoz        = 2 * magn(3);
 q1_q3       = q(1) * q(3);
 q2_q4       = q(2) * q(4);
 q3_q3       = q(3) * q(3);
 f_4         = twox * (0.5 - q3_q3 - q(4)*q(4)) +           ...
-              twoz * (q2_q4 - q1_q3) - magn(3);
+              twoz * (q2_q4 - q1_q3) - magn(1);
 f_5         = twox * (q(2)*q(3) - q(1)*q(4)) +                 ...
               twoz * (q(1)*q(2) + q(3)*q(4)) - magn(2);
 f_6         = twox * (q1_q3 + q2_q4) +                         ...
-              twoz * (0.5 - q(2)*q(2) - q3_q3) - magn(1);
+              twoz * (0.5 - q(2)*q(2) - q3_q3) - magn(3);
 
 % compute the Jacobian
 twox_q      = twox * q;

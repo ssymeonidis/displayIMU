@@ -18,23 +18,62 @@
 % initialize simulation
 clear all; close all;
 
-% define simulation inputs/constants
-q      = [0.7, 0.3, 0.3, 0.0];
-q      = q / sqrt(sum(q.^2));
+% % test 0deg-yaw
+euler  = [15, 15, 15];
 magn   = [1, 0, 0];
-alpha  = 0.01;
-iter   = 70;
+run_sim(euler, magn)
+% 
+% % test 45deg-yaw (works)
+% euler  = [35, 5, 5];
+% magn   = [1, -1, 0];
+% run_sim(euler, magn)
+% 
+% % test neg45deg-yaw
+% euler  = [-35, 5, 5];
+% magn   = [1, 1, 0];
+% run_sim(euler, magn)
+% 
+% % test 135deg-yaw <- produces -45deg
+% euler  = [-35, 5, 5];
+% magn   = [-1, -1, 0];
+% run_sim(euler, magn)
+% 
+% % test 45deg-yaw (works)
+% euler  = [35, 5, 5];
+% magn   = [-1, 1, 0];
+% run_sim(euler, magn)
 
-% apply current acceleration
-FOM    = [];
-for i=1:iter
- [q, FOM(i)] = applyMagnGradient(q, magn, alpha);
-  display_state(q);
+% test neg45deg-yaw
+% euler  = [75, 5, 5];
+% magn   = [0, 0, 1];
+% run_sim(euler, magn)
+
+
+%% run simulation given specified inputs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function euler = run_sim(euler, magn)
+
+  % define local constants
+  alpha  = 0.005;
+  iter   = 300;
+
+  % convert orientation angles to quaternion
+  euler_rad  = pi * euler / 180;
+  q          = eulerToQuat(euler_rad);
+  
+  % main processing loop
+  figure(1);
+  FOM    = [];
+  for i=1:iter
+    [q, FOM(i)] = applyMagnGradient(q, magn, alpha);
+    display_state(q);
+  end
+  
+  % print results
+  euler_rad  = quatToEuler(q);
+  euler      = 180 * euler_rad / pi;
 end
-
-% graph results
-figure;
-plot(FOM);
 
 
 %% main function (performs conversion and generates plot)
