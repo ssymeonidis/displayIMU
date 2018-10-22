@@ -15,18 +15,34 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-% define simulation inputs/constants
-q      = [0.7, 0.3, 0.3, 0.0];
-q      = q / sqrt(sum(q.^2));
-accl   = [0, 0, 1];
-alpha  = 0.01;
-iter   = 70;
+% This function is based off the work performed by Sebastian O.H. Madgwick,
+% documented in the paper "An efficient orientation Filter for inertial and
+% inertial/magnetic sensor arrays. 
 
-% apply current acceleration
-FOM    = [];
-for i=1:iter
- [q, FOM(i)] = applyAcclGradient(q, accl, alpha);
+%%
+% ASSUMPTION - normalized input quaternion (use quatNormalize function)
+
+function [q, FOM] = applyAcclRotate(q, accl, alpha, method)
+
+% normalize the acceleration vector
+accl       = accl / sqrt(sum(accl.^2));
+
+% check number of arguments
+if (nargin < 4)
+  method = "full";
 end
 
-% graph results
-plot(FOM);
+if (method == "full")
+  
+  % normalize the acceleration vector
+  mag        = sqrt(sum(accl.^2));
+  if (mag > 0.001)
+    accl     = accl / mag;
+  end
+
+  % find the rotational difference
+  q_delta    = quatRotateDiff(accl, q);
+  q          = qRotate(q, q_delta);
+end
+
+end

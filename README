@@ -16,8 +16,8 @@ are provided to convert that state into Euler angles.  The "core" IMU codebase
 is written in C and is configured to create a shared object file that can be
 statically or dynamically linked into another application.
 
-The algorithm uses a right-handed coordinate system, where positive x, y, and z axes face forward, right, and up.  Under nominal conditions, i.e. no yaw, pitch, or roll, the acclerometer y value should be positive (x and z being near zero) 
-and the magnetometer z value should be positive (y being negative and z being near zero).  A 3x3 tranformation is avaible to swap/invert axes for each sensor
+The algorithm uses a right-handed coordinate system, where positive x, y, and z axes face forward, right, and up.  Under nominal conditions, i.e. no yaw, pitch, or roll, the acclerometer z value should be positive (x and z being near zero) 
+and the magnetometer x value should be positive (y being negative and z being near zero).  A 3x3 tranformation is avaible to swap/invert axes for each sensor
 and a reference is available to "tear" or rotate the final quaternion into the
 final coordinate system.  
 

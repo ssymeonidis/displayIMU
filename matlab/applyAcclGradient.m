@@ -25,7 +25,10 @@
 function [q, FOM] = applyAcclGradient(q, accl, alpha)
 
 % normalize the acceleration vector
-accl       = accl / sqrt(sum(accl.^2));
+mag        = sqrt(sum(accl.^2));
+if (mag > 0.001)
+  accl     = accl / mag;
+end
 
 % compute the objective function 
 two_q      = 2 * q;

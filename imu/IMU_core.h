@@ -70,8 +70,8 @@ typedef struct {
 // subsystem state structure definition
 typedef struct {
   float                t;              // last datum time
-  float                tMove ;         // last "unstable" time
-  float                SEq[4];         // current quaterion
+  float                tMove;          // last "unstable" time
+  float                q[4];           // current quaterion
   float                A[3];           // last acceleration estimate
   unsigned char        aReset;         // accelerometer reset signal
   unsigned char        mReset;         // magnetometer reset signal

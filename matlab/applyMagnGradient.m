@@ -28,16 +28,17 @@ function [q, FOM] = applyMagnGradient(q, magn, alpha)
 magn        = magn / sqrt(sum(magn.^2));
 
 % compute the objective function 
-twox        = 2 * magn(1);
-twoz        = 2 * magn(3);
+twox        = 2 * magn(3);
+twoz        = 2 * magn(1);
 q1_q3       = q(1) * q(3);
 q2_q4       = q(2) * q(4);
-f_4         = twox * (0.5 - q(3)*q(3) - q(4)*q(4)) +           ...
-              twoz * (q2_q4 - q1_q3) - magn(1);
+q3_q3       = q(3) * q(3);
+f_4         = twox * (0.5 - q3_q3 - q(4)*q(4)) +           ...
+              twoz * (q2_q4 - q1_q3) - magn(3);
 f_5         = twox * (q(2)*q(3) - q(1)*q(4)) +                 ...
-              twoz * (q(1)*q(2) + q(3)*q(4)) - magn(1);
+              twoz * (q(1)*q(2) + q(3)*q(4)) - magn(2);
 f_6         = twox * (q1_q3 + q2_q4) +                         ...
-              twoz * (0.5 - q(2)*q(2) - q(3)*q(3)) - magn(3);
+              twoz * (0.5 - q(2)*q(2) - q3_q3) - magn(1);
 
 % compute the Jacobian
 twox_q      = twox * q;

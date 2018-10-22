@@ -25,17 +25,22 @@ extern "C" {
 #endif
 
 // converting between quaternions and pointing vectors
-float* IMU_math_quatToUp     (float *q, float *v);
-float* IMU_math_quatToFrwd   (float *q, float *v);
-float* IMU_math_upFrwdToQuat (float *u, float *f, float *q);
+float* IMU_math_quatToUp      (float *q, float *v);
+float* IMU_math_quatToFrwd    (float *q, float *v);
+float* IMU_math_upFrwdToQuat  (float *u, float *f, float *q);
 
 // converting between quaternions and Euler angles
-float* IMU_math_quatToEuler  (float *q, float *E);
-float* IMU_math_eulerToQuat  (float *E, float *q);
-float* IMU_math_radToDeg     (float *r, float *d);
-float* IMU_math_degToRad     (float *d, float *r);
+float* IMU_math_quatToEuler   (float *q, float *E);
+float* IMU_math_eulerToQuat   (float *E, float *q);
+float* IMU_math_radToDeg      (float *r, float *d);
+float* IMU_math_degToRad      (float *d, float *r);
 
-float* IMU_math_applyRef     (float *q, float *ref, float *q_out);
+// core filters
+int    IMU_math_estmAccl      (float *q, float *a, float alpha, float *FOM);
+int    IMU_math_estmMagn      (float *q, float *m, float alpha, float *FOM);
+float  IMU_math_calcWeight    (float val, float ref, float thresh);
+
+float* IMU_math_applyRef      (float *q, float *ref, float *q_out);
 
 #ifdef __cplusplus
 }

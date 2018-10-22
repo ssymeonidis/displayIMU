@@ -16,8 +16,6 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-% This rotates this quaterion, representing a unit vector, by the input
-% quaternion
 function out = quatRotateDiff(q1, q2)
 
 out = quatMultiply(q2, quatConjugate(q1));
