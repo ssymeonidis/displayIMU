@@ -36,19 +36,11 @@ f_1        = two_q(2)*q(4) - two_q(1)*q(3) - accl(1);
 f_2        = two_q(1)*q(2) + two_q(3)*q(4) - accl(2);
 f_3        = 1 - two_q(2)*q(2) - two_q(3)*q(3) - accl(3);
 
-% compute the Jacobian
-J_11       = two_q(3);
-J_12       = two_q(4);
-J_13       = two_q(1);
-J_14       = two_q(2);
-J_32       = 2*J_14;
-J_33       = 2*J_11;
-
 % calculate the gradient
-qHatDot    = [J_14*f_2 - J_11*f_1,              ...
-              J_12*f_1 + J_13*f_2 - J_32*f_3,   ...
-              J_12*f_2 - J_33*f_3 - J_13*f_1,   ...
-              J_14*f_1 + J_11 * f_2];
+qHatDot    = [two_q(2)*f_2 - two_q(3)*f_1,                    ...
+              two_q(4)*f_1 + two_q(1)*f_2 - 2*two_q(2)*f_3,   ...
+              two_q(4)*f_2 - 2*two_q(3)*f_3 - two_q(1)*f_1,   ...
+              two_q(2)*f_1 + two_q(3)*f_2];
 
 % apply the gradient to q
 mag        = sqrt(sum(qHatDot.^2));

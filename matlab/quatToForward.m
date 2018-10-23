@@ -33,7 +33,7 @@ if (method == "full")
 
 elseif (method == "optimized")
 
-  out(1) = q(1)*q(1) - q(2)*q(2) - q(3)*q(3) - q(4)*q(4);
+  out(1) =  q(1)*q(1) - q(2)*q(2) - q(3)*q(3) - q(4)*q(4);
   out(2) =  2*q(1)*q(4) - 2*q(2)*q(3);
   out(3) = -2*q(1)*q(3) + 2*q(2)*q(4);
 

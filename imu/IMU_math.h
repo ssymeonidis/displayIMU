@@ -37,7 +37,8 @@ float* IMU_math_degToRad      (float *d, float *r);
 
 // core filters
 int    IMU_math_estmAccl      (float *q, float *a, float alpha, float *FOM);
-int    IMU_math_estmMagn      (float *q, float *m, float alpha, float *FOM);
+int    IMU_math_estmMagnRef   (float *q, float *m, float refx,  float refz, 
+                               float alpha, float *FOM);
 float  IMU_math_calcWeight    (float val, float ref, float thresh);
 
 float* IMU_math_applyRef      (float *q, float *ref, float *q_out);

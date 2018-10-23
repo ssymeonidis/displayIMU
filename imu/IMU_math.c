@@ -247,15 +247,17 @@ int IMU_math_estmAccl(
 * assumes normalized quaternion and datum
 ******************************************************************************/
 
-int IMU_math_estmMagn(
+int IMU_math_estmMagnRef(
   float                 *q, 
   float                 *m, 
+  float                 refx,
+  float                 refz,
   float                 alpha, 
   float                 *FOM)
 {
   // compute the objective function 
-  float twox            = 2.0f * m[2];
-  float twoz            = 2.0f * m[0];
+  float twox            = 2.0f * refx;
+  float twoz            = 2.0f * refz;
   float q1_q3           = q[0] * q[2];
   float q2_q4           = q[1] * q[3];
   float q3_q3           = q[2] * q[2];

@@ -20,10 +20,10 @@
 /*
  * This function is based off the work performed by Sebastian O.H. Madgwick, 
  * documented in the paper "An efficient orientation Filter for inertial and
- * inertial/magnetic sensor arrays. Changes were made to turn on/off sensors 
- * and to adapted the filter for human activity recoginition.  Significant
- * changes were made for adding hooks and increasing readabilty.
-*/
+ * inertial/magnetic sensor arrays". Changes were made to support async data
+ * and adapted the filter for activity recogition and wearable sensors.
+*/  
+
 
 // definitions (increased readability)
 #define NULL 0
@@ -515,7 +515,8 @@ int IMU_core_newMagn(
   #endif
 
   // update system state (quaternion)
-  int status = IMU_math_estmMagn(q, m, weight*config[id].mWeight, &FOM->delt);
+  float weightTemp = weight*config[id].mWeight;
+  int status = IMU_math_estmMagnRef(q, m, 1.0, 0.0, weightTemp, &FOM->delt);
     
   // save results to system state
   #if IMU_USE_PTHREAD

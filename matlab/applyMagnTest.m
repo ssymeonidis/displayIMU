@@ -18,45 +18,45 @@
 % initialize simulation
 clear all; close all;
 
-% % test 0deg-yaw
+% test 0deg-yaw
 euler  = [15, 15, 15];
 magn   = [1, 0, 0];
-run_sim(euler, magn)
-% 
-% % test 45deg-yaw (works)
-% euler  = [35, 5, 5];
-% magn   = [1, -1, 0];
-% run_sim(euler, magn)
-% 
-% % test neg45deg-yaw
-% euler  = [-35, 5, 5];
-% magn   = [1, 1, 0];
-% run_sim(euler, magn)
-% 
-% % test 135deg-yaw <- produces -45deg
-% euler  = [-35, 5, 5];
-% magn   = [-1, -1, 0];
-% run_sim(euler, magn)
-% 
-% % test 45deg-yaw (works)
-% euler  = [35, 5, 5];
-% magn   = [-1, 1, 0];
-% run_sim(euler, magn)
+ref    = [1, 0, 0];
+run_sim(euler, magn, ref)
 
-% test neg45deg-yaw
-% euler  = [75, 5, 5];
-% magn   = [0, 0, 1];
-% run_sim(euler, magn)
+% test 90deg-yaw
+euler  = [75, 15, 15];
+magn   = [0, -1, 0];
+ref    = [1, 0, 0];
+run_sim(euler, magn, ref)
+
+% test neg90deg-yaw
+euler  = [-75, 15, 15];
+magn   = [0, 1, 0];
+ref    = [1, 0, 0];
+run_sim(euler, magn, ref)
+
+% test neg180deg-yaw
+euler  = [-195, 15, 15];
+magn   = [-1, 0, 0];
+ref    = [1, 0, 0];
+run_sim(euler, magn, ref)
+
+% test 0deg-yaw
+% euler  = [15, 15, 15];
+% magn   = [1, 0, 1]; magn = magn / sqrt(sum(magn));
+% ref    = [1, 0, 1]; ref  = ref  / sqrt(sum(ref));
+% run_sim(euler, magn, ref)
 
 
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(euler, magn)
+function euler = run_sim(euler, magn, ref)
 
   % define local constants
-  alpha  = 0.005;
-  iter   = 300;
+  alpha  = 0.01;
+  iter   = 100;
 
   % convert orientation angles to quaternion
   euler_rad  = pi * euler / 180;
@@ -66,7 +66,7 @@ function euler = run_sim(euler, magn)
   figure(1);
   FOM    = [];
   for i=1:iter
-    [q, FOM(i)] = applyMagnGradient(q, magn, alpha);
+    [q, FOM(i)] = applyMagnGradient(q, magn, ref, alpha);
     display_state(q);
   end
   
