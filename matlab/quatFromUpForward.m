@@ -15,15 +15,23 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function M = quatToMatrix(q)
+function q = quatFromUpForward(u, f)
 
-q = quatNormalize(q);
-w = q(1);
-x = q(2);
-y = q(3);
-z = q(4);
+% normalize reference (up) vector
+u = u./norm(u);
 
-M = [1-2*y*y-2*z*z,    2*x*y-2*w*z,    2*x*z+2*w*y;
-       2*x*y+2*w*z,  1-2*x*x-2*z*z,    2*y*z-2*w*x;
-       2*x*z-2*w*y,    2*y*z+2*w*x,  1-2*x*x-2*y*y];
+% ortho normalize forward vector 
+D = sum(f.*u);
+f = f - D*u; 
+f = f./norm(f);
+
+% calculate right vector
+r = cross(u,f);
+
+% calcuate the quaternion
+M = [f(1), r(1), u(1); ...
+     f(2), r(2), u(2); ...
+     f(3), r(3), u(3)];
+q = matrixToQuat(M);
+
+end

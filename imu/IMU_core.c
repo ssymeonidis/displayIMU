@@ -676,7 +676,7 @@ inline float* scale(
 ******************************************************************************/
 
 inline float* decrm(
-  float          *v, 
+  float          *v,
   float          *d)
 {
   v[0]          -= d[0];

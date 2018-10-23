@@ -25,17 +25,18 @@ if (nargin < 2)
   method = "full";
 end
 
+% uses quaternion base operations
 if (method == "full")
   forward = [0, 1, 0, 0];
   tmp     = quatMultiply(q, forward);
   out     = quatMultiply(tmp, quatConjugate(q));
   out     = out(2:4);
 
+% fully expanded and optimized
 elseif (method == "optimized")
-
-  out(1) =  q(1)*q(1) - q(2)*q(2) - q(3)*q(3) - q(4)*q(4);
-  out(2) =  2*q(1)*q(4) - 2*q(2)*q(3);
-  out(3) = -2*q(1)*q(3) + 2*q(2)*q(4);
+  out(1)  = 2 * (0.5 - q(3)*q(3) - q(4)*q(4));
+  out(2)  = 2 * (q(2)*q(3) + q(1)*q(4));
+  out(3)  = 2 * (q(2)*q(4) - q(1)*q(3));
 
 else
   error("invalid method");

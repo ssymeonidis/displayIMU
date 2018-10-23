@@ -21,7 +21,7 @@
 % conversions/matrixToQuaternion/
 function q = matrixToQuat(M)
 
-tr = M(1,1) + M(2,2) + M(3,3);
+tr     = M(1,1) + M(2,2) + M(3,3);
 
 if (tr > 0) 
   S    = sqrt(tr+1.0) * 2; 

@@ -23,7 +23,7 @@ if (nargin < 3)
   method = "full";
 end
 
-% uses quat base operations
+% uses quaternion base operations
 if (method == "full")
   v        = [0, v];
   q        = quatNormalize(q);

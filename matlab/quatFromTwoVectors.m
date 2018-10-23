@@ -40,5 +40,5 @@ elseif (method == 2)
   q = [real, w];
   q = q / sqrt(sum(q.^2));
 end
-  
+
 end

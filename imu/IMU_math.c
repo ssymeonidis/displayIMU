@@ -29,33 +29,48 @@ static inline float* decrm(float *v, float *d);
 
 
 /******************************************************************************
+* apply reference quaterion to current orientation
+******************************************************************************/
+
+float* IMU_math_quatMult(
+  float                 *in1, 
+  float                 *in2,
+  float                 *out)
+{
+  out[0] = in2[0]*in1[0] - in2[1]*in1[1] - in2[2]*in1[2] - in2[3]*in1[3];
+  out[1] = in2[0]*in1[1] + in2[1]*in1[0] - in2[2]*in1[3] + in2[3]*in1[2];
+  out[2] = in2[0]*in1[2] + in2[1]*in1[3] + in2[2]*in1[0] - in2[3]*in1[1];
+  out[3] = in2[0]*in1[3] - in2[1]*in1[2] + in2[2]*in1[1] + in2[3]*in1[0];
+  return q_out;  // allows function to be used as function argument
+}
+
+
+/******************************************************************************
 * utility function - get up component from quaternion
-* (this function needs to be double checked)
 ******************************************************************************/
 
 float* IMU_math_quatToUp(
   float*                q,
   float*                v)
 {
-  v[0]                  =  q[3]*q[1] - q[2]*q[0] + q[1]*q[3] - q[0]*q[2];
-  v[1]                  =  q[3]*q[2] + q[2]*q[3] + q[1]*q[0] + q[0]*q[1];
-  v[2]                  =  q[3]*q[3] - q[2]*q[2] - q[1]*q[1] + q[0]*q[0];
+  v[0]                  =  2 * (q[1]*q[3] + q[0]*q[2]);
+  v[1]                  =  2 * (q[2]*q[3] - q[0]*q[1]);
+  v[2]                  =  2 * (0.5 - q[1]*q[1] - q[2]*q[2]);
   return v;             // allows function to be used as function argument
 }
 
 
 /******************************************************************************
 * utility function - get forward component from quaternion
-* (this function needs to be written)
 ******************************************************************************/
 
 float* IMU_math_quatToFrwd(
   float*                q, 
   float*                v)
 {
-  v[0]                  =  0;
-  v[1]                  =  0;
-  v[2]                  =  0;
+  v[0]                  =  2 * (0.5 - q[2]*q[2] - q[3]*q[3]);
+  v[1]                  =  2 * (q[1]*q[2] + q[0]*q[3]);
+  v[2]                  =  2 * (q[1]*q[3] - q[0]*q[2]);
   return v;             // allows function to be used as function argument
 }
 
@@ -212,7 +227,7 @@ float* IMU_math_degToRad(
 int IMU_math_estmAccl(
   float                 *q, 
   float                 *a, 
-  float                 alpha, 
+  float                 alpha,
   float                 *FOM)
 {
   // compute the objective function 
@@ -312,23 +327,6 @@ float IMU_math_calcWeight(
   float error           = fabs(ref - val) / val;
   float result          = 1.0f - error / thresh;
   return                (result < 0.0f) ? 0.0f : result;
-}
-
-
-/******************************************************************************
-* apply reference quaterion to current orientation
-******************************************************************************/
-
-float* IMU_math_applyRef(
-  float                 *q, 
-  float                 *ref, 
-  float                 *q_out)
-{
-  q_out[0] = q[0]*ref[0] - q[1]*ref[1] - q[2]*ref[2] - q[3]*ref[3];
-  q_out[1] = q[0]*ref[1] + q[1]*ref[0] + q[2]*ref[3] - q[3]*ref[2];
-  q_out[2] = q[0]*ref[2] - q[1]*ref[3] + q[2]*ref[0] + q[3]*ref[1];
-  q_out[3] = q[0]*ref[3] + q[1]*ref[2] - q[2]*ref[1] + q[3]*ref[0];
-  return q_out;  // allows function to be used as function argument
 }
 
 

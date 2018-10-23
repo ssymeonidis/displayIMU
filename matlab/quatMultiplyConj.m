@@ -15,23 +15,28 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function q = quatForwardUp(f,u)
+%%
+function out = quatMultiplyConj(in1, in2, method)
 
-% normalize reference (up) vector
-u = u./norm(u);
+% check number of arguments
+if (nargin < 2)
+  method = "full";
+end
 
-% ortho normalize forward vector 
-D = sum(f.*u);
-f = f - D*u; 
-f = f./norm(f);
+% uses quaternion base operations
+if (method == "full")
+  in2    = quatConjugate(in2);
+  out    = quatMultiply(in1, in2);
 
-% calculate right vector
-r = cross(u,f);
+% fully expanded and optimized
+elseif (method == "optimized")
+  out(1) = in2(1)*in1(1) + in2(2)*in1(2) + in2(3)*in1(3) + in2(4)*in1(4);
+  out(2) = in2(1)*in1(2) - in2(2)*in1(1) + in2(3)*in1(4) - in2(4)*in1(3);
+  out(3) = in2(1)*in1(3) - in2(2)*in1(4) - in2(3)*in1(1) + in2(4)*in1(2);
+  out(4) = in2(1)*in1(4) + in2(2)*in1(3) - in2(3)*in1(2) - in2(4)*in1(1);
 
-% calcuate the quaternion
-M = [f(1), r(1), u(1); ...
-     f(2), r(2), u(2); ...
-     f(3), r(3), u(3)];
-q = matrixToQuat(M);
+else
+  error("invalid method");
+end
 
 end
