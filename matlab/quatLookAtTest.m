@@ -19,10 +19,10 @@
 clear all; close all;
 
 % simple forward/up test
-q = eulerToQuat(180*[125,5,10]/pi);
+q = eulerToQuat(180*[125,5,10]/pi)
 u = quatToUp(q);
 f = quatToForward(q);
-q_out1 = quatFromForwardUp(f, u);
+q_out1 = quatFromForwardUp(f, u)
 
 % partial update test #1
 q_init = [1, 0, 0, 0];
@@ -31,9 +31,16 @@ f = quatToForward(q_init);
 q_temp = quatFromForwardUp(f, u);
 f = quatToForward(q);
 u = quatToUp(q_temp);
-q_out2 = quatFromForwardUp(f, u);
+q_out2 = quatFromForwardUp(f, u)
 
-% partial update test #2 
+% partial update test #2
+u = quatToUp(q);
+q_temp = quatFromUp(u);
+f = quatToForward(q);
+u = quatToUp(q_temp);
+q_out3 = quatFromForwardUp(f, u)
+
+% partial update test #3
 % (this shouldn't work)
 q_init = [1, 0, 0, 0];
 f = quatToForward(q);
@@ -41,4 +48,4 @@ u = quatToUp(q_init);
 q_temp = quatFromForwardUp(f, u);
 f = quatToForward(q_temp);
 u = quatToUp(q);
-q_out3 = quatFromForwardUp(f, u);
+q_out4 = quatFromForwardUp(f, u)

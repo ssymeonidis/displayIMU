@@ -16,7 +16,7 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-function v_out = quatRotateReverse(v, q, method)
+function q = quatFromUp(u, method)
 
 % check number of arguments
 if (nargin < 3)
@@ -25,27 +25,20 @@ end
 
 % uses quaternion base operations
 if (method == "full")
-  v        = [0, v];
-  q        = quatNormalize(q);
-  tmp      = quatMultiply(v,q);
-  v_out    = quatMultiply(quatConjugate(q),tmp);
-  v_out    = v_out(2:4);
-
+  q = quatFromTwoVectors([0, 0, 1], u);
+    
 % fully expanded and optimized
 elseif (method == "optimized")
-  v_out    = [2 * (v(1)*(0.5 - q(3)*q(3) - q(4)*q(4))   ...
-                 + v(2)*(q(2)*q(3) + q(1)*q(4))         ...
-                 + v(3)*(q(2)*q(4) - q(1)*q(3))),       ...
-                
-              2 * (v(1)*(q(2)*q(3) - q(1)*q(4))         ...
-                 + v(2)*(0.5 - q(2)*q(2) - q(4)*q(4))   ...
-                 + v(3)*(q(3)*q(4) + q(1)*q(2))),       ...
-                
-              2 * (v(1)*(q(2)*q(4) + q(1)*q(3))         ...
-                 + v(2)*(q(3)*q(4) - q(1)*q(2))         ...
-                 + v(3)*(0.5 - q(2)*q(2)-q(3)*q(3)))];
+  err   = 0.001;
+  norm  = sqrt(u(1)*u(1) + u(2)*u(2) + u(3)*u(3)) + u(3);
+  if (real > err * norm)
+    q   = [real, -v(2), v(1), 0];
+    q   = q / sqrt(sum(q.^2));    
+  else
+    q   = [1, 0, 0, 0];
+  end
 
-else 
+else
   error("invalid method");
 end
  
