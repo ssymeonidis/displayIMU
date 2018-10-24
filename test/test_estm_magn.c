@@ -53,7 +53,7 @@ int main(void)
   float ref_1[4] = {1.0, 0.0, 0.0, 0.0};
   float m_1[3]   = {1.0, 0.0, 0.0};
   for (i=0; i<iter; i++) {
-    IMU_math_estmMagn(q_1, m_1, alpha, &FOM);
+    IMU_math_estmMagnRef(q_1, m_1, 0.0, 1.0, alpha, &FOM);
     print_line(FOM, q_1);
   }
   if (FOM > 0.01) {

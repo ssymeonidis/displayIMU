@@ -30,16 +30,18 @@ float* IMU_math_quatMultConj  (float *in1, float *in2, float *out);
 float* IMU_math_rotateForward (float *v,   float *q,   float *out);
 float* IMU_math_rotateReverse (float *v,   float *q,   float *out);
 
-// converting between quaternions and pointing vectors
-float* IMU_math_quatToUp      (float *q,   float *v);
-float* IMU_math_quatToFrwd    (float *q,   float *v);
-float* IMU_math_upFrwdToQuat  (float *u,   float *f,   float *q);
-
 // converting between quaternions and Euler angles
 float* IMU_math_quatToEuler   (float *q,   float *E);
 float* IMU_math_eulerToQuat   (float *E,   float *q);
 float* IMU_math_radToDeg      (float *r,   float *d);
 float* IMU_math_degToRad      (float *d,   float *r);
+
+// converting between quaternions and pointing vectors
+float* IMU_math_quatToUp      (float *q,   float *v);
+float* IMU_math_quatToFrwd    (float *q,   float *v);
+float* IMU_math_upToQuat      (float *u,   float *q);
+float* IMU_math_upFrwdToQuat  (float *u,   float *f,   float *q);
+float* IMU_math_vectToQuat    (float *u,   float *v,   float *q);
 
 // core filters
 int    IMU_math_estmAccl      (float *q, float *a, float alpha, float *FOM);

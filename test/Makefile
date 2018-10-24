@@ -8,6 +8,7 @@ DEFINES     = -D"IMU_TYPE=${IMU_TYPE}"
 TARGETS     = $(BINDIR)/test_datum       \
               $(BINDIR)/test_pnts_gyro   \
               $(BINDIR)/test_euler       \
+              $(BINDIR)/test_quat_math   \
               $(BINDIR)/test_estm_accl   \
               $(BINDIR)/test_estm_magn
 LIBS        = -L../bin                   \
@@ -17,6 +18,7 @@ LINKER      = -Wl,-rpath=../../bin
 SRCS        = test_datum.c               \
               test_pnts_gyro.c           \
               test_euler.c               \
+              test_quat_math.c           \
               test_estm_accl.c           \
               test_estm_magn.c
 OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
@@ -32,6 +34,9 @@ $(BINDIR)/test_pnts_gyro: $(OBJDIR)/test_pnts_gyro.o
 $(BINDIR)/test_euler: $(OBJDIR)/test_euler.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
+$(BINDIR)/test_quat_math: $(OBJDIR)/test_quat_math.o
+	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
+
 $(BINDIR)/test_estm_accl: $(OBJDIR)/test_estm_accl.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
@@ -43,3 +48,6 @@ $(OBJDIR)/%.o: %.c
 
 clean:
 	-${RM} ${TARGETS} ${OBJS}
+
+run_all:
+	${TARGETS}

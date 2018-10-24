@@ -19,7 +19,7 @@
 function q = quatFromUp(u, method)
 
 % check number of arguments
-if (nargin < 3)
+if (nargin < 2)
   method = "full";
 end
 
@@ -30,10 +30,11 @@ if (method == "full")
 % fully expanded and optimized
 elseif (method == "optimized")
   err   = 0.001;
-  norm  = sqrt(u(1)*u(1) + u(2)*u(2) + u(3)*u(3)) + u(3);
+  norm  = sqrt(u(1)*u(1) + u(2)*u(2) + u(3)*u(3));
+  real  = norm + u(3);
   if (real > err * norm)
-    q   = [real, -v(2), v(1), 0];
-    q   = q / sqrt(sum(q.^2));    
+    q   = [real, -u(2), u(1), 0];
+    q   = q / sqrt(sum(q.^2)); 
   else
     q   = [1, 0, 0, 0];
   end
