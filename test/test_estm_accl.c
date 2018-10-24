@@ -24,11 +24,10 @@
 #include "IMU_math.h"
 
 // define constants
-static const float precision   = 0.05;
+static const float precision = 0.25;
 
 // internal functions
-static void print_line    (float FOM, float q[4]);
-static void verify_quat   (float val1[4], float val2[4]);
+static void process_angles (float ang[3], float vec[3], float out[3]);
 
 
 /******************************************************************************
@@ -37,30 +36,68 @@ static void verify_quat   (float val1[4], float val2[4]);
 
 int main(void)
 {
-  // define internal constants
-  const float alpha    = 0.01;
-  const int   iter     = 70;
-  
-  // define internal variables
-  float FOM;
-  int   i;
-  
   // start datum test
   printf("starting test_estm_accl...\n");
   
   // test zero-pitch, zero-roll
-  float q_1[4]   = {0.8552, 0.3665, 0.3665, 0.0};
-  float ref_1[4] = {1.0, 0.0, 0.0, 0.0};
-  float a_1[3]   = {0.0, 0.0, 1.0};
-  for (i=0; i<iter; i++) {
-    IMU_math_estmAccl(q_1, a_1, alpha, &FOM);
-    print_line(FOM, q_1);
-  }
-  if (FOM > 0.01) {
-    printf("error: FOM convergance greater that threshold\n");
+  float ang1[3]   = {25.0, 15.0, 15.0};
+  float vec1[3]   = { 0.0,  0.0,  1.0};
+  float out1[3]   = { 0.0,  0.0,  0.0};
+  process_angles(ang1, vec1, out1);
+  if (fabs(out1[1]) >  precision || fabs(out1[2]) > precision) {
+    printf("error: failed zero pitch, zero roll\n");
     exit(0);
   }
-  verify_quat(q_1, ref_1);
+
+  // test 90deg-pitch
+  float ang2[3]   = {15.0, 65.0, 15.0};
+  float vec2[3]   = {-1.0,  0.0,  0.0};
+  float out2[3]   = { 0.0,  0.0,  0.0};
+  process_angles(ang2, vec2, out2);
+  if (fabs(out2[1] - 90.0) >  precision) {
+    printf("error: failed 90deg pitch\n");
+    exit(0);
+  }
+
+  // test 90deg-roll
+  float ang3[3]   = {15.0, 15.0, 65.0};
+  float vec3[3]   = { 0.0,  1.0,  0.0};
+  float out3[3]   = { 0.0,  0.0,  0.0};
+  process_angles(ang3, vec3, out3);
+  if (fabs(out3[1]) >  precision || fabs(out3[2] - 90.0) > precision) {
+    printf("error: failed 90deg roll\n");
+    exit(0);
+  }
+
+  // test 180deg-roll
+  float ang4[3]   = {15.0, 15.0, 155.0};
+  float vec4[3]   = { 0.0,  0.0,  -1.0};
+  float out4[3]   = { 0.0,  0.0,   0.0};
+  process_angles(ang4, vec4, out4);
+  if (fabs(out4[1]) >  precision || fabs(out4[2] - 180.0) > precision) {
+    printf("error: failed 90deg roll\n");
+    exit(0);
+  }
+
+  // test neg90deg-pitch
+  float ang5[3]   = {-15.0, -65.0, -15.0};
+  float vec5[3]   = {  1.0,   0.0,   0.0};
+  float out5[3]   = {  0.0,   0.0,   0.0};
+  process_angles(ang5, vec5, out5);
+  if (fabs(out5[1] + 90.0) >  precision) {
+    printf("error: failed -90deg pitch\n");
+    exit(0);
+  }
+
+  // test neg90deg-roll
+  float ang6[3]   = {-15.0, -15.0, -65.0};
+  float vec6[3]   = {  0.0,  -1.0,   0.0};
+  float out6[3]   = {  0.0,   0.0,   0.0};
+  process_angles(ang6, vec6, out6);
+  if (fabs(out6[1]) >  precision || fabs(out6[2] + 90.0) > precision) {
+    printf("error: failed -90deg roll\n");
+    exit(0);
+  }
 
   // exit program
   printf("pass: test_estm_accl\n\n");
@@ -72,28 +109,28 @@ int main(void)
 * prints results to console
 ******************************************************************************/
 
-void print_line(
-  float                FOM,
-  float                q[4])
+void process_angles(
+  float                ang[3],
+  float                vec[3],
+  float                out[3])
 {
-  // start datum test
-  printf("%0.3f, %0.2f, %0.2f, %0.2f, %0.2f\n", FOM, q[0], q[1], q[2], q[3]);
-}
+  // define local constants
+  const float alpha    = 0.005;
+  const int   iter     = 100;
 
+  // define local variables
+  float                radians[3];
+  float                q[3];
+  float                FOM;
+  int                  i;
 
-/******************************************************************************
-* verifies euler angle against intended result
-******************************************************************************/
-
-void verify_quat(
-  float                val1[3],
-  float                val2[3])
-{
-  if (fabs(val1[0] - val2[0]) > precision ||
-      fabs(val1[1] - val2[1]) > precision ||
-      fabs(val1[2] - val2[2]) > precision ||
-      fabs(val1[3] - val2[3]) > precision) {
-    printf("error: quaternion accuracy failure\n");
-    exit(0);
-  }
+  // main processing loop
+  IMU_math_degToRad(ang, radians);
+  IMU_math_eulerToQuat(radians, q);
+  for (i=0; i<iter; i++)
+    IMU_math_estmAccl(q, vec, alpha, &FOM);
+  IMU_math_quatToEuler(q, radians);
+  IMU_math_radToDeg(radians, out);
+  printf("%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n", 
+    ang[0], ang[1], ang[2], vec[0], vec[1], vec[2], out[0], out[1], out[2]);
 }

@@ -18,33 +18,33 @@
 % initialize simulation
 clear all; close all;
 
-% test zero-pitch, zero-tilt
-euler  = [15, 15, 15];
+% test zero-pitch, zero-roll
+euler  = [25, 15, 15];
 accl   = [0, 0, 1];
 run_sim(euler, accl)
 
-% test 90deg-pitch, zero-tilt
-euler  = [15, 75, 15];
+% test 90deg-pitch
+euler  = [15, 65, 15];
 accl   = [-1, 0, 0];
 run_sim(euler, accl)
 
-% test zero-pitch, 90deg-tilt
-euler  = [15, 15, 75];
+% test 90deg-roll
+euler  = [15, 15, 65];
 accl   = [0, 1, 0];
 run_sim(euler, accl)
 
-% test zero-pitch, 180deg-tilt
-euler  = [15, 15, 165];
+% test 180deg-roll
+euler  = [15, 15, 155];
 accl   = [0, 0, -1];
 run_sim(euler, accl)
 
-% test neg90-pitch, zero-tilt
-euler  = [-15, -75, -15];
+% test neg90-pitch
+euler  = [-15, -65, -15];
 accl   = [1, 0, 0];
 run_sim(euler, accl)
 
-% test zero-pitch, neg90-tilt
-euler  = [-15, -15, -75];
+% % test zero-pitch, neg90-roll
+euler  = [-15, -15, -65];
 accl   = [0, -1, 0];
 run_sim(euler, accl)
 
@@ -84,9 +84,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function display_state(q)
-  u             = quatRotate([0, 0, 1], q, "full");
-  f             = quatRotate([1, 0, 0], q, "full");
-  r             = quatRotate([0, 1, 0], q, "full");
+  u             = quatRotateForward([0, 0, 1], q, "full");
+  f             = quatRotateForward([1, 0, 0], q, "full");
+  r             = quatRotateForward([0, 1, 0], q, "full");
   plotVector(u, f, r);
   title('applyAcclTest');
   delete(findall(gcf,'type','annotation'));

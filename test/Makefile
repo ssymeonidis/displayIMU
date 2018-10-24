@@ -13,6 +13,7 @@ TARGETS     = $(BINDIR)/test_datum       \
               $(BINDIR)/test_estm_magn
 LIBS        = -L../bin                   \
               -lIMU                      \
+              -lm                        \
               -lpthread
 LINKER      = -Wl,-rpath=../../bin
 SRCS        = test_datum.c               \

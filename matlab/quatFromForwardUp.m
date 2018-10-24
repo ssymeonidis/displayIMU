@@ -23,10 +23,10 @@ u = u./norm(u);
 % ortho normalize forward vector 
 D = sum(f.*u);
 f = f - D*u; 
-f = f./norm(f)
+f = f./norm(f);
 
 % calculate right vector
-r = cross(u,f)
+r = cross(u,f);
 
 % calcuate the quaternion
 M = [f(1), r(1), u(1); ...
