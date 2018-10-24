@@ -264,6 +264,7 @@ float* IMU_math_upFrwdToQuat(
   float n       = sqrtf(u_in[0]*u_in[0] + u_in[1]*u_in[1] + u_in[2]*u_in[2]);
   float u[3]    = {u_in[0]/n, u_in[1]/n, u_in[2]/n};
 
+
   // ortho-normalize forward vector 
   n             = u[0]*f_in[0] + u[1]*f_in[1] + u[2]*f_in[2];
   float f[3]    = {f_in[0] - n*u[0], f_in[1] - n*u[1], f_in[2] - n*u[2]};

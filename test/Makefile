@@ -50,4 +50,10 @@ clean:
 	-${RM} ${TARGETS} ${OBJS}
 
 run_all:
-	${TARGETS}
+	cd $(BINDIR); ./test_datum       | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_pnts_gyro   | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_euler       | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_quat_math   | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_estm_accl   | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_estm_magn   | grep -e pass -e error -e fail
+

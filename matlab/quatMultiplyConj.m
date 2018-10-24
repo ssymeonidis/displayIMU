@@ -19,7 +19,7 @@
 function out = quatMultiplyConj(in1, in2, method)
 
 % check number of arguments
-if (nargin < 2)
+if (nargin < 3)
   method = "full";
 end
 
