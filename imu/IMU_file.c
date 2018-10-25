@@ -32,7 +32,7 @@ static const char* IMU_core_config_name[] = {
   "isMagn",
   "isStable",
   "isFOM",
-  "isMove",
+  "isPos",
   "isPredict",
   "gThresh",
   "gThreshTime",
@@ -44,7 +44,7 @@ static const char* IMU_core_config_name[] = {
   "mMagThresh",
   "mAng",
   "mAngThresh",
-  "moveAlpha"
+  "posAlpha"
 };
 typedef enum {
   IMU_core_enable       = 0,
@@ -53,7 +53,7 @@ typedef enum {
   IMU_core_isMagn       = 3,
   IMU_core_isStable     = 4,
   IMU_core_isFOM        = 5,
-  IMU_core_isMove       = 6,
+  IMU_core_isPos        = 6,
   IMU_core_isPredict    = 7,
   IMU_core_gThresh      = 8,
   IMU_core_gThreshTime  = 9,
@@ -65,7 +65,7 @@ typedef enum {
   IMU_core_mMagThresh   = 15,
   IMU_core_mAng         = 16,
   IMU_core_mAngThresh   = 17,
-  IMU_core_moveAlpha    = 18
+  IMU_core_posAlpha     = 18
 } IMU_core_config_enum;
 
 // rect subsystem parsing inputs
@@ -197,8 +197,8 @@ int IMU_file_coreLoad(
       get_bool(args, &config->isStable);
     else if (type == IMU_core_isFOM)
       get_bool(args, &config->isFOM);
-    else if (type == IMU_core_isMove)
-      get_bool(args, &config->isMove);
+    else if (type == IMU_core_isPos)
+      get_bool(args, &config->isPos);
     else if (type == IMU_core_gThresh)
       sscanf(args, "%f", &config->gThresh);
     else if (type == IMU_core_gThreshTime)
@@ -219,8 +219,8 @@ int IMU_file_coreLoad(
       sscanf(args, "%f", &config->mAng);
     else if (type == IMU_core_mAngThresh)
       sscanf(args, "%f", &config->mAngThresh);
-    else if (type == IMU_core_moveAlpha)
-      sscanf(args, "%f", &config->moveAlpha);
+    else if (type == IMU_core_posAlpha)
+      sscanf(args, "%f", &config->posAlpha);
   }
 
   // exit function
@@ -253,7 +253,7 @@ int IMU_file_coreSave(
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
   fprintf(file, "  \"isStable\": ");    write_bool(file, config->isStable);
   fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
-  fprintf(file, "  \"isMove\": ");      write_bool(file, config->isMove);
+  fprintf(file, "  \"isPos\": ");       write_bool(file, config->isPos);
   fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
   fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
   fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
@@ -264,7 +264,7 @@ int IMU_file_coreSave(
   fprintf(file, "  \"mMagThresh\": %0.2f,\n",      config->mMagThresh);
   fprintf(file, "  \"mAng\": %0.2f,\n",            config->mAng);
   fprintf(file, "  \"mAngThresh\": %0.2f,\n",      config->mAngThresh);
-  fprintf(file, "  \"moveAlpha\": %0.2f,\n",       config->moveAlpha);
+  fprintf(file, "  \"posAlpha\": %0.2f,\n",        config->posAlpha);
   fprintf(file, "}\n");
 
   // exit function

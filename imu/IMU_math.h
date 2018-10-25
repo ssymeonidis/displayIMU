@@ -34,17 +34,17 @@ static inline float* IMU_math_rotateForward (float *v,  float *q,  float *out);
 static inline float* IMU_math_rotateReverse (float *v,  float *q,  float *out);
 
 // converting between quaternions and pointing vectors
-static inline float* IMU_math_quatToUp      (float *q, float *v);
-static inline float* IMU_math_quatToFrwd    (float *q, float *v);
-static inline float* IMU_math_upToQuat      (float *u, float *q);
-static inline float* IMU_math_upFrwdToQuat  (float *u, float *f,   float *q);
-static inline float* IMU_math_vectToQuat    (float *u, float *v,   float *q);
+static inline float* IMU_math_quatToUp      (float *q,  float *v);
+static inline float* IMU_math_quatToFrwd    (float *q,  float *v);
+static inline float* IMU_math_upToQuat      (float *u,  float *q);
+static inline float* IMU_math_upFrwdToQuat  (float *u,  float *f,  float *q);
+static inline float* IMU_math_vectToQuat    (float *u,  float *v,  float *q);
 
 /// converting between quaternions and Euler angles
-static inline float* IMU_math_quatToEuler   (float *q, float *E);
-static inline float* IMU_math_eulerToQuat   (float *E, float *q);
-static inline float* IMU_math_radToDeg      (float *r, float *d);
-static inline float* IMU_math_degToRad      (float *d, float *r);
+static inline float* IMU_math_quatToEuler   (float *q,  float *E);
+static inline float* IMU_math_eulerToQuat   (float *E,  float *q);
+static inline float* IMU_math_radToDeg      (float *r,  float *d);
+static inline float* IMU_math_degToRad      (float *d,  float *r);
 
 // general utility functions
 static inline float IMU_math_calcWeight (float val, float ref, float thresh);

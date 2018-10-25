@@ -52,7 +52,7 @@ typedef struct {
   unsigned char        isMagn;          // enable magnetometer data
   unsigned char        isStable;        // enable detection of no movement
   unsigned char        isFOM;           // enable weight based on FOM
-  unsigned char        isMove;          // enable acceleration estimate
+  unsigned char        isPos;           // enable acceleration estimate
   unsigned char        isPredict;       // enable extrapolation of estim
   float                gThresh;         // no motion threshold value
   float                gThreshTime;     // no motion threhsold time
@@ -64,7 +64,7 @@ typedef struct {
   float                mMagThresh;      // magnetic north magn error thres
   float                mAng;            // magnetic north angle
   float                mAngThresh;      // magnetic north angle error thresh
-  float                moveAlpha;       // acceleration estimate alpha
+  float                posAlpha;        // position accleration alpha
 } IMU_core_config;
 
 // subsystem state structure definition
@@ -73,6 +73,7 @@ typedef struct {
   float                tMove;          // last "unstable" time
   float                q[4];           // current quaterion
   float                A[3];           // last acceleration estimate
+  IMU_TYPE             mInit[3];       // initial magnetometer value
   unsigned char        aReset;         // accelerometer reset signal
   unsigned char        mReset;         // magnetometer reset signal
   unsigned char        estmValid;      // flag to insure valid state

@@ -97,7 +97,7 @@ int main(void)
   configIMU.configRect->enable = 0;
 
   // read IMU_pnts json config file
-  status = IMU_engn_load(id, "../test_pnts.json", IMU_engn_pnts);
+  status = IMU_engn_load(id, "../config/test_pnts.json", IMU_engn_pnts);
   if (status < 0) {
     printf("error: IMU_engn_load failure #%d\n", status);
     exit(0);

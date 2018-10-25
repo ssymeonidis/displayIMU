@@ -44,9 +44,7 @@ static uint16_t         numInst = 0;
 
 // internal functions definitions
 static inline float  norm3(IMU_TYPE *in, float *out);
-static inline float* norm4(float *v);
 static inline float* scale(float *v, float m);  
-static inline float* decrm(float *v, float *d);
 int IMU_core_newGyro (uint16_t id, float t, IMU_TYPE *g, IMU_core_FOM*);
 int IMU_core_newAccl (uint16_t id, float t, IMU_TYPE *a, IMU_core_FOM*);
 int IMU_core_newMagn (uint16_t id, float t, IMU_TYPE *m, IMU_core_FOM*);
@@ -152,7 +150,6 @@ int IMU_core_reset(
 
 /******************************************************************************
 * core function for dead recon
-* (this function needs verification)
 ******************************************************************************/
 
 int IMU_core_zero(
@@ -161,38 +158,80 @@ int IMU_core_zero(
   IMU_TYPE              *a_in, 
   IMU_TYPE              *m_in)
 {
-  // check out-of-bounds condition
-  if (id >= numInst)
-    return IMU_CORE_BAD_INST;
-  if (!config[id].enable)
-    return IMU_CORE_FNC_DISABLED;
-    
   // lock before modifying state
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&state[id].lock);
   #endif
 
-  // normalize accerometer data or derive from system state
-  float                 a[3];
-  if (!config[id].isAccl || a_in == NULL) {
-    IMU_math_quatToUp(state[id].q, a);
-  } else {
-    norm3(a_in, a);
+  // copy vectors to have the correct type
+  float                 a[3], m[3];
+  if (a_in != NULL) {   
+    a[0]                = (float)a_in[0]; 
+    a[1]                = (float)a_in[1];
+    a[2]                = (float)a_in[2];
+  }
+  if (m_in != NULL) {   
+    m[0]                = (float)m_in[0]; 
+    m[1]                = (float)m_in[1];
+    m[2]                = (float)m_in[2];
+  }
+
+  // zero with accerometer and magnetometer
+  if        ( config[id].isAccl && config[id].isMagn) {
+
+    // synced sensor data (datum3)
+    if        (a!=NULL && m!=NULL) {
+      IMU_math_upFrwdToQuat(a, m, state[id].q);
+      state[id].aReset  = 0;
+      state[id].mReset  = 0;
+
+    // asynchnous accelerometer vector
+    } else if (a!=NULL && m==NULL) {
+      if (state[id].mReset)
+        IMU_math_upToQuat(a, state[id].q);
+      else
+        IMU_math_upFrwdToQuat(a, state[id].mInit, state[id].q);
+      state[id].aReset  = 0;
+      
+    // asynchnous magnetometer vector
+    } else if (a==NULL && m!=NULL) {
+      if (state[id].aReset) {
+        memcpy(state[id].mInit, m, 3*sizeof(IMU_TYPE));
+      } else {
+        IMU_math_quatToUp(state[id].q, a);
+        IMU_math_upFrwdToQuat(a, m, state[id].q);
+      }
+      state[id].mReset  = 0;
+    
+    // no sensor data provided
+    } else {
+      return IMU_CORE_FNC_DISABLED;
+    }
+
+  // no magnetometer configuation
+  } else if ( config[id].isAccl && !config[id].isMagn) {
+    if (a==NULL || !state[id].aReset)
+      return IMU_CORE_FNC_DISABLED;
+    IMU_math_upToQuat(a, state[id].q);
     state[id].aReset    = 0;
-  }
-  
-  // normalize magnetometer data or derive from system state
-  float                 m[3];
-  if (!config[id].isMagn || m_in == NULL) {
-    IMU_math_quatToFrwd(state[id].q, m);
-  } else {
-    norm3(m_in, m);
+
+  // no accelerometer configuration
+  } else if (!config[id].isAccl &&  config[id].isMagn) {
+    if (m==NULL || !state[id].mReset)
+      return IMU_CORE_FNC_DISABLED;
+    a[0]                = 0.0f;
+    a[1]                = 0.0f;
+    a[2]                = 1.0f;
+    IMU_math_upFrwdToQuat(a, m, state[id].q);
     state[id].mReset    = 0;
-  }
-  
-  // calcuate orientation and update state
-  IMU_math_upFrwdToQuat(a, m, state[id].q);
-  state[id].t           = t;
+
+  // gyroscope only configuration
+  } else {
+    state[id].q[0]      = 1.0f;
+    state[id].q[1]      = 0.0f;
+    state[id].q[2]      = 0.0f;
+    state[id].q[3]      = 0.0f;
+   }
 
   // unlock function and exit (no errors)
   #if IMU_USE_PTHREAD
@@ -306,8 +345,6 @@ int IMU_core_newGyro(
   // determine whether the function needs to be executed
   if (!config[id].enable || !config[id].isGyro)
     return IMU_CORE_FNC_DISABLED;
-  if (state[id].aReset   || state[id].mReset)
-    return IMU_CORE_FNC_IN_RESET;
   
   // copy values and calcuate mag 
   float g[3]            = {(float)g_in[0], (float)g_in[1], (float)g_in[2]};
@@ -364,7 +401,7 @@ int IMU_core_newAccl(
   IMU_core_FOM_accl     *FOM;
   if (pntr != NULL) {
     pntr->isValid       = !state[id].aReset && config[id].isFOM;
-    FOM                 = &pntr->FOM.accl;               
+    FOM                 = &pntr->FOM.accl;
   } else {
     FOM                 = &staticFOM.FOM.accl;
   }
@@ -373,7 +410,7 @@ int IMU_core_newAccl(
   if (!config[id].enable || !config[id].isAccl)
     return IMU_CORE_FNC_DISABLED;
   if (state[id].aReset) {
-    IMU_core_zero(id, t, a_in, NULL);
+    IMU_core_zero(id, t, a_in, state[id].mInit);
     return IMU_CORE_FNC_ZEROED;
   }
 
@@ -395,7 +432,7 @@ int IMU_core_newAccl(
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&state[id].lock);
   memcpy(q, state[id].q, sizeof(state[id].q));
-  if (config[id].isMove)
+  if (config[id].isPos)
     memcpy(A, state[id].A, sizeof(state[id].A));
   t_copy                = state[id].t;
   IMU_thrd_mutex_unlock(&state[id].lock);
@@ -406,7 +443,7 @@ int IMU_core_newAccl(
   #endif
 
   // save accelerometer data
-  if (config[id].isMove) {
+  if (config[id].isPos) {
     float   G[3];       
     scale(IMU_math_quatToUp(state[id].q, G), config[id].aMag);
     uint8_t *valid      = &state[id].estmValid;
@@ -416,7 +453,7 @@ int IMU_core_newAccl(
       A[2]              = (float)a_in[2]-G[2];
       *valid            = 1;
     } else {
-      float alpha       = config[id].moveAlpha * FOM->magFOM;
+      float alpha       = config[id].posAlpha * FOM->magFOM;
       A[0]              = alpha*A[0] + (1.0f-alpha)*((float)a_in[0]-G[0]);
       A[1]              = alpha*A[1] + (1.0f-alpha)*((float)a_in[1]-G[1]);
       A[2]              = alpha*A[2] + (1.0f-alpha)*((float)a_in[2]-G[2]);
@@ -431,7 +468,7 @@ int IMU_core_newAccl(
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&state[id].lock);
   memcpy(state[id].q, q, sizeof(state[id].q));
-  if (config[id].isMove)
+  if (config[id].isPos)
     memcpy(state[id].A, A, sizeof(state[id].A));
   float t_new           = FOM->magFOM * t_copy + (1.0 - FOM->magFOM) * t;
   if (t_new > state[id].t)
@@ -638,24 +675,6 @@ inline float norm3(
 
 
 /******************************************************************************
-* utility function - normalize 4x1 array
-******************************************************************************/
-
-inline float* norm4(
-  float          *v)
-{
-  float norm     = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
-  if (norm > 0.001f) {
-    v[0]        /= norm;
-    v[1]        /= norm;
-    v[2]        /= norm;
-    v[3]        /= norm;
-  }
-  return v;     // allows function to be used as function argument
-}
-
-
-/******************************************************************************
 * utility function - scale 4x1 array by scalar value
 ******************************************************************************/
 
@@ -668,20 +687,4 @@ inline float* scale(
   v[2]          *= m;
   v[3]          *= m;
   return v;     // allows function to be used as function argument
-}
-
-
-/******************************************************************************
-* utility function - decrement 4x1 array by another 4x1 array
-******************************************************************************/
-
-inline float* decrm(
-  float          *v,
-  float          *d)
-{
-  v[0]          -= d[0];
-  v[1]          -= d[1];
-  v[2]          -= d[2];
-  v[3]          -= d[3];
-  return v;
 }

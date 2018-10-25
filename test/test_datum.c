@@ -68,7 +68,7 @@ int main(void)
   configIMU.configCore->enable = 0;
 
   // read IMU_rect json config file
-  status = IMU_engn_load(id, "../test_datum.json", IMU_engn_rect);
+  status = IMU_engn_load(id, "../config/test_datum.json", IMU_engn_rect);
   if (status < 0) {
     printf("error: IMU_engn_load failure #%d\n", status);
     exit(0);

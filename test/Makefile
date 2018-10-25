@@ -6,30 +6,29 @@ OBJDIR      = obj
 RM          = rm -f  
 DEFINES     = -D"IMU_TYPE=${IMU_TYPE}"
 TARGETS     = $(BINDIR)/test_datum       \
-              $(BINDIR)/test_pnts_gyro   \
               $(BINDIR)/test_euler       \
               $(BINDIR)/test_quat_math   \
               $(BINDIR)/test_estm_accl   \
-              $(BINDIR)/test_estm_magn
+              $(BINDIR)/test_estm_magn   \
+              $(BINDIR)/test_core_accl   \
+              $(BINDIR)/test_pnts_gyro
 LIBS        = -L../bin                   \
               -lIMU                      \
               -lm                        \
               -lpthread
 LINKER      = -Wl,-rpath=../../bin
 SRCS        = test_datum.c               \
-              test_pnts_gyro.c           \
               test_euler.c               \
               test_quat_math.c           \
               test_estm_accl.c           \
-              test_estm_magn.c
+              test_estm_magn.c           \
+              test_core_accl.c           \
+              test_pnts_gyro.c
 OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 all: ${TARGETS}
 
 $(BINDIR)/test_datum: $(OBJDIR)/test_datum.o
-	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
-
-$(BINDIR)/test_pnts_gyro: $(OBJDIR)/test_pnts_gyro.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
 $(BINDIR)/test_euler: $(OBJDIR)/test_euler.o
@@ -44,17 +43,23 @@ $(BINDIR)/test_estm_accl: $(OBJDIR)/test_estm_accl.o
 $(BINDIR)/test_estm_magn: $(OBJDIR)/test_estm_magn.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
+$(BINDIR)/test_core_accl: $(OBJDIR)/test_core_accl.o
+	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
+
+$(BINDIR)/test_pnts_gyro: $(OBJDIR)/test_pnts_gyro.o
+	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
+
 $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) ${DEFINES} ${INCLUDE} -c $< -o $@
 
 clean:
 	-${RM} ${TARGETS} ${OBJS}
 
-run_all:
-	cd $(BINDIR); ./test_datum       | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_pnts_gyro   | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_euler       | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_quat_math   | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_estm_accl   | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_estm_magn   | grep -e pass -e error -e fail
-
+run:
+	cd $(BINDIR); ./test_datum     | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_euler     | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_quat_math | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_estm_accl | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_estm_magn | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_core_accl | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_pnts_gyro | grep -e pass -e error -e fail
