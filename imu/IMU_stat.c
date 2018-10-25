@@ -18,11 +18,11 @@
 */
 
 // include statements 
-#include "IMU_auto.h"
+#include "IMU_stat.h"
 
 // internally managed structures
-static IMU_auto_config  config [IMU_MAX_INST]; 
-static IMU_auto_state   state  [IMU_MAX_INST];
+static IMU_stat_config  config [IMU_MAX_INST]; 
+static IMU_stat_state   state  [IMU_MAX_INST];
 static uint16_t         numInst = 0;
 
 
@@ -30,13 +30,13 @@ static uint16_t         numInst = 0;
 * function to create new instance
 ******************************************************************************/
 
-int IMU_auto_init(
+int IMU_stat_init(
   uint16_t                *id, 
-  IMU_auto_config         **pntr)
+  IMU_stat_config         **pntr)
 {
   // check for device count overflow
   if (numInst >= IMU_MAX_INST)
-    return IMU_AUTO_INST_OVERFLOW;
+    return IMU_STAT_INST_OVERFLOW;
 
   // return inst handle and config struct
   *id   = numInst; 
@@ -52,13 +52,13 @@ int IMU_auto_init(
 * function to return instance config pointer
 ******************************************************************************/
 
-int IMU_auto_getConfig(
+int IMU_stat_getConfig(
   uint16_t                id,
-  IMU_auto_config         **pntr)
+  IMU_stat_config         **pntr)
 {
   // check for out-of-bounds condition
   if (id > numInst-1)
-    return IMU_AUTO_BAD_INST;
+    return IMU_STAT_BAD_INST;
 
   // return state
   *pntr = &config[id];
@@ -70,13 +70,13 @@ int IMU_auto_getConfig(
 * function to return instance state pointer
 ******************************************************************************/
 
-int IMU_auto_getState( 
+int IMU_stat_getState( 
   uint16_t                id,  
-  IMU_auto_state          **pntr)
+  IMU_stat_state          **pntr)
 {
   // check for out-of-bounds condition
   if (id > numInst-1)
-    return IMU_AUTO_BAD_INST; 
+    return IMU_STAT_BAD_INST; 
 
   // return state
   *pntr = &state[id];
@@ -88,7 +88,7 @@ int IMU_auto_getState(
 * process gyroscope, accelerometer, and magnetometer vectors
 ******************************************************************************/
 
-int IMU_auto_reset(
+int IMU_stat_reset(
   uint16_t                id)
 {
   return 0;
@@ -99,7 +99,7 @@ int IMU_auto_reset(
 * process gyroscope, accelerometer, and magnetometer vectors
 ******************************************************************************/
 
-int IMU_auto_update(
+int IMU_stat_update(
   uint16_t                id,  
   IMU_core_FOM            *FOM,
   uint16_t                size)

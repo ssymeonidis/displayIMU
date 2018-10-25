@@ -30,7 +30,7 @@ extern "C" {
 #include "IMU_core.h"
 #include "IMU_rect.h"
 #include "IMU_pnts.h"
-#include "IMU_auto.h"
+#include "IMU_stat.h"
 #include "IMU_calb.h"
 
 // define error codes
@@ -54,7 +54,7 @@ extern "C" {
 typedef struct {
   uint8_t               isRect;          // enable rectify subsystem
   uint8_t               isPnts;          // enable stable point collection
-  uint8_t               isAuto;          // enable continous metric collection
+  uint8_t               isStat;          // enable continous metric collection
   uint8_t               isCalb;          // enable calibration subsystem 
   uint8_t               isEstmAccl;      // enable accl estm (minus gravity) 
   uint8_t               isQuatOnly;      // disable conversion to Euler angles
@@ -68,12 +68,12 @@ typedef struct {
   uint16_t              idCore;          // core subsystem id
   uint16_t              idRect;          // rect subsystem id
   uint16_t              idPnts;          // pnts subsystem id
-  uint16_t              idAuto;          // auto subsystem id
+  uint16_t              idStat;          // stat subsystem id
   uint16_t              idCalb;          // calb subsystem id
   IMU_core_config       *configCore;     // core configuration pointer
   IMU_rect_config       *configRect;     // rect configuration pointer
   IMU_pnts_config       *configPnts;     // pnts configuration pointer
-  IMU_auto_config       *configAuto;     // auto configuration pointer
+  IMU_stat_config       *configStat;     // stat configuration pointer
   IMU_calb_config       *configCalb;     // calb configuration pointer
   uint8_t               isExit;          // commands thread to exit
   uint8_t               exitThread;      // confirms thread has exited 
@@ -84,7 +84,7 @@ typedef enum {                           // input to IMU_engn_init
   IMU_engn_core_only    = 0,             // core subystem only
   IMU_engn_rect_core    = 1,             // rect and core
   IMU_engn_calb_pnts    = 2,             // rect, pnts, calb, and core
-  IMU_engn_calb_auto    = 3,             // rect, auto, calb, and core
+  IMU_engn_calb_stat    = 3,             // rect, stat, calb, and core
   IMU_engn_calb_full    = 4              // all susbsystems running
 } IMU_engn_type;
 
@@ -93,28 +93,28 @@ typedef enum {
   IMU_engn_core         = 0,
   IMU_engn_rect         = 1,
   IMU_engn_pnts         = 2,
-  IMU_engn_auto         = 3,
+  IMU_engn_stat         = 3,
   IMU_engn_calb         = 4,
   IMU_engn_self         = 5
 } IMU_engn_system;
 
 // input to IMU_engn_getConfig
 typedef union {
-  IMU_core_config       *configCore;
-  IMU_rect_config       *configRect;
-  IMU_pnts_config       *configPnts;
-  IMU_auto_config       *configAuto;
-  IMU_calb_config       *configCalb;
-  IMU_engn_config       *configEngn;
+  IMU_core_config       *core;
+  IMU_rect_config       *rect;
+  IMU_pnts_config       *pnts;
+  IMU_stat_config       *stat;
+  IMU_calb_config       *calb;
+  IMU_engn_config       *engn;
 } IMU_union_config;
 
 // input to IMU_engn_getState
 typedef union {
-  IMU_core_state        *stateCore;
-  IMU_pnts_state        *statePnts;
-  IMU_auto_state        *stateAuto;
-  IMU_calb_state        *stateCalb;
-  IMU_engn_state        *stateEngn;
+  IMU_core_state        *core;
+  IMU_pnts_state        *pnts;
+  IMU_stat_state        *stat;
+  IMU_calb_state        *calb;
+  IMU_engn_state        *engn;
 } IMU_union_state;
 
 // sensor data structure 
@@ -144,7 +144,7 @@ typedef struct {
 
 
 // data structure access functions
-int IMU_engn_init       (IMU_engn_type, uint16_t *id, IMU_engn_config**);
+int IMU_engn_init       (IMU_engn_type, uint16_t *id);
 int IMU_engn_getSysID   (uint16_t id, IMU_engn_system, uint16_t *sysID);
 int IMU_engn_getConfig  (uint16_t id, IMU_engn_system, IMU_union_config*);
 int IMU_engn_getState   (uint16_t id, IMU_engn_system, IMU_union_state*);

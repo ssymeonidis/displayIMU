@@ -77,7 +77,7 @@ typedef struct {
   float                tMove;          // last "unstable" time
   float                q[4];           // current quaterion
   float                A[3];           // last acceleration estimate
-  IMU_TYPE             mInit[3];       // initial magnetometer value
+  float                mInit[3];       // initial magnetometer value
   unsigned char        aReset;         // accelerometer reset signal
   unsigned char        mReset;         // magnetometer reset signal
   unsigned char        estmValid;      // flag to insure valid state

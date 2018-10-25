@@ -24,7 +24,7 @@
 #include "IMU_rect.h"
 #include "IMU_core.h"
 #include "IMU_pnts.h"
-#include "IMU_auto.h"
+#include "IMU_stat.h"
 #include "IMU_calb.h"
 #include "IMU_engn.h"
 
@@ -47,8 +47,8 @@ int IMU_file_rectLoad (const char *filename, IMU_rect_config *config);
 int IMU_file_rectSave (const char *filename, IMU_rect_config *config);
 int IMU_file_pntsLoad (const char *filename, IMU_pnts_config *config);
 int IMU_file_pntsSave (const char *filename, IMU_pnts_config *config);
-int IMU_file_autoLoad (const char *filename, IMU_auto_config *config);
-int IMU_file_autoSave (const char *filename, IMU_auto_config *config);
+int IMU_file_statLoad (const char *filename, IMU_stat_config *config);
+int IMU_file_statSave (const char *filename, IMU_stat_config *config);
 int IMU_file_calbLoad (const char *filename, IMU_calb_config *config);
 int IMU_file_calbSave (const char *filename, IMU_calb_config *config);
 int IMU_file_engnLoad (const char *filename, IMU_engn_config *config);

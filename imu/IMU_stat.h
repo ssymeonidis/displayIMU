@@ -17,8 +17,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _IMU_AUTO_H
-#define _IMU_AUTO_H
+#ifndef _IMU_STAT_H
+#define _IMU_STAT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,8 +29,8 @@ extern "C" {
 #include "IMU_core.h"
 
 // define error codes
-#define IMU_AUTO_INST_OVERFLOW  -1
-#define IMU_AUTO_BAD_INST       -2
+#define IMU_STAT_INST_OVERFLOW  -1
+#define IMU_STAT_BAD_INST	-2
 
 
 // define configuration structure
@@ -42,7 +42,7 @@ typedef struct {
   float                  gAlpha;          // mean/std calc filter value 
   float                  aAlpha;          // accelerometer filter value
   float                  mAlpha;          // magnetometer filter value
-} IMU_auto_config;
+} IMU_stat_config;
 
 // define internal state 
 typedef struct {
@@ -50,17 +50,17 @@ typedef struct {
   float                  aMag;
   float                  gMag;
   float                  gAng;
-} IMU_auto_state;
+} IMU_stat_state;
 
 
 // data structure access function
-int IMU_auto_init      (uint16_t *id, IMU_auto_config **config);
-int IMU_auto_getConfig (uint16_t id,  IMU_auto_config **config);
-int IMU_auto_getState  (uint16_t id,  IMU_auto_state  **state);
+int IMU_stat_init      (uint16_t *id, IMU_stat_config **config);
+int IMU_stat_getConfig (uint16_t id,  IMU_stat_config **config);
+int IMU_stat_getState  (uint16_t id,  IMU_stat_state  **state);
 
 // general operation functions 
-int IMU_auto_reset   (uint16_t id);
-int IMU_auto_update  (uint16_t id, IMU_core_FOM*, uint16_t size);
+int IMU_stat_reset   (uint16_t id);
+int IMU_stat_update  (uint16_t id, IMU_core_FOM*, uint16_t size);
 
 
 #ifdef __cplusplus

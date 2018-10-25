@@ -84,8 +84,7 @@ void* IMU_engn_run     (void*);
 
 int IMU_engn_init(
   IMU_engn_type         type,
-  uint16_t              *id, 
-  IMU_engn_config       **pntr)
+  uint16_t              *id)
 {
   // check device count overflow
   if (numInst >= IMU_MAX_INST)
@@ -95,27 +94,27 @@ int IMU_engn_init(
   if        (type == IMU_engn_core_only) {
     config[numInst].isRect       = 0;
     config[numInst].isPnts       = 0;
-    config[numInst].isAuto       = 0;
+    config[numInst].isStat       = 0;
     config[numInst].isCalb       = 0;
   } else if (type == IMU_engn_rect_core) {
     config[numInst].isRect       = 1;
     config[numInst].isPnts       = 0;
-    config[numInst].isAuto       = 0;
+    config[numInst].isStat       = 0;
     config[numInst].isCalb       = 0;
   } else if (type == IMU_engn_calb_pnts) {
     config[numInst].isRect       = 1;
     config[numInst].isPnts       = 1;
-    config[numInst].isAuto       = 0;
+    config[numInst].isStat       = 0;
     config[numInst].isCalb       = 1;
-  } else if (type == IMU_engn_calb_auto) {
+  } else if (type == IMU_engn_calb_stat) {
     config[numInst].isRect       = 1;
     config[numInst].isPnts       = 0;
-    config[numInst].isAuto       = 1;
+    config[numInst].isStat       = 1;
     config[numInst].isCalb       = 1;
   } else if (type == IMU_engn_calb_full) {
     config[numInst].isRect       = 1;
     config[numInst].isPnts       = 1;
-    config[numInst].isAuto       = 1;
+    config[numInst].isStat       = 1;
     config[numInst].isCalb       = 1;
   } else {
     return IMU_ENGN_BAD_ENGN_TYPE;
@@ -134,8 +133,8 @@ int IMU_engn_init(
     status  += max(0,IMU_rect_init(&cur->idRect, &cur->configRect));
   if (config[numInst].isPnts)
     status  += max(0,IMU_pnts_init(&cur->idPnts, &cur->configPnts));
-  if (config[numInst].isAuto)
-    status  += max(0,IMU_auto_init(&cur->idAuto, &cur->configAuto));
+  if (config[numInst].isStat)
+    status  += max(0,IMU_stat_init(&cur->idStat, &cur->configStat));
   if (config[numInst].isCalb)
     status  += max(0,IMU_calb_init(&cur->idCalb, &cur->configCalb));
   if (status < 0)
@@ -149,7 +148,6 @@ int IMU_engn_init(
 
   // pass handle and config structure
   *id        = numInst;
-  *pntr      = &config[*id];
   numInst++;
 
   // exit (no errors)
@@ -179,8 +177,8 @@ int IMU_engn_getSysID(
     *sysID              = state[id].idRect;
   else if (system == IMU_engn_pnts) 
     *sysID              = state[id].idPnts;
-  else if (system == IMU_engn_auto) 
-    *sysID              = state[id].idAuto;
+  else if (system == IMU_engn_stat) 
+    *sysID              = state[id].idStat;
   else if (system == IMU_engn_calb)
     *sysID              = state[id].idCalb;
   else
@@ -208,17 +206,17 @@ int IMU_engn_getConfig(
 
   // pass subsystem config structure
   if      (system == IMU_engn_core) 
-    pntr->configCore    = state[id].configCore;
+    pntr->core          = state[id].configCore;
   else if (system == IMU_engn_rect) 
-    pntr->configRect    = state[id].configRect;
+    pntr->rect          = state[id].configRect;
   else if (system == IMU_engn_pnts)
-    pntr->configPnts    = state[id].configPnts;
-  else if (system == IMU_engn_auto)
-    pntr->configAuto    = state[id].configAuto;
+    pntr->pnts          = state[id].configPnts;
+  else if (system == IMU_engn_stat)
+    pntr->stat          = state[id].configStat;
   else if (system == IMU_engn_calb)
-    pntr->configCalb    = state[id].configCalb;
+    pntr->calb          = state[id].configCalb;
   else if (system == IMU_engn_self) 
-    pntr->configEngn    = &config[id];
+    pntr->engn          = &config[id];
   else
     return IMU_ENGN_NONEXISTANT_SYSID;
   
@@ -244,17 +242,17 @@ int IMU_engn_getState(
 
   // pass subsystem state structure
   if      (system == IMU_engn_core) 
-    IMU_core_getState(state[id].idCore, &pntr->stateCore);
+    IMU_core_getState(state[id].idCore, &pntr->core);
   else if (system == IMU_engn_rect)
     return IMU_ENGN_NONEXISTANT_STRUCT;
   else if (system == IMU_engn_pnts)
-    IMU_pnts_getState(state[id].idPnts, &pntr->statePnts);
-  else if (system == IMU_engn_auto)
-    IMU_auto_getState(state[id].idAuto, &pntr->stateAuto);
+    IMU_pnts_getState(state[id].idPnts, &pntr->pnts);
+  else if (system == IMU_engn_stat)
+    IMU_stat_getState(state[id].idStat, &pntr->stat);
   else if (system == IMU_engn_calb)
     return IMU_ENGN_NONEXISTANT_STRUCT;
   else if (system == IMU_engn_self)
-    pntr->stateEngn     = &state[id];
+    pntr->engn          = &state[id];
   else
     return IMU_ENGN_NONEXISTANT_SYSID;
 
@@ -381,8 +379,8 @@ int IMU_engn_load(
     return IMU_file_rectLoad(filename, state[id].configRect);
   else if (system == IMU_engn_pnts)
     return IMU_file_pntsLoad(filename, state[id].configPnts);
-  else if (system == IMU_engn_auto)
-    return IMU_file_autoLoad(filename, state[id].configAuto);
+  else if (system == IMU_engn_stat)
+    return IMU_file_statLoad(filename, state[id].configStat);
   else if (system == IMU_engn_calb) 
     return IMU_file_calbLoad(filename, state[id].configCalb);
   else if (system == IMU_engn_self) 
@@ -414,8 +412,8 @@ int IMU_engn_save(
     return IMU_file_rectSave(filename, state[id].configRect);
   else if (system == IMU_engn_pnts)
     return IMU_file_pntsSave(filename, state[id].configPnts);
-  else if (system == IMU_engn_auto)
-    return IMU_file_autoSave(filename, state[id].configAuto);
+  else if (system == IMU_engn_stat)
+    return IMU_file_statSave(filename, state[id].configStat);
   else if (system == IMU_engn_calb)
     return IMU_file_calbSave(filename, state[id].configCalb);
   else if (system == IMU_engn_self) 
@@ -452,8 +450,8 @@ int IMU_engn_reset(
   int status = max(0,IMU_core_reset(state[id].idCore));
   if (config[id].isPnts)
     status  += max(0,IMU_pnts_reset(state[id].idPnts));
-  if (config[id].isAuto)
-    status  += max(0,IMU_auto_reset(state[id].idAuto));
+  if (config[id].isStat)
+    status  += max(0,IMU_stat_reset(state[id].idStat));
   if (config[id].isCalb)
     status  += max(0,IMU_calb_reset(state[id].idCalb));
   if (status < 0)
@@ -604,7 +602,7 @@ int IMU_engn_data3(
     return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   
   // create FOM pointer
-  if (config[id].isAuto || config[id].isFOM)
+  if (config[id].isStat || config[id].isFOM)
     FOM = datumFOM;
   else
     FOM = NULL;
@@ -615,8 +613,8 @@ int IMU_engn_data3(
   if (config[id].isPnts)
     status += max(0,IMU_pnts_data3(state[id].idPnts, data3, &pnt));
   status   += max(0,IMU_core_data3(state[id].idCore, data3, FOM));
-  if (config[id].isAuto)
-    status += max(0,IMU_auto_update(state[id].idAuto, FOM, 3));
+  if (config[id].isStat)
+    status += max(0,IMU_stat_update(state[id].idStat, FOM, 3));
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
@@ -760,7 +758,7 @@ int IMU_engn_process(
     return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   
   // create FOM pointer
-  if (config[id].isAuto || config[id].isFOM)
+  if (config[id].isStat || config[id].isFOM)
     FOM = datumFOM;
   else
     FOM = NULL;
@@ -771,8 +769,8 @@ int IMU_engn_process(
   if (config[id].isPnts)
     status += max(0,IMU_pnts_datum(state[id].idPnts, datum, &pnt));
   status   += max(0,IMU_core_datum(state[id].idCore, datum, FOM));
-  if (config[id].isAuto)
-    status += max(0,IMU_auto_update(state[id].idAuto, FOM, 1));
+  if (config[id].isStat)
+    status += max(0,IMU_stat_update(state[id].idStat, FOM, 1));
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
@@ -838,7 +836,7 @@ int IMU_copy_results1(
     int status = IMU_engn_getState(id, IMU_engn_pnts, &unionState);
     if (status < 0)
       return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
-    pntsState = unionState.statePnts;
+    pntsState = unionState.pnts;
     if (pntsState == NULL)
       return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   }
@@ -913,7 +911,7 @@ int IMU_copy_results3(
     int status = IMU_engn_getState(id, IMU_engn_pnts, &unionState);
     if (status < 0)
       return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
-    pntsState = unionState.statePnts;
+    pntsState = unionState.pnts;
     if (pntsState == NULL)
       return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   }
@@ -972,7 +970,7 @@ int IMU_engn_typeCheck(
     return IMU_ENGN_UNINITIALIZE_SYS;
   if (system == IMU_engn_pnts && !config[id].isPnts)
     return IMU_ENGN_UNINITIALIZE_SYS;
-  if (system == IMU_engn_auto && !config[id].isAuto)
+  if (system == IMU_engn_stat && !config[id].isStat)
     return IMU_ENGN_UNINITIALIZE_SYS;
   if (system == IMU_engn_calb && !config[id].isCalb)
     return IMU_ENGN_UNINITIALIZE_SYS;    

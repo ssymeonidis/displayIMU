@@ -248,12 +248,12 @@ int IMU_calb_pnts(
 
 
 /******************************************************************************
-* update IMU_correct structure w/ autocal results
+* update IMU_correct structure w/ statcal results
 ******************************************************************************/
 
-int IMU_calb_auto(
+int IMU_calb_stat(
   uint16_t                id,
-  IMU_auto_state          *state)
+  IMU_stat_state          *state)
 {
   return 0;
 }

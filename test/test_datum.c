@@ -36,8 +36,7 @@ int main(void)
 {
   // define local variable
   IMU_datum          datum;
-  IMU_engn_config    *imuConfig;
-  IMU_union_config   configIMU;
+  IMU_union_config   config;
   IMU_engn_sensor    *sensor;
   uint16_t           id;
   int                status;
@@ -46,18 +45,20 @@ int main(void)
   printf("starting test_datum...\n");
 
   // initialize the IMU and its data parser
-  status = IMU_engn_init(IMU_engn_rect_core, &id, &imuConfig);
+  status = IMU_engn_init(IMU_engn_rect_core, &id);
   check_status(status, "IMU_engn_init failure");
   
   // get pointer to sensor structure
-  imuConfig->isSensorStruct = 1;
+  status = IMU_engn_getConfig(id, IMU_engn_self, &config);
+  check_status(status, "IMU_engn_getConfig failure");
+  config.engn->isSensorStruct = 1;
   status = IMU_engn_getSensor(id, &sensor);
   check_status(status, "IMU_engn_getSensor failure");
     
   // disable core (not under test)
-  status = IMU_engn_getConfig(id, IMU_engn_core, &configIMU);
+  status = IMU_engn_getConfig(id, IMU_engn_core, &config);
   check_status(status, "IMU_engn_getConfig failure");
-  configIMU.configCore->enable = 0;
+  config.core->enable = 0;
 
   // read IMU_rect json config file
   status = IMU_engn_load(id, "../config/test_datum.json", IMU_engn_rect);

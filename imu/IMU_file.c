@@ -118,9 +118,9 @@ typedef enum {
   IMU_pnts_mThresh      = 10
 } IMU_pnts_config_enum;
 
-// auto subsystem parsing inputs
-static const int   IMU_auto_config_size = 7;
-static const char* IMU_auto_config_name[] = {
+// stat subsystem parsing inputs
+static const int   IMU_stat_config_size = 7;
+static const char* IMU_stat_config_name[] = {
   "enable",
   "isGyro",
   "isAccl",
@@ -130,15 +130,15 @@ static const char* IMU_auto_config_name[] = {
   "mAlpha"
 };
 typedef enum {
-  IMU_auto_enable      = 0,
-  IMU_auto_isGyro      = 0,
-  IMU_auto_isAccl      = 1,
-  IMU_auto_isMagn      = 2,
-  IMU_auto_gAlpha      = 3,
-  IMU_auto_gThresh     = 4,
-  IMU_auto_aAlpha      = 5,
-  IMU_auto_mAlpha      = 6,
-} IMU_auto_config_enum;
+  IMU_stat_enable      = 0,
+  IMU_stat_isGyro      = 0,
+  IMU_stat_isAccl      = 1,
+  IMU_stat_isMagn      = 2,
+  IMU_stat_gAlpha      = 3,
+  IMU_stat_gThresh     = 4,
+  IMU_stat_aAlpha      = 5,
+  IMU_stat_mAlpha      = 6,
+} IMU_stat_config_enum;
 
 // parsing line buffers
 #define line_size 128
@@ -461,15 +461,15 @@ int IMU_file_pntsSave(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_autoLoad(
+int IMU_file_statLoad(
   const char            *filename,
-  IMU_auto_config       *config)
+  IMU_stat_config       *config)
 {
   // define internal variables
   FILE                  *file;
   char                  *field;
   char                  *args;
-  IMU_auto_config_enum  type;     
+  IMU_stat_config_enum  type;     
   int                   status;
 
   // open configuration json file 
@@ -487,18 +487,18 @@ int IMU_file_autoLoad(
       break;
 
     // extract specified field arguments  
-    type = get_field(field, IMU_auto_config_name, IMU_auto_config_size);
-    if      (type == IMU_auto_isGyro)
+    type = get_field(field, IMU_stat_config_name, IMU_stat_config_size);
+    if      (type == IMU_stat_isGyro)
       get_bool(args, &config->isGyro);
-    else if (type == IMU_auto_isAccl)
+    else if (type == IMU_stat_isAccl)
       get_bool(args, &config->isAccl);
-    else if (type == IMU_auto_isMagn)
+    else if (type == IMU_stat_isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == IMU_auto_gAlpha)
+    else if (type == IMU_stat_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
-    else if (type == IMU_auto_aAlpha)
+    else if (type == IMU_stat_aAlpha)
       sscanf(args, "%f", &config->aAlpha);
-    else if (type == IMU_auto_mAlpha)
+    else if (type == IMU_stat_mAlpha)
       sscanf(args, "%f", &config->mAlpha);
   }
 
@@ -512,9 +512,9 @@ int IMU_file_autoLoad(
 * writes configuration structure to a json file
 ******************************************************************************/
 
-int IMU_file_autoSave(
+int IMU_file_statSave(
   const char           *filename,
-  IMU_auto_config      *config)
+  IMU_stat_config      *config)
 {
   // define internal variables
   FILE                 *file;

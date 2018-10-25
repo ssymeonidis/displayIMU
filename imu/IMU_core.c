@@ -131,6 +131,7 @@ int IMU_core_reset(
   state[id].aReset      = config[id].isAccl;
   state[id].mReset      = config[id].isMagn;
   state[id].estmValid   = 0;
+  state[id].status      = 0;
 
   // unlock function and exit (no errors)
   #if IMU_USE_PTHREAD
@@ -195,7 +196,7 @@ int IMU_core_zero(
     // asynchnous magnetometer vector
     } else if (a_in==NULL && m_in!=NULL) {
       if (state[id].aReset) {
-        memcpy(state[id].mInit, m, 3*sizeof(IMU_TYPE));
+        memcpy(state[id].mInit, m, sizeof(m));
         status          = IMU_CORE_ZEROED_SAVE;
       } else {
         IMU_math_quatToUp(state[id].q, a);

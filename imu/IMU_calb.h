@@ -23,7 +23,7 @@
 #include "IMU_rect.h"
 #include "IMU_core.h"
 #include "IMU_pnts.h"
-#include "IMU_auto.h"
+#include "IMU_stat.h"
 #include "IMU_type.h"
 
 #ifdef __cplusplus
@@ -87,7 +87,7 @@ int IMU_calb_save       (uint16_t id, IMU_rect_config*, IMU_core_config*);
 
 // sensor interface functions
 int IMU_calb_pnts       (uint16_t id, IMU_pnts_entry*); 
-int IMU_calb_auto       (uint16_t id, IMU_auto_state*);
+int IMU_calb_stat       (uint16_t id, IMU_stat_state*);
 
 
 #ifdef __cplusplus

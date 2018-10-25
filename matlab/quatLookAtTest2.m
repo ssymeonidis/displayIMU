@@ -15,23 +15,15 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function q = quatFromForwardUp(f,u)
+%%
+% clear all; close all;
 
-% normalize reference (up) vector
-u = u./norm(u);
+% simple forward/up test
+%euler  = [360*rand(), 180*rand()-90, 360*rand()-180];
+q1_in  = eulerToQuat(180*euler/pi);
+u1_in  = 255*quatToUp(q1_in);
+f1_in  = 255*quatToForward(q1_in);
+q1_out = quatFromForwardUp(f1_in, u1_in);
+u1_out = 255*quatToUp(q1_out);
+f1_out = 255*quatToUp(q1_out);
 
-% ortho normalize forward vector 
-D = dot(f, u);
-f = f - D*u; 
-f = f./norm(f);
-
-% calculate right vector
-r = cross(u,f);
-
-% calcuate the quaternion
-M = [f(1), r(1), u(1); ...
-     f(2), r(2), u(2); ...
-     f(3), r(3), u(3)];
-q = matrixToQuat(M);
-
-end

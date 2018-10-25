@@ -17,7 +17,7 @@ SRCS        = IMU_file.c  \
               IMU_rect.c  \
               IMU_pnts.c  \
               IMU_calb.c  \
-              IMU_auto.c  \
+              IMU_stat.c  \
               IMU_core.c  \
               IMU_engn.c
 OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
