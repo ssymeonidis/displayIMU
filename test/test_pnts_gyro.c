@@ -24,6 +24,7 @@
 #include <math.h>
 #include "IMU_engn.h"
 #include "IMU_pnts.h"
+#include "test_utils.h"
 
 // define constants
 static const int   msg_delay   = 200;
@@ -55,25 +56,16 @@ int main(void)
 
   // initialize the IMU and its data parser
   status = IMU_engn_init(IMU_engn_calb_pnts, &id, &imuConfig);
-  if (status < 0) {
-    printf("error: IMU_engn_init failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_init failure");
   
   // get pointer to sensor structure
   imuConfig->isSensorStruct = 1;
   status = IMU_engn_getSensor(id, &sensor);
-  if (status < 0) {
-    printf("error: IMU_engn_getSensor failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_getSensor failure");
   
   // get pointer to pnts state structure
   status = IMU_engn_getState(id, IMU_engn_pnts, &stateIMU);
-  if (status < 0) {
-    printf("error: IMU_engn_getState failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_getState failure");
   pntsState = stateIMU.statePnts;
   if (pntsState == NULL) {
     printf("error: IMU_engn_getState return NULL pointer");
@@ -82,40 +74,25 @@ int main(void)
   
   // disable core (not under test)
   status = IMU_engn_getConfig(id, IMU_engn_core, &configIMU);
-  if (status < 0) {
-    printf("error: IMU_engn_getSensor failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_getConfig failure");
   configIMU.configCore->enable = 0;
 
   // disable rect (not under test)
   status = IMU_engn_getConfig(id, IMU_engn_rect, &configIMU);
-  if (status < 0) {
-    printf("error: IMU_engn_getSensor failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_getConfig failure");
   configIMU.configRect->enable = 0;
 
   // read IMU_pnts json config file
   status = IMU_engn_load(id, "../config/test_pnts.json", IMU_engn_pnts);
-  if (status < 0) {
-    printf("error: IMU_engn_load failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_load failure");
 
   // start data queue
   status = IMU_engn_start();
-  if (status < 0) {
-    printf("error: IMU_engn_start failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_start failure");
   
   // start points collections
   status = IMU_engn_calbStart(id, IMU_calb_NA); 
-  if (status < 0) {
-    printf("error: IMU_engn_calbStart failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_calbStart failure");
   
   // testing initalization of gyroscope related state values
   datum.type    = IMU_gyro;
@@ -124,10 +101,7 @@ int main(void)
   datum.val[1]  = 20;
   datum.val[2]  = 30;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   float zero[3] = {0,  0,  0};
@@ -144,10 +118,7 @@ int main(void)
   datum.val[1]  = 25;
   datum.val[2]  = 35;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   float val2[3] = {9.5, 20.5, 30.5};
@@ -163,10 +134,7 @@ int main(void)
   datum.val[1]  = 20;
   datum.val[2]  = 30;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   float val4[3] = {10, 20, 30};
@@ -181,10 +149,7 @@ int main(void)
   datum.val[1]  = 15;
   datum.val[2]  = 25;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   float val5[3] = {10.5, 19.5, 29.5};
@@ -199,10 +164,7 @@ int main(void)
   datum.val[1]  = 25;
   datum.val[2]  = 35;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   float val6[3] = {9.95, 20.05, 30.05};
@@ -217,10 +179,7 @@ int main(void)
   datum.val[1]  = 40;
   datum.val[2]  = 40;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);
@@ -238,10 +197,7 @@ int main(void)
   datum.val[1]  = 20;
   datum.val[2]  = 30;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);
@@ -258,10 +214,7 @@ int main(void)
   datum.val[1]  = 20;
   datum.val[2]  = 30;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);
@@ -278,10 +231,7 @@ int main(void)
   datum.val[1]  = 40;
   datum.val[2]  = 40;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);
@@ -303,10 +253,7 @@ int main(void)
   datum.val[1]  = 20;
   datum.val[2]  = 30;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);
@@ -319,10 +266,7 @@ int main(void)
   datum.val[1]  = 20;
   datum.val[2]  = 30;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);
@@ -339,10 +283,7 @@ int main(void)
   datum.val[1]  = 40;
   datum.val[2]  = 40;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);
@@ -359,10 +300,7 @@ int main(void)
   datum.val[1]  = 20;
   datum.val[2]  = 30;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify IMU_pnts state structure
   usleep(msg_delay);

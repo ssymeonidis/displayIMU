@@ -17,6 +17,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+ * This function is based off the work performed by Sebastian O.H. Madgwick, 
+ * documented in the paper "An efficient orientation Filter for inertial and
+ * inertial/magnetic sensor arrays". Changes were made to support async data
+ * and adapted the filter for activity recogition and wearable sensors.
+*/  
+
 // include statements 
 #include <math.h>            // sqrt/trig
 #include "IMU_math.h"

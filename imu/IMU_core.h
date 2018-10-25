@@ -32,16 +32,20 @@ extern "C" {
 #include "IMU_type.h"
 
 // define status codes
-#define IMU_CORE_FNC_DISABLED    1
-#define IMU_CORE_FNC_IN_RESET    2
-#define IMU_CORE_FNC_ZEROED      3
-#define IMU_CORE_NO_WEIGHT       4
-#define IMU_CORE_GYRO_STABLE     5
+#define IMU_CORE_FNC_DISABLED       1
+#define IMU_CORE_ZEROED_ACCL        2
+#define IMU_CORE_ZEROED_MAGN        3
+#define IMU_CORE_ZEROED_SAVE        4
+#define IMU_CORE_ZEROED_BOTH        5
+#define IMU_CORE_ZEROED_GYRO        6
+#define IMU_CORE_NO_WEIGHT          7
+#define IMU_CORE_GYRO_STABLE        8
+#define IMU_CORE_NORMAL_OP          9
 
 // define error codes
-#define IMU_CORE_INST_OVERFLOW  -1
-#define IMU_CORE_BAD_INST       -2
-#define IMU_CORE_FAILED_MUTEX   -3
+#define IMU_CORE_INST_OVERFLOW     -1
+#define IMU_CORE_BAD_INST          -2
+#define IMU_CORE_FAILED_MUTEX      -3
 
 
 // configuration structure definition
@@ -77,6 +81,7 @@ typedef struct {
   unsigned char        aReset;         // accelerometer reset signal
   unsigned char        mReset;         // magnetometer reset signal
   unsigned char        estmValid;      // flag to insure valid state
+  int                  status;         // captures last datum status
 #if IMU_USE_PTHREAD
   pthread_mutex_t      lock;           // mutex (async operation)
 #endif

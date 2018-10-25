@@ -122,12 +122,10 @@ int IMU_engn_init(
   }
   config[numInst].isFOM          = 0;
   config[numInst].isSensorStruct = 0;
-  
-  // initialize the quaternion reference
-  state[numInst].q_ref[0]        = 1;
-  state[numInst].q_ref[1]        = 0;
-  state[numInst].q_ref[2]        = 0;
-  state[numInst].q_ref[3]        = 0;
+  config[numInst].q_ref[0]       = 1;
+  config[numInst].q_ref[1]       = 0;
+  config[numInst].q_ref[2]       = 0;
+  config[numInst].q_ref[3]       = 0;
   
   // create IMU subsystem instances
   IMU_engn_state *cur = &state[numInst];
@@ -154,11 +152,6 @@ int IMU_engn_init(
   *pntr      = &config[*id];
   numInst++;
 
-  // ensure instance reseted to known state
-  status     = IMU_engn_reset(*id);
-  if (status < 0)
-    return IMU_ENGN_FAILED_RESET;
-
   // exit (no errors)
   return 0;
 }
@@ -168,7 +161,7 @@ int IMU_engn_init(
 * function to return subsystem ID
 ******************************************************************************/
 
-int IMU_engn_getSysID( 
+int IMU_engn_getSysID(
   uint16_t		id,  
   IMU_engn_system       system,
   uint16_t              *sysID)
@@ -315,6 +308,14 @@ int IMU_engn_setCalbFnc(
 
 int IMU_engn_start()
 {
+  // reset all instances
+  int             status  = 0;
+  int             i;
+  for (i=0; i<numInst; i++)
+    status  += max(0, IMU_engn_reset(i));
+  if (status > 0)
+    return IMU_ENGN_FAILED_RESET;
+
   // zero queue size pass through
   #if IMU_ENGN_QUEUE_SIZE == 0
   return 0;
@@ -449,7 +450,6 @@ int IMU_engn_reset(
   
   // reset all open subsystems
   int status = max(0,IMU_core_reset(state[id].idCore));
-  IMU_core_reset(0);
   if (config[id].isPnts)
     status  += max(0,IMU_pnts_reset(state[id].idPnts));
   if (config[id].isAuto)
@@ -469,7 +469,7 @@ int IMU_engn_reset(
 ******************************************************************************/
 
 int IMU_engn_setRef( 
-  uint16_t		id,  
+  uint16_t		id,
   float                 *ref)
 {
   // check out-of-bounds condition
@@ -477,10 +477,10 @@ int IMU_engn_setRef(
     return IMU_ENGN_BAD_INST;
 
   // copy contents of input vector
-  state[id].q_ref[0]    = ref[0];
-  state[id].q_ref[1]    = ref[1];
-  state[id].q_ref[2]    = ref[2];
-  state[id].q_ref[3]    = ref[3];
+  config[id].q_ref[0]   = ref[0];
+  config[id].q_ref[1]   = ref[1];
+  config[id].q_ref[2]   = ref[2];
+  config[id].q_ref[3]   = ref[3];
   
   // exit function
   return 0;
@@ -508,10 +508,10 @@ int IMU_engn_setRefCur(
     return IMU_ENGN_SUBSYSTEM_FAILURE;
 
   // copy contents of input vector
-  state[id].q_ref[0]    =  ref[0];
-  state[id].q_ref[1]    = -ref[1];
-  state[id].q_ref[2]    = -ref[2];
-  state[id].q_ref[3]    = -ref[3];
+  config[id].q_ref[0]   = ref[0];
+  config[id].q_ref[1]   = ref[1];
+  config[id].q_ref[2]   = ref[2];
+  config[id].q_ref[3]   = ref[3];
   
   // exit function
   return 0;
@@ -643,9 +643,9 @@ int IMU_engn_getEstm(
   // get estimates
   int status = max(0,IMU_core_estmQuat(state[id].idCore, t, estm->q_org));
   if (config[id].isEstmAccl)
-    status  += max(0,IMU_core_estmAccl(state[id].idCore, t, estm->move));
+    status  += max(0,IMU_core_estmAccl(state[id].idCore, t, estm->pos));
   if (!config[id].isQuatOnly) {
-    IMU_math_rotateReverse(estm->q_org, state[id].q_ref, estm->q);
+    IMU_math_rotateReverse(estm->q_org, config[id].q_ref, estm->q);
     IMU_math_quatToEuler(estm->q, estm->ang);
   }
   

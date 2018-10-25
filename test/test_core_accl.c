@@ -23,15 +23,19 @@
 #include <unistd.h>
 #include <math.h>
 #include "IMU_engn.h"
-#include "IMU_pnts.h"
+#include "test_utils.h"
 
 // define constants
 static const int   msg_delay   = 200;
-static const float precision   = 0.001;
+static const float precision   = 0.01;
+
+// define globals
+uint16_t           id          = 0;
+IMU_TYPE           curTime     = 0;
 
 // define internal function
-static void print_gyro(IMU_TYPE time, IMU_engn_sensor*, IMU_pnts_state*);
-static void verify_vector(float *val, float ref[3]);
+static void test_datum   (float vec[3], int num_iter, float ref[4], int state);
+static void verify_estm  (float ref[4]);
 
 
 /******************************************************************************
@@ -41,106 +45,121 @@ static void verify_vector(float *val, float ref[3]);
 int main(void)
 {
   // define local variable
-  IMU_datum          datum;
   IMU_engn_config    *engnConfig;
-  IMU_union_config   unionConfig;
-  IMU_union_state    unionState;
-  IMU_core_config    *coreConfig;
-  IMU_core_state     *coreState;
-  uint16_t           id;
   int                status;
 
   // start datum test
   printf("starting test_core_accl...\n");
 
-  // initialize the IMU and its data parser
+  // initialize imu engine
   status = IMU_engn_init(IMU_engn_core_only, &id, &engnConfig);
-  if (status < 0) {
-    printf("error: IMU_engn_init failure #%d\n", status);
-    exit(0);
-  }
-  
-  // get pointer to core config structure
-  status = IMU_engn_getConfig(id, IMU_engn_core, &unionConfig);
-  if (status < 0) {
-    printf("error: IMU_engn_getConfig failure #%d\n", status);
-    exit(0);
-  }
-  coreConfig = unionConfig.configCore;
-
-  // get pointer to core state structure
-  status = IMU_engn_getState(id, IMU_engn_core, &unionState);
-  if (status < 0) {
-    printf("error: IMU_engn_getState failure #%d\n", status);
-    exit(0);
-  }
-  coreState = unionState.stateCore;
-
-  // read IMU_pnts json config file
+  check_status(status, "IMU_engn_init failure");
   status = IMU_engn_load(id, "../config/test_core.json", IMU_engn_core);
-  if (status < 0) {
-    printf("error: IMU_engn_load failure #%d\n", status);
-    exit(0);
-  }
-
-  // start data queue
+  check_status(status, "IMU_engn_load failure");
   status = IMU_engn_start();
-  if (status < 0) {
-    printf("error: IMU_engn_start failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_start failure");
+
+  // verify quaternion initialization
+  float out1[4]      = { 1.0000,  0.0000,  0.0000,  0.0000};
+  verify_estm(out1);
+  
+  // testing accelerometer zeroing
+  float vec1[3]      = {    179,     179,     255};
+  float out2[4]      = { 0.9246, -0.2694,  0.2694,  0.0000};
+  test_datum(vec1, 1, out2, IMU_CORE_ZEROED_ACCL);
   
   // testing initalization of gyroscope related state values
-  /*datum.type    = IMU_gyro;
-  datum.t       = 10;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }*/
+  float vec2[3]      = {      0,       0,     255};
+  test_datum(vec2, 1, out2, IMU_CORE_NORMAL_OP);
+  
+  // testing initalization of gyroscope related state values
+  test_datum(vec2, 100, out1, IMU_CORE_NORMAL_OP);
   
   // exit program
-  printf("pass: test_ptns_gyro\n\n");
+  printf("pass: test_core_accl\n\n");
   return 0;
 }
 
 
 /******************************************************************************
-* main function - simple test of datum queue and correction block
+* assess quaternion based on datum
 ******************************************************************************/
 
-void print_gyro(
-  IMU_TYPE                 time,
-  IMU_engn_sensor          *sensor, 
-  IMU_pnts_state           *state)
+void test_datum(
+  float                    vec[3],
+  int                      num_iter,
+  float                    ref[4],
+  int                      state)
 {
-  // get pointer to points entry
-  IMU_pnts_entry *entry = state->current;
-  printf("%d, %d, %d, %d, %d, %0.1f, %0.1f, %0.1f, %0.1f, %0.1f, %0.1f, ", 
-    state->curPnts, state->state, time-state->tStable, 
-    entry->tStart, entry->tEnd,
-    state->gMean[0],  state->gMean[1],  state->gMean[2],
-    entry->gAccum[0], entry->gAccum[1], entry->gAccum[2]);
-  printf("%0.1f, %0.1f, %0.1f\n", 
-    sensor->gFlt[0],  sensor->gFlt[1],  sensor->gFlt[2]);
+  // define local variable
+  IMU_datum                datum;
+  int                      status;
+  int                      i;
+
+  // increment time
+  curTime                 += 10;
+  datum.type               = IMU_accl;
+  datum.t                  = curTime;
+  datum.val[0]             = vec[0];
+  datum.val[1]             = vec[1];
+  datum.val[2]             = vec[2];
+
+  for (i=0; i<num_iter; i++) {
+    status                 = IMU_engn_datum(0, &datum);
+    check_status(status, "IMU_engn_datum failure");
+    usleep(msg_delay);
+  }
+
+  // verify value
+  verify_state(state);
+  verify_estm(ref);
 }
 
 
 /******************************************************************************
-* main function - simple test of datum queue and correction block
+* prints system quaternion and verifies against a reference
 ******************************************************************************/
 
-void verify_vector(
-  float                    *val,
-  float                    ref[3])
+void verify_estm(
+  float                    ref[4])
 {
-  if (fabs(val[0] - ref[0]) > precision ||
-      fabs(val[1] - ref[1]) > precision ||
-      fabs(val[2] - ref[2]) > precision) {
-    printf("error: gMean precision failure\n");
+  // get quaternion estimate
+  IMU_engn_estm            estm;
+  IMU_engn_getEstm(id, curTime, &estm);
+  float *q = estm.q;
+  
+  // print current quaternion
+  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", q[0], q[1], q[2], q[3]);
+
+  // verify against reference;
+  if (fabs(q[0] - ref[0]) > precision ||
+      fabs(q[1] - ref[1]) > precision ||
+      fabs(q[2] - ref[2]) > precision ||
+      fabs(q[3] - ref[3]) > precision) {
+    printf("error: quaternion precision error\n");
+    exit(0);
+  }
+}
+
+
+/******************************************************************************
+* verifies state of last datum 
+******************************************************************************/
+
+void verify_state(
+  int                      state_in)
+{
+  // define local variables
+  IMU_union_state          unionState;
+  int status = IMU_engn_getState(id, IMU_engn_core, &unionState);
+  int state  = unionState.stateCore->status;
+  
+  // print current state
+  printf("%d, ", state);
+
+  // verify against reference;
+  if (state != state_in) {
+    printf("error: state error\n");
     exit(0);
   }
 }

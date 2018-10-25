@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "test_utils.h"
 #include "IMU_math.h"
 
 // define constants

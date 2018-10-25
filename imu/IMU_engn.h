@@ -58,8 +58,9 @@ typedef struct {
   uint8_t               isCalb;          // enable calibration subsystem 
   uint8_t               isEstmAccl;      // enable accl estm (minus gravity) 
   uint8_t               isQuatOnly;      // disable conversion to Euler angles
-  uint8_t               isFOM;           // disable caluculation of FOMs
+  uint8_t               isFOM;           // disable calculation of FOMs
   uint8_t               isSensorStruct;  // enable storage of sensor data
+  float                 q_ref[4];        // quaternion reference
 } IMU_engn_config;
 
 // system state structure definition
@@ -74,9 +75,8 @@ typedef struct {
   IMU_pnts_config       *configPnts;     // pnts configuration pointer
   IMU_auto_config       *configAuto;     // auto configuration pointer
   IMU_calb_config       *configCalb;     // calb configuration pointer
-  uint16_t              isExit;          // commands thread to exit
-  uint16_t              exitThread;      // confirms thread has exited 
-  float                 q_ref[4];        // quaternion reference
+  uint8_t               isExit;          // commands thread to exit
+  uint8_t               exitThread;      // confirms thread has exited 
 } IMU_engn_state;
 
 // define which subsystems are running
@@ -139,7 +139,7 @@ typedef struct {
   float                 q_org[4];
   float                 q[4];
   float                 ang[3];
-  float                 move[3];
+  float                 pos[3];
 } IMU_engn_estm;
 
 

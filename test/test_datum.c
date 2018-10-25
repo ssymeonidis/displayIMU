@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "IMU_engn.h"
+#include "test_utils.h"
 
 // define constants
 static const int msg_delay   = 200;
@@ -46,40 +47,25 @@ int main(void)
 
   // initialize the IMU and its data parser
   status = IMU_engn_init(IMU_engn_rect_core, &id, &imuConfig);
-  if (status < 0) {
-    printf("error: IMU_engn_init failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_init failure");
   
   // get pointer to sensor structure
   imuConfig->isSensorStruct = 1;
   status = IMU_engn_getSensor(id, &sensor);
-  if (status < 0) {
-    printf("error: IMU_engn_getSensor failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_getSensor failure");
     
   // disable core (not under test)
   status = IMU_engn_getConfig(id, IMU_engn_core, &configIMU);
-  if (status < 0) {
-    printf("error: IMU_engn_getSensor failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_getConfig failure");
   configIMU.configCore->enable = 0;
 
   // read IMU_rect json config file
   status = IMU_engn_load(id, "../config/test_datum.json", IMU_engn_rect);
-  if (status < 0) {
-    printf("error: IMU_engn_load failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_load failure");
 
   // start data queue
   status = IMU_engn_start();
-  if (status < 0) {
-    printf("error: IMU_engn_start failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_start failure");
   
   // inject gyroscope input
   datum.type    = IMU_gyro;
@@ -88,10 +74,7 @@ int main(void)
   datum.val[1]  = 200;
   datum.val[2]  = 300;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_datum failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify sensor structure
   usleep(msg_delay);
@@ -118,10 +101,7 @@ int main(void)
   datum.val[1]  = 500;
   datum.val[2]  = 600;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_start failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify sensor structure
   usleep(msg_delay);
@@ -148,10 +128,7 @@ int main(void)
   datum.val[1]  = 800;
   datum.val[2]  = 900;
   status = IMU_engn_datum(id, &datum);
-  if (status < 0) {
-    printf("error: IMU_engn_start failure #%d\n", status);
-    exit(0);
-  }
+  check_status(status, "IMU_engn_datum failure");
   
   // verify sensor structure
   usleep(msg_delay);
