@@ -24,6 +24,9 @@
 #include "IMU_math.h"
 #include "test_utils.h"
 
+// define local functions
+void print_results_quat(float q[4]);
+
 
 /******************************************************************************
 * main function - simple test of datum queue and correction block
@@ -91,7 +94,7 @@ int main(void)
   float ans7[4] = { 0.3018, -0.6229,  0.7217,  0.0000};
   float out7[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_upToQuat(u7, out7);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out7[0], out7[1], out7[2], out7[3]);
+  print_results_quat(out7);
   verify_quat(ans7, out7);
 
   // testing two vector to quaternion function
@@ -100,7 +103,7 @@ int main(void)
   float ans8[4] = { 0.9718, -0.1560, -0.0377, -0.1727};
   float out8[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_vectToQuat(u8, v8, out8);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out8[0], out8[1], out8[2], out8[3]);
+  print_results_quat(out8);
   verify_quat(ans8, out8);
 
   // testing up-forward to quaternion function
@@ -109,7 +112,7 @@ int main(void)
   float ans9[4] = { 0.5949,  0.7983, -0.0821,  0.0449};
   float out9[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_upFrwdToQuat(u9, f9, out9);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out9[0], out9[1], out9[2], out9[3]);
+  print_results_quat(out9);
   verify_quat(ans9, out9);
 
   // testing up-forward to quaternion function
@@ -118,7 +121,7 @@ int main(void)
   float ans10[4] = {-0.1647,  0.9274,  0.0806,  0.3260};
   float out10[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_upFrwdToQuat(u10, f10, out10);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out10[0], out10[1], out10[2], out10[3]);
+  print_results_quat(out10);
   verify_quat(ans10, out10);
 
   // testing up-forward to quaternion function
@@ -127,7 +130,7 @@ int main(void)
   float ans11[4] = {-0.0651,  0.1228,  0.8580,  0.4945};
   float out11[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_upFrwdToQuat(u11, f11, out11);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out11[0], out11[1], out11[2], out11[3]);
+  print_results_quat(out11);
   verify_quat(ans11, out11);
 
   // testing up-forward to quaternion function
@@ -136,10 +139,24 @@ int main(void)
   float ans12[4] = {-0.4690,  0.4808,  0.4525,  0.5866};
   float out12[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_upFrwdToQuat(u12, f12, out12);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out12[0], out12[1], out12[2], out12[3]);
+  print_results_quat(out12);
   verify_quat(ans12, out12);
 
   // exit program
   printf("pass: test_quat_math\n\n");
   return 0;
 }
+
+
+/******************************************************************************
+* prints system quaternion and verifies against a reference
+******************************************************************************/
+
+void print_results_quat(
+  float                    q[4])
+{
+  // print and verify current quaternion
+  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", q[0], q[1], q[2], q[3]);
+}
+
+

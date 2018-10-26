@@ -37,7 +37,7 @@ static void verify_state (int   state);
 
 
 /******************************************************************************
-* main function - simple test of datum queue and correction block
+* main function
 ******************************************************************************/
 
 int main(void)
@@ -148,7 +148,7 @@ int main(void)
 
 
 /******************************************************************************
-* assess quaternion based on datum
+* test quaternion and state for a specified datum
 ******************************************************************************/
 
 void test_datum(

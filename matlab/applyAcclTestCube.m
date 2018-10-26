@@ -74,26 +74,17 @@ function euler = run_sim(euler, accl)
     display_state(q);
   end
 
-  % print results
+  % return final state
   euler_rad  = quatToEuler(q);
   euler      = 180 * euler_rad / pi;
 end
 
 
-%% updates the display
+%% update the display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function display_state(q)
-  u             = quatRotateForward([0, 0, 1], q, "full");
-  f             = quatRotateForward([1, 0, 0], q, "full");
-  r             = quatRotateForward([0, 1, 0], q, "full");
-  plotVector(u, f, r);
+  plotState(q);
   title('applyAcclTest');
-  delete(findall(gcf,'type','annotation'));
-  loc           = [.75 .67 .6 .3];
-  str{1}        = 'red = up';
-  str{2}        = 'green = forward';
-  str{3}        = 'blue = right';
-  annotation('textbox', loc, 'String', str, 'FitBoxToText', 'on');
   drawnow;
 end
