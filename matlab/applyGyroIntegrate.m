@@ -17,11 +17,10 @@
 
 function q = applyGyroIntegrate(q, gyro, dt)
 
-tmp(1) = - 0.5*q(2)*gyro(1) - 0.5*q(3)*gyro(2) - 0.5*q(4)*gyro(3);
-tmp(2) =   0.5*q(1)*gyro(1) + 0.5*q(3)*gyro(3) - 0.5*q(4)*gyro(2);
-tmp(3) =   0.5*q(1)*gyro(2) - 0.5*q(2)*gyro(3) + 0.5*q(4)*gyro(1);
-tmp(4) =   0.5*q(1)*gyro(3) + 0.5*q(2)*gyro(2) - 0.5*q(3)*gyro(1);
+tmp(1) =  -0.5 * (q(2)*gyro(1) + q(3)*gyro(2) + q(4)*gyro(3));
+tmp(2) =   0.5 * (q(1)*gyro(1) + q(3)*gyro(3) - q(4)*gyro(2));
+tmp(3) =   0.5 * (q(1)*gyro(2) - q(2)*gyro(3) + q(4)*gyro(1));
+tmp(4) =   0.5 * (q(1)*gyro(3) + q(2)*gyro(2) - q(3)*gyro(1));
 q      =   q + dt*tmp;
 
 end
-

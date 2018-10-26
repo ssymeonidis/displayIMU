@@ -37,10 +37,10 @@ static uint16_t         numInst = 0;
 // internal functions definitions
 static inline float  norm3(IMU_TYPE *in, float *out);
 static inline float* scale(float *v, float m);  
-int IMU_core_newGyro (uint16_t id, float t, IMU_TYPE *g, IMU_core_FOM*);
-int IMU_core_newAccl (uint16_t id, float t, IMU_TYPE *a, IMU_core_FOM*);
-int IMU_core_newMagn (uint16_t id, float t, IMU_TYPE *m, IMU_core_FOM*);
-int IMU_core_zero    (uint16_t id, float t, IMU_TYPE *a, IMU_TYPE *m);
+int IMU_core_newGyro (uint16_t id, uint32_t t, IMU_TYPE *g, IMU_core_FOM*);
+int IMU_core_newAccl (uint16_t id, uint32_t t, IMU_TYPE *a, IMU_core_FOM*);
+int IMU_core_newMagn (uint16_t id, uint32_t t, IMU_TYPE *m, IMU_core_FOM*);
+int IMU_core_zero    (uint16_t id, uint32_t t, IMU_TYPE *a, IMU_TYPE *m);
 
 
 /******************************************************************************
@@ -147,7 +147,7 @@ int IMU_core_reset(
 
 int IMU_core_zero(
   uint16_t              id,  
-  float                 t,
+  uint32_t              t,
   IMU_TYPE              *a_in, 
   IMU_TYPE              *m_in)
 {
@@ -171,6 +171,9 @@ int IMU_core_zero(
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&state[id].lock);
   #endif
+
+  // update state time
+  state[id].t           = (float)t;
 
   // zero with accerometer and magnetometer
   if        ( config[id].isAccl && config[id].isMagn) {
@@ -330,7 +333,7 @@ int IMU_core_data3(
 
 int IMU_core_newGyro(
   uint16_t              id, 
-  float                 t, 
+  uint32_t              t, 
   IMU_TYPE              *g_in,
   IMU_core_FOM          *pntr)
 {
@@ -352,7 +355,9 @@ int IMU_core_newGyro(
     return IMU_CORE_FNC_DISABLED;
   
   // copy values and calcuate mag 
-  float g[3]            = {(float)g_in[0], (float)g_in[1], (float)g_in[2]};
+  float g[3]            = {(float)g_in[0]/config[id].gScale, 
+                           (float)g_in[1]/config[id].gScale, 
+                           (float)g_in[2]/config[id].gScale};
   FOM->magSqrd          = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
  
   // check stable condition
@@ -371,14 +376,10 @@ int IMU_core_newGyro(
   IMU_thrd_mutex_lock(&state[id].lock);
   #endif
 
-  // compute gyro quaternion rate and apply delta to estimated orientation
-  float *q       = state[id].q;
-  float half_dt  = 0.5 * (t - state[id].t);
-  q[0]          += half_dt * (-q[1]*g[0] - q[2]*g[1] - q[3]*g[2]);
-  q[1]          += half_dt * ( q[0]*g[0] + q[2]*g[2] - q[3]*g[1]);
-  q[2]          += half_dt * ( q[0]*g[1] - q[1]*g[2] + q[3]*g[0]);
-  q[3]          += half_dt * ( q[0]*g[2] + q[1]*g[1] - q[2]*g[0]); 
-  state[id].t    = t;
+  // update system state with gyro
+  float dt = ((float)t-state[id].t)*IMU_CORE_10USEC_TO_SEC;
+  IMU_math_estmGyro(state[id].q, g, dt);
+  state[id].t           = (float)t;
 
   // unlock mutex and exit (no errors)
   #if IMU_USE_PTHREAD
@@ -394,7 +395,7 @@ int IMU_core_newGyro(
 
 int IMU_core_newAccl(
   uint16_t              id,
-  float                 t,
+  uint32_t              t,
   IMU_TYPE              *a_in,
   IMU_core_FOM          *pntr)
 {
@@ -479,7 +480,7 @@ int IMU_core_newAccl(
   memcpy(state[id].q, q, sizeof(state[id].q));
   if (config[id].isPos)
     memcpy(state[id].A, A, sizeof(state[id].A));
-  float t_new           = weight * t_copy + (1.0 - weight) * t;
+  float t_new           = weight * t_copy + (1.0 - weight) * (float)t;
   if (t_new > state[id].t)
     state[id].t         = t_new;
   IMU_thrd_mutex_unlock(&state[id].lock);
@@ -499,7 +500,7 @@ int IMU_core_newAccl(
 
 int IMU_core_newMagn(
   uint16_t              id, 
-  float                 t,
+  uint32_t              t,
   IMU_TYPE              *m_in,
   IMU_core_FOM          *pntr)
 {
@@ -552,13 +553,14 @@ int IMU_core_newMagn(
   }
   
   // copy internal orientation state
-  float *q, t_copy;
   #if IMU_USE_PTHREAD
+  float                 q[4];
   IMU_thrd_mutex_lock(&state[id].lock);
   memcpy(q, state[id].q, sizeof(state[id].q));
-  t_copy                = state[id].t;
+  float t_copy          = state[id].t;
   IMU_thrd_mutex_unlock(&state[id].lock);
   #else
+  float                 *q;
   q                     = state[id].q;
   state[id].t           = t;
   #endif
@@ -571,7 +573,7 @@ int IMU_core_newMagn(
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&state[id].lock);
   memcpy(state[id].q, q, sizeof(state[id].q));
-  float t_new           = weight * t_copy + (1.0f - weight) * t;
+  float t_new           = weight * t_copy + (1.0f - weight) * (float)t;
   if (t_new > state[id].t)
     state[id].t         = t_new;
   IMU_thrd_mutex_unlock(&state[id].lock);
@@ -591,7 +593,7 @@ int IMU_core_newMagn(
 
 int IMU_core_estmQuat(
   uint16_t              id,
-  float                 t,
+  uint32_t              t,
   float                 *estm)
 {
   // check out-of-bounds condition
@@ -622,7 +624,7 @@ int IMU_core_estmQuat(
 
 int IMU_core_estmAccl(
   uint16_t              id,
-  float                 t,
+  uint32_t              t,
   float                 *estm)
 {
   // check out-of-bounds condition

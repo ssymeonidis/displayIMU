@@ -25,6 +25,7 @@
 #include "test_utils.h"
 
 // define local functions
+void print_results_vect(float v[3]);
 void print_results_quat(float q[4]);
 
 
@@ -43,7 +44,7 @@ int main(void)
   float ans1[4] = { 0.1885,  1.7353, -0.1283,  0.4359};
   float out1[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_quatMult(q1a, q1b, out1);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out1[0], out1[1], out1[2], out1[3]);
+  print_results_quat(out1);
   verify_quat(ans1, out1);
 
   // testing quaternion multiply conjugate
@@ -52,7 +53,7 @@ int main(void)
   float ans2[4] = {-0.4796,  1.0635, -1.2086, -0.6873};
   float out2[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_quatMultConj(q2a, q2b, out2);
-  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out2[0], out2[1], out2[2], out2[3]);
+  print_results_quat(out2);
   verify_quat(ans2, out2);
 
   // testing quaternion vector rotate forward
@@ -61,7 +62,7 @@ int main(void)
   float ans3[3] = { 0.3700,  0.5211,  0.8295};
   float out3[3] = { 0.0000,  0.0000,  0.0000};
   IMU_math_rotateForward(v3, q3, out3);
-  printf("%0.3f, %0.3f, %0.3f\n", out3[0], out3[1], out3[2]);
+  print_results_vect(out3);
   verify_vect(ans3, out3);
 
   // testing quaternion vector rotate reverse
@@ -70,7 +71,7 @@ int main(void)
   float ans4[3] = { 0.3868,  0.4137, -0.7857};
   float out4[3] = { 0.0000,  0.0000,  0.0000};
   IMU_math_rotateReverse(v4, q4, out4);
-  printf("%0.3f, %0.3f, %0.3f\n", out4[0], out4[1], out4[2]);
+  print_results_vect(out4);
   verify_vect(ans4, out4);
 
   // testing quaternion to up function
@@ -78,7 +79,7 @@ int main(void)
   float ans5[3] = {-0.1274, -0.4384, -0.8897};
   float out5[3] = { 0.0000,  0.0000,  0.0000};
   IMU_math_quatToUp(q5, out5);
-  printf("%0.3f, %0.3f, %0.3f\n", out5[0], out5[1], out5[2]);
+  print_results_vect(out5);
   verify_vect(ans5, out5);
 
   // testing quaternion to forward function
@@ -86,7 +87,7 @@ int main(void)
   float ans6[3] = {-0.2548, -0.9285, -0.2701};
   float out6[3] = { 0.0000,  0.0000,  0.0000};
   IMU_math_quatToFrwd(q6, out6);
-  printf("%0.3f, %0.3f, %0.3f\n", out6[0], out6[1], out6[2]);
+  print_results_vect(out6);
   verify_vect(ans6, out6);
 
   // testing up to quaternion function
@@ -145,6 +146,18 @@ int main(void)
   // exit program
   printf("pass: test_quat_math\n\n");
   return 0;
+}
+
+
+/******************************************************************************
+* prints system quaternion and verifies against a reference
+******************************************************************************/
+
+void print_results_vect(
+  float                    v[3])
+{
+  // print and verify current quaternion
+  printf("%0.3f, %0.3f, %0.3f\n", v[0], v[1], v[2]);
 }
 
 

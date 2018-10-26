@@ -22,15 +22,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include "IMU_math.h"
-
-// define constants
-static const float precision   = 0.05;
+#include "test_utils.h"
 
 // internal functions
 static void test_quat     (float quat[4],  float euler[3]); 
 static void print_line    (float input[4], float result[3], float quat[4]);
-static void verify_euler  (float val1[3],  float val2[3]);
-static void verify_quat   (float val1[4],  float val2[4]);
 
 
 /******************************************************************************
@@ -115,7 +111,7 @@ void test_quat(
   IMU_math_degToRad(test, temp);
   IMU_math_eulerToQuat(temp, quat);
   print_line(input, test, quat);
-  verify_euler(test, euler);
+  verify_vect(test, euler);
   verify_quat(quat, input);
 }
 
@@ -134,39 +130,4 @@ void print_line(
     input[0], input[1], input[2], input[3], euler[0], euler[1], euler[2]);
   printf("%0.2f, %0.2f, %0.2f, %0.2f\n",
     quat[0], quat[1], quat[2], quat[3]);
-}
-
-
-/******************************************************************************
-* verifies euler angle against intended result
-******************************************************************************/
-
-void verify_euler(
-  float                val1[3],
-  float                val2[3])
-{
-  if (fabs(val1[0] - val2[0]) > precision ||
-      fabs(val1[1] - val2[1]) > precision ||
-      fabs(val1[2] - val2[2]) > precision) {
-    printf("error: euler results failure\n");
-    exit(0);
-  }
-}
-
-
-/******************************************************************************
-* verifies euler angle against intended result
-******************************************************************************/
-
-void verify_quat(
-  float                val1[3],
-  float                val2[3])
-{
-  if (fabs(val1[0] - val2[0]) > precision ||
-      fabs(val1[1] - val2[1]) > precision ||
-      fabs(val1[2] - val2[2]) > precision ||
-      fabs(val1[3] - val2[3]) > precision) {
-    printf("error: euler results failure\n");
-    exit(0);
-  }
 }

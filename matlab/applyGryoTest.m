@@ -18,37 +18,37 @@
 % rotate test #1
 euler      = [0, 0, 0];
 axis       = [1, 0, 0];
-range      = 180;             % deg
+range      = 90;              % deg
 speed      = 15;              % deg/sec
 euler      = run_sim(euler, axis, range, speed);
 
 % rotate test #2
 axis       = [-1, 0, 0];
-range      = 180;             % deg
+range      = 90;              % deg
 speed      = 15;              % deg/sec
 euler      = run_sim(euler, axis, range, speed);
 
 % rotate test #3
 axis       = [0, 1, 0];
-range      = 180;             % deg
+range      = 90;              % deg
 speed      = 15;              % deg/sec
 euler      = run_sim(euler, axis, range, speed);
 
 % rotate test #4
 axis       = [0, -1, 0];
-range      = 180;             % deg
+range      = 90;              % deg
 speed      = 15;              % deg/sec
 euler      = run_sim(euler, axis, range, speed);
 
 % rotate test #5
 axis       = [0, 0, 1];
-range      = 180;             % deg
+range      = 90;              % deg
 speed      = 15;              % deg/sec
 euler      = run_sim(euler, axis, range, speed);
 
 % rotate test #6
 axis       = [0, 0, -1];
-range      = 180;             % deg
+range      = 90;              % deg
 speed      = 15;              % deg/sec
 euler      = run_sim(euler, axis, range, speed);
 
@@ -61,9 +61,9 @@ function euler = run_sim(euler, axis, range, speed)
   % define local constants
   dt           = 0.1;
   time         = range / speed;
-  iter         = time  / dt;
+  iter         = time  / dt
   speed_rad    = pi * speed / 180;
-  gyro         = axis  * speed_rad;
+  gyro         = axis * speed_rad
   
   % main processing loop
   euler_rad    = pi * euler / 180;
@@ -74,6 +74,7 @@ function euler = run_sim(euler, axis, range, speed)
   end
 
   % return final state
+  q
   euler_rad  = quatToEuler(q);
   euler      = 180 * euler_rad / pi;
 end

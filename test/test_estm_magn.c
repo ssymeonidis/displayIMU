@@ -22,13 +22,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include "IMU_math.h"
-
-// define constants
-static const float precision   = 0.05;
+#include "test_utils.h"
 
 // internal functions
 static void print_line    (float FOM, float q[4]);
-static void verify_quat   (float val1[4], float val2[4]);
 
 
 /******************************************************************************
@@ -78,22 +75,4 @@ void print_line(
 {
   // start datum test
   printf("%0.3f, %0.2f, %0.2f, %0.2f, %0.2f\n", FOM, q[0], q[1], q[2], q[3]);
-}
-
-
-/******************************************************************************
-* verifies euler angle against intended result
-******************************************************************************/
-
-void verify_quat(
-  float                val1[3],
-  float                val2[3])
-{
-  if (fabs(val1[0] - val2[0]) > precision ||
-      fabs(val1[1] - val2[1]) > precision ||
-      fabs(val1[2] - val2[2]) > precision ||
-      fabs(val1[3] - val2[3]) > precision) {
-    printf("error: quaternion accuracy failure\n");
-    exit(0);
-  }
 }

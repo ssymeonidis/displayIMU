@@ -24,7 +24,7 @@
 #include "IMU_file.h"
 
 // core subsystem parsing inputs
-static const int   IMU_core_config_size = 19;
+static const int   IMU_core_config_size = 20;
 static const char* IMU_core_config_name[] = {
   "enable",
   "isGyro", 
@@ -36,6 +36,7 @@ static const char* IMU_core_config_name[] = {
   "isPredict",
   "gThresh",
   "gThreshTime",
+  "gScale",
   "aWeight",
   "aMag",
   "aMagThresh",
@@ -57,15 +58,16 @@ typedef enum {
   IMU_core_isPredict    = 7,
   IMU_core_gThresh      = 8,
   IMU_core_gThreshTime  = 9,
-  IMU_core_aWeight      = 10,
-  IMU_core_aMag         = 11,
-  IMU_core_aMagThresh   = 12,
-  IMU_core_mWeight      = 13,
-  IMU_core_mMag         = 14,
-  IMU_core_mMagThresh   = 15,
-  IMU_core_mAng         = 16,
-  IMU_core_mAngThresh   = 17,
-  IMU_core_posAlpha     = 18
+  IMU_core_gScale       = 10,
+  IMU_core_aWeight      = 11,
+  IMU_core_aMag         = 12,
+  IMU_core_aMagThresh   = 13,
+  IMU_core_mWeight      = 14,
+  IMU_core_mMag         = 15,
+  IMU_core_mMagThresh   = 16,
+  IMU_core_mAng         = 17,
+  IMU_core_mAngThresh   = 18,
+  IMU_core_posAlpha     = 19
 } IMU_core_config_enum;
 
 // rect subsystem parsing inputs
@@ -203,6 +205,8 @@ int IMU_file_coreLoad(
       sscanf(args, "%f", &config->gThresh);
     else if (type == IMU_core_gThreshTime)
       sscanf(args, "%f", &config->gThreshTime);
+    else if (type == IMU_core_gScale)
+      sscanf(args, "%f", &config->gScale);
     else if (type == IMU_core_aWeight)
       sscanf(args, "%f", &config->aWeight);
     else if (type == IMU_core_aMag)
@@ -256,6 +260,7 @@ int IMU_file_coreSave(
   fprintf(file, "  \"isPos\": ");       write_bool(file, config->isPos);
   fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
   fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
+  fprintf(file, "  \"gScale\": %0.2f,\n",          config->gScale);
   fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
   fprintf(file, "  \"aMag\": %0.2f,\n",            config->aMag);
   fprintf(file, "  \"aMagThresh\": %0.2f,\n",      config->aMagThresh);

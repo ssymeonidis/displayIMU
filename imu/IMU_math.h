@@ -40,16 +40,15 @@ static inline float* IMU_math_upToQuat      (float *u,  float *q);
 static inline float* IMU_math_upFrwdToQuat  (float *u,  float *f,  float *q);
 static inline float* IMU_math_vectToQuat    (float *u,  float *v,  float *q);
 
-/// converting between quaternions and Euler angles
+// converting between quaternions and Euler angles
 static inline float* IMU_math_quatToEuler   (float *q,  float *E);
 static inline float* IMU_math_eulerToQuat   (float *E,  float *q);
 static inline float* IMU_math_radToDeg      (float *r,  float *d);
 static inline float* IMU_math_degToRad      (float *d,  float *r);
 
-// general utility functions
-static inline float IMU_math_calcWeight (float val, float ref, float thresh);
-
 // core filters
+static inline float IMU_math_calcWeight (float val, float ref, float thresh);
+static inline int   IMU_math_estmGyro   (float *q,  float *g,  float dt);
 int    IMU_math_estmAccl      (float *q, float *a, float alpha, float *FOM);
 int    IMU_math_estmMagnRef   (float *q, float *m, float refx,  float refz,
                                float alpha, float *FOM);
@@ -375,7 +374,7 @@ inline float* IMU_math_degToRad(
 * function used to apply target and threshold to generate weight 
 ******************************************************************************/
 
-static float IMU_math_calcWeight(
+inline float IMU_math_calcWeight(
   float                 val, 
   float                 ref, 
   float                 thresh)
@@ -383,6 +382,28 @@ static float IMU_math_calcWeight(
   float error           = fabs(ref - val) / val;
   float result          = 1.0f - error / thresh;
   return                (result < 0.0f) ? 0.0f : result;
+}
+
+
+/******************************************************************************
+* function used to apply gyroscope rates 
+******************************************************************************/
+
+inline int   IMU_math_estmGyro(
+  float                 *q,  
+  float                 *g,  
+  float                 dt)
+{
+  float half_dt         = 0.5 * dt;
+  float dq[4]           = {-q[1]*g[0] - q[2]*g[1] - q[3]*g[2],
+                            q[0]*g[0] + q[2]*g[2] - q[3]*g[1],
+                            q[0]*g[1] - q[1]*g[2] + q[3]*g[0],
+                            q[0]*g[2] + q[1]*g[1] - q[2]*g[0]}; 
+  q[0]                 += half_dt * dq[0];
+  q[1]                 += half_dt * dq[1];
+  q[2]                 += half_dt * dq[2];
+  q[3]                 += half_dt * dq[3];
+  return 0;
 }
 
 

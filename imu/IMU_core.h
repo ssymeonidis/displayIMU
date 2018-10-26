@@ -47,6 +47,8 @@ extern "C" {
 #define IMU_CORE_BAD_INST          -2
 #define IMU_CORE_FAILED_MUTEX      -3
 
+// define constants
+#define IMU_CORE_10USEC_TO_SEC      0.00001
 
 // configuration structure definition
 typedef struct {
@@ -60,6 +62,7 @@ typedef struct {
   unsigned char        isPredict;       // enable extrapolation of estim
   float                gThresh;         // no motion threshold value
   float                gThreshTime;     // no motion threhsold time
+  float                gScale;          // scale to covert to rad/sec
   float                aWeight;         // accelerometer IMU weight
   float                aMag;            // gravity magnitude
   float                aMagThresh;      // gravity magnitude error thresh
@@ -99,8 +102,8 @@ int IMU_core_datum     (uint16_t id, IMU_datum*, IMU_core_FOM*);
 int IMU_core_data3     (uint16_t id, IMU_data3*, IMU_core_FOM*);
 
 // state estimation functions
-int IMU_core_estmQuat  (uint16_t id, float t, float* estm);
-int IMU_core_estmAccl  (uint16_t id, float t, float* estm);
+int IMU_core_estmQuat  (uint16_t id, uint32_t t, float* estm);
+int IMU_core_estmAccl  (uint16_t id, uint32_t t, float* estm);
 
 
 #ifdef __cplusplus

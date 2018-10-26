@@ -29,8 +29,9 @@ static const float precision   = 0.05;
 
 // function definitions
 void check_state   (int status,     char  *message);
-void verify_quat   (float val1[4],  float val2[4]);
+void verify_data   (float val1,     float val);
 void verify_vect   (float val1[3],  float val2[3]);
+void verify_quat   (float val1[4],  float val2[4]);
 
 
 /******************************************************************************
@@ -49,18 +50,15 @@ void check_status(
 
 
 /******************************************************************************
-* verifies quaternion against intended result
+* verifies vector against intended result
 ******************************************************************************/
 
-void verify_quat(
-  float                val1[3],
-  float                val2[3])
+void verify_data(
+  float                val1,
+  float                val2)
 {
-  if (fabs(val1[0] - val2[0]) > precision ||
-      fabs(val1[1] - val2[1]) > precision ||
-      fabs(val1[2] - val2[2]) > precision ||
-      fabs(val1[3] - val2[3]) > precision) {
-    printf("error: quat results failure\n");
+  if (fabs(val1 - val2) > precision) {
+    printf("error: vect results failure\n");
     exit(0);
   }
 }
@@ -78,6 +76,24 @@ void verify_vect(
       fabs(val1[1] - val2[1]) > precision ||
       fabs(val1[2] - val2[2]) > precision) {
     printf("error: vect results failure\n");
+    exit(0);
+  }
+}
+
+
+/******************************************************************************
+* verifies quaternion against intended result
+******************************************************************************/
+
+void verify_quat(
+  float                val1[3],
+  float                val2[3])
+{
+  if (fabs(val1[0] - val2[0]) > precision ||
+      fabs(val1[1] - val2[1]) > precision ||
+      fabs(val1[2] - val2[2]) > precision ||
+      fabs(val1[3] - val2[3]) > precision) {
+    printf("error: quat results failure\n");
     exit(0);
   }
 }

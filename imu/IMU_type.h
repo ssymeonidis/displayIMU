@@ -39,11 +39,11 @@ typedef enum {
 } IMU_sensor;
 typedef struct {
   IMU_sensor           type;
-  IMU_TYPE             t;
+  uint32_t             t;
   IMU_TYPE             val[3];
 } IMU_datum;
 typedef struct {
-  IMU_TYPE             t;
+  uint32_t             t;
   IMU_TYPE             g[3];
   IMU_TYPE             a[3];
   IMU_TYPE             m[3];
