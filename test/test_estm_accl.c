@@ -24,8 +24,8 @@
 #include "test_utils.h"
 #include "IMU_math.h"
 
-// define constants
-static const float precision = 0.25;
+// define internal constants
+const float precision_ang = 0.25;
 
 // internal functions
 static void process_angles (float ang[3], float vec[3], float out[3]);
@@ -45,7 +45,7 @@ int main(void)
   float vec1[3]   = { 0.0,  0.0,  1.0};
   float out1[3]   = { 0.0,  0.0,  0.0};
   process_angles(ang1, vec1, out1);
-  if (fabs(out1[1]) >  precision || fabs(out1[2]) > precision) {
+  if (fabs(out1[1]) >  precision_ang || fabs(out1[2]) > precision_ang) {
     printf("error: failed zero pitch, zero roll\n");
     exit(0);
   }
@@ -55,7 +55,7 @@ int main(void)
   float vec2[3]   = {-1.0,  0.0,  0.0};
   float out2[3]   = { 0.0,  0.0,  0.0};
   process_angles(ang2, vec2, out2);
-  if (fabs(out2[1] - 90.0) >  precision) {
+  if (fabs(out2[1] - 90.0) >  precision_ang) {
     printf("error: failed 90deg pitch\n");
     exit(0);
   }
@@ -65,7 +65,7 @@ int main(void)
   float vec3[3]   = { 0.0,  1.0,  0.0};
   float out3[3]   = { 0.0,  0.0,  0.0};
   process_angles(ang3, vec3, out3);
-  if (fabs(out3[1]) >  precision || fabs(out3[2] - 90.0) > precision) {
+  if (fabs(out3[1]) >  precision_ang || fabs(out3[2] - 90.0) > precision_ang) {
     printf("error: failed 90deg roll\n");
     exit(0);
   }
@@ -75,7 +75,7 @@ int main(void)
   float vec4[3]   = { 0.0,  0.0,  -1.0};
   float out4[3]   = { 0.0,  0.0,   0.0};
   process_angles(ang4, vec4, out4);
-  if (fabs(out4[1]) >  precision || fabs(out4[2] - 180.0) > precision) {
+  if (fabs(out4[1]) >  precision_ang || fabs(out4[2] - 180.0) > precision_ang) {
     printf("error: failed 90deg roll\n");
     exit(0);
   }
@@ -85,7 +85,7 @@ int main(void)
   float vec5[3]   = {  1.0,   0.0,   0.0};
   float out5[3]   = {  0.0,   0.0,   0.0};
   process_angles(ang5, vec5, out5);
-  if (fabs(out5[1] + 90.0) >  precision) {
+  if (fabs(out5[1] + 90.0) >  precision_ang) {
     printf("error: failed -90deg pitch\n");
     exit(0);
   }
@@ -95,7 +95,7 @@ int main(void)
   float vec6[3]   = {  0.0,  -1.0,   0.0};
   float out6[3]   = {  0.0,   0.0,   0.0};
   process_angles(ang6, vec6, out6);
-  if (fabs(out6[1]) >  precision || fabs(out6[2] + 90.0) > precision) {
+  if (fabs(out6[1]) >  precision_ang || fabs(out6[2] + 90.0) > precision_ang) {
     printf("error: failed -90deg roll\n");
     exit(0);
   }

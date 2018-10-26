@@ -22,13 +22,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "IMU_math.h"
-
-// define constants
-static const float precision   = 0.05;
-
-// internal functions
-static void verify_quat   (float val1[4],  float val2[4]);
-static void verify_vect   (float val1[3],  float val2[3]);
+#include "test_utils.h"
 
 
 /******************************************************************************
@@ -110,50 +104,42 @@ int main(void)
   verify_quat(ans8, out8);
 
   // testing up-forward to quaternion function
-  float u9[3]   = {-0.7620, -0.0033,  0.9195};
-  float f9[3]   = {-0.3192,  0.1705, -0.5524};
-  float ans9[4] = {-0.1293, -0.3357, -0.0481,  0.9318};
+  float u9[3]   = {   -6.6,  -244.1,   -73.4};
+  float f9[3]   = {  250.5,   -19.8,    43.2};
+  float ans9[4] = { 0.5949,  0.7983, -0.0821,  0.0449};
   float out9[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
   IMU_math_upFrwdToQuat(u9, f9, out9);
   printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out9[0], out9[1], out9[2], out9[3]);
   verify_quat(ans9, out9);
 
+  // testing up-forward to quaternion function
+  float u10[3]   = {  147.4,    91.3,  -187.0};
+  float f10[3]   = {  197.5,    10.8,   161.0};
+  float ans10[4] = {-0.1647,  0.9274,  0.0806,  0.3260};
+  float out10[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
+  IMU_math_upFrwdToQuat(u10, f10, out10);
+  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out10[0], out10[1], out10[2], out10[3]);
+  verify_quat(ans10, out10);
+
+  // testing up-forward to quaternion function
+  float u11[3]   = {    2.5,   220.5,  -128.1};
+  float f11[3]   = { -245.1,    37.3,    59.5};
+  float ans11[4] = {-0.0651,  0.1228,  0.8580,  0.4945};
+  float out11[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
+  IMU_math_upFrwdToQuat(u11, f11, out11);
+  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out11[0], out11[1], out11[2], out11[3]);
+  verify_quat(ans11, out11);
+
+  // testing up-forward to quaternion function
+  float u12[3]   = {   35.6,   250.4,    32.7};
+  float f12[3]   = {  -24.9,   -29.3,   252.1};
+  float ans12[4] = {-0.4690,  0.4808,  0.4525,  0.5866};
+  float out12[4] = { 0.0000,  0.0000,  0.0000,  0.0000};
+  IMU_math_upFrwdToQuat(u12, f12, out12);
+  printf("%0.3f, %0.3f, %0.3f, %0.3f\n", out12[0], out12[1], out12[2], out12[3]);
+  verify_quat(ans12, out12);
+
   // exit program
   printf("pass: test_quat_math\n\n");
   return 0;
-}
-
-
-/******************************************************************************
-* verifies quaternion against intended result
-******************************************************************************/
-
-void verify_quat(
-  float                val1[3],
-  float                val2[3])
-{
-  if (fabs(val1[0] - val2[0]) > precision ||
-      fabs(val1[1] - val2[1]) > precision ||
-      fabs(val1[2] - val2[2]) > precision ||
-      fabs(val1[3] - val2[3]) > precision) {
-    printf("error: quat results failure\n");
-    exit(0);
-  }
-}
-
-
-/******************************************************************************
-* verifies vector against intended result
-******************************************************************************/
-
-void verify_vect(
-  float                val1[3],
-  float                val2[3])
-{
-  if (fabs(val1[0] - val2[0]) > precision ||
-      fabs(val1[1] - val2[1]) > precision ||
-      fabs(val1[2] - val2[2]) > precision) {
-    printf("error: vect results failure\n");
-    exit(0);
-  }
 }

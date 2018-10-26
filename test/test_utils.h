@@ -20,6 +20,18 @@
 #ifndef _TEST_UTILS_H
 #define _TEST_UTILS_H
 
+// include statements
+#include <math.h>
+
+// define constants
+static const int   msg_delay   = 200;
+static const float precision   = 0.05;
+
+// function definitions
+void check_state   (int status,     char  *message);
+void verify_quat   (float val1[4],  float val2[4]);
+void verify_vect   (float val1[3],  float val2[3]);
+
 
 /******************************************************************************
 * checks status and prints error message if necessary
@@ -31,6 +43,41 @@ void check_status(
 {
   if (status < 0) {
     printf("error: %s :%d\n", message, status);
+    exit(0);
+  }
+}
+
+
+/******************************************************************************
+* verifies quaternion against intended result
+******************************************************************************/
+
+void verify_quat(
+  float                val1[3],
+  float                val2[3])
+{
+  if (fabs(val1[0] - val2[0]) > precision ||
+      fabs(val1[1] - val2[1]) > precision ||
+      fabs(val1[2] - val2[2]) > precision ||
+      fabs(val1[3] - val2[3]) > precision) {
+    printf("error: quat results failure\n");
+    exit(0);
+  }
+}
+
+
+/******************************************************************************
+* verifies vector against intended result
+******************************************************************************/
+
+void verify_vect(
+  float                val1[3],
+  float                val2[3])
+{
+  if (fabs(val1[0] - val2[0]) > precision ||
+      fabs(val1[1] - val2[1]) > precision ||
+      fabs(val1[2] - val2[2]) > precision) {
+    printf("error: vect results failure\n");
     exit(0);
   }
 }

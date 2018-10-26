@@ -643,7 +643,7 @@ int IMU_engn_getEstm(
   if (config[id].isEstmAccl)
     status  += max(0,IMU_core_estmAccl(state[id].idCore, t, estm->pos));
   if (!config[id].isQuatOnly) {
-    IMU_math_rotateReverse(estm->q_org, config[id].q_ref, estm->q);
+    IMU_math_quatMultConj(estm->q_org, config[id].q_ref, estm->q);
     IMU_math_quatToEuler(estm->q, estm->ang);
   }
   

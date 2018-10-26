@@ -24,9 +24,6 @@
 #include "IMU_engn.h"
 #include "test_utils.h"
 
-// define constants
-static const int msg_delay   = 200;
-
 
 /******************************************************************************
 * main function - simple test of datum queue and correction block

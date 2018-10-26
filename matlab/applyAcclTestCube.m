@@ -43,7 +43,7 @@ euler  = [-15, -65, -15];
 accl   = [1, 0, 0];
 run_sim(euler, accl)
 
-% % test zero-pitch, neg90-roll
+% test neg90-roll
 euler  = [-15, -15, -65];
 accl   = [0, -1, 0];
 run_sim(euler, accl)

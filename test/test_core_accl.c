@@ -25,10 +25,6 @@
 #include "IMU_engn.h"
 #include "test_utils.h"
 
-// define constants
-static const int   msg_delay   = 200;
-static const float precision   = 0.1;
-
 // define globals
 uint16_t           id          = 0;
 IMU_TYPE           curTime     = 0;
@@ -60,6 +56,7 @@ int main(void)
   status = IMU_engn_start();
   check_status(status, "IMU_engn_start failure");
 
+
   /****************************************************************************
   * test #1 - no magnetometer for reset
   ****************************************************************************/
@@ -81,7 +78,8 @@ int main(void)
   // testing accelerometer filtering
   float out2[4]      = { 1.0000,  0.0000,  0.0000,  0.0000};
   test_datum(vec2, 100, out2, IMU_CORE_NORMAL_OP);
-  
+
+
   /****************************************************************************
   * test #2 - magnetometer then accelerometer datum for reset
   ****************************************************************************/
@@ -98,7 +96,7 @@ int main(void)
 
   // testing accelerometer zeroing w/ magnetometer (revist)
   float vec3[3]      = {    233,      -6,     104};
-  float out3[4]      = { 0.8379, -0.0398, -0.5428,  0.0000};
+  float out3[4]      = { 0.8379,  0.0398,  0.5428,  0.0398};
   test_datum(vec3, 1, out3, IMU_CORE_ZEROED_BOTH);
 
   // verify non-zeroing operation 
@@ -107,7 +105,8 @@ int main(void)
     
   // testing accelerometer filtering
   float out4[4]      = { 0.7064,  0.0000,  0.7064,  0.0000};
-  test_datum(vec4, 900, out4, IMU_CORE_NORMAL_OP);
+  test_datum(vec4, 100, out4, IMU_CORE_NORMAL_OP);
+
 
   /****************************************************************************
   * test #3 - accelerometer then magnetomter datum for reset
@@ -120,10 +119,28 @@ int main(void)
   verify_estm(out_reset);
 
   // testing accelerometer zeroing
-  float vec5[3]      = {    179,     179,     255};
-  float out5[4]      = { 0.9246, -0.2694,  0.2694,  0.0000};
-  test_datum(vec1, 1, out1, IMU_CORE_ZEROED_ACCL);
+  float vec5[3]      = {   -199,     122,     104};
+  float out5[4]      = { 0.8387, -0.2846, -0.4642,  0.0000};
+  test_datum(vec5, 1, out5, IMU_CORE_ZEROED_ACCL);
   
+  // inject magnetometer datum
+  float mag6[3]      = {    104,     -28,    -231};
+  float out6[4]      = { 0.2988, -0.5352,  0.1006,  0.7837};
+  add_magn(mag6, out6, IMU_CORE_ZEROED_MAGN);
+
+  // verify non-zeroing operation 
+  float vec7[3]      = {   -255,       0,       0};
+  test_datum(vec7, 1, out6, IMU_CORE_NORMAL_OP);
+    
+  // testing accelerometer filtering
+  float out7[4]      = { 0.2051, -0.6972,  0.2051,  0.6972};
+  test_datum(vec7, 100, out7, IMU_CORE_NORMAL_OP);
+
+
+  /****************************************************************************
+  * exit unit test
+  ****************************************************************************/
+
   // exit program
   printf("pass: test_core_accl\n\n");
   return 0;
@@ -210,17 +227,9 @@ void verify_estm(
   IMU_engn_getEstm(id, curTime, &estm);
   float *q = estm.q;
   
-  // print current quaternion
+  // print and verify current quaternion
   printf("%0.3f, %0.3f, %0.3f, %0.3f\n", q[0], q[1], q[2], q[3]);
-
-  // verify against reference;
-  if (fabs(q[0] - ref[0]) > precision ||
-      fabs(q[1] - ref[1]) > precision ||
-      fabs(q[2] - ref[2]) > precision ||
-      fabs(q[3] - ref[3]) > precision) {
-    printf("error: quaternion precision error\n");
-    exit(0);
-  }
+  verify_quat(q, ref);
 }
 
 

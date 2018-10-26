@@ -26,10 +26,6 @@
 #include "IMU_pnts.h"
 #include "test_utils.h"
 
-// define constants
-static const int   msg_delay   = 200;
-static const float precision   = 0.001;
-
 // define internal function
 static void print_gyro(IMU_TYPE time, IMU_engn_sensor*, IMU_pnts_state*);
 static void verify_vector(float *val, float ref[3]);

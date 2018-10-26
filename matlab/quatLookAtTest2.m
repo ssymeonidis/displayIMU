@@ -16,14 +16,13 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-% clear all; close all;
+clear all; close all;
 
 % simple forward/up test
-%euler  = [360*rand(), 180*rand()-90, 360*rand()-180];
+euler  = [360*rand(), 180*rand()-90, 360*rand()-180];
 q1_in  = eulerToQuat(180*euler/pi);
-u1_in  = 255*quatToUp(q1_in);
-f1_in  = 255*quatToForward(q1_in);
+u1_in  = 255*quatToUp(q1_in)
+f1_in  = 255*quatToForward(q1_in)
 q1_out = quatFromForwardUp(f1_in, u1_in);
 u1_out = 255*quatToUp(q1_out);
-f1_out = 255*quatToUp(q1_out);
-
+f1_out = 255*quatToForward(q1_out);

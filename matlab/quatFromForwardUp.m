@@ -19,6 +19,7 @@ function q = quatFromForwardUp(f,u)
 
 % normalize reference (up) vector
 u = u./norm(u);
+f = f./norm(f);
 
 % ortho normalize forward vector 
 D = dot(f, u);
@@ -26,7 +27,7 @@ f = f - D*u;
 f = f./norm(f);
 
 % calculate right vector
-r = cross(u,f);
+r = cross(u, f);
 
 % calcuate the quaternion
 M = [f(1), r(1), u(1); ...
