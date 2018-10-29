@@ -24,7 +24,7 @@
 #include <math.h>
 
 // define constants
-static const int   msg_delay   = 200;
+static const int   msg_delay   = 300;
 static const float precision   = 0.05;
 
 // function definitions

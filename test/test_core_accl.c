@@ -241,9 +241,9 @@ void verify_state(
 {
   // define local variables
   IMU_union_state          unionState;
-  int status = IMU_engn_getState(id, IMU_engn_core, &unionState);
+  int status = IMU_engn_getState(id, IMU_engn_self, &unionState);
   check_status(status, "IMU_engn_getState failure");
-  int state  = unionState.core->status;
+  int state  = unionState.engn->core;
   
   // print current state
   printf("%d, ", state);

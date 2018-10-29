@@ -75,6 +75,13 @@ typedef struct {
   IMU_pnts_config       *configPnts;     // pnts configuration pointer
   IMU_stat_config       *configStat;     // stat configuration pointer
   IMU_calb_config       *configCalb;     // calb configuration pointer
+  int                   core;            // status of IMU core
+  int                   quat;            // status of IMU estm
+  int                   tran;            // status of IMU tran
+  int                   rect;            // status of IMU rect
+  int                   pnts;            // status of IMU pnts
+  int                   stat;            // status of IMU stat
+  int                   calb;            // status of IMU calb
   uint8_t               isExit;          // commands thread to exit
   uint8_t               exitThread;      // confirms thread has exited 
 } IMU_engn_state;

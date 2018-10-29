@@ -30,6 +30,7 @@
 
 
 // internal functions definitions
+static inline float  norm3(float *v);
 static inline float* norm4(float *v);
 static inline float* scale(float *v, float m);  
 static inline float* decrm(float *v, float *d);
@@ -67,11 +68,11 @@ int IMU_math_estmAccl(
 
 /******************************************************************************
 * update quaternion with newest accelerometer datum
-* assumes normalized quaternion and datum
+* (does not assume normalized datum)
 ******************************************************************************/
 
 int IMU_math_estmMagnNorm(
-  float                 *q, 
+  float                 *q,
   float                 *m_in,
   float                 alpha,
   float                 *FOM)
@@ -81,10 +82,7 @@ int IMU_math_estmMagnNorm(
   IMU_math_quatToUp(q, u);
   float n               = u[0]*m_in[0] + u[1]*m_in[1] + u[2]*m_in[2];
   float m[3]            = {m_in[0]-n*u[0], m_in[1]-n*u[1], m_in[2]-n*u[2]};
-  n                     = sqrt(m[0]*m[0] + m[1]*m[1] + m[2]*m[2]);
-  m[0]                  = m[0]/n;
-  m[1]                  = m[1]/n;
-  m[2]                  = m[2]/n;
+  norm3(m);
 
   // compute the objective function 
   float two_q[4]        = {2.0f*q[0], 2.0f*q[1], 2.0f*q[2], 2.0f*q[3]};
@@ -159,6 +157,23 @@ int IMU_math_estmMagnRef(
   
   // exit (no errors)
   return 0;
+}
+
+
+/******************************************************************************
+* utility function - normalize 3x1 array
+******************************************************************************/
+
+inline float norm3(
+  float          *v)
+{
+  float norm     = sqrtf((float)v[0]*(float)v[0] + 
+                         (float)v[1]*(float)v[1] + 
+                         (float)v[2]*(float)v[2]); 
+  v[0]           = (float)v[0] / norm;
+  v[1]           = (float)v[1] / norm;
+  v[2]           = (float)v[2] / norm;
+  return norm;
 }
 
 

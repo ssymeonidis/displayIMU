@@ -90,54 +90,65 @@ int IMU_engn_init(
   if (numInst >= IMU_MAX_INST)
     return IMU_ENGN_INST_OVERFLOW;
 
+  // pass handle and config structure
+  *id                   = numInst;
+  numInst++;
+
   // initialize config structure
   if        (type == IMU_engn_core_only) {
-    config[numInst].isRect       = 0;
-    config[numInst].isPnts       = 0;
-    config[numInst].isStat       = 0;
-    config[numInst].isCalb       = 0;
+    config[*id].isRect       = 0;
+    config[*id].isPnts       = 0;
+    config[*id].isStat       = 0;
+    config[*id].isCalb       = 0;
   } else if (type == IMU_engn_rect_core) {
-    config[numInst].isRect       = 1;
-    config[numInst].isPnts       = 0;
-    config[numInst].isStat       = 0;
-    config[numInst].isCalb       = 0;
+    config[*id].isRect       = 1;
+    config[*id].isPnts       = 0;
+    config[*id].isStat       = 0;
+    config[*id].isCalb       = 0;
   } else if (type == IMU_engn_calb_pnts) {
-    config[numInst].isRect       = 1;
-    config[numInst].isPnts       = 1;
-    config[numInst].isStat       = 0;
-    config[numInst].isCalb       = 1;
+    config[*id].isRect       = 1;
+    config[*id].isPnts       = 1;
+    config[*id].isStat       = 0;
+    config[*id].isCalb       = 1;
   } else if (type == IMU_engn_calb_stat) {
-    config[numInst].isRect       = 1;
-    config[numInst].isPnts       = 0;
-    config[numInst].isStat       = 1;
-    config[numInst].isCalb       = 1;
+    config[*id].isRect       = 1;
+    config[*id].isPnts       = 0;
+    config[*id].isStat       = 1;
+    config[*id].isCalb       = 1;
   } else if (type == IMU_engn_calb_full) {
-    config[numInst].isRect       = 1;
-    config[numInst].isPnts       = 1;
-    config[numInst].isStat       = 1;
-    config[numInst].isCalb       = 1;
+    config[*id].isRect       = 1;
+    config[*id].isPnts       = 1;
+    config[*id].isStat       = 1;
+    config[*id].isCalb       = 1;
   } else {
     return IMU_ENGN_BAD_ENGN_TYPE;
   }
-  config[numInst].isFOM          = 0;
-  config[numInst].isSensorStruct = 0;
-  config[numInst].q_ref[0]       = 1;
-  config[numInst].q_ref[1]       = 0;
-  config[numInst].q_ref[2]       = 0;
-  config[numInst].q_ref[3]       = 0;
+  config[*id].isFOM          = 0;
+  config[*id].isSensorStruct = 0;
+  config[*id].q_ref[0]       = 1;
+  config[*id].q_ref[1]       = 0;
+  config[*id].q_ref[2]       = 0;
+  config[*id].q_ref[3]       = 0;
+  state[*id].rect            = 0;
+  state[*id].pnts            = 0;
+  state[*id].stat            = 0;
+  state[*id].calb            = 0;
+  state[*id].quat            = 0;
+  state[*id].tran            = 0;
   
   // create IMU subsystem instances
-  IMU_engn_state *cur = &state[numInst];
-  int status = max(0,IMU_core_init(&cur->idCore, &cur->configCore));
-  if (config[numInst].isRect)
-    status  += max(0,IMU_rect_init(&cur->idRect, &cur->configRect));
-  if (config[numInst].isPnts)
-    status  += max(0,IMU_pnts_init(&cur->idPnts, &cur->configPnts));
-  if (config[numInst].isStat)
-    status  += max(0,IMU_stat_init(&cur->idStat, &cur->configStat));
-  if (config[numInst].isCalb)
-    status  += max(0,IMU_calb_init(&cur->idCalb, &cur->configCalb));
-  if (status < 0)
+  IMU_engn_state *cur = &state[*id];
+  state[*id].core     = IMU_core_init(&cur->idCore, &cur->configCore);
+  if (config[*id].isRect)
+    state[*id].rect   = IMU_rect_init(&cur->idRect, &cur->configRect);
+  if (config[*id].isPnts)
+    state[*id].pnts   = IMU_pnts_init(&cur->idPnts, &cur->configPnts);
+  if (config[*id].isStat)
+    state[*id].stat   = IMU_stat_init(&cur->idStat, &cur->configStat);
+  if (config[*id].isCalb)
+    state[*id].calb   = IMU_calb_init(&cur->idCalb, &cur->configCalb);
+  if (&cur->core < 0 || &cur->rect < 0 || &cur->pnts < 0 ||
+      &cur->stat < 0 || &cur->calb < 0)
     return IMU_ENGN_FAILED_SYS_INIT;
 
   // create pthread mutex
@@ -146,11 +157,8 @@ int IMU_engn_init(
   if (err) return IMU_CORE_FAILED_MUTEX;
   #endif
 
-  // pass handle and config structure
-  *id        = numInst;
-  numInst++;
-
   // exit (no errors)
+  printf("finished init\n");
   return 0;
 }
 
@@ -447,14 +455,15 @@ int IMU_engn_reset(
   memset(sensor[id].mFlt, 0, 3*sizeof(IMU_TYPE));
   
   // reset all open subsystems
-  int status = max(0,IMU_core_reset(state[id].idCore));
+  state[id].core   = IMU_core_reset(state[id].idCore);
   if (config[id].isPnts)
-    status  += max(0,IMU_pnts_reset(state[id].idPnts));
+    state[id].pnts = IMU_pnts_reset(state[id].idPnts);
   if (config[id].isStat)
-    status  += max(0,IMU_stat_reset(state[id].idStat));
+    state[id].stat = IMU_stat_reset(state[id].idStat);
   if (config[id].isCalb)
-    status  += max(0,IMU_calb_reset(state[id].idCalb));
-  if (status < 0)
+    state[id].calb = IMU_calb_reset(state[id].idCalb);
+  if (state[id].core < 0 || state[id].pnts < 0 || 
+      state[id].stat < 0 || state[id].calb < 0)
     return IMU_ENGN_FAILED_RESET;
    
   // exit function
@@ -609,13 +618,14 @@ int IMU_engn_data3(
 
   // process datum by subsystems
   if (config[id].isRect)
-    status += max(0,IMU_rect_data3(state[id].idRect, data3));
+    state[id].rect = IMU_rect_data3(state[id].idRect, data3);
   if (config[id].isPnts)
-    status += max(0,IMU_pnts_data3(state[id].idPnts, data3, &pnt));
-  status   += max(0,IMU_core_data3(state[id].idCore, data3, FOM));
+    state[id].pnts = IMU_pnts_data3(state[id].idPnts, data3, &pnt);
+  state[id].core   = IMU_core_data3(state[id].idCore, data3, FOM);
   if (config[id].isStat)
-    status += max(0,IMU_stat_update(state[id].idStat, FOM, 3));
-  if (status < 0)
+    state[id].stat = IMU_stat_update(state[id].idStat, FOM, 3);
+  if (state[id].rect < 0 || state[id].pnts < 0 ||
+      state[id].core < 0 || state[id].stat < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
   // save data to sensor structure
@@ -639,16 +649,19 @@ int IMU_engn_getEstm(
   IMU_engn_estm         *estm)
 {
   // get estimates
-  int status = max(0,IMU_core_estmQuat(state[id].idCore, t, estm->q_org));
+  
+  state[id].quat   = IMU_core_estmQuat(state[id].idCore, t, estm->q_org);
   if (config[id].isEstmAccl)
-    status  += max(0,IMU_core_estmAccl(state[id].idCore, t, estm->pos));
+    state[id].tran = IMU_core_estmAccl(state[id].idCore, t, estm->pos);
+  else
+    state[id].tran = 0;
   if (!config[id].isQuatOnly) {
     IMU_math_quatMultConj(estm->q_org, config[id].q_ref, estm->q);
     IMU_math_quatToEuler(estm->q, estm->ang);
   }
   
   // exit function
-  if (status < 0)
+  if (state[id].quat < 0 || state[id].tran < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
   return 0;
 }
@@ -765,13 +778,14 @@ int IMU_engn_process(
 
   // process datum by subsystems
   if (config[id].isRect)
-    status += max(0,IMU_rect_datum(state[id].idRect, datum, datum->val));
+    state[id].rect = IMU_rect_datum(state[id].idRect, datum, datum->val);
   if (config[id].isPnts)
-    status += max(0,IMU_pnts_datum(state[id].idPnts, datum, &pnt));
-  status   += max(0,IMU_core_datum(state[id].idCore, datum, FOM));
+    state[id].pnts = IMU_pnts_datum(state[id].idPnts, datum, &pnt);
+  state[id].core   = IMU_core_datum(state[id].idCore, datum, FOM);
   if (config[id].isStat)
-    status += max(0,IMU_stat_update(state[id].idStat, FOM, 1));
-  if (status < 0)
+    state[id].stat = IMU_stat_update(state[id].idStat, FOM, 1);
+  if (state[id].rect < 0 || state[id].pnts < 0 ||
+      state[id].core < 0 || state[id].stat < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
   // save data to sensor structure
