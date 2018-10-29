@@ -199,6 +199,10 @@ int IMU_core_zero(
     // asynchnous magnetometer vector
     } else if (a_in==NULL && m_in!=NULL) {
       if (state[id].aReset) {
+        a[0]            = 0.0f;
+        a[1]            = 0.0f;
+        a[2]            = 1.0f;
+        IMU_math_upFrwdToQuat(a, m, state[id].q);
         memcpy(state[id].mInit, m, sizeof(m));
         status          = IMU_CORE_ZEROED_SAVE;
       } else {
@@ -567,7 +571,7 @@ int IMU_core_newMagn(
 
   // update system state (quaternion)
   float weightTemp = weight*config[id].mWeight;
-  int status = IMU_math_estmMagnRef(q, m, 1.0, 0.0, weightTemp, &FOM->delt);
+  int status = IMU_math_estmMagnNorm(q, m, weightTemp, &FOM->delt);
     
   // save results to system state
   #if IMU_USE_PTHREAD

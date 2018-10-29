@@ -70,6 +70,46 @@ int IMU_math_estmAccl(
 * assumes normalized quaternion and datum
 ******************************************************************************/
 
+int IMU_math_estmMagnNorm(
+  float                 *q, 
+  float                 *m_in,
+  float                 alpha,
+  float                 *FOM)
+{
+  // orthonormalize the magnetomter
+  float u[3];           
+  IMU_math_quatToUp(q, u);
+  float n               = u[0]*m_in[0] + u[1]*m_in[1] + u[2]*m_in[2];
+  float m[3]            = {m_in[0]-n*u[0], m_in[1]-n*u[1], m_in[2]-n*u[2]};
+  n                     = sqrt(m[0]*m[0] + m[1]*m[1] + m[2]*m[2]);
+  m[0]                  = m[0]/n;
+  m[1]                  = m[1]/n;
+  m[2]                  = m[2]/n;
+
+  // compute the objective function 
+  float two_q[4]        = {2.0f*q[0], 2.0f*q[1], 2.0f*q[2], 2.0f*q[3]};
+  float f_4             = 1.0f - two_q[2]*q[2] - two_q[3]*q[3] - m[0];
+  float f_5             = two_q[1]*q[2] - two_q[0]*q[3] - m[1];
+  float f_6             = two_q[0]*q[2] + two_q[1]*q[3] - m[2];
+
+  // calculate the gradient
+  float qHatDot[4]      = {-two_q[3]*f_5 + two_q[2]*f_6,
+                            two_q[2]*f_5 + two_q[3]*f_6,
+                           -2*two_q[2]*f_4 + two_q[1]*f_5 + two_q[0]*f_6,
+                           -2*two_q[3]*f_4 - two_q[0]*f_5 + two_q[1]*f_6};
+  norm4(decrm(q, scale(norm4(qHatDot), alpha)));
+  *FOM                  = qHatDot[0];
+  
+  // exit (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* update quaternion with newest accelerometer datum
+* assumes normalized quaternion and datum
+******************************************************************************/
+
 int IMU_math_estmMagnRef(
   float                 *q, 
   float                 *m, 
@@ -85,11 +125,11 @@ int IMU_math_estmMagnRef(
   float q2_q4           = q[1] * q[3];
   float q3_q3           = q[2] * q[2];
   float f_4             = twox * (0.5f - q3_q3 - q[3]*q[3]) +
-                          twoz * (q2_q4 - q1_q3) - m[2];
+                          twoz * (q2_q4 - q1_q3) - m[0];
   float f_5             = twox * (q[1]*q[2] - q[0]*q[3]) +
                           twoz * (q[0]*q[1] + q[2]*q[3]) - m[1];
   float f_6             = twox * (q1_q3 + q2_q4) +
-                          twoz * (0.5f - q[1]*q[1] - q3_q3) - m[0];
+                          twoz * (0.5f - q[1]*q[1] - q3_q3) - m[2];
 
   // compute the Jacobian
   float twox_q[4]       = {twox * q[0], twox * q[1],

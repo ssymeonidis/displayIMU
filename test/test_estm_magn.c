@@ -24,8 +24,11 @@
 #include "IMU_math.h"
 #include "test_utils.h"
 
+// define internal constants
+const float precision_ang = 7.0;
+
 // internal functions
-static void print_line    (float FOM, float q[4]);
+static void process_angles (float ang[3], float vec[3], float out[3]);
 
 
 /******************************************************************************
@@ -34,30 +37,49 @@ static void print_line    (float FOM, float q[4]);
 
 int main(void)
 {
-  // define internal constants
-  const float alpha    = 0.01;
-  const int   iter     = 70;
-  
-  // define internal variables
-  float FOM;
-  int   i;
-  
   // start datum test
   printf("starting test_estm_magn...\n");
   
-  // test zero-pitch, zero-roll
-  float q_1[4]   = {0.8552, 0.3665, 0.3665, 0.0};
-  float ref_1[4] = {1.0, 0.0, 0.0, 0.0};
-  float m_1[3]   = {1.0, 0.0, 0.0};
-  for (i=0; i<iter; i++) {
-    IMU_math_estmMagnRef(q_1, m_1, 0.0, 1.0, alpha, &FOM);
-    print_line(FOM, q_1);
-  }
-  if (FOM > 0.01) {
-    printf("error: FOM convergance greater that threshold\n");
+  // test zero yaw
+  float ang1[3]   = {25.0, 15.0, 15.0};
+  float vec1[3]   = { 1.0,  0.0,  0.0};
+  float out1[3]   = { 0.0,  0.0,  0.0};
+  process_angles(ang1, vec1, out1);
+  if (fabs(out1[0]) >  precision_ang) {
+    printf("error: failed zero yaw\n");
     exit(0);
   }
-  verify_quat(q_1, ref_1);
+
+  // test 90deg yaw
+  float ang2[3]   = {65.0, 15.0, 15.0};
+  float vec2[3]   = { 0.0, -1.0,  0.0};
+  float out2[3]   = { 0.0,  0.0,  0.0};
+  process_angles(ang2, vec2, out2);
+  if (fabs(out2[0] - 90.0) >  precision_ang) {
+    printf("error: failed 90deg yaw\n");
+    exit(0);
+  }
+
+  // test neg90deg yaw
+  float ang3[3]   = {-65.0, 15.0, 15.0};
+  float vec3[3]   = { 0.0,  1.0,  0.0};
+  float out3[3]   = { 0.0,  0.0,  0.0};
+  process_angles(ang3, vec3, out3);
+  if (fabs(out3[0] + 90.0) > precision_ang) {
+    printf("error: failed neg90deg yaw\n");
+    exit(0);
+  }
+
+  // test 180deg yaw
+  float ang4[3]   = {-205.0, 15.0, 15.0};
+  float vec4[3]   = {-1.0,  0.0,  0.0};
+  float out4[3]   = { 0.0,  0.0,  0.0};
+  process_angles(ang4, vec4, out4);
+  if (fabs(out4[0] + 180.0) > precision_ang &&
+      fabs(out4[0] - 180.0) > precision_ang) {
+    printf("error: failed 180deg yaw\n");
+    exit(0);
+  }
 
   // exit program
   printf("pass: test_estm_magn\n\n");
@@ -69,10 +91,28 @@ int main(void)
 * prints results to console
 ******************************************************************************/
 
-void print_line(
-  float                FOM,
-  float                q[4])
+void process_angles(
+  float                ang[3],
+  float                vec[3],
+  float                out[3])
 {
-  // start datum test
-  printf("%0.3f, %0.2f, %0.2f, %0.2f, %0.2f\n", FOM, q[0], q[1], q[2], q[3]);
+  // define local constants
+  const float alpha    = 0.005;
+  const int   iter     = 100;
+
+  // define local variables
+  float                radians[3];
+  float                q[3];
+  float                FOM;
+  int                  i;
+
+  // main processing loop
+  IMU_math_degToRad(ang, radians);
+  IMU_math_eulerToQuat(radians, q);
+  for (i=0; i<iter; i++)
+    IMU_math_estmMagnNorm(q, vec, alpha, &FOM);
+  IMU_math_quatToEuler(q, radians);
+  IMU_math_radToDeg(radians, out);
+  printf("%0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n", 
+    ang[0], ang[1], ang[2], vec[0], vec[1], vec[2], out[0], out[1], out[2]);
 }

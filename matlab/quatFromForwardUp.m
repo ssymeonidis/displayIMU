@@ -19,7 +19,6 @@ function q = quatFromForwardUp(f,u)
 
 % normalize reference (up) vector
 u = u./norm(u);
-f = f./norm(f);
 
 % ortho normalize forward vector 
 D = dot(f, u);

@@ -19,43 +19,33 @@
 clear all; close all;
 
 % test 0deg-yaw
-euler  = [15, 15, 15];
+euler  = [25, 15, 15];
 magn   = [1, 0, 0];
-ref    = [1, 0, 0];
-run_sim(euler, magn, ref)
+run_sim(euler, magn)
 
 % test 90deg-yaw
-euler  = [75, 15, 15];
+euler  = [65, 15, 15];
 magn   = [0, -1, 0];
-ref    = [1, 0, 0];
-run_sim(euler, magn, ref)
+run_sim(euler, magn)
 
 % test neg90deg-yaw
-euler  = [-75, 15, 15];
+euler  = [-65, 15, 15];
 magn   = [0, 1, 0];
-ref    = [1, 0, 0];
-run_sim(euler, magn, ref)
+run_sim(euler, magn)
 
-% test neg180deg-yaw
-euler  = [-195, 15, 15];
+% test 180deg-yaw
+euler  = [-205, 15, 15];
 magn   = [-1, 0, 0];
-ref    = [1, 0, 0];
-run_sim(euler, magn, ref)
-
-% test 0deg-yaw
-% euler  = [15, 15, 15];
-% magn   = [1, 0, 1]; magn = magn / sqrt(sum(magn));
-% ref    = [1, 0, 1]; ref  = ref  / sqrt(sum(ref));
-% run_sim(euler, magn, ref)
+run_sim(euler, magn)
 
 
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(euler, magn, ref)
+function euler = run_sim(euler, magn)
 
   % define local constants
-  alpha  = 0.01;
+  alpha  = 0.005;
   iter   = 100;
 
   % convert orientation angles to quaternion
@@ -66,7 +56,7 @@ function euler = run_sim(euler, magn, ref)
   figure(1);
   FOM    = [];
   for i=1:iter
-    [q, FOM(i)] = applyMagnGradient(q, magn, ref, alpha);
+    [q, FOM(i)] = applyMagnGradientNorm(q, magn, alpha);
     display_state(q);
   end
   
@@ -80,9 +70,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function display_state(q)
-  u             = quatRotate([0, 0, 1], q, "full");
-  f             = quatRotate([1, 0, 0], q, "full");
-  r             = quatRotate([0, 1, 0], q, "full");
+  u             = quatRotateForward([0, 0, 1], q, "full");
+  f             = quatRotateForward([1, 0, 0], q, "full");
+  r             = quatRotateForward([0, 1, 0], q, "full");
   plotVector(u, f, r);
   title('eulerToQuatTest');
   delete(findall(gcf,'type','annotation'));
