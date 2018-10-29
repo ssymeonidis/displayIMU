@@ -35,19 +35,17 @@ extern "C" {
 
 // define error codes
 #define IMU_ENGN_INST_OVERFLOW           -1
-#define IMU_ENGN_BAD_ENGN_TYPE           -2
-#define IMU_ENGN_FAILED_SYS_INIT         -3
-#define IMU_ENGN_FAILED_RESET            -4
-#define IMU_ENGN_BAD_INST                -5
-#define IMU_ENGN_UNINITIALIZE_SYS        -6
-#define IMU_ENGN_NONEXISTANT_SYSID       -7
-#define IMU_ENGN_NONEXISTANT_STRUCT      -8
-#define IMU_ENGN_DISABLED_SENSOR_STRUCT  -9
-#define IMU_ENGN_SUBSYSTEM_FAILURE       -10
-#define IMU_ENGN_SENSOR_STRUCT_COPY_FAIL -11
-#define IMU_ENGN_FAILED_THREAD           -12
-#define IMU_ENGN_FAILED_MUTEX            -13
-#define IMU_ENGN_QUEUE_OVERFLOW          -14
+#define IMU_ENGN_BAD_INST                -2
+#define IMU_ENGN_BAD_ENGN_TYPE           -3
+#define IMU_ENGN_SUBSYSTEM_FAILURE       -4
+#define IMU_ENGN_UNINITIALIZE_SYS        -5
+#define IMU_ENGN_NONEXISTANT_SYSID       -6
+#define IMU_ENGN_NONEXISTANT_STRUCT      -7
+#define IMU_ENGN_DISABLED_SENSOR_STRUCT  -8
+#define IMU_ENGN_SENSOR_STRUCT_COPY_FAIL -9
+#define IMU_ENGN_FAILED_THREAD           -10
+#define IMU_ENGN_FAILED_MUTEX            -11
+#define IMU_ENGN_QUEUE_OVERFLOW          -12
 
 
 // configuration structure definition

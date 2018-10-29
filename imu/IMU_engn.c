@@ -320,7 +320,7 @@ int IMU_engn_start()
   for (i=0; i<numInst; i++)
     status  += max(0, IMU_engn_reset(i));
   if (status > 0)
-    return IMU_ENGN_FAILED_RESET;
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
 
   // zero queue size pass through
   #if IMU_ENGN_QUEUE_SIZE == 0
@@ -464,7 +464,7 @@ int IMU_engn_reset(
     state[id].calb = IMU_calb_reset(state[id].idCalb);
   if (state[id].core < 0 || state[id].pnts < 0 || 
       state[id].stat < 0 || state[id].calb < 0)
-    return IMU_ENGN_FAILED_RESET;
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
    
   // exit function
   return 0;
