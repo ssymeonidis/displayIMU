@@ -364,17 +364,6 @@ int IMU_core_newGyro(
                            (float)g_in[2]/config[id].gScale};
   FOM->magSqrd          = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
  
-  // check stable condition
-  FOM->isStable         = 0;
-  if (config[id].isStable) {
-    if (FOM->magSqrd > config[id].gThresh * config[id].gThresh)
-      state[id].tMove   = t;
-    else if (t - state[id].tMove > config[id].gThreshTime) {
-      FOM->isStable     = 1;
-      return IMU_CORE_GYRO_STABLE;
-    }
-  }
-
   // lock before modifying state
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&state[id].lock);
@@ -416,7 +405,7 @@ int IMU_core_newAccl(
     FOM                 = &staticFOM.FOM.accl;
   }
   
-  // determine whether the functions needs to be executed
+  // determine whether the function needs to be executed
   if (!config[id].enable || !config[id].isAccl)
     return IMU_CORE_FNC_DISABLED;
   if (state[id].aReset) 
@@ -444,7 +433,7 @@ int IMU_core_newAccl(
   float q[4], A[3], t_copy;
   IMU_thrd_mutex_lock(&state[id].lock);
   memcpy(q, state[id].q, sizeof(state[id].q));
-  if (config[id].isPos)
+  if (config[id].isTran)
     memcpy(A, state[id].A, sizeof(state[id].A));
   t_copy                = state[id].t;
   IMU_thrd_mutex_unlock(&state[id].lock);
@@ -458,7 +447,7 @@ int IMU_core_newAccl(
   #endif
 
   // save accelerometer data
-  if (config[id].isPos) {
+  if (config[id].isTran) {
     float   G[3];       
     scale(IMU_math_quatToUp(state[id].q, G), config[id].aMag);
     uint8_t *valid      = &state[id].estmValid;
@@ -482,7 +471,7 @@ int IMU_core_newAccl(
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&state[id].lock);
   memcpy(state[id].q, q, sizeof(state[id].q));
-  if (config[id].isPos)
+  if (config[id].isTran)
     memcpy(state[id].A, A, sizeof(state[id].A));
   float t_new           = weight * t_copy + (1.0 - weight) * (float)t;
   if (t_new > state[id].t)
@@ -521,7 +510,7 @@ int IMU_core_newMagn(
     FOM                 = &staticFOM.FOM.magn;
   }
   
-  // determine whether the functions needs to be executed
+  // determine whether the function needs to be executed
   if (!config[id].isMagn || !config[id].enable)
     return IMU_CORE_FNC_DISABLED;
   if (state[id].mReset) 

@@ -24,7 +24,7 @@
 #include "IMU_file.h"
 
 // core subsystem parsing inputs
-static const int   IMU_core_config_size = 20;
+static const int   IMU_core_config_size   = 18;
 static const char* IMU_core_config_name[] = {
   "enable",
   "isGyro", 
@@ -32,10 +32,8 @@ static const char* IMU_core_config_name[] = {
   "isMagn",
   "isStable",
   "isFOM",
-  "isPos",
+  "isTran",
   "isPredict",
-  "gThresh",
-  "gThreshTime",
   "gScale",
   "aWeight",
   "aMag",
@@ -54,24 +52,22 @@ typedef enum {
   IMU_core_isMagn       = 3,
   IMU_core_isStable     = 4,
   IMU_core_isFOM        = 5,
-  IMU_core_isPos        = 6,
+  IMU_core_isTran       = 6,
   IMU_core_isPredict    = 7,
-  IMU_core_gThresh      = 8,
-  IMU_core_gThreshTime  = 9,
-  IMU_core_gScale       = 10,
-  IMU_core_aWeight      = 11,
-  IMU_core_aMag         = 12,
-  IMU_core_aMagThresh   = 13,
-  IMU_core_mWeight      = 14,
-  IMU_core_mMag         = 15,
-  IMU_core_mMagThresh   = 16,
-  IMU_core_mAng         = 17,
-  IMU_core_mAngThresh   = 18,
-  IMU_core_posAlpha     = 19
+  IMU_core_gScale       = 8,
+  IMU_core_aWeight      = 9,
+  IMU_core_aMag         = 10,
+  IMU_core_aMagThresh   = 11,
+  IMU_core_mWeight      = 12,
+  IMU_core_mMag         = 13,
+  IMU_core_mMagThresh   = 14,
+  IMU_core_mAng         = 15,
+  IMU_core_mAngThresh   = 16,
+  IMU_core_posAlpha     = 17
 } IMU_core_config_enum;
 
 // rect subsystem parsing inputs
-static const int   IMU_rect_config_size = 7;
+static const int   IMU_rect_config_size   = 7;
 static const char* IMU_rect_config_name[] = {
   "enable",
   "gBias",
@@ -92,15 +88,16 @@ typedef enum {
 } IMU_rect_config_enum;
 
 // pnts subsystem parsing inputs
-static const int   IMU_pnts_config_size = 11;
+static const int   IMU_pnts_config_size   = 12;
 static const char* IMU_pnts_config_name[] = {
   "enable",
+  "isGyro",
   "isAccl",
   "isMagn",
+  "tHold",
+  "tStable",
   "gAlpha",
   "gThresh",
-  "gInitTime",
-  "gHoldTime",
   "aAlpha",
   "aThresh",
   "mAlpha",
@@ -108,20 +105,21 @@ static const char* IMU_pnts_config_name[] = {
 };
 typedef enum {
   IMU_pnts_enable       = 0,
-  IMU_pnts_isAccl       = 1,
-  IMU_pnts_isMagn       = 2,
-  IMU_pnts_gAlpha       = 3,
-  IMU_pnts_gThresh      = 4,
-  IMU_pnts_gInitTime    = 5,
-  IMU_pnts_gHoldTime    = 6,
-  IMU_pnts_aAlpha       = 7,
-  IMU_pnts_aThresh      = 8,
-  IMU_pnts_mAlpha       = 9,
-  IMU_pnts_mThresh      = 10
+  IMU_pnts_isGyro       = 1,
+  IMU_pnts_isAccl       = 2,
+  IMU_pnts_isMagn       = 3,
+  IMU_pnts_tHold        = 4,
+  IMU_pnts_tStable      = 5,
+  IMU_pnts_gAlpha       = 6,
+  IMU_pnts_gThresh      = 7,
+  IMU_pnts_aAlpha       = 8,
+  IMU_pnts_aThresh      = 9,
+  IMU_pnts_mAlpha       = 10,
+  IMU_pnts_mThresh      = 11
 } IMU_pnts_config_enum;
 
 // stat subsystem parsing inputs
-static const int   IMU_stat_config_size = 7;
+static const int   IMU_stat_config_size   = 7;
 static const char* IMU_stat_config_name[] = {
   "enable",
   "isGyro",
@@ -199,12 +197,10 @@ int IMU_file_coreLoad(
       get_bool(args, &config->isStable);
     else if (type == IMU_core_isFOM)
       get_bool(args, &config->isFOM);
-    else if (type == IMU_core_isPos)
-      get_bool(args, &config->isPos);
-    else if (type == IMU_core_gThresh)
-      sscanf(args, "%f", &config->gThresh);
-    else if (type == IMU_core_gThreshTime)
-      sscanf(args, "%f", &config->gThreshTime);
+    else if (type == IMU_core_isTran)
+      get_bool(args, &config->isTran);
+    else if (type == IMU_core_isPredict)
+      get_bool(args, &config->isPredict);
     else if (type == IMU_core_gScale)
       sscanf(args, "%f", &config->gScale);
     else if (type == IMU_core_aWeight)
@@ -257,9 +253,7 @@ int IMU_file_coreSave(
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
   fprintf(file, "  \"isStable\": ");    write_bool(file, config->isStable);
   fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
-  fprintf(file, "  \"isPos\": ");       write_bool(file, config->isPos);
-  fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
-  fprintf(file, "  \"gThreshTime\": %0.2f,\n",     config->gThreshTime);
+  fprintf(file, "  \"isTran\": ");      write_bool(file, config->isTran);
   fprintf(file, "  \"gScale\": %0.2f,\n",          config->gScale);
   fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
   fprintf(file, "  \"aMag\": %0.2f,\n",            config->aMag);
@@ -397,18 +391,20 @@ int IMU_file_pntsLoad(
     type = get_field(field, IMU_pnts_config_name, IMU_pnts_config_size);
     if      (type == IMU_pnts_enable)
       get_bool(args, &config->enable);
+    else if (type == IMU_pnts_isGyro)
+      get_bool(args, &config->isGyro);
     else if (type == IMU_pnts_isAccl)
       get_bool(args, &config->isAccl);
     else if (type == IMU_pnts_isMagn)
       get_bool(args, &config->isMagn);
+    else if (type == IMU_pnts_tHold)
+      sscanf(args, "%f", &config->tHold);
+    else if (type == IMU_pnts_tStable)
+      sscanf(args, "%f", &config->tStable);
     else if (type == IMU_pnts_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
     else if (type == IMU_pnts_gThresh)
       sscanf(args, "%f", &config->gThresh);
-    else if (type == IMU_pnts_gInitTime)
-      sscanf(args, "%f", &config->gInitTime);
-    else if (type == IMU_pnts_gHoldTime)
-      sscanf(args, "%f", &config->gHoldTime);
     else if (type == IMU_pnts_aAlpha)
       sscanf(args, "%f", &config->aAlpha);
     else if (type == IMU_pnts_aThresh)
@@ -444,12 +440,13 @@ int IMU_file_pntsSave(
   // write contents to json file one line at a time
   fprintf(file, "{\n");
   fprintf(file, "  \"enable\": ");      write_bool(file, config->enable);
+  fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
   fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
+  fprintf(file, "  \"gInitTime\": %0.2f,\n",       config->tHold);
+  fprintf(file, "  \"gHoldTime\": %0.2f,\n",       config->tStable);
   fprintf(file, "  \"gAlpha\": %0.2f,\n",          config->gAlpha);
   fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
-  fprintf(file, "  \"gInitTime\": %0.2f,\n",       config->gInitTime);
-  fprintf(file, "  \"gHoldTime\": %0.2f,\n",       config->gHoldTime);
   fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
   fprintf(file, "  \"aThresh\": %0.2f,\n",         config->aThresh);
   fprintf(file, "  \"mAlpha\": %0.2f,\n",          config->mAlpha);

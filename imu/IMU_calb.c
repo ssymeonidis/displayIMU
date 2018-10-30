@@ -345,5 +345,3 @@ int IMU_calb_defaultFnc(
     return IMU_CALB_CALBFNC_REJECTED;
   }
 }
-
-

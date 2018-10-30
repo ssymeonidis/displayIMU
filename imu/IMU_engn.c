@@ -147,9 +147,9 @@ int IMU_engn_init(
     state[*id].stat   = IMU_stat_init(&cur->idStat, &cur->configStat);
   if (config[*id].isCalb)
     state[*id].calb   = IMU_calb_init(&cur->idCalb, &cur->configCalb);
-  if (&cur->core < 0 || &cur->rect < 0 || &cur->pnts < 0 ||
-      &cur->stat < 0 || &cur->calb < 0)
-    return IMU_ENGN_FAILED_SYS_INIT;
+  if (cur->core < 0 || cur->rect < 0 || cur->pnts < 0 ||
+      cur->stat < 0 || cur->calb < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
 
   // create pthread mutex
   #if IMU_USE_PTHREAD
@@ -158,7 +158,6 @@ int IMU_engn_init(
   #endif
 
   // exit (no errors)
-  printf("finished init\n");
   return 0;
 }
 

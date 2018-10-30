@@ -58,10 +58,8 @@ typedef struct {
   unsigned char        isMagn;          // enable magnetometer data
   unsigned char        isStable;        // enable detection of no movement
   unsigned char        isFOM;           // enable weight based on FOM
-  unsigned char        isPos;           // enable acceleration estimate
+  unsigned char        isTran;          // enable translational estimate
   unsigned char        isPredict;       // enable extrapolation of estim
-  float                gThresh;         // no motion threshold value
-  float                gThreshTime;     // no motion threhsold time
   float                gScale;          // scale to covert to rad/sec
   float                aWeight;         // accelerometer IMU weight
   float                aMag;            // gravity magnitude
