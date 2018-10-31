@@ -36,7 +36,7 @@ int         key[2]      = {78, 24};
 int         fncCount    = 0;
 
 // define internal function
-void test_fnc(uint16_t id, uint16_t cnt, IMU_pnts_entry*, void*);
+void test_fnc(uint16_t cnt, IMU_pnts_entry*, void*);
 void add_datum(float g[3], float dt);
 
 
@@ -132,14 +132,13 @@ int main(void)
 ******************************************************************************/
 
 void test_fnc(
-  uint16_t                 id, 
   uint16_t                 count,
   IMU_pnts_entry           *entry,
   void                     *pntr)
 {
   // verify count and entry
   float *g                 = entry->gFltr;
-  printf("%d, %d, %0.2f, %0.2f, %0.2f\n", id, count, g[0], g[1], g[2]);
+  printf("%d, %0.2f, %0.2f, %0.2f\n", count, g[0], g[1], g[2]);
   verify_int(count, fncCount);
   verify_vect(g, vec[fncCount]);
 

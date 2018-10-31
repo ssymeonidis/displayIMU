@@ -38,7 +38,7 @@ extern "C" {
 #define IMU_PNTS_10USEC_TO_SEC   0.00001
 
 // define callback funciton args
-#define IMU_PNTS_FNC_ARG         uint16_t, uint16_t, IMU_pnts_entry*, void*
+#define IMU_PNTS_FNC_ARG         uint16_t, IMU_pnts_entry*, void*
 
 // configuration structure definition
 typedef struct {

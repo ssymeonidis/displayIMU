@@ -525,7 +525,7 @@ inline IMU_pnts_entry* break_stable(
       thrdVal[id].pntr    = state[id].fncPntr;
       pthread_create(&thrd[id], &thrdAttr[id], IMU_pnts_run, &thrdVal[id]);
       #else
-      state[id].fnc(id, state[id].curPnts-1, entry, state[id].fncPntr);
+      state[id].fnc(state[id].curPnts-1, entry, state[id].fncPntr);
       #endif
     }
     return entry;
@@ -544,7 +544,7 @@ void* IMU_pnts_run(
 {
   threadStruct *vals = (threadStruct*)pntr;
   printf("count = %d\n", vals->count);
-  state[vals->id].fnc(vals->id, vals->count, vals->entry, vals->pntr);
+  state[vals->id].fnc(vals->count, vals->entry, vals->pntr);
 }
 
 
