@@ -56,6 +56,10 @@ int IMU_pnts_init(
   *id   = numInst; 
   *pntr = &config[*id];
   numInst++;
+
+  // initialize the callback fnc
+  state[*id].fnc          = NULL;
+  state[*id].fncPntr      = NULL;
   
   // initialize instance state
   IMU_pnts_reset(*id);
@@ -146,6 +150,29 @@ int IMU_pnts_getEntry(
     i += IMU_PNTS_SIZE;
   *pntr = &table[id][i];
  
+  // exit function (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* function to reset instance state
+******************************************************************************/
+
+// function callback functions
+int IMU_pnts_setFnc(
+  uint16_t                id, 
+  int                     (*fnc)(IMU_PNTS_FNC_ARG),
+  void                    *fncPntr)
+{
+  // check device count overflow
+  if (id >= numInst)
+    return IMU_PNTS_BAD_INST;
+
+  // copy callback function and its pointer
+  state[id].fnc           = fnc;
+  state[id].fncPntr       = fncPntr;
+
   // exit function (no errors)
   return 0;
 }
@@ -467,6 +494,8 @@ inline IMU_pnts_entry* break_stable(
   // update current points count and launch thread
   if (state[id].curPnts < state[id].numPnts) {
     state[id].curPnts++;
+    if (state[id].fnc != NULL)
+      state[id].fnc(id, state[id].curPnts-1, entry, state[id].fncPntr);
     return entry;
   } else {
     return NULL;
@@ -518,7 +547,7 @@ inline void accum_gyro(
   IMU_TYPE                *cur, 
   IMU_TYPE                time)
 {
-  float time_s            = (float)time * IMU_CORE_10USEC_TO_SEC;
+  float time_s            = (float)time * IMU_PNTS_10USEC_TO_SEC;
   prev[0]                += time_s * (float)cur[0];
   prev[1]                += time_s * (float)cur[1];
   prev[2]                += time_s * (float)cur[2];

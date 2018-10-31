@@ -29,13 +29,16 @@ extern "C" {
 #include "IMU_type.h"
 
 // define error codes
-#define IMU_PNTS_INST_OVERFLOW      -1
-#define IMU_PNTS_BAD_INST           -2
-#define IMU_PNTS_BAD_INDEX          -3
-#define IMU_PNTS_FNC_DISABLED       -4
+#define IMU_PNTS_INST_OVERFLOW   -1
+#define IMU_PNTS_BAD_INST        -2
+#define IMU_PNTS_BAD_INDEX       -3
+#define IMU_PNTS_FNC_DISABLED    -4
 
 // define constants
-#define IMU_CORE_10USEC_TO_SEC      0.00001
+#define IMU_PNTS_10USEC_TO_SEC   0.00001
+
+// define callback funciton args
+#define IMU_PNTS_FNC_ARG         uint16_t, uint16_t, IMU_pnts_entry*, void*
 
 // configuration structure definition
 typedef struct {
@@ -74,6 +77,8 @@ typedef struct {
   uint8_t                mClock;
   uint32_t               tStable;
   IMU_pnts_entry         *current;
+  int                    (*fnc)(IMU_PNTS_FNC_ARG); 
+  void                   *fncPntr;
 } IMU_pnts_state;
 
 // define report fo calibration point
@@ -99,6 +104,9 @@ int IMU_pnts_getState  (uint16_t id, IMU_pnts_state**);
 int IMU_pnts_getCount  (uint16_t id, uint16_t *count);
 int IMU_pnts_getEntry  (uint16_t id, uint16_t index, IMU_pnts_entry**);
 
+// function callback functions
+int IMU_pnts_setFnc    (uint16_t id, int (*fnc)(IMU_PNTS_FNC_ARG), void*);
+
 // general operation functions 
 int IMU_pnts_reset     (uint16_t id);
 int IMU_pnts_start     (uint16_t id, uint16_t numPnts);
@@ -110,7 +118,6 @@ int IMU_pnts_data3     (uint16_t id, IMU_data3*, IMU_pnts_entry**);
 int IMU_pnts_newGyro   (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
 int IMU_pnts_newAccl   (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
 int IMU_pnts_newMagn   (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
-
 
 #ifdef __cplusplus
 }

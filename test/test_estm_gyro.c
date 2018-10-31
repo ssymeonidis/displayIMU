@@ -59,7 +59,7 @@ int main(void)
   process_rotate(q3, gyro3, dt, num_iter, ref3);
 
   // exit program
-  printf("pass: test_estm_accl\n\n");
+  printf("pass: test_estm_gyro\n\n");
   return 0;
 }
 

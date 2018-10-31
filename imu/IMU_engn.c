@@ -292,6 +292,26 @@ int IMU_engn_getSensor(
 * function to set calibration callback
 ******************************************************************************/
 
+int IMU_engn_setPntsFnc( 
+  uint16_t		id,  
+  int                   (*fnc)(IMU_PNTS_FNC_ARG),
+  void                  *fncPntr)
+{
+  // check out-of-bounds condition
+  if (id >= numInst)
+    return IMU_ENGN_BAD_INST;
+  if (!config[id].isCalb)
+    return IMU_ENGN_UNINITIALIZE_SYS;
+
+  // pass sensor structure and exit
+  return IMU_pnts_setFnc(id, fnc, fncPntr);
+}
+
+
+/******************************************************************************
+* function to set calibration callback
+******************************************************************************/
+
 int IMU_engn_setCalbFnc( 
   uint16_t		id,  
   int                   (*pntr)(uint16_t, IMU_calb_FOM*))
@@ -342,7 +362,7 @@ int IMU_engn_start()
 
 
 /******************************************************************************
-* function to set calibration callback
+* function to stop IMU engn
 ******************************************************************************/
 
 int IMU_engn_stop()

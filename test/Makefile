@@ -14,7 +14,8 @@ TARGETS     = $(BINDIR)/test_datum       \
               $(BINDIR)/test_core_gyro   \
               $(BINDIR)/test_core_accl   \
               $(BINDIR)/test_core_magn   \
-              $(BINDIR)/test_pnts_gyro
+              $(BINDIR)/test_pnts_gyro   \
+              $(BINDIR)/test_pnts_fnc
 LIBS        = -L../bin                   \
               -lIMU                      \
               -lm                        \
@@ -29,7 +30,8 @@ SRCS        = test_datum.c               \
               test_core_gyro.c           \
               test_core_accl.c           \
               test_core_magn.c           \
-              test_pnts_gyro.c
+              test_pnts_gyro.c           \
+              test_pnts_fnc.c
 OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 all: ${TARGETS}
@@ -64,6 +66,9 @@ $(BINDIR)/test_core_magn: $(OBJDIR)/test_core_magn.o
 $(BINDIR)/test_pnts_gyro: $(OBJDIR)/test_pnts_gyro.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
+$(BINDIR)/test_pnts_fnc: $(OBJDIR)/test_pnts_fnc.o
+	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
+
 $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) ${DEFINES} ${INCLUDE} -c $< -o $@
 
@@ -81,3 +86,4 @@ run:
 	cd $(BINDIR); ./test_core_accl | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_core_magn | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_pnts_gyro | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_pnts_fnc  | grep -e pass -e error -e fail

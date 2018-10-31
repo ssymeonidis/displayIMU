@@ -83,9 +83,6 @@ typedef struct {
   unsigned char        mReset;         // magnetometer reset signal
   unsigned char        estmValid;      // flag to insure valid state
   int                  status;         // captures last datum status
-#if IMU_USE_PTHREAD
-  pthread_mutex_t      lock;           // mutex (async operation)
-#endif
 } IMU_core_state;
 
 

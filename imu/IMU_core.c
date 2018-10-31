@@ -33,6 +33,9 @@ static IMU_core_config  config [IMU_MAX_INST];
 static IMU_core_state   state  [IMU_MAX_INST];
 static IMU_core_FOM     staticFOM;
 static uint16_t         numInst = 0;
+#if IMU_USE_PTHREAD
+pthread_mutex_t         lock   [IMU_MAX_INST];
+#endif
 
 // internal functions definitions
 static inline float  norm3(IMU_TYPE *in, float *out);
@@ -57,7 +60,7 @@ int IMU_core_init(
 
   // create pthread mutex
   #if IMU_USE_PTHREAD
-  int err  = IMU_thrd_mutex_init(&state[numInst].lock);
+  int err  = IMU_thrd_mutex_init(&lock[numInst]);
   if (err) return IMU_CORE_FAILED_MUTEX;
   #endif
 
@@ -120,7 +123,7 @@ int IMU_core_reset(
 
   // lock before modifying state
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   #endif
 
   // initialize state to known value
@@ -135,7 +138,7 @@ int IMU_core_reset(
 
   // unlock function and exit (no errors)
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  IMU_thrd_mutex_unlock(&lock[id]);
   #endif
   return 0;
 }
@@ -169,7 +172,7 @@ int IMU_core_zero(
 
   // lock before modifying state
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   #endif
 
   // update state time
@@ -251,7 +254,7 @@ int IMU_core_zero(
 
   // unlock function and exit (no errors)
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  IMU_thrd_mutex_unlock(&lock[id]);
   #endif
   return status;
 }
@@ -366,7 +369,7 @@ int IMU_core_newGyro(
  
   // lock before modifying state
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   #endif
 
   // update system state with gyro
@@ -376,7 +379,7 @@ int IMU_core_newGyro(
 
   // unlock mutex and exit (no errors)
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  IMU_thrd_mutex_unlock(&lock[id]);
   #endif
   return IMU_CORE_NORMAL_OP;
 }
@@ -431,12 +434,12 @@ int IMU_core_newAccl(
   // copy internal orientation state
   #if IMU_USE_PTHREAD
   float q[4], A[3], t_copy;
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   memcpy(q, state[id].q, sizeof(state[id].q));
   if (config[id].isTran)
     memcpy(A, state[id].A, sizeof(state[id].A));
   t_copy                = state[id].t;
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  IMU_thrd_mutex_unlock(&lock[id]);
 
   // or pass pointers given blocking I/F
   #else
@@ -469,14 +472,13 @@ int IMU_core_newAccl(
   
   // save results to system state
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   memcpy(state[id].q, q, sizeof(state[id].q));
   if (config[id].isTran)
     memcpy(state[id].A, A, sizeof(state[id].A));
-  float t_new           = weight * t_copy + (1.0 - weight) * (float)t;
-  if (t_new > state[id].t)
-    state[id].t         = t_new;
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  if (t_copy > state[id].t)
+    state[id].t         = t_copy;
+  IMU_thrd_mutex_unlock(&lock[id]);
   #endif
 
   // pass status and exit function
@@ -548,10 +550,10 @@ int IMU_core_newMagn(
   // copy internal orientation state
   #if IMU_USE_PTHREAD
   float                 q[4];
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   memcpy(q, state[id].q, sizeof(state[id].q));
   float t_copy          = state[id].t;
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  IMU_thrd_mutex_unlock(&lock[id]);
   #else
   float                 *q;
   q                     = state[id].q;
@@ -564,12 +566,11 @@ int IMU_core_newMagn(
     
   // save results to system state
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   memcpy(state[id].q, q, sizeof(state[id].q));
-  float t_new           = weight * t_copy + (1.0f - weight) * (float)t;
-  if (t_new > state[id].t)
-    state[id].t         = t_new;
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  if (t_copy > state[id].t)
+    state[id].t         = t_copy;
+  IMU_thrd_mutex_unlock(&lock[id]);
   #endif
 
   // pass status and exit function
@@ -597,7 +598,7 @@ int IMU_core_estmQuat(
 
   // lock before copying state
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   #endif
 
   // copy current orientation state and return
@@ -605,7 +606,7 @@ int IMU_core_estmQuat(
 
   // unlock mutex and exit
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  IMU_thrd_mutex_unlock(&lock[id]);
   #endif
   return 0;
 }
@@ -628,7 +629,7 @@ int IMU_core_estmAccl(
 
   // lock before copying state
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_lock(&state[id].lock);
+  IMU_thrd_mutex_lock(&lock[id]);
   #endif
 
   // copy internal variables 
@@ -637,7 +638,7 @@ int IMU_core_estmAccl(
 
   // unlock mutex
   #if IMU_USE_PTHREAD
-  IMU_thrd_mutex_unlock(&state[id].lock);
+  IMU_thrd_mutex_unlock(&lock[id]);
   #endif
 
   // apply rotation to acceleration vector

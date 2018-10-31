@@ -154,6 +154,7 @@ int IMU_engn_getSysID   (uint16_t id, IMU_engn_system, uint16_t *sysID);
 int IMU_engn_getConfig  (uint16_t id, IMU_engn_system, IMU_union_config*);
 int IMU_engn_getState   (uint16_t id, IMU_engn_system, IMU_union_state*);
 int IMU_engn_getSensor  (uint16_t id, IMU_engn_sensor**);
+int IMU_engn_setPntsFnc (uint16_t id, int (*fnc)(IMU_PNTS_FNC_ARG), void*);
 int IMU_engn_setCalbFnc (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
 
 // enable/disable queue controls
