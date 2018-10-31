@@ -1,13 +1,14 @@
 {
   "enable": true,
+  "isGyro": true,
   "isAccl": true,
   "isMagn": true,
-  "gAlpha": 0.1,
+  "tHold": 100,
+  "tStable": 200,
+  "gAlpha": 0.25,
   "gThresh": 20,
-  "gInitTime": 100,
-  "gHoldTime": 100,
-  "aAlpha": 0.05,
+  "aAlpha": 0.35,
   "aThresh": 30,
-  "mAlpha": 0.02,
+  "mAlpha": 0.40s,
   "mThresh": 40
 }

@@ -26,9 +26,15 @@
 #include "IMU_pnts.h"
 #include "test_utils.h"
 
+// define globals
+uint16_t    id          = 0;
+float       curTime     = 0;
+
 // define internal function
-static void print_gyro(IMU_TYPE time, IMU_engn_sensor*, IMU_pnts_state*);
-static void verify_vector(float *val, float ref[3]);
+void test_datum(float g[3], float dt, int pnts, float t, float  ref[3]);
+void verify_state(int state);
+void verify_tStable(uint32_t tCurrent, float tStable);
+void verify_sensor(float ref[3]);
 
 
 /******************************************************************************
@@ -38,13 +44,8 @@ static void verify_vector(float *val, float ref[3]);
 int main(void)
 {
   // define local variable
-  IMU_datum          datum;
-  IMU_engn_sensor    *sensor;
-  IMU_union_config   config;
-  IMU_union_state    state;
-  IMU_pnts_state     *pnts;
-  uint16_t           id;
-  int                status;
+  IMU_union_config     config;
+  int                  status;
 
   // start datum test
   printf("starting test_pnts_gyro...\n");
@@ -53,21 +54,10 @@ int main(void)
   status = IMU_engn_init(IMU_engn_calb_pnts, &id);
   check_status(status, "IMU_engn_init failure");
   
-  // get pointer to sensor structure
+  // enable sensor structure
   status = IMU_engn_getConfig(id, IMU_engn_self, &config);
   check_status(status, "IMU_engn_getConfig failure");
   config.engn->isSensorStruct = 1;
-  status = IMU_engn_getSensor(id, &sensor);
-  check_status(status, "IMU_engn_getSensor failure");
-  
-  // get pointer to pnts state structure
-  status = IMU_engn_getState(id, IMU_engn_pnts, &state);
-  check_status(status, "IMU_engn_getState failure");
-  pnts = state.pnts;
-  if (pnts == NULL) {
-    printf("error: IMU_engn_getState return NULL pointer");
-    exit(0);
-  }
   
   // disable core (not under test)
   status = IMU_engn_getConfig(id, IMU_engn_core, &config);
@@ -86,227 +76,89 @@ int main(void)
   // start data queue
   status = IMU_engn_start();
   check_status(status, "IMU_engn_start failure");
-  
-  // start points collections
-  status = IMU_engn_calbStart(id, IMU_calb_NA); 
-  check_status(status, "IMU_engn_calbStart failure");
-  
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 10;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  float zero[3] = {0,  0,  0};
-  float val1[3] = {10, 20, 30};
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  verify_vector(pnts->gMean,  val1);
-  verify_vector(sensor->gFlt, zero);
 
-  // testing averaging of gyroscope data
-  datum.type    = IMU_gyro;
-  datum.t       = 15;
-  datum.val[0]  = 5;
-  datum.val[1]  = 25;
-  datum.val[2]  = 35;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  float val2[3] = {9.5, 20.5, 30.5};
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  verify_vector(pnts->gMean,  val2);
-  verify_vector(sensor->gFlt, zero);
 
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 115;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  float val4[3] = {10, 20, 30};
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  verify_vector(sensor->gFlt, val4);
+  /****************************************************************************
+  * test #1 - stability test
+  ****************************************************************************/
 
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 165;
-  datum.val[0]  = 15;
-  datum.val[1]  = 15;
-  datum.val[2]  = 25;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  float val5[3] = {10.5, 19.5, 29.5};
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  verify_vector(sensor->gFlt, val5);
+  // verify reset condition
+  verify_state(IMU_pnts_enum_reset); printf("\n");
 
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 215;
-  datum.val[0]  = 5;
-  datum.val[1]  = 25;
-  datum.val[2]  = 35;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  float val6[3] = {9.95, 20.05, 30.05};
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  verify_vector(sensor->gFlt, val6);
+  // verify initialization
+  float vec1[3] = {10.0, 20.0, 30.0};
+  test_datum(vec1, 0.01, IMU_pnts_enum_move,   0.00, vec1);
 
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 250;
-  datum.val[0]  = 40;
-  datum.val[1]  = 40;
-  datum.val[2]  = 40;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  if (pnts->curPnts != 1) {
-    printf("error: IMU point not captured #%d\n", status);
-    exit(0);
-  }
-  verify_vector(sensor->gFlt, zero);
+  // verify tStable
+  test_datum(vec1, 0.05, IMU_pnts_enum_move,   0.05, vec1);
+  test_datum(vec1, 0.03, IMU_pnts_enum_move,   0.08, vec1);
 
-  // testing initalization of gyroscope relLated state values
-  datum.type    = IMU_gyro;
-  datum.t       = 260;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  if (pnts->state != IMU_pnts_enum_unstable) {
-    printf("error: IMU state not unstable\n");
-    exit(0);
-  }
+  // verify hold state
+  test_datum(vec1, 0.05, IMU_pnts_enum_hold,   0.13, vec1);
+  test_datum(vec1, 0.05, IMU_pnts_enum_hold,   0.18, vec1);
 
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 380;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  if (pnts->state != IMU_pnts_enum_stable) {
-    printf("error: IMU state not stable\n");
-    exit(0);
-  }
-  
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 400;
-  datum.val[0]  = 40;
-  datum.val[1]  = 40;
-  datum.val[2]  = 40;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  if (pnts->curPnts != 1) {
-    printf("error: min hold time violated\n");
-    exit(0);
-  }
-  verify_vector(sensor->gFlt, zero);
-  if (pnts->state == IMU_pnts_enum_stable) {
-    printf("error: IMU state should not be stable\n");
-    exit(0);
-  }
+  // verify stable state
+  test_datum(vec1, 0.04, IMU_pnts_enum_stable, 0.22, vec1);
 
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 420;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 480;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  if (datum.t-pnts->tStable < 60) {
-    printf("error: IMU time stability error #%d\n", status);
-    exit(0);
-  }
-  
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 500;
-  datum.val[0]  = 40;
-  datum.val[1]  = 40;
-  datum.val[2]  = 40;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  if (pnts->state == IMU_pnts_enum_stable) {
-    printf("error: IMU state should not be stable\n");
-    exit(0);
-  }
-   
-  // testing initalization of gyroscope related state values
-  datum.type    = IMU_gyro;
-  datum.t       = 560;
-  datum.val[0]  = 10;
-  datum.val[1]  = 20;
-  datum.val[2]  = 30;
-  status = IMU_engn_datum(id, &datum);
-  check_status(status, "IMU_engn_datum failure");
-  
-  // verify IMU_pnts state structure
-  usleep(msg_delay);
-  print_gyro(datum.t, sensor, pnts);
-  if (pnts->state == IMU_pnts_enum_stable) {
-    printf("error: IMU state should not be stable\n");
-    exit(0);
-  }
-   
+  // verify moving state
+  float vec2[3] = {30.0, 30.0, 30.0};
+  float out2[3] = {15.0, 22.5, 30.0};
+  test_datum(vec2, 0.04, IMU_pnts_enum_move,   0.00, out2);
+
+
+  /****************************************************************************
+  * test #2 - hold test
+  ****************************************************************************/
+
+  // reset pnts logic
+  IMU_engn_reset(id);
+  verify_state(IMU_pnts_enum_reset); printf("\n");
+
+  // verify initialization
+  test_datum(vec1, 0.01, IMU_pnts_enum_move,   0.00, vec1);
+
+  // verify tStable
+  float vec3[3]  = {20.0, 20.0, 20.0};
+  float out3a[3] = {12.5, 20.0, 27.5};
+  float out3b[3] = {11.9, 20.0, 28.1};
+  test_datum(vec3, 0.04, IMU_pnts_enum_move,   0.04, out3a);
+  test_datum(vec1, 0.04, IMU_pnts_enum_move,   0.04, out3b);
+
+  // verify hold state
+  float out4[3]  = {11.40, 20.0, 28.60};
+  test_datum(vec1, 0.04, IMU_pnts_enum_hold,   0.04, out4);
+
+  // verify moving state
+  float out5[3]  = {16.05, 22.50, 28.95};
+  test_datum(vec2, 0.04, IMU_pnts_enum_move,   0.00, out5);
+
+
+  /****************************************************************************
+  * test #3 - moving test
+  ****************************************************************************/
+
+  // verify tStable
+  float vec6[3]  = {20.00, 20.00, 30.00};
+  float out6a[3] = {17.04, 21.88, 29.21};
+  float out6b[3] = {17.78, 21.41, 29.41};
+  test_datum(vec6, 0.04, IMU_pnts_enum_move,   0.04, out6a);
+  test_datum(vec6, 0.04, IMU_pnts_enum_move,   0.04, out6b);
+
+  // verify tStable clear
+  float vec7[3]  = {10.00, 10.00, 10.00};
+  float out7[3]  = {15.84, 18.55, 24.56};
+  test_datum(vec7, 0.04, IMU_pnts_enum_move,   0.04, out7);
+
+  // verify tStable
+  float vec8[3]  = {15.00, 20.00, 25.00};
+  float out8[3]  = {15.63, 18.92, 24.67};
+  test_datum(vec8, 0.07, IMU_pnts_enum_move,   0.07, out8);
+
+
+  /****************************************************************************
+  * exit unit test
+  ****************************************************************************/
+
   // exit program
   printf("pass: test_ptns_gyro\n\n");
   return 0;
@@ -314,38 +166,101 @@ int main(void)
 
 
 /******************************************************************************
-* main function - simple test of datum queue and correction block
+* inject sensor datum and verify state
 ******************************************************************************/
 
-void print_gyro(
-  IMU_TYPE                 time,
-  IMU_engn_sensor          *sensor, 
-  IMU_pnts_state           *state)
+void test_datum(
+  float                    gyro[3],
+  float                    dt,
+  int                      state,
+  float                    tStable,
+  float                    ref[3])
 {
-  // get pointer to points entry
-  IMU_pnts_entry *entry = state->current;
-  printf("%d, %d, %d, %d, %d, %0.1f, %0.1f, %0.1f, %0.1f, %0.1f, %0.1f, ", 
-    state->curPnts, state->state, time-state->tStable, 
-    entry->tStart, entry->tEnd,
-    state->gMean[0],  state->gMean[1],  state->gMean[2],
-    entry->gAccum[0], entry->gAccum[1], entry->gAccum[2]);
-  printf("%0.1f, %0.1f, %0.1f\n", 
-    sensor->gFlt[0],  sensor->gFlt[1],  sensor->gFlt[2]);
+  // define local variable
+  IMU_datum                datum;
+  int                      status;
+
+  // increment time
+  curTime                 += dt;
+  datum.type               = IMU_gyro;
+  datum.t                  = curTime * 100000;
+  datum.val[0]             = gyro[0];
+  datum.val[1]             = gyro[1];
+  datum.val[2]             = gyro[2];
+  status                   = IMU_engn_datum(0, &datum);
+  check_status(status, "IMU_engn_datum failure");
+  usleep(msg_delay);
+
+  // verify results
+  verify_state(state);
+  verify_tStable(datum.t, tStable);
+  verify_sensor(ref);
 }
 
 
 /******************************************************************************
-* main function - simple test of datum queue and correction block
+* verify pnts state
 ******************************************************************************/
 
-void verify_vector(
-  float                    *val,
-  float                    ref[3])
+void verify_state(
+  int                      ref)
 {
-  if (fabs(val[0] - ref[0]) > precision ||
-      fabs(val[1] - ref[1]) > precision ||
-      fabs(val[2] - ref[2]) > precision) {
-    printf("error: gMean precision failure\n");
+  // define local variable
+  IMU_union_state          state;
+  int                      status;
+
+  // verify against reference
+  status                   = IMU_engn_getState(id, IMU_engn_self, &state);
+  check_status(status, "IMU_engn_getState failure");
+  printf("%d, ", state.engn->pnts);
+  if (state.engn->pnts != ref) {
+    printf("error: pnts state failure\n");
     exit(0);
   }
 }
+
+
+/******************************************************************************
+* verify tStable
+******************************************************************************/
+
+void verify_tStable(
+  uint32_t                 tCurrent,
+  float                    tStable)
+{
+  // define local variable
+  IMU_union_state          state;
+  int                      status;
+
+  // verify against reference
+  status                   = IMU_engn_getState(id, IMU_engn_pnts, &state);
+  check_status(status, "IMU_engn_getState failure");
+  float delta = (float)(tCurrent - state.pnts->tStable) / 100000.0;
+  printf("%0.3f, ", delta);
+  if (abs(delta - tStable) > precision) {
+    printf("error: pnts tStable failure\n");
+    exit(0);
+  } 
+}
+
+
+/******************************************************************************
+* verify sensor
+******************************************************************************/
+
+void verify_sensor(
+  float                    ref[3])
+{
+  // define local variable
+  IMU_engn_sensor          *sensor;
+  int                      status;
+
+  // verify against reference
+  status = IMU_engn_getSensor(id, &sensor);
+  check_status(status, "IMU_engn_getSensor failure");
+  printf("%0.2f, %0.2f, %0.2f\n", 
+    sensor->gFlt[0],  sensor->gFlt[1],  sensor->gFlt[2]);
+  verify_vect(ref, sensor->gFlt);
+}
+
+

@@ -441,9 +441,9 @@ inline IMU_pnts_enum update_state(
   }
 
   // update state based on elapsed stable time
-  if (t - state[id].tStable >= config[id].tStable)
+  if (t - state[id].tStable >= (uint32_t)config[id].tStable)
     return IMU_pnts_enum_stable;
-  if (t - state[id].tStable >= config[id].tHold)
+  if (t - state[id].tStable >= (uint32_t)config[id].tHold)
     return IMU_pnts_enum_hold;
   else
     return IMU_pnts_enum_move;

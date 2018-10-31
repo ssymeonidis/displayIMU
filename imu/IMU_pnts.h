@@ -43,8 +43,8 @@ typedef struct {
   uint8_t                isGyro;          // process gyroscope data
   uint8_t                isAccl;          // process accelerometer data
   uint8_t                isMagn;          // process magnetometer data
-  float                  tHold;           // no motion minimum hold time
-  float                  tStable;         // no motion minimum stable time
+  uint32_t               tHold;           // no motion minimum hold time
+  uint32_t               tStable;         // no motion minimum stable time
   float                  gAlpha;          // mean/std calc filter value 
   float                  gThresh;         // no motion threshold value
   float                  aAlpha;          // accelerometer filter value

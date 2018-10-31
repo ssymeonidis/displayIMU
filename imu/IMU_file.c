@@ -398,9 +398,9 @@ int IMU_file_pntsLoad(
     else if (type == IMU_pnts_isMagn)
       get_bool(args, &config->isMagn);
     else if (type == IMU_pnts_tHold)
-      sscanf(args, "%f", &config->tHold);
+      sscanf(args, "%d", &config->tHold);
     else if (type == IMU_pnts_tStable)
-      sscanf(args, "%f", &config->tStable);
+      sscanf(args, "%d", &config->tStable);
     else if (type == IMU_pnts_gAlpha)
       sscanf(args, "%f", &config->gAlpha);
     else if (type == IMU_pnts_gThresh)
@@ -414,6 +414,13 @@ int IMU_file_pntsLoad(
     else if (type == IMU_pnts_mThresh)
       sscanf(args, "%f", &config->mThresh);
   }
+
+  // scale parameters
+  config->tHold    = config->tHold   * 100;
+  config->tStable  = config->tStable * 100;
+  config->gThresh  = config->gThresh * config->gThresh;
+  config->aThresh  = config->aThresh * config->aThresh;
+  config->mThresh  = config->mThresh * config->mThresh;
 
   // exit function
   fclose(file);
@@ -439,18 +446,18 @@ int IMU_file_pntsSave(
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
-  fprintf(file, "  \"enable\": ");      write_bool(file, config->enable);
-  fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
-  fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
-  fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
-  fprintf(file, "  \"gInitTime\": %0.2f,\n",       config->tHold);
-  fprintf(file, "  \"gHoldTime\": %0.2f,\n",       config->tStable);
-  fprintf(file, "  \"gAlpha\": %0.2f,\n",          config->gAlpha);
-  fprintf(file, "  \"gThresh\": %0.2f,\n",         config->gThresh);
-  fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
-  fprintf(file, "  \"aThresh\": %0.2f,\n",         config->aThresh);
-  fprintf(file, "  \"mAlpha\": %0.2f,\n",          config->mAlpha);
-  fprintf(file, "  \"mThresh\": %0.2f\n",          config->mThresh);
+  fprintf(file, "  \"enable\": ");    write_bool(file, config->enable);
+  fprintf(file, "  \"isGyro\": ");    write_bool(file, config->isGyro);
+  fprintf(file, "  \"isAccl\": ");    write_bool(file, config->isAccl);
+  fprintf(file, "  \"isMagn\": ");    write_bool(file, config->isMagn);
+  fprintf(file, "  \"tHold\": %d,\n",                  config->tHold   / 100);
+  fprintf(file, "  \"tStable\": %d,\n",                config->tStable / 100);
+  fprintf(file, "  \"gAlpha\": %0.2f,\n",              config->gAlpha);
+  fprintf(file, "  \"gThresh\": %0.2f,\n",        sqrt(config->gThresh));
+  fprintf(file, "  \"aAlpha\": %0.2f,\n",              config->aAlpha);
+  fprintf(file, "  \"aThresh\": %0.2f,\n",        sqrt(config->aThresh));
+  fprintf(file, "  \"mAlpha\": %0.2f,\n",              config->mAlpha);
+  fprintf(file, "  \"mThresh\": %0.2f\n",         sqrt(config->mThresh));
   fprintf(file, "}\n");
 
   // exit function

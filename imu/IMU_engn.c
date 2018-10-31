@@ -845,7 +845,7 @@ int IMU_copy_results1(
   // get IMU_pnts state
   IMU_union_state       unionState;
   IMU_pnts_state        *pntsState;
-  if (config[id].isPnts) {
+  if (config[id].isPnts && state[id].configPnts->enable) {
     int status = IMU_engn_getState(id, IMU_engn_pnts, &unionState);
     if (status < 0)
       return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
@@ -863,7 +863,7 @@ int IMU_copy_results1(
       memcpy(sensor[id].gCor, datum->val, sizeof(sensor[id].gCor));
     else
       memset(sensor[id].gCor, 0, 3*sizeof(float));
-    if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable)
+    if (config[id].isPnts && state[id].configPnts->enable)
       memcpy(sensor[id].gFlt, pntsState->current->gFltr, 3*sizeof(float));
     else
       memset(sensor[id].gFlt, 0, 3*sizeof(float));
@@ -878,7 +878,7 @@ int IMU_copy_results1(
       memcpy(sensor[id].aCor, datum->val, sizeof(sensor[id].aCor));
     else
       memset(sensor[id].aCor, 0, 3*sizeof(float));
-    if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable)
+    if (config[id].isPnts && state[id].configPnts->enable)
       memcpy(sensor[id].aFlt, pntsState->current->aFltr, 3*sizeof(float));
     else
       memset(sensor[id].aFlt, 0, 3*sizeof(float));
@@ -893,7 +893,7 @@ int IMU_copy_results1(
       memcpy(sensor[id].mCor, datum->val, sizeof(sensor[id].mCor));
     else
       memset(sensor[id].mCor, 0, 3*sizeof(float));
-    if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable)
+    if (config[id].isPnts && state[id].configPnts->enable)
       memcpy(sensor[id].mFlt, pntsState->current->mFltr, 3*sizeof(float));
     else
       memset(sensor[id].mFlt, 0, 3*sizeof(float));
@@ -944,7 +944,7 @@ int IMU_copy_results3(
   }
 
   // copy filtered data
-  if (config[id].isPnts && pntsState->state == IMU_pnts_enum_stable) {
+  if (config[id].isPnts && state[id].configPnts->enable) {
     memcpy(sensor[id].aFlt, pntsState->current->aFltr, 3*sizeof(float));
     memcpy(sensor[id].gFlt, pntsState->current->gFltr, 3*sizeof(float));
     memcpy(sensor[id].mFlt, pntsState->current->mFltr, 3*sizeof(float));
