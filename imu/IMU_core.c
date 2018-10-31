@@ -496,7 +496,7 @@ int IMU_core_newMagn(
   } else {
     FOM                 = &staticFOM.FOM.magn;
   }
-  
+
   // determine whether function executes
   if (id >= numInst)
     return IMU_CORE_BAD_INST; 

@@ -51,12 +51,12 @@ static threadStruct     thrdVal  [IMU_MAX_INST];
 static inline IMU_pnts_enum   update_state (uint16_t id, uint32_t, uint8_t,
                                             IMU_pnts_entry**);
 static inline IMU_pnts_entry* break_stable (uint16_t id);
-static inline float calc_std     (float *val1, IMU_TYPE *val2);
-static inline void  apply_alpha  (float *prev, IMU_TYPE *cur, float alpha);
-static inline void  accum_gyro   (float *prev, IMU_TYPE *cur, IMU_TYPE t);
-static inline void  copy_val     (float *val1, IMU_TYPE *val2);
+static inline float calc_std       (float *val1, IMU_TYPE *val2);
+static inline void  apply_alpha    (float *prev, IMU_TYPE *cur, float alpha);
+static inline void  accum_gyro     (float *prev, IMU_TYPE *cur, IMU_TYPE t);
+static inline void  copy_val       (float *val1, IMU_TYPE *val2);
 #if IMU_USE_PTHREAD
-static inline void* IMU_pnts_run (void*);
+static inline void* IMU_pnts_break (void*);
 #endif
 
 
@@ -78,8 +78,10 @@ int IMU_pnts_init(
   numInst++;
 
   // initialize the callback fnc
-  state[*id].fnc          = NULL;
-  state[*id].fncPntr      = NULL;
+  state[*id].fncStable     = NULL;
+  state[*id].fncBreak      = NULL;
+  state[*id].fncStablePntr = NULL;
+  state[*id].fncBreakPntr  = NULL;
   
   // initialize instance state
   IMU_pnts_reset(*id);
@@ -176,11 +178,11 @@ int IMU_pnts_getEntry(
 
 
 /******************************************************************************
-* function to reset instance state
+* function to set "stable" callback
 ******************************************************************************/
 
 // function callback functions
-int IMU_pnts_setFnc(
+int IMU_pnts_fncStable(
   uint16_t                id, 
   void                    (*fnc)(IMU_PNTS_FNC_ARG),
   void                    *fncPntr)
@@ -190,8 +192,8 @@ int IMU_pnts_setFnc(
     return IMU_PNTS_BAD_INST;
 
   // copy callback function and its pointer
-  state[id].fnc           = fnc;
-  state[id].fncPntr       = fncPntr;
+  state[id].fncStable     = fnc;
+  state[id].fncStablePntr = fncPntr;
 
   // exit function (no errors)
   return 0;
@@ -199,7 +201,30 @@ int IMU_pnts_setFnc(
 
 
 /******************************************************************************
-* function to reset instance state
+* function to set "break" callback
+******************************************************************************/
+
+// function callback functions
+int IMU_pnts_fncBreak(
+  uint16_t                id, 
+  void                    (*fnc)(IMU_PNTS_FNC_ARG),
+  void                    *fncPntr)
+{
+  // check device count overflow
+  if (id >= numInst)
+    return IMU_PNTS_BAD_INST;
+
+  // copy callback function and its pointer
+  state[id].fncBreak      = fnc;
+  state[id].fncBreakPntr  = fncPntr;
+
+  // exit function (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* function to reset instance
 ******************************************************************************/
 
 int IMU_pnts_reset(
@@ -517,15 +542,15 @@ inline IMU_pnts_entry* break_stable(
   // update current points count and launch thread
   if (state[id].curPnts < state[id].numPnts) {
     state[id].curPnts++;
-    if (state[id].fnc != NULL) {
+    if (state[id].fncBreak != NULL) {
       #if IMU_USE_PTHREAD
       thrdVal[id].id      = id;
       thrdVal[id].count   = state[id].curPnts-1;
       thrdVal[id].entry   = entry;
-      thrdVal[id].pntr    = state[id].fncPntr;
-      pthread_create(&thrd[id], &thrdAttr[id], IMU_pnts_run, &thrdVal[id]);
+      thrdVal[id].pntr    = state[id].fncBreakPntr;
+      pthread_create(&thrd[id], &thrdAttr[id], IMU_pnts_break, &thrdVal[id]);
       #else
-      state[id].fnc(state[id].curPnts-1, entry, state[id].fncPntr);
+      state[id].fncBreak(state[id].curPnts-1, entry, state[id].fncBreakPntr);
       #endif
     }
     return entry;
@@ -539,12 +564,11 @@ inline IMU_pnts_entry* break_stable(
 * utility function - execute function handle
 ******************************************************************************/
 
-void* IMU_pnts_run(
+void* IMU_pnts_break(
   void                     *pntr)
 {
   threadStruct *vals = (threadStruct*)pntr;
-  printf("count = %d\n", vals->count);
-  state[vals->id].fnc(vals->count, vals->entry, vals->pntr);
+  state[vals->id].fncBreak(vals->count, vals->entry, vals->pntr);
 }
 
 

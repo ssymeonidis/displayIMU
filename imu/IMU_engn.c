@@ -304,7 +304,7 @@ int IMU_engn_setPntsFnc(
     return IMU_ENGN_UNINITIALIZE_SYS;
 
   // pass sensor structure and exit
-  return IMU_pnts_setFnc(id, fnc, fncPntr);
+  return IMU_pnts_fncBreak(id, fnc, fncPntr);
 }
 
 
@@ -918,7 +918,7 @@ int IMU_copy_results1(
     else
       memset(sensor[id].mFlt, 0, 3*sizeof(float));
     if (FOM != NULL && FOM->isValid)
-      memcpy(&sensor[id].gFOM, &FOM->FOM.magn, sizeof(IMU_core_FOM_magn));
+      memcpy(&sensor[id].mFOM, &FOM->FOM.magn, sizeof(IMU_core_FOM_magn));
     else
       sensor[id].mFOM = (IMU_core_FOM_magn){0};
   } else {

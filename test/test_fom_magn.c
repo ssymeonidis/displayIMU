@@ -44,7 +44,7 @@ int main(void)
   int                  status;
 
   // start datum test
-  printf("starting test_fom_accl...\n");
+  printf("starting test_fom_magn...\n");
 
   // initialize imu engine
   status = IMU_engn_init(IMU_engn_core_only, &id);
@@ -64,8 +64,8 @@ int main(void)
   status = IMU_engn_getConfig(id, IMU_engn_core, &config);
   check_status(status, "IMU_engn_getConfig failure");
   config.core->isFOM          = 1;
-  config.core->aMag           = 255.0;
-  config.core->aMagThresh     = 128.0;
+  config.core->mMag           = 255.0;
+  config.core->mMagThresh     = 128.0;
 
 
   /****************************************************************************
@@ -101,7 +101,7 @@ int main(void)
   ****************************************************************************/
 
   // exit program
-  printf("pass: test_fom_accl\n\n");
+  printf("pass: test_fom_magn\n\n");
   return 0;
 }
 
@@ -121,7 +121,7 @@ void test_datum(
 
   // increment time
   curTime                 += 10;
-  datum.type               = IMU_accl;
+  datum.type               = IMU_magn;
   datum.t                  = curTime;
   datum.val[0]             = vec[0];
   datum.val[1]             = vec[1];
@@ -133,7 +133,7 @@ void test_datum(
   // extract figure of merit
   status = IMU_engn_getSensor(id, &sensor);
   check_status(status, "IMU_engn_getSensor failure");
-  float magFOM             = sensor->aFOM.magFOM;
+  float magFOM             = sensor->mFOM.magFOM;
 
   // update display
   printf("%0.2f, %0.2f, %0.2f, %0.2f\n", magFOM, vec[0], vec[1], vec[2]);

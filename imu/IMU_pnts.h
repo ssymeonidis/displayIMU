@@ -77,8 +77,10 @@ typedef struct {
   uint8_t                mClock;
   uint32_t               tStable;
   IMU_pnts_entry         *current;
-  void                   (*fnc)(IMU_PNTS_FNC_ARG); 
-  void                   *fncPntr;
+  void                   *fncStablePntr;
+  void                   *fncBreakPntr;
+  void                   (*fncStable) (IMU_PNTS_FNC_ARG);
+  void                   (*fncBreak)  (IMU_PNTS_FNC_ARG); 
 } IMU_pnts_state;
 
 // define report fo calibration point
@@ -96,28 +98,29 @@ struct IMU_pnts_entry{
 
 
 // data structure access function
-int IMU_pnts_init     (uint16_t *id, IMU_pnts_config**);
-int IMU_pnts_getConfig (uint16_t id, IMU_pnts_config**);
-int IMU_pnts_getState  (uint16_t id, IMU_pnts_state**);
+int IMU_pnts_init       (uint16_t *id, IMU_pnts_config**);
+int IMU_pnts_getConfig   (uint16_t id, IMU_pnts_config**);
+int IMU_pnts_getState    (uint16_t id, IMU_pnts_state**);
 
 // points table access function (requires calib_table_size greater than one)
-int IMU_pnts_getCount  (uint16_t id, uint16_t *count);
-int IMU_pnts_getEntry  (uint16_t id, uint16_t index, IMU_pnts_entry**);
+int IMU_pnts_getCount    (uint16_t id, uint16_t *count);
+int IMU_pnts_getEntry    (uint16_t id, uint16_t index, IMU_pnts_entry**);
 
 // function callback functions
-int IMU_pnts_setFnc    (uint16_t id, void (*fnc)(IMU_PNTS_FNC_ARG), void*);
+int IMU_pnts_fncStable   (uint16_t id, void (*fnc)(IMU_PNTS_FNC_ARG), void*);
+int IMU_pnts_fncBreak    (uint16_t id, void (*fnc)(IMU_PNTS_FNC_ARG), void*);
 
 // general operation functions 
-int IMU_pnts_reset     (uint16_t id);
-int IMU_pnts_start     (uint16_t id, uint16_t numPnts);
-int IMU_pnts_stop      (uint16_t id);
-int IMU_pnts_datum     (uint16_t id, IMU_datum*, IMU_pnts_entry**);
-int IMU_pnts_data3     (uint16_t id, IMU_data3*, IMU_pnts_entry**);
+int IMU_pnts_reset       (uint16_t id);
+int IMU_pnts_start       (uint16_t id, uint16_t numPnts);
+int IMU_pnts_stop        (uint16_t id);
+int IMU_pnts_datum       (uint16_t id, IMU_datum*, IMU_pnts_entry**);
+int IMU_pnts_data3       (uint16_t id, IMU_data3*, IMU_pnts_entry**);
 
 // alternate asynchronous interface
-int IMU_pnts_newGyro   (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
-int IMU_pnts_newAccl   (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
-int IMU_pnts_newMagn   (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
+int IMU_pnts_newGyro     (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
+int IMU_pnts_newAccl     (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
+int IMU_pnts_newMagn     (uint16_t id, uint32_t t, IMU_TYPE*, IMU_pnts_entry**);
 
 #ifdef __cplusplus
 }
