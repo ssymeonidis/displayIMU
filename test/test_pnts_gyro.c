@@ -102,8 +102,7 @@ int main(void)
 
   // verify moving state
   float vec2[3] = {30.0, 30.0, 30.0};
-  float out2[3] = {15.0, 22.5, 30.0};
-  test_datum(vec2, 0.04, IMU_pnts_enum_move,   0.00, out2);
+  test_datum(vec2, 0.04, IMU_pnts_enum_move,   0.00, vec1);
 
 
   /****************************************************************************

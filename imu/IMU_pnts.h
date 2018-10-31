@@ -77,7 +77,7 @@ typedef struct {
   uint8_t                mClock;
   uint32_t               tStable;
   IMU_pnts_entry         *current;
-  int                    (*fnc)(IMU_PNTS_FNC_ARG); 
+  void                   (*fnc)(IMU_PNTS_FNC_ARG); 
   void                   *fncPntr;
 } IMU_pnts_state;
 
@@ -105,7 +105,7 @@ int IMU_pnts_getCount  (uint16_t id, uint16_t *count);
 int IMU_pnts_getEntry  (uint16_t id, uint16_t index, IMU_pnts_entry**);
 
 // function callback functions
-int IMU_pnts_setFnc    (uint16_t id, int (*fnc)(IMU_PNTS_FNC_ARG), void*);
+int IMU_pnts_setFnc    (uint16_t id, void (*fnc)(IMU_PNTS_FNC_ARG), void*);
 
 // general operation functions 
 int IMU_pnts_reset     (uint16_t id);

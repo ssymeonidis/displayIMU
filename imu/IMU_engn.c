@@ -294,7 +294,7 @@ int IMU_engn_getSensor(
 
 int IMU_engn_setPntsFnc( 
   uint16_t		id,  
-  int                   (*fnc)(IMU_PNTS_FNC_ARG),
+  void                  (*fnc)(IMU_PNTS_FNC_ARG),
   void                  *fncPntr)
 {
   // check out-of-bounds condition

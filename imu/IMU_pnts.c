@@ -162,7 +162,7 @@ int IMU_pnts_getEntry(
 // function callback functions
 int IMU_pnts_setFnc(
   uint16_t                id, 
-  int                     (*fnc)(IMU_PNTS_FNC_ARG),
+  void                    (*fnc)(IMU_PNTS_FNC_ARG),
   void                    *fncPntr)
 {
   // check device count overflow
@@ -341,10 +341,11 @@ int IMU_pnts_newGyro(
 
   // calculate sensor mean and deviation
   float std = calc_std(entry->gFltr, g);
-  apply_alpha(entry->gFltr, g, config[id].gAlpha);
+  uint8_t isMove  = std > config[id].gThresh;
+  if (!(isMove && state[id].state == IMU_pnts_enum_stable))
+    apply_alpha(entry->gFltr, g, config[id].gAlpha);
 
   // update state based on std and elapsed time
-  uint8_t isMove  = std > config[id].gThresh;
   state[id].state = update_state(id, t, isMove, pntr);
 
   // update accum and counts based on new state
@@ -389,10 +390,11 @@ int IMU_pnts_newAccl(
 
   // calculate sensor mean and deviation
   float std = calc_std(entry->aFltr, a);
-  apply_alpha(entry->aFltr, a, config[id].aAlpha);
+  uint8_t isMove  = std > config[id].aThresh;
+  if (!(isMove && state[id].state == IMU_pnts_enum_stable))
+    apply_alpha(entry->aFltr, a, config[id].aAlpha);
 
   // update state based on std and elapsed time
-  uint8_t isMove  = std > config[id].aThresh;
   state[id].state = update_state(id, t, isMove, pntr);
 
   // update counts based on new state
@@ -434,10 +436,11 @@ int IMU_pnts_newMagn(
 
   // calculate sensor mean and deviation
   float std = calc_std(entry->mFltr, m);
-  apply_alpha(entry->mFltr, m, config[id].mAlpha);
+  uint8_t isMove  = std > config[id].mThresh;
+  if (!(isMove && state[id].state == IMU_pnts_enum_stable))
+    apply_alpha(entry->mFltr, m, config[id].mAlpha);
 
   // update state based on std and elapsed time
-  uint8_t isMove  = std > config[id].mThresh;
   state[id].state = update_state(id, t, isMove, pntr);
 
   // update counts based on new state
@@ -556,7 +559,7 @@ inline void accum_gyro(
 
 
 /******************************************************************************
-* utility function - apply alpha 
+* utility function - copy value
 ******************************************************************************/
 
 inline void copy_val(

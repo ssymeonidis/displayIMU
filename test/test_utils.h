@@ -28,8 +28,9 @@ static const int   msg_delay   = 300;
 static const float precision   = 0.05;
 
 // function definitions
-void check_state   (int status,     char  *message);
-void verify_data   (float val1,     float val);
+void check_status  (int status,     char  *message);
+void verify_int    (int   val1,     int   val2);
+void verify_data   (float val1,     float val2);
 void verify_vect   (float val1[3],  float val2[3]);
 void verify_quat   (float val1[4],  float val2[4]);
 
@@ -50,7 +51,23 @@ void check_status(
 
 
 /******************************************************************************
-* verifies vector against intended result
+* verify integer value
+******************************************************************************/
+
+void verify_int(
+  int                      val1,
+  int                      val2)
+{
+  // verify against reference
+  if (val1 != val2) {
+    printf("error: int results failure\n");
+    exit(0);
+  }
+}
+
+
+/******************************************************************************
+* verifies float value
 ******************************************************************************/
 
 void verify_data(
@@ -58,7 +75,7 @@ void verify_data(
   float                val2)
 {
   if (fabs(val1 - val2) > precision) {
-    printf("error: vect results failure\n");
+    printf("error: data results failure\n");
     exit(0);
   }
 }

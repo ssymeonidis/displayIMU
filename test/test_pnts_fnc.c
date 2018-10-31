@@ -30,13 +30,14 @@
 uint16_t    id          = 0;
 float       curTime     = 0;
 int         fncVal      = 0;
+float       vec[2][3]   = {{10.0, 20.0, 30.0},
+                           {40.0, 40.0, 40.0}};
+int         key[2]      = {78, 24};
+int         fncCount    = 0;
 
 // define internal function
 void test_fnc(uint16_t id, uint16_t cnt, IMU_pnts_entry*, void*);
-void test_datum(float g[3], float dt, int state, float t, float  ref[3]);
-void verify_state(int state);
-void verify_tStable(uint32_t tCurrent, float tStable);
-void verify_sensor(float ref[3]);
+void add_datum(float g[3], float dt);
 
 
 /******************************************************************************
@@ -84,30 +85,36 @@ int main(void)
   status = IMU_engn_start();
   check_status(status, "IMU_engn_start failure");
 
-
-  /****************************************************************************
-  * test #1 - stability test
-  ****************************************************************************/
-
   // provide non-zero pnts count to allow callback
   status = IMU_engn_getState(id, IMU_engn_pnts, &state);
   check_status(status, "IMU_engn_getState failure");
-  state.pnts->numPnts = 1;
+  state.pnts->numPnts = 2;
 
-  // verify reset condition
-  verify_state(IMU_pnts_enum_reset); printf("\n");
+  // change alpha to allow easier point triggering
+  status = IMU_engn_getConfig(id, IMU_engn_pnts, &config);
+  check_status(status, "IMU_engn_getConfig failure");
+  config.pnts->gAlpha = 1.0;
 
-  // verify initialization
-  float vec1[3] = {10.0, 20.0, 30.0};
-  test_datum(vec1, 0.01, IMU_pnts_enum_move,   0.00, vec1);
 
-  // verify stable state
-  test_datum(vec1, 0.25, IMU_pnts_enum_stable, 0.25, vec1);
+  /****************************************************************************
+  * test callback (two callbacks)
+  ****************************************************************************/
 
-  // verify moving state
-  float vec2[3] = {30.0, 30.0, 30.0};
-  float out2[3] = {15.0, 22.5, 30.0};
-  test_datum(vec2, 0.04, IMU_pnts_enum_move,   0.00, out2);
+  // create first stable point
+  add_datum(vec[0], 0.01);
+  add_datum(vec[0], 0.25);
+  add_datum(vec[1], 0.04);
+  usleep(msg_delay);
+  printf("fncVal = %d\n", fncVal);
+  verify_int(fncVal, key[0]);
+
+  // create second stable point
+  add_datum(vec[1], 0.01);
+  add_datum(vec[1], 0.25);
+  add_datum(vec[0], 0.04);
+  usleep(msg_delay);
+  printf("fncVal = %d\n", fncVal);
+  verify_int(fncVal, key[1]);
 
 
   /****************************************************************************
@@ -130,7 +137,18 @@ void test_fnc(
   IMU_pnts_entry           *entry,
   void                     *pntr)
 {
-  printf("here\n");
+  // verify count and entry
+  float *g                 = entry->gFltr;
+  printf("%d, %d, %0.2f, %0.2f, %0.2f\n", id, count, g[0], g[1], g[2]);
+  verify_int(count, fncCount);
+  verify_vect(g, vec[fncCount]);
+
+  // set pointer to known value
+  int *val                 = (int*)pntr;
+  *val                     = key[fncCount];
+
+  // undate test counter
+  fncCount++;
 }
 
 
@@ -138,12 +156,9 @@ void test_fnc(
 * inject sensor datum and verify state
 ******************************************************************************/
 
-void test_datum(
+void add_datum(
   float                    gyro[3],
-  float                    dt,
-  int                      state,
-  float                    tStable,
-  float                    ref[3])
+  float                    dt)
 {
   // define local variable
   IMU_datum                datum;
@@ -159,74 +174,4 @@ void test_datum(
   status                   = IMU_engn_datum(0, &datum);
   check_status(status, "IMU_engn_datum failure");
   usleep(msg_delay);
-
-  // verify results
-  verify_state(state);
-  verify_tStable(datum.t, tStable);
-  verify_sensor(ref);
-}
-
-
-/******************************************************************************
-* verify pnts state
-******************************************************************************/
-
-void verify_state(
-  int                      ref)
-{
-  // define local variable
-  IMU_union_state          state;
-  int                      status;
-
-  // verify against reference
-  status                   = IMU_engn_getState(id, IMU_engn_self, &state);
-  check_status(status, "IMU_engn_getState failure");
-  printf("%d, ", state.engn->pnts);
-  if (state.engn->pnts != ref) {
-    printf("error: pnts state failure\n");
-    exit(0);
-  }
-}
-
-
-/******************************************************************************
-* verify tStable
-******************************************************************************/
-
-void verify_tStable(
-  uint32_t                 tCurrent,
-  float                    tStable)
-{
-  // define local variable
-  IMU_union_state          state;
-  int                      status;
-
-  // verify against reference
-  status                   = IMU_engn_getState(id, IMU_engn_pnts, &state);
-  check_status(status, "IMU_engn_getState failure");
-  float delta = (float)(tCurrent - state.pnts->tStable) / 100000.0;
-  if (fabs(delta - tStable) > 0.00001) {
-    printf("error: pnts tStable failure\n");
-    exit(0);
-  } 
-}
-
-
-/******************************************************************************
-* verify sensor
-******************************************************************************/
-
-void verify_sensor(
-  float                    ref[3])
-{
-  // define local variable
-  IMU_engn_sensor          *sensor;
-  int                      status;
-
-  // verify against reference
-  status = IMU_engn_getSensor(id, &sensor);
-  check_status(status, "IMU_engn_getSensor failure");
-  printf("%0.2f, %0.2f, %0.2f\n", 
-    sensor->gFlt[0],  sensor->gFlt[1],  sensor->gFlt[2]);
-  verify_vect(ref, sensor->gFlt);
 }
