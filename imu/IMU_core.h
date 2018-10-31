@@ -33,14 +33,6 @@ extern "C" {
 
 // define status codes
 #define IMU_CORE_FNC_DISABLED       1
-#define IMU_CORE_ZEROED_ACCL        2
-#define IMU_CORE_ZEROED_MAGN        3
-#define IMU_CORE_ZEROED_SAVE        4
-#define IMU_CORE_ZEROED_BOTH        5
-#define IMU_CORE_ZEROED_GYRO        6
-#define IMU_CORE_NO_WEIGHT          7
-#define IMU_CORE_GYRO_STABLE        8
-#define IMU_CORE_NORMAL_OP          9
 
 // define error codes
 #define IMU_CORE_INST_OVERFLOW     -1
@@ -69,23 +61,32 @@ typedef struct {
   float                mMagThresh;      // magnetic north magn error thres
   float                mAng;            // magnetic north angle
   float                mAngThresh;      // magnetic north angle error thresh
-  float                posAlpha;        // position accleration alpha
+  float                tranAlpha;       // translational accleration alpha
 } IMU_core_config;
 
 // subsystem state structure definition
 typedef struct {
-  float                t;              // last datum time
-  float                tMove;          // last "unstable" time
-  float                q[4];           // current quaterion
-  float                A[3];           // last acceleration estimate
-  float                mInit[3];       // initial magnetometer value
-  unsigned char        aReset;         // accelerometer reset signal
-  unsigned char        mReset;         // magnetometer reset signal
-  unsigned char        estmValid;      // flag to insure valid state
-  int                  status;         // captures last datum status
+  int                  status;          // captures last datum status
+  float                t;               // last datum time
+  float                q[4];            // current quaterion
+  float                aTran[3];        // last acceleration estimate
+  float                mInit[3];        // initial magnetometer value
+  unsigned char        aReset;          // accelerometer reset signal
+  unsigned char        mReset;          // magnetometer reset signal
 } IMU_core_state;
 
-
+// core datum internal state
+typedef enum {
+  IMU_core_enum_unitialized  = 1,
+  IMU_core_enum_zeroed_accl  = 2,
+  IMU_core_enum_zeroed_magn  = 3,
+  IMU_core_enum_zeroed_save  = 4,
+  IMU_core_enum_zeroed_both  = 5,
+  IMU_core_enum_zeroed_gyro  = 6,
+  IMU_core_enum_normal_op    = 7,
+  IMU_core_enum_no_weight    = 9,
+} IMU_core_enum;
+  
 // data structure access functions
 int IMU_core_init     (uint16_t *id, IMU_core_config **config);
 int IMU_core_getConfig (uint16_t id, IMU_core_config **config);

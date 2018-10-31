@@ -127,14 +127,16 @@ int IMU_core_reset(
   #endif
 
   // initialize state to known value
+  state[id].status      = IMU_core_enum_unitialized;
   state[id].q[0]        = 1.0;
   state[id].q[1]        = 0.0;
   state[id].q[2]        = 0.0;
   state[id].q[3]        = 0.0;
+  state[id].aTran[0]    = 0.0;
+  state[id].aTran[1]    = 0.0;
+  state[id].aTran[2]    = 0.0;
   state[id].aReset      = config[id].isAccl;
   state[id].mReset      = config[id].isMagn;
-  state[id].estmValid   = 0;
-  state[id].status      = 0;
 
   // unlock function and exit (no errors)
   #if IMU_USE_PTHREAD
@@ -186,16 +188,16 @@ int IMU_core_zero(
       IMU_math_upFrwdToQuat(a, m, state[id].q);
       state[id].aReset  = 0;
       state[id].mReset  = 0;
-      status            = IMU_CORE_ZEROED_BOTH;
+      status            = IMU_core_enum_zeroed_both;
 
     // asynchnous accelerometer vector
     } else if (a_in!=NULL && m_in==NULL) {
       if (state[id].mReset) {
         IMU_math_upToQuat(a, state[id].q);
-        status          = IMU_CORE_ZEROED_ACCL;
+        status          = IMU_core_enum_zeroed_accl;
       } else {
         IMU_math_upFrwdToQuat(a, state[id].mInit, state[id].q);
-        status          = IMU_CORE_ZEROED_BOTH;
+        status          = IMU_core_enum_zeroed_both;
       }
       state[id].aReset  = 0;
       
@@ -207,11 +209,11 @@ int IMU_core_zero(
         a[2]            = 1.0f;
         IMU_math_upFrwdToQuat(a, m, state[id].q);
         memcpy(state[id].mInit, m, sizeof(m));
-        status          = IMU_CORE_ZEROED_SAVE;
+        status          = IMU_core_enum_zeroed_save;
       } else {
         IMU_math_quatToUp(state[id].q, a);
         IMU_math_upFrwdToQuat(a, m, state[id].q);
-        status          = IMU_CORE_ZEROED_MAGN;
+        status          = IMU_core_enum_zeroed_magn;
       }
       state[id].mReset  = 0;
     
@@ -227,7 +229,7 @@ int IMU_core_zero(
     } else {
       IMU_math_upToQuat(a, state[id].q);
       state[id].aReset  = 0;
-      status            = IMU_CORE_ZEROED_ACCL;
+      status            = IMU_core_enum_zeroed_accl;
     }
 
   // no accelerometer configuration
@@ -240,7 +242,7 @@ int IMU_core_zero(
       a[2]              = 1.0f;
       IMU_math_upFrwdToQuat(a, m, state[id].q);
       state[id].mReset  = 0;
-      status            = IMU_CORE_ZEROED_MAGN;
+      status            = IMU_core_enum_zeroed_magn;
     }
 
   // gyroscope only configuration
@@ -249,7 +251,7 @@ int IMU_core_zero(
     state[id].q[1]      = 0.0f;
     state[id].q[2]      = 0.0f;
     state[id].q[3]      = 0.0f;
-    status              = IMU_CORE_ZEROED_GYRO;
+    status              = IMU_core_enum_zeroed_gyro;
   }
 
   // unlock function and exit (no errors)
@@ -314,7 +316,7 @@ int IMU_core_data3(
     }
     
     // zero the system to the current sensor
-    state[id].status    = IMU_CORE_ZEROED_BOTH;
+    state[id].status    = IMU_core_enum_zeroed_both;
     return IMU_core_zero(id, data3->t, data3->a, data3->m);
   }
   
@@ -330,7 +332,7 @@ int IMU_core_data3(
   }
     
   // exit fucntion (no errors)
-  return IMU_CORE_NORMAL_OP;
+  return IMU_core_enum_normal_op;
 }
 
 
@@ -344,20 +346,18 @@ int IMU_core_newGyro(
   IMU_TYPE              *g_in,
   IMU_core_FOM          *pntr)
 {
-  // check out-of-bounds condition
-  if (id >= numInst)
-    return IMU_CORE_BAD_INST; 
-
   // initialize figure of merit
   IMU_core_FOM_gyro     *FOM;
   if (pntr != NULL) {
-    pntr->isValid       = 1;
+    pntr->isValid       = 0;
     FOM                 = &pntr->FOM.gyro;
   } else {
     FOM                 = &staticFOM.FOM.gyro;
   }
   
-  // determine whether the function needs to be executed
+  // determine whether function executes
+  if (id >= numInst)
+    return IMU_CORE_BAD_INST; 
   if (!config[id].enable || !config[id].isGyro)
     return IMU_CORE_FNC_DISABLED;
   
@@ -381,7 +381,7 @@ int IMU_core_newGyro(
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_unlock(&lock[id]);
   #endif
-  return IMU_CORE_NORMAL_OP;
+  return IMU_core_enum_normal_op;
 }
 
 
@@ -395,20 +395,18 @@ int IMU_core_newAccl(
   IMU_TYPE              *a_in,
   IMU_core_FOM          *pntr)
 {
-  // check out-of-bounds condition
-  if (id >= numInst)
-    return IMU_CORE_BAD_INST;
-
   // initialize figure of merit
   IMU_core_FOM_accl     *FOM;
   if (pntr != NULL) {
-    pntr->isValid       = !state[id].aReset && config[id].isFOM;
+    pntr->isValid       = 0;
     FOM                 = &pntr->FOM.accl;
   } else {
     FOM                 = &staticFOM.FOM.accl;
   }
   
-  // determine whether the function needs to be executed
+  // determine whether function executes
+  if (id >= numInst)
+    return IMU_CORE_BAD_INST;
   if (!config[id].enable || !config[id].isAccl)
     return IMU_CORE_FNC_DISABLED;
   if (state[id].aReset) 
@@ -419,63 +417,54 @@ int IMU_core_newAccl(
   FOM->mag              = norm3(a_in, a);
   
   // determine datum quality (based on amplitude)
-  float                 weight;
   if (config[id].isFOM) {
     float ref           = config[id].aMag;
     float thresh        = config[id].aMagThresh;
     FOM->magFOM         = IMU_math_calcWeight(FOM->mag, ref, thresh);
-    if (FOM->magFOM <= 0) 
-      return IMU_CORE_NO_WEIGHT;
-    weight              = FOM->magFOM;
+    pntr->isValid       = 1;
+    if (FOM->magFOM <= 0.001)
+      return IMU_core_enum_no_weight;
   } else {
-    weight              = 1.0f;
+    FOM->magFOM         = 1.0f;
   }
 
   // copy internal orientation state
   #if IMU_USE_PTHREAD
-  float q[4], A[3], t_copy;
+  float q[4], aTran[3], t_copy;
   IMU_thrd_mutex_lock(&lock[id]);
   memcpy(q, state[id].q, sizeof(state[id].q));
   if (config[id].isTran)
-    memcpy(A, state[id].A, sizeof(state[id].A));
-  t_copy                = state[id].t;
+    memcpy(aTran, state[id].aTran, sizeof(aTran));
+  t_copy         = state[id].t;
   IMU_thrd_mutex_unlock(&lock[id]);
 
-  // or pass pointers given blocking I/F
+  // pass pointers given blocking I/F
   #else
-  float *q, *A;
-  q                     = state[id].q;
-  A                     = state[id].A;
-  state[id].t           = t;
+  float *q       = state[id].q;
+  float *aTran   = state[id].aTran;
+  state[id].t    = t;
   #endif
 
   // save accelerometer data
   if (config[id].isTran) {
     float   G[3];       
     scale(IMU_math_quatToUp(state[id].q, G), config[id].aMag);
-    uint8_t *valid      = &state[id].estmValid;
-    if (!state[id].aReset && !state[id].mReset && *valid) {
-      A[0]              = (float)a_in[0]-G[0];
-      A[1]              = (float)a_in[1]-G[1];
-      A[2]              = (float)a_in[2]-G[2];
-      *valid            = 1;
-    } else {
-      float alpha       = config[id].posAlpha * FOM->magFOM;
-      A[0]              = alpha*A[0] + (1.0f-alpha)*((float)a_in[0]-G[0]);
-      A[1]              = alpha*A[1] + (1.0f-alpha)*((float)a_in[1]-G[1]);
-      A[2]              = alpha*A[2] + (1.0f-alpha)*((float)a_in[2]-G[2]);
-    }
+    float alpha  = config[id].tranAlpha;
+    aTran[0]     = alpha*aTran[0] + (1.0f-alpha)*((float)a_in[0]-G[0]);
+    aTran[1]     = alpha*aTran[1] + (1.0f-alpha)*((float)a_in[1]-G[1]);
+    aTran[2]     = alpha*aTran[2] + (1.0f-alpha)*((float)a_in[2]-G[2]);
   }
 
   // update system state (quaternion)
-  int status = IMU_math_estmAccl(q, a, weight*config[id].aWeight, &FOM->delt);
+  float weight   = FOM->magFOM*config[id].aWeight;
+  int   status   = IMU_math_estmAccl(q, a, weight, &FOM->delt);
   
   // save results to system state
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&lock[id]);
   memcpy(state[id].q, q, sizeof(state[id].q));
   if (config[id].isTran)
-    memcpy(state[id].A, A, sizeof(state[id].A));
+    memcpy(state[id].aTran, aTran, sizeof(aTran));
   if (t_copy > state[id].t)
     state[id].t         = t_copy;
   IMU_thrd_mutex_unlock(&lock[id]);
@@ -485,7 +474,7 @@ int IMU_core_newAccl(
   if (status < 0)
     return status;
   else 
-    return IMU_CORE_NORMAL_OP;
+    return IMU_core_enum_normal_op;
 }
 
 
@@ -499,20 +488,18 @@ int IMU_core_newMagn(
   IMU_TYPE              *m_in,
   IMU_core_FOM          *pntr)
 {
-  // check out-of-bounds condition
-  if (id >= numInst)
-    return IMU_CORE_BAD_INST; 
-
   // initialize figure of merit
   IMU_core_FOM_magn     *FOM;
   if (pntr != NULL) {
-    pntr->isValid       = !state[id].mReset && config[id].isFOM;
+    pntr->isValid       = 0;
     FOM                 = &pntr->FOM.magn;               
   } else {
     FOM                 = &staticFOM.FOM.magn;
   }
   
-  // determine whether the function needs to be executed
+  // determine whether function executes
+  if (id >= numInst)
+    return IMU_CORE_BAD_INST; 
   if (!config[id].isMagn || !config[id].enable)
     return IMU_CORE_FNC_DISABLED;
   if (state[id].mReset) 
@@ -523,9 +510,7 @@ int IMU_core_newMagn(
   FOM->mag              = norm3(m_in, m);
 
   // determine datum quality factor
-  float                 weight;
   if (config[id].isFOM) {
-
     // determine magnitude error
     float ref           = config[id].mMag;
     float thresh        = config[id].mMagThresh;
@@ -540,11 +525,13 @@ int IMU_core_newMagn(
     FOM->angFOM         = IMU_math_calcWeight(FOM->ang, ref, thresh);
 
     // check zero weight conditiond
-    weight              = FOM->magFOM * FOM->angFOM;
-    if (weight <= 0)
-      return IMU_CORE_NO_WEIGHT;
+    pntr->isValid       = 1;
+    if (FOM->magFOM <= 0.0001 || FOM->angFOM <= 0.0001)
+      return IMU_core_enum_no_weight;
+
   } else {
-    weight              = 1.0f;
+    FOM->magFOM         = 1.0f;
+    FOM->angFOM         = 1.0f;
   }
   
   // copy internal orientation state
@@ -554,15 +541,16 @@ int IMU_core_newMagn(
   memcpy(q, state[id].q, sizeof(state[id].q));
   float t_copy          = state[id].t;
   IMU_thrd_mutex_unlock(&lock[id]);
+
+  // pass pointers given blocking I/F
   #else
-  float                 *q;
-  q                     = state[id].q;
+  float *q              = state[id].q;
   state[id].t           = t;
   #endif
 
   // update system state (quaternion)
-  float weightTemp = weight*config[id].mWeight;
-  int status = IMU_math_estmMagnNorm(q, m, weightTemp, &FOM->delt);
+  float weight = FOM->magFOM*FOM->angFOM*config[id].mWeight;
+  int   status = IMU_math_estmMagnNorm(q, m, weight, &FOM->delt);
     
   // save results to system state
   #if IMU_USE_PTHREAD
@@ -577,7 +565,7 @@ int IMU_core_newMagn(
   if (status < 0)
     return status;
   else 
-    return IMU_CORE_NORMAL_OP;
+    return IMU_core_enum_normal_op;
 }
 
 
@@ -627,28 +615,21 @@ int IMU_core_estmAccl(
   if (!config[id].enable)
     return IMU_CORE_FNC_DISABLED;
 
-  // lock before copying state
+  // copy translation accleration and quaternion
   #if IMU_USE_PTHREAD
   IMU_thrd_mutex_lock(&lock[id]);
-  #endif
-
-  // copy internal variables 
-  float A[3];  memcpy(A, state[id].A, sizeof(A));
-  float q[4];  memcpy(q, state[id].q, sizeof(q));
-
-  // unlock mutex
-  #if IMU_USE_PTHREAD
+  float aTran[3];  memcpy(aTran, state[id].aTran, sizeof(aTran));
+  float q[4];      memcpy(q,     state[id].q,     sizeof(q));
   IMU_thrd_mutex_unlock(&lock[id]);
+
+  // pass pointers given blocking I/F
+  #else
+  float *aTran   = state[id].aTran;
+  float *q       = state[id].q
   #endif
 
   // apply rotation to acceleration vector
-  float tmp[4]          = {-q[1]*A[0] - q[2]*A[1] - q[3]*A[2],
-                            q[0]*A[0] + q[2]*A[2] - q[3]*A[1],
-                            q[0]*A[1] - q[1]*A[2] + q[3]*A[0],
-                            q[0]*A[2] + q[1]*A[1] - q[2]*A[0]};
-  estm[0] = -tmp[0]*q[1] + tmp[1]*q[0] - tmp[2]*q[3] + tmp[3]*q[2];
-  estm[1] = -tmp[0]*q[2] + tmp[1]*q[3] + tmp[2]*q[0] - tmp[3]*q[1];
-  estm[2] = -tmp[0]*q[3] - tmp[1]*q[2] + tmp[2]*q[1] + tmp[3]*q[0];
+  IMU_math_rotateForward(aTran, q, estm);
   
   // exit function (no errors)
   return 0;

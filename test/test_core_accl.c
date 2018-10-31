@@ -69,15 +69,15 @@ int main(void)
   // testing accelerometer zeroing
   float vec1[3]      = {    179,     179,     255};
   float out1[4]      = { 0.9246, -0.2694,  0.2694,  0.0000};
-  test_datum(vec1, 1, out1, IMU_CORE_ZEROED_ACCL);
+  test_datum(vec1, 1, out1, IMU_core_enum_zeroed_accl);
   
   // verify non-zeroing operation 
   float vec2[3]      = {      0,       0,     255};
-  test_datum(vec2, 1, out1, IMU_CORE_NORMAL_OP);
+  test_datum(vec2, 1, out1, IMU_core_enum_normal_op);
   
   // testing accelerometer filtering
   float out2[4]      = { 1.0000,  0.0000,  0.0000,  0.0000};
-  test_datum(vec2, 100, out2, IMU_CORE_NORMAL_OP);
+  test_datum(vec2, 100, out2, IMU_core_enum_normal_op);
 
 
   /****************************************************************************
@@ -92,20 +92,20 @@ int main(void)
 
   // inject magnetometer datum
   float mag3[3]      = {    104,      28,    -231};
-  add_magn(mag3, IMU_CORE_ZEROED_SAVE); printf("no verification...\n");
+  add_magn(mag3, IMU_core_enum_zeroed_save); printf("no verification...\n");
 
   // testing accelerometer zeroing w/ magnetometer (revist)
   float vec3[3]      = {    233,      -6,     104};
   float out3[4]      = { 0.8379,  0.0398,  0.5428,  0.0398};
-  test_datum(vec3, 1, out3, IMU_CORE_ZEROED_BOTH);
+  test_datum(vec3, 1, out3, IMU_core_enum_zeroed_both);
 
   // verify non-zeroing operation 
   float vec4[3]      = {   -255,       0,       0};
-  test_datum(vec4, 1, out3, IMU_CORE_NORMAL_OP);
+  test_datum(vec4, 1, out3, IMU_core_enum_normal_op);
     
   // testing accelerometer filtering
   float out4[4]      = { 0.7064,  0.0000,  0.7064,  0.0000};
-  test_datum(vec4, 100, out4, IMU_CORE_NORMAL_OP);
+  test_datum(vec4, 100, out4, IMU_core_enum_normal_op);
 
 
   /****************************************************************************
@@ -121,21 +121,21 @@ int main(void)
   // testing accelerometer zeroing
   float vec5[3]      = {   -199,     122,     104};
   float out5[4]      = { 0.8387, -0.2846, -0.4642,  0.0000};
-  test_datum(vec5, 1, out5, IMU_CORE_ZEROED_ACCL);
+  test_datum(vec5, 1, out5, IMU_core_enum_zeroed_accl);
   
   // inject magnetometer datum
   float mag6[3]      = {    104,     -28,    -231};
   float out6[4]      = { 0.2988, -0.5352,  0.1006,  0.7837};
-  add_magn(mag6, IMU_CORE_ZEROED_MAGN);
+  add_magn(mag6, IMU_core_enum_zeroed_magn);
   verify_estm(out6);
 
   // verify non-zeroing operation 
   float vec7[3]      = {   -255,       0,       0};
-  test_datum(vec7, 1, out6, IMU_CORE_NORMAL_OP);
+  test_datum(vec7, 1, out6, IMU_core_enum_normal_op);
     
   // testing accelerometer filtering
   float out7[4]      = { 0.2051, -0.6972,  0.2051,  0.6972};
-  test_datum(vec7, 100, out7, IMU_CORE_NORMAL_OP);
+  test_datum(vec7, 100, out7, IMU_core_enum_normal_op);
 
 
   /****************************************************************************

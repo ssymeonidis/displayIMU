@@ -43,7 +43,7 @@ static const char* IMU_core_config_name[] = {
   "mMagThresh",
   "mAng",
   "mAngThresh",
-  "posAlpha"
+  "tranAlpha"
 };
 typedef enum {
   IMU_core_enable       = 0,
@@ -63,7 +63,7 @@ typedef enum {
   IMU_core_mMagThresh   = 14,
   IMU_core_mAng         = 15,
   IMU_core_mAngThresh   = 16,
-  IMU_core_posAlpha     = 17
+  IMU_core_tranAlpha    = 17
 } IMU_core_config_enum;
 
 // rect subsystem parsing inputs
@@ -219,8 +219,8 @@ int IMU_file_coreLoad(
       sscanf(args, "%f", &config->mAng);
     else if (type == IMU_core_mAngThresh)
       sscanf(args, "%f", &config->mAngThresh);
-    else if (type == IMU_core_posAlpha)
-      sscanf(args, "%f", &config->posAlpha);
+    else if (type == IMU_core_tranAlpha)
+      sscanf(args, "%f", &config->tranAlpha);
   }
 
   // exit function
@@ -263,7 +263,7 @@ int IMU_file_coreSave(
   fprintf(file, "  \"mMagThresh\": %0.2f,\n",      config->mMagThresh);
   fprintf(file, "  \"mAng\": %0.2f,\n",            config->mAng);
   fprintf(file, "  \"mAngThresh\": %0.2f,\n",      config->mAngThresh);
-  fprintf(file, "  \"posAlpha\": %0.2f,\n",        config->posAlpha);
+  fprintf(file, "  \"tranAlpha\": %0.2f,\n",       config->tranAlpha);
   fprintf(file, "}\n");
 
   // exit function
