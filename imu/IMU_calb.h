@@ -49,9 +49,11 @@ extern "C" {
 
 // define calibration types
 typedef enum {
-  IMU_calb_NA           = -1,
-  IMU_calb_4pnt         = 0,
-  IMU_calb_6pnt         = 1
+  IMU_calb_NA           = 0,
+  IMU_calb_1pnt         = 1,
+  IMU_calv_2pnt         = 2,
+  IMU_calb_4pnt         = 3,
+  IMU_calb_6pnt         = 4
 } IMU_calb_mode;
 
 // configuration structure definition

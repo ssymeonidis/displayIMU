@@ -21,23 +21,43 @@
 #define NULL 0
 
 // include statements 
+#if IMU_USE_PTHREAD
+#include <pthread.h>
+#include <unistd.h>
+#endif
 #include <string.h>
 #include "IMU_pnts.h"
 
-// internally managed structures
-static IMU_pnts_config  config [IMU_MAX_INST]; 
-static IMU_pnts_state   state  [IMU_MAX_INST];
-static IMU_pnts_entry   table  [IMU_MAX_INST][IMU_PNTS_SIZE];
-static uint16_t         numInst = 0;
+// internal type definitions
+typedef struct{
+  uint16_t              id;
+  uint16_t              count;
+  IMU_pnts_entry        *entry;
+  void                  *pntr;
+} threadStruct;
+
+// internally defined variables
+static IMU_pnts_config  config   [IMU_MAX_INST]; 
+static IMU_pnts_state   state    [IMU_MAX_INST];
+static IMU_pnts_entry   table    [IMU_MAX_INST][IMU_PNTS_SIZE];
+static uint16_t         numInst  = 0;
+#if IMU_USE_PTHREAD
+static pthread_t        thrd     [IMU_MAX_INST];
+static pthread_attr_t   thrdAttr [IMU_MAX_INST];
+static threadStruct     thrdVal  [IMU_MAX_INST];
+#endif
 
 // internally defined functions
 static inline IMU_pnts_enum   update_state (uint16_t id, uint32_t, uint8_t,
                                             IMU_pnts_entry**);
 static inline IMU_pnts_entry* break_stable (uint16_t id);
-static inline float calc_std    (float *val1, IMU_TYPE *val2);
-static inline void  apply_alpha (float *prev, IMU_TYPE *cur, float alpha);
-static inline void  accum_gyro  (float *prev, IMU_TYPE *cur, IMU_TYPE t);
-static inline void  copy_val    (float *val1, IMU_TYPE *val2);
+static inline float calc_std     (float *val1, IMU_TYPE *val2);
+static inline void  apply_alpha  (float *prev, IMU_TYPE *cur, float alpha);
+static inline void  accum_gyro   (float *prev, IMU_TYPE *cur, IMU_TYPE t);
+static inline void  copy_val     (float *val1, IMU_TYPE *val2);
+#if IMU_USE_PTHREAD
+static inline void* IMU_pnts_run (void*);
+#endif
 
 
 /******************************************************************************
@@ -497,12 +517,34 @@ inline IMU_pnts_entry* break_stable(
   // update current points count and launch thread
   if (state[id].curPnts < state[id].numPnts) {
     state[id].curPnts++;
-    if (state[id].fnc != NULL)
+    if (state[id].fnc != NULL) {
+      #if IMU_USE_PTHREAD
+      thrdVal[id].id      = id;
+      thrdVal[id].count   = state[id].curPnts-1;
+      thrdVal[id].entry   = entry;
+      thrdVal[id].pntr    = state[id].fncPntr;
+      pthread_create(&thrd[id], &thrdAttr[id], IMU_pnts_run, &thrdVal[id]);
+      #else
       state[id].fnc(id, state[id].curPnts-1, entry, state[id].fncPntr);
+      #endif
+    }
     return entry;
   } else {
     return NULL;
   }
+}
+
+
+/******************************************************************************
+* utility function - execute function handle
+******************************************************************************/
+
+void* IMU_pnts_run(
+  void                     *pntr)
+{
+  threadStruct *vals = (threadStruct*)pntr;
+  printf("count = %d\n", vals->count);
+  state[vals->id].fnc(vals->id, vals->count, vals->entry, vals->pntr);
 }
 
 

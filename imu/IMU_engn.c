@@ -46,7 +46,7 @@ typedef struct {
 } IMU_engn_queue;
 #endif
 
-// internally managed structures
+// internally define variables
 static IMU_core_FOM      datumFOM [3];
 static IMU_engn_config   config   [IMU_MAX_INST]; 
 static IMU_engn_state    state    [IMU_MAX_INST];
@@ -356,7 +356,7 @@ int IMU_engn_start()
   engnExitThread = 0;
   return pthread_create(&engnThread, NULL, IMU_engn_run, &engnThreadID);
   #else
-  return IMU_ENGN_FAILED_THREAD;
+  return 0;
   #endif
 }
 
