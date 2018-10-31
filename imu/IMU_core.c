@@ -456,7 +456,7 @@ int IMU_core_newAccl(
   }
 
   // update system state (quaternion)
-  float weight   = FOM->magFOM*config[id].aWeight;
+  float weight   = FOM->magFOM * config[id].aWeight;
   int   status   = IMU_math_estmAccl(q, a, weight, &FOM->delt);
   
   // save results to system state
@@ -549,7 +549,7 @@ int IMU_core_newMagn(
   #endif
 
   // update system state (quaternion)
-  float weight = FOM->magFOM*FOM->angFOM*config[id].mWeight;
+  float weight = FOM->magFOM * FOM->angFOM * config[id].mWeight;
   int   status = IMU_math_estmMagnNorm(q, m, weight, &FOM->delt);
     
   // save results to system state

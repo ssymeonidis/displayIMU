@@ -75,7 +75,6 @@ typedef union {
   IMU_data3            *data3;
 } IMU_core_pntr;
 struct IMU_core_FOM{
-  IMU_core_pntr        pntr;
   uint8_t              isValid;
   union {
     IMU_core_FOM_gyro  gyro;
