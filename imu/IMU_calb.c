@@ -313,6 +313,14 @@ void calb_6pnt_full(
     rect->aBias[1]  -= table[id][i].aFltr[1];
     rect->aBias[2]  -= table[id][i].aFltr[2];
   }
+
+  // convert sums to averages
+  rect->gBias[0]    /= 6.0f;
+  rect->gBias[1]    /= 6.0f;
+  rect->gBias[2]    /= 6.0f;
+  rect->aBias[0]    /= 6.0f;
+  rect->aBias[1]    /= 6.0f;
+  rect->aBias[2]    /= 6.0f;
 }
 
 

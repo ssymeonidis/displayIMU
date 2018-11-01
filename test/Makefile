@@ -23,7 +23,7 @@ SRCS        = test_datum.c               \
               test_fom_magn.c            \
               test_pnts_gyro.c           \
               test_pnts_fnc.c            \
-              test_calb_pnts.c
+              test_calb_bias.c
 OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 TARGETS     = $(patsubst %.c,$(BINDIR)/%,$(SRCS))
 
@@ -68,7 +68,7 @@ $(BINDIR)/test_pnts_gyro: $(OBJDIR)/test_pnts_gyro.o
 $(BINDIR)/test_pnts_fnc: $(OBJDIR)/test_pnts_fnc.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
-$(BINDIR)/test_calb_pnts: $(OBJDIR)/test_calb_pnts.o
+$(BINDIR)/test_calb_bias: $(OBJDIR)/test_calb_bias.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
 $(OBJDIR)/%.o: %.c
@@ -91,4 +91,4 @@ run:
 	cd $(BINDIR); ./test_fom_magn  | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_pnts_gyro | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_pnts_fnc  | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_calb_pnts | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_calb_bias | grep -e pass -e error -e fail

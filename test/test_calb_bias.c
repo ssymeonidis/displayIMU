@@ -45,7 +45,7 @@ int main(void)
   int                  status;
 
   // start datum test
-  printf("starting test_calb_pnts...\n");
+  printf("starting test_calb_bias...\n");
 
   // initialize the IMU and its data parser
   status = IMU_engn_init(IMU_engn_calb_pnts, &id);
@@ -93,7 +93,6 @@ int main(void)
   * test one-point gyroscope NUC
   ****************************************************************************/
 
-  // initiate one-point nuc
   float off1[3]   = { 50.0,  50.0,  50.0};
   float vec1[3]   = { 10.0,  20.0,  30.0};
   float ref1[3]   = {-10.0, -20.0, -30.0};
@@ -107,7 +106,6 @@ int main(void)
   * test four-point magnetometer NUC
   ****************************************************************************/
 
-  // initiate one-point nuc
   float off2[3]    = { 99.0,  99.0, 99.0};
   float vec2a[3]   = { 37.0,  -2.0,  0.0};
   float vec2b[3]   = {-23.0,  -2.0,  0.0};
@@ -124,11 +122,34 @@ int main(void)
 
 
   /****************************************************************************
+  * test six-point accelerometer NUC
+  ****************************************************************************/
+
+  float off3[3]    = { 99.0,  99.0,  99.0};
+  float vec3a[3]   = { 36.0,  -3.0,   4.0};
+  float vec3b[3]   = {-24.0,  -3.0,   4.0};
+  float vec3c[3]   = {  6.0,  27.0,   4.0};
+  float vec3d[3]   = {  6.0, -33.0,   4.0};
+  float vec3e[3]   = {  6.0,  -3.0,  34.0};
+  float vec3f[3]   = {  6.0,  -3.0, -26.0};
+  float ref3[3]    = { -6.0,   3.0,  -4.0};
+  status = IMU_engn_calbStart(id, IMU_calb_6pnt_full);
+  add_datum(vec3a, off3, IMU_accl);
+  add_datum(vec3b, off3, IMU_accl);
+  add_datum(vec3c, off3, IMU_accl);
+  add_datum(vec3d, off3, IMU_accl);
+  add_datum(vec3e, off3, IMU_accl);
+  add_datum(vec3f, off3, IMU_accl);
+  print_vect(rect->aBias);
+  verify_vect(rect->aBias, ref3);
+
+
+  /****************************************************************************
   * exit unit test
   ****************************************************************************/
 
   // exit program
-  printf("pass: test_calb_pnts\n\n");
+  printf("pass: test_calb_bias\n\n");
   return 0;
 }
 
