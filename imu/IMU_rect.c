@@ -78,17 +78,16 @@ int IMU_rect_getConfig(
 
 int IMU_rect_datum(
   uint16_t              id,
-  IMU_datum             *datum,
-  IMU_TYPE              *val)
+  IMU_datum             *datum)
 {
   // check sensor type and execute
   if      (datum->type == IMU_gyro)
-    return IMU_rect_gyro(id, val, datum->val);
+    return IMU_rect_gyro(id, datum->val, datum->val);
   else if (datum->type == IMU_accl)
-    return IMU_rect_accl(id, val, datum->val);
+    return IMU_rect_accl(id, datum->val, datum->val);
   else if (datum->type == IMU_magn)
-    return IMU_rect_magn(id, val, datum->val);
-  else 
+    return IMU_rect_magn(id, datum->val, datum->val);
+  else
     return IMU_RECT_INVALID_SENSOR;
 }
 

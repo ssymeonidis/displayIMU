@@ -38,11 +38,11 @@
 // internally defined types
 #if IMU_ENGN_QUEUE_SIZE
 typedef struct {
-  uint16_t              id    [IMU_ENGN_QUEUE_SIZE+1];
-  IMU_datum             datum [IMU_ENGN_QUEUE_SIZE+1];
-  int                   first;
-  int                   last;
-  int                   count;
+  uint16_t               id       [IMU_ENGN_QUEUE_SIZE+1];
+  IMU_datum              datum    [IMU_ENGN_QUEUE_SIZE+1];
+  int                    first;
+  int                    last;
+  int                    count;
 } IMU_engn_queue;
 #endif
 
@@ -212,9 +212,9 @@ int IMU_engn_getConfig(
     return IMU_ENGN_UNINITIALIZE_SYS;    
 
   // pass subsystem config structure
-  if      (system == IMU_engn_core) 
+  if      (system == IMU_engn_core)
     pntr->core          = state[id].configCore;
-  else if (system == IMU_engn_rect) 
+  else if (system == IMU_engn_rect)
     pntr->rect          = state[id].configRect;
   else if (system == IMU_engn_pnts)
     pntr->pnts          = state[id].configPnts;
@@ -222,7 +222,7 @@ int IMU_engn_getConfig(
     pntr->stat          = state[id].configStat;
   else if (system == IMU_engn_calb)
     pntr->calb          = state[id].configCalb;
-  else if (system == IMU_engn_self) 
+  else if (system == IMU_engn_self)
     pntr->engn          = &config[id];
   else
     return IMU_ENGN_NONEXISTANT_SYSID;
@@ -245,7 +245,7 @@ int IMU_engn_getState(
   if (id >= numInst)
     return IMU_ENGN_BAD_INST;
   if (IMU_engn_typeCheck(id, system) != 0)
-    return IMU_ENGN_UNINITIALIZE_SYS;    
+    return IMU_ENGN_UNINITIALIZE_SYS;   
 
   // pass subsystem state structure
   if      (system == IMU_engn_core) 
@@ -619,39 +619,34 @@ int IMU_engn_data3(
   IMU_data3             *data3)
 {
   // define local variables
-  IMU_pnts_entry        *pnt;
-  IMU_core_FOM          *FOM;
-  int                   status = 0;
+  IMU_pnts_entry        *pnt   = NULL;
+  IMU_core_FOM          *FOM   = NULL;
     
-  // save data to sensor structure
-  if (config[id].isSensorStruct)
-    status = IMU_copy_data3Raw(id, data3);
-  if (status < 0)
-    return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
-  
   // create FOM pointer
   if (config[id].isStat || config[id].isFOM)
     FOM = datumFOM;
-  else
-    FOM = NULL;
 
+  // save data to sensor structure
+  if (config[id].isSensorStruct)
+    IMU_copy_data3Raw(id, data3);
+  
   // process datum by subsystems
   if (config[id].isRect)
-    state[id].rect = IMU_rect_data3(state[id].idRect, data3);
+    state[id].rect = IMU_rect_data3  (state[id].idRect, data3);
+  state[id].core   = IMU_core_data3  (state[id].idCore, data3, FOM);
   if (config[id].isPnts)
-    state[id].pnts = IMU_pnts_data3(state[id].idPnts, data3, &pnt);
-  state[id].core   = IMU_core_data3(state[id].idCore, data3, FOM);
+    state[id].pnts = IMU_pnts_data3  (state[id].idPnts, data3, &pnt);
+  if (config[id].isCalb && pnt != NULL)
+    state[id].calb = IMU_calb_pnts   (state[id].idCalb, pnt);
   if (config[id].isStat)
-    state[id].stat = IMU_stat_update(state[id].idStat, FOM, 3);
+    state[id].stat = IMU_stat_update (state[id].idStat, FOM, 3);
   if (state[id].rect < 0 || state[id].pnts < 0 ||
       state[id].core < 0 || state[id].stat < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
   // save data to sensor structure
   if (config[id].isSensorStruct)
-    status = IMU_copy_results3(id, data3, FOM);
-  if (status < 0)
-    return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+    IMU_copy_results3(id, data3, FOM);
     
   // exit function
   return 0;
@@ -779,41 +774,36 @@ int IMU_engn_process(
   IMU_datum             *datum)
 {
   // define local variables
-  IMU_pnts_entry        *pnt;
-  IMU_core_FOM          *FOM;
-  int                   status = 0;
+  IMU_core_FOM          *FOM   = NULL;
+  IMU_pnts_entry        *pnt   = NULL;
     
-  // save data to sensor structure
-  if (config[id].isSensorStruct)
-    status = IMU_copy_datumRaw(id, datum);
-  if (status < 0)
-    return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
-  
   // create FOM pointer
   if (config[id].isStat || config[id].isFOM)
     FOM = datumFOM;
-  else
-    FOM = NULL;
 
+  // save data to sensor structure
+  if (config[id].isSensorStruct)
+    IMU_copy_datumRaw(id, datum);
+  
   // process datum by subsystems
   if (config[id].isRect)
-    state[id].rect = IMU_rect_datum(state[id].idRect, datum, datum->val);
+    state[id].rect = IMU_rect_datum  (state[id].idRect, datum);
+  state[id].core   = IMU_core_datum  (state[id].idCore, datum, FOM);
   if (config[id].isPnts)
-    state[id].pnts = IMU_pnts_datum(state[id].idPnts, datum, &pnt);
-  state[id].core   = IMU_core_datum(state[id].idCore, datum, FOM);
-  if (config[id].isStat)
-    state[id].stat = IMU_stat_update(state[id].idStat, FOM, 1);
-  if (state[id].rect < 0 || state[id].pnts < 0 ||
-      state[id].core < 0 || state[id].stat < 0)
+    state[id].pnts = IMU_pnts_datum  (state[id].idPnts, datum, &pnt);
+  if (config[id].isCalb && pnt != NULL)
+    state[id].calb = IMU_calb_pnts   (state[id].idCalb, pnt);
+  if (config[id].isStat && FOM != NULL)
+    state[id].stat = IMU_stat_update (state[id].idStat, FOM, 1);
+  if (state[id].rect < 0 || state[id].core < 0 || state[id].pnts < 0  ||
+      state[id].calb < 0 || state[id].stat < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
   // save data to sensor structure
   if (config[id].isSensorStruct)
-    status = IMU_copy_results1(id, datum, FOM);
-  if (status < 0)
-    return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+    IMU_copy_results1(id, datum, FOM);
     
-  // exit function
+  // exit function (no errrors)
   return 0;
 }
 
@@ -866,12 +856,8 @@ int IMU_copy_results1(
   IMU_union_state       unionState;
   IMU_pnts_state        *pntsState;
   if (config[id].isPnts && state[id].configPnts->enable) {
-    int status = IMU_engn_getState(id, IMU_engn_pnts, &unionState);
-    if (status < 0)
-      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+    IMU_engn_getState(id, IMU_engn_pnts, &unionState);
     pntsState = unionState.pnts;
-    if (pntsState == NULL)
-      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   }
 
   // copy datum time
@@ -921,9 +907,9 @@ int IMU_copy_results1(
       memcpy(&sensor[id].mFOM, &FOM->FOM.magn, sizeof(IMU_core_FOM_magn));
     else
       sensor[id].mFOM = (IMU_core_FOM_magn){0};
-  } else {
-    return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   }
+
+  // exit function (no errors)
   return 0;
 }
 
@@ -941,12 +927,8 @@ int IMU_copy_results3(
   IMU_union_state       unionState;
   IMU_pnts_state        *pntsState;
   if (config[id].isPnts) {
-    int status = IMU_engn_getState(id, IMU_engn_pnts, &unionState);
-    if (status < 0)
-      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
+    IMU_engn_getState(id, IMU_engn_pnts, &unionState);
     pntsState = unionState.pnts;
-    if (pntsState == NULL)
-      return IMU_ENGN_SENSOR_STRUCT_COPY_FAIL;
   }
 
   // copy datum time

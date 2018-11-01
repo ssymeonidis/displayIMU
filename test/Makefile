@@ -14,10 +14,11 @@ TARGETS     = $(BINDIR)/test_datum       \
               $(BINDIR)/test_core_gyro   \
               $(BINDIR)/test_core_accl   \
               $(BINDIR)/test_core_magn   \
+              $(BINDIR)/test_fom_accl    \
+              $(BINDIR)/test_fom_magn    \
               $(BINDIR)/test_pnts_gyro   \
               $(BINDIR)/test_pnts_fnc    \
-              $(BINDIR)/test_fom_accl    \
-              $(BINDIR)/test_fom_magn
+              $(BINDIR)/test_calb_pnts
 LIBS        = -L../bin                   \
               -lIMU                      \
               -lm                        \
@@ -32,10 +33,11 @@ SRCS        = test_datum.c               \
               test_core_gyro.c           \
               test_core_accl.c           \
               test_core_magn.c           \
+              test_fom_accl.c            \
+              test_fom_magn.c            \
               test_pnts_gyro.c           \
               test_pnts_fnc.c            \
-              test_fom_accl.c            \
-              test_fom_magn.c
+              test_calb_pnts.c
 OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 
 all: ${TARGETS}
@@ -67,16 +69,19 @@ $(BINDIR)/test_core_accl: $(OBJDIR)/test_core_accl.o
 $(BINDIR)/test_core_magn: $(OBJDIR)/test_core_magn.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
+$(BINDIR)/test_fom_accl: $(OBJDIR)/test_fom_accl.o
+	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
+
+$(BINDIR)/test_fom_magn: $(OBJDIR)/test_fom_magn.o
+	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
+
 $(BINDIR)/test_pnts_gyro: $(OBJDIR)/test_pnts_gyro.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
 $(BINDIR)/test_pnts_fnc: $(OBJDIR)/test_pnts_fnc.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
-$(BINDIR)/test_fom_accl: $(OBJDIR)/test_fom_accl.o
-	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
-
-$(BINDIR)/test_fom_magn: $(OBJDIR)/test_fom_magn.o
+$(BINDIR)/test_calb_pnts: $(OBJDIR)/test_calb_pnts.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
 $(OBJDIR)/%.o: %.c
@@ -95,7 +100,8 @@ run:
 	cd $(BINDIR); ./test_core_gyro | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_core_accl | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_core_magn | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_pnts_gyro | grep -e pass -e error -e fail
-	cd $(BINDIR); ./test_pnts_fnc  | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_fom_accl  | grep -e pass -e error -e fail
 	cd $(BINDIR); ./test_fom_magn  | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_pnts_gyro | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_pnts_fnc  | grep -e pass -e error -e fail
+	cd $(BINDIR); ./test_calb_pnts | grep -e pass -e error -e fail
