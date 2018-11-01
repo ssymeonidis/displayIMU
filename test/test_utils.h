@@ -33,6 +33,7 @@ void verify_int    (int   val1,     int   val2);
 void verify_data   (float val1,     float val2);
 void verify_vect   (float val1[3],  float val2[3]);
 void verify_quat   (float val1[4],  float val2[4]);
+void print_vect    (float val[3]);
 
 
 /******************************************************************************
@@ -113,6 +114,17 @@ void verify_quat(
     printf("error: quat results failure\n");
     exit(0);
   }
+}
+
+
+/******************************************************************************
+* verifies quaternion against intended result
+******************************************************************************/
+
+void print_vect(
+  float                val[3])
+{
+  printf("%0.2f, %0.2f, %0.2f\n", val[0], val[1], val[2]);
 }
 
 

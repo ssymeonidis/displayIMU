@@ -120,6 +120,15 @@ typedef enum {
 } IMU_pnts_config_enum;
 
 // stat subsystem parsing inputs
+static const int   IMU_calb_config_size   = 1;
+static const char* IMU_calb_config_name[] = {
+  "enable",
+};
+typedef enum {
+  IMU_calb_enable      = 0
+} IMU_calb_config_enum;
+
+// stat subsystem parsing inputs
 static const int   IMU_stat_config_size   = 7;
 static const char* IMU_stat_config_name[] = {
   "enable",
@@ -471,6 +480,74 @@ int IMU_file_pntsSave(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
+int IMU_file_calbLoad(
+  const char           *filename, 
+  IMU_calb_config      *config)
+{
+  // define internal variables
+  FILE                  *file;
+  char                  *field;
+  char                  *args;
+  IMU_calb_config_enum  type;     
+  int                   status;
+
+  // open configuration json file 
+  file = fopen(filename, "r");
+  if (file == NULL)
+    return IMU_FILE_INVALID_FILE;
+
+  // main loop that parse json file line by line
+  while (1) {
+    // read line and parse field/args
+    status = get_line(file, &field, &args);
+    if (status == 1)
+      continue;
+    if (status > 1 || status < 0)
+      break;
+
+    // extract specified field arguments  
+    type = get_field(field, IMU_calb_config_name, IMU_calb_config_size);
+    if      (type == IMU_calb_enable)
+      get_bool(args, &config->enable);
+  }
+
+  // exit function
+  fclose(file);
+  return 0;
+}
+
+
+/******************************************************************************
+* writes configuration structure to a json file
+******************************************************************************/
+
+int IMU_file_calbSave(
+  const char           *filename, 
+  IMU_calb_config      *config)
+{
+  // define internal variables
+  FILE                 *file;
+
+  // open configuration json file 
+  file = fopen(filename, "w");
+  if (file == NULL)
+    return IMU_FILE_INVALID_FILE;
+
+  // write contents to json file one line at a time
+  fprintf(file, "{\n");
+  fprintf(file, "  \"enable\": ");       write_bool(file, config->enable);
+  fprintf(file, "}\n");
+
+  // exit function
+  fclose(file);
+  return 0;
+}
+
+
+/******************************************************************************
+* reads configuration json file into memory (structure)
+******************************************************************************/
+
 int IMU_file_statLoad(
   const char            *filename,
   IMU_stat_config       *config)
@@ -546,30 +623,6 @@ int IMU_file_statSave(
 
   // exit function
   fclose(file);
-  return 0;
-}
-
-
-/******************************************************************************
-* reads configuration json file into memory (structure)
-******************************************************************************/
-
-int IMU_file_calbLoad(
-  const char           *filename, 
-  IMU_calb_config      *config)
-{
-  return 0;
-}
-
-
-/******************************************************************************
-* writes configuration structure to a json file
-******************************************************************************/
-
-int IMU_file_calbSave(
-  const char           *filename, 
-  IMU_calb_config      *config)
-{
   return 0;
 }
 

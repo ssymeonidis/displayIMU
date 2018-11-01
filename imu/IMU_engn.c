@@ -151,6 +151,10 @@ int IMU_engn_init(
       cur->stat < 0 || cur->calb < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
 
+  // initialize config structures
+  if (config[*id].isCalb > 0)
+    IMU_calb_setStruct(cur->idCalb, cur->configRect, cur->configCore);
+
   // create pthread mutex
   #if IMU_USE_PTHREAD
   int err  = IMU_thrd_mutex_init(&engnLock);
@@ -555,14 +559,16 @@ int IMU_engn_calbStart(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_ENGN_BAD_INST;
-
+  
   // get current orientation and pass to setRef
-  int status = max(0, IMU_pnts_start(state[id].idPnts, 0));
-  status    += max(0, IMU_calb_start(state[id].idCalb, mode));
+  int status = IMU_calb_start (state[id].idCalb, mode);
+  if (status < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+  status     = IMU_pnts_start (state[id].idPnts, status);
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
-  // exit function
+  // exit function (no errors)
   return 0;
 }
 
@@ -580,7 +586,7 @@ int IMU_engn_calbSave(
 
   // get current orientation and pass to setRef
   IMU_engn_state *pntr = &state[id];
-  int status = IMU_calb_save(pntr->idCalb, pntr->configRect, pntr->configCore);
+  int status = IMU_calb_save(pntr->idCalb);
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     

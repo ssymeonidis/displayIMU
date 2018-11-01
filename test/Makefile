@@ -5,20 +5,6 @@ BINDIR      = bin
 OBJDIR      = obj
 RM          = rm -f  
 DEFINES     = -D"IMU_TYPE=${IMU_TYPE}"
-TARGETS     = $(BINDIR)/test_datum       \
-              $(BINDIR)/test_euler       \
-              $(BINDIR)/test_quat_math   \
-              $(BINDIR)/test_estm_gyro   \
-              $(BINDIR)/test_estm_accl   \
-              $(BINDIR)/test_estm_magn   \
-              $(BINDIR)/test_core_gyro   \
-              $(BINDIR)/test_core_accl   \
-              $(BINDIR)/test_core_magn   \
-              $(BINDIR)/test_fom_accl    \
-              $(BINDIR)/test_fom_magn    \
-              $(BINDIR)/test_pnts_gyro   \
-              $(BINDIR)/test_pnts_fnc    \
-              $(BINDIR)/test_calb_pnts
 LIBS        = -L../bin                   \
               -lIMU                      \
               -lm                        \
@@ -39,6 +25,7 @@ SRCS        = test_datum.c               \
               test_pnts_fnc.c            \
               test_calb_pnts.c
 OBJS        = $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
+TARGETS     = $(patsubst %.c,$(BINDIR)/%,$(SRCS))
 
 all: ${TARGETS}
 

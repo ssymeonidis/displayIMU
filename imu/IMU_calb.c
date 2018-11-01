@@ -26,12 +26,12 @@ static IMU_calb_config  config [IMU_MAX_INST];
 static IMU_calb_state   state  [IMU_MAX_INST];
 static IMU_pnts_entry   table  [IMU_MAX_INST][IMU_CALB_SIZE]; 
 static uint16_t         numInst     = 0;
-static uint16_t         modePnts[2] = {4, 6};
 
 // internally defined functions
-void calb_4pnt(uint16_t id);
-void calb_6pnt(uint16_t id);
-int IMU_calb_defaultFnc(uint16_t id, IMU_calb_FOM*);
+static void calb_1pnt_gyro (uint16_t id);
+static void calb_4pnt_magn (uint16_t id);
+static void calb_6pnt_full (uint16_t id);
+int    IMU_calb_defaultFnc (uint16_t id, IMU_calb_FOM*);
 
 
 /******************************************************************************
@@ -91,9 +91,9 @@ int IMU_calb_setStruct(
     return IMU_CALB_BAD_INST;
 
   // copy rectify and core structures
-  memcpy(&state[id].rect_org, rect, sizeof(IMU_rect_config));
-  memcpy(&state[id].core_org, core, sizeof(IMU_rect_config)); 
-  
+  state[id].rectPntr      = rect;
+  state[id].corePntr      = core;
+
   // exit function (no errors)
   return 0;
 }
@@ -108,9 +108,7 @@ int IMU_calb_setFnc(
   int                     (*fncCalb)(uint16_t, IMU_calb_FOM*))
 {
   // check device count overflow
-  if (id >= numInst)
-    return IMU_CALB_BAD_INST;
-  if (fncCalb == NULL);
+  if (fncCalb == NULL)
     return IMU_CALB_BAD_PNTR;
 
   // copy rectify and core structures
@@ -157,9 +155,11 @@ int IMU_calb_start(
   // copy current entry to the table
   state[id].numPnts       = 0;
   state[id].mode          = mode;
+  memcpy(&state[id].rect, state[id].rectPntr, sizeof(IMU_rect_config));
+  memcpy(&state[id].core, state[id].corePntr, sizeof(IMU_core_config));
   
   // exit function (no errors)
-  return 0;
+  return IMU_calb_mode_pnts[mode];
 }
 
 
@@ -168,9 +168,7 @@ int IMU_calb_start(
 ******************************************************************************/
 
 int IMU_calb_save(
-  uint16_t                id,
-  IMU_rect_config         *rect,
-  IMU_core_config         *core)
+  uint16_t                id)
 {
   // check out-of-bounds condition
   if (id >= numInst)
@@ -179,35 +177,11 @@ int IMU_calb_save(
     return IMU_CALB_FNC_DISABLED;
 
   // copy current entry to the IMU rectify config 
-  memcpy(rect, &state[id].rect, sizeof(IMU_rect_config));
-  memcpy(core, &state[id].core, sizeof(IMU_core_config));
+  memcpy(state[id].rectPntr, &state[id].rect, sizeof(IMU_rect_config));
+  memcpy(state[id].corePntr, &state[id].core, sizeof(IMU_core_config));
   
   // exit function (no errors)
   return 0;
-}
-
-
-/******************************************************************************
-* reports status of calibration
-******************************************************************************/
-
-int IMU_calb_status(
-  uint16_t                id,
-  IMU_calb_FOM            **FOM)
-{
-  // check out-of-bounds condition
-  if (id >= numInst)
-    return IMU_CALB_BAD_INST;
-  if (!config[id].enable)
-    return IMU_CALB_FNC_DISABLED;
-
-  // determine whether enough points were collected
-  if (state[id].numPnts < modePnts[state[id].mode])
-    return 0;
-  
-  // pass FOM structure
-  *FOM = &state[id].FOM;
-  return IMU_CALB_UPDATED;
 }
 
 
@@ -231,16 +205,21 @@ int IMU_calb_pnts(
   state[id].numPnts++;
 
   // determine whether enough points were collected
-  if (state[id].numPnts < modePnts[state[id].mode])
+  if (state[id].numPnts < IMU_calb_mode_pnts[state[id].mode])
     return 0;
  
   // perform the specified calibration routine
-  if      (state[id].mode == IMU_calb_4pnt)
-    calb_4pnt(id);
-  else if (state[id].mode == IMU_calb_6pnt)
-    calb_6pnt(id);
+  if      (state[id].mode == IMU_calb_1pnt_gyro)
+    calb_1pnt_gyro(id);
+  else if (state[id].mode == IMU_calb_4pnt_magn)
+    calb_4pnt_magn(id);
+  else if (state[id].mode == IMU_calb_6pnt_full)
+    calb_6pnt_full(id);
   else
     return IMU_CALB_BAD_MODE; 
+
+  // call calibration function
+  state[id].fnc(id, &state[id].FOM);
     
   // exit fuction
   return IMU_CALB_UPDATED;
@@ -263,28 +242,14 @@ int IMU_calb_stat(
 * function to return instance state pointer
 ******************************************************************************/
 
-void calb_4pnt(
+void calb_1pnt_gyro(
   uint16_t                id)
 {
-  // define internal variables
-  IMU_rect_config *rect = &state[id].rect;
-  int i;
-
   // process completed points table
-  rect->gBias[0]     = 0;
-  rect->gBias[1]     = 0;
-  rect->gBias[2]     = 0;
-  rect->mBias[0]     = 0;
-  rect->mBias[1]     = 0;
-  rect->mBias[2]     = 0;
-  for (i=0; i<4; i++) {
-    rect->gBias[0]  += table[id][i].gFltr[0];
-    rect->gBias[1]  += table[id][i].gFltr[1];
-    rect->gBias[2]  += table[id][i].gFltr[2];
-    rect->mBias[0]  += table[id][i].mFltr[0];
-    rect->mBias[1]  += table[id][i].mFltr[1];
-    rect->mBias[2]  += table[id][i].mFltr[2];
-  }
+  IMU_rect_config *rect   = &state[id].rect;
+  rect->gBias[0]          = -table[id][0].gFltr[0];
+  rect->gBias[1]          = -table[id][0].gFltr[1];
+  rect->gBias[2]          = -table[id][0].gFltr[2];
 }
 
 
@@ -292,7 +257,41 @@ void calb_4pnt(
 * function to return instance state pointer
 ******************************************************************************/
 
-void calb_6pnt(
+void calb_4pnt_magn(
+  uint16_t                id)
+{
+  // define internal variables
+  IMU_rect_config *rect = &state[id].rect;
+  int i;
+
+  // process completed points table
+  rect->gBias[0]     = 0.0f;
+  rect->gBias[1]     = 0.0f;
+  rect->gBias[2]     = 0.0f;
+  rect->mBias[0]     = 0.0f;
+  rect->mBias[1]     = 0.0f;
+  for (i=0; i<4; i++) {
+    rect->gBias[0]  -= table[id][i].gFltr[0];
+    rect->gBias[1]  -= table[id][i].gFltr[1];
+    rect->gBias[2]  -= table[id][i].gFltr[2];
+    rect->mBias[0]  -= table[id][i].mFltr[0];
+    rect->mBias[1]  -= table[id][i].mFltr[1];
+  }
+
+  // convert sums to averages
+  rect->gBias[0]    /= 4.0f;
+  rect->gBias[1]    /= 4.0f;
+  rect->gBias[2]    /= 4.0f;
+  rect->mBias[0]    /= 4.0f;
+  rect->mBias[1]    /= 4.0f;
+}
+
+
+/******************************************************************************
+* function to return instance state pointer
+******************************************************************************/
+
+void calb_6pnt_full(
   uint16_t                id)
 { 
   // define internal variables
@@ -306,19 +305,13 @@ void calb_6pnt(
   rect->aBias[0]     = 0;
   rect->aBias[1]     = 0;
   rect->aBias[2]     = 0;
-  rect->mBias[0]     = 0;
-  rect->mBias[1]     = 0;
-  rect->mBias[2]     = 0;
   for (i=0; i<6; i++) {
-    rect->gBias[0]  += table[id][i].gFltr[0];
-    rect->gBias[1]  += table[id][i].gFltr[1];
-    rect->gBias[2]  += table[id][i].gFltr[2];
-    rect->aBias[0]  += table[id][i].aFltr[0];
-    rect->aBias[1]  += table[id][i].aFltr[1];
-    rect->aBias[2]  += table[id][i].aFltr[2];
-    rect->mBias[0]  += table[id][i].mFltr[0];
-    rect->mBias[1]  += table[id][i].mFltr[1];
-    rect->mBias[2]  += table[id][i].mFltr[2];
+    rect->gBias[0]  -= table[id][i].gFltr[0];
+    rect->gBias[1]  -= table[id][i].gFltr[1];
+    rect->gBias[2]  -= table[id][i].gFltr[2];
+    rect->aBias[0]  -= table[id][i].aFltr[0];
+    rect->aBias[1]  -= table[id][i].aFltr[1];
+    rect->aBias[2]  -= table[id][i].aFltr[2];
   }
 }
 
@@ -328,20 +321,14 @@ void calb_6pnt(
 ******************************************************************************/
 
 int IMU_calb_defaultFnc(
-  uint16_t              id, 
-  IMU_calb_FOM          *FOM)
+  uint16_t                id,
+  IMU_calb_FOM            *FOM)
 {
   // check out-of-bounds condition
-  if (id >= numInst)
-    return IMU_CALB_BAD_INST;
   if (FOM == NULL)
     return IMU_CALB_BAD_PNTR;
   
-  // verify FOM is above threshold and save+
-  if (FOM->calbFOM > config[id].threshFOM) {
-    IMU_engn_calbSave(id);
-    return IMU_CALB_CALBFNC_SAVED;
-  } else {
-    return IMU_CALB_CALBFNC_REJECTED;
-  }
+  // verify FOM is above threshold and save
+  IMU_calb_save(id);
+  return IMU_CALB_CALBFNC_SAVED;
 }

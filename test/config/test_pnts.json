@@ -9,6 +9,6 @@
   "gThresh": 20,
   "aAlpha": 0.35,
   "aThresh": 30,
-  "mAlpha": 0.40s,
+  "mAlpha": 0.40,
   "mThresh": 40
 }

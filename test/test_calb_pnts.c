@@ -29,15 +29,9 @@
 // define globals
 uint16_t    id          = 0;
 float       curTime     = 0;
-int         fncVal      = 0;
-float       vec[2][3]   = {{10.0, 20.0, 30.0},
-                           {40.0, 40.0, 40.0}};
-int         key[2]      = {78, 24};
-int         fncCount    = 0;
 
 // define internal function
-void test_fnc(uint16_t cnt, IMU_pnts_entry*, void*);
-void add_datum(float g[3], float dt);
+void add_datum(float val[3], float off[3], IMU_sensor);
 
 
 /******************************************************************************
@@ -48,7 +42,6 @@ int main(void)
 {
   // define local variable
   IMU_union_config     config;
-  IMU_union_state      state;
   int                  status;
 
   // start datum test
@@ -73,48 +66,61 @@ int main(void)
   check_status(status, "IMU_engn_getConfig failure");
   config.rect->enable = 0;
 
-  // read IMU_pnts json config file
+  // read IMU_pnts and IMU_calb json config file
   status = IMU_engn_load(id, "../config/test_pnts.json", IMU_engn_pnts);
   check_status(status, "IMU_engn_load failure");
-
-  // set callback function
-  status = IMU_engn_setPntsFnc(id, &test_fnc, &fncVal);
-  check_status(status, "IMU_engn_setPntsFnc failure");
+  status = IMU_engn_load(id, "../config/test_calb.json", IMU_engn_calb);
+  check_status(status, "IMU_engn_load failure");
 
   // start data queue
   status = IMU_engn_start();
   check_status(status, "IMU_engn_start failure");
 
-  // provide non-zero pnts count to allow callback
-  status = IMU_engn_getState(id, IMU_engn_pnts, &state);
-  check_status(status, "IMU_engn_getState failure");
-  state.pnts->numPnts = 2;
-
   // change alpha to allow easier point triggering
   status = IMU_engn_getConfig(id, IMU_engn_pnts, &config);
   check_status(status, "IMU_engn_getConfig failure");
   config.pnts->gAlpha = 1.0;
+  config.pnts->aAlpha = 1.0;
+  config.pnts->mAlpha = 1.0;
+
+  // get handle to config status
+  status = IMU_engn_getConfig(id, IMU_engn_rect, &config);
+  check_status(status, "IMU_engn_getConfig failure");
+  IMU_rect_config *rect   = config.rect;
 
 
   /****************************************************************************
-  * test callback (two callbacks)
+  * test one-point gyroscope NUC
   ****************************************************************************/
 
-  // create first stable point
-  add_datum(vec[0], 0.01);
-  add_datum(vec[0], 0.25);
-  add_datum(vec[1], 0.04);
-  usleep(msg_delay);
-  printf("fncVal = %d\n", fncVal);
-  verify_int(fncVal, key[0]);
+  // initiate one-point nuc
+  float off1[3]   = { 50.0,  50.0,  50.0};
+  float vec1[3]   = { 10.0,  20.0,  30.0};
+  float ref1[3]   = {-10.0, -20.0, -30.0};
+  status = IMU_engn_calbStart(id, IMU_calb_1pnt_gyro);
+  add_datum(vec1, off1, IMU_gyro);
+  print_vect(rect->gBias);
+  verify_vect(rect->gBias, ref1);
 
-  // create second stable point
-  add_datum(vec[1], 0.01);
-  add_datum(vec[1], 0.25);
-  add_datum(vec[0], 0.04);
-  usleep(msg_delay);
-  printf("fncVal = %d\n", fncVal);
-  verify_int(fncVal, key[1]);
+
+  /****************************************************************************
+  * test four-point magnetometer NUC
+  ****************************************************************************/
+
+  // initiate one-point nuc
+  float off2[3]    = { 99.0,  99.0, 99.0};
+  float vec2a[3]   = { 37.0,  -2.0,  0.0};
+  float vec2b[3]   = {-23.0,  -2.0,  0.0};
+  float vec2c[3]   = {  7.0,  28.0,  0.0};
+  float vec2d[3]   = {  7.0, -32.0,  0.0};
+  float ref2[3]    = { -7.0,   2.0,  0.0};
+  status = IMU_engn_calbStart(id, IMU_calb_4pnt_magn);
+  add_datum(vec2a, off2, IMU_magn);
+  add_datum(vec2b, off2, IMU_magn);
+  add_datum(vec2c, off2, IMU_magn);
+  add_datum(vec2d, off2, IMU_magn);
+  print_vect(rect->mBias);
+  verify_vect(rect->mBias, ref2);
 
 
   /****************************************************************************
@@ -128,49 +134,45 @@ int main(void)
 
 
 /******************************************************************************
-* callback funtion
-******************************************************************************/
-
-void test_fnc(
-  uint16_t                 count,
-  IMU_pnts_entry           *entry,
-  void                     *pntr)
-{
-  // verify count and entry
-  float *g                 = entry->gFltr;
-  printf("%d, %0.2f, %0.2f, %0.2f\n", count, g[0], g[1], g[2]);
-  verify_int(count, fncCount);
-  verify_vect(g, vec[fncCount]);
-
-  // set pointer to known value
-  int *val                 = (int*)pntr;
-  *val                     = key[fncCount];
-
-  // undate test counter
-  fncCount++;
-}
-
-
-/******************************************************************************
-* inject sensor datum and verify state
+* inject stable point (include break_stable condition)
 ******************************************************************************/
 
 void add_datum(
-  float                    gyro[3],
-  float                    dt)
+  float                    val[3],
+  float                    off[3],
+  IMU_sensor               type)
 {
   // define local variable
   IMU_datum                datum;
   int                      status;
 
-  // increment time
-  curTime                 += dt;
-  datum.type               = IMU_gyro;
+  // ceate datum structure
+  datum.type               = type;
+  datum.val[0]             = val[0];
+  datum.val[1]             = val[1];
+  datum.val[2]             = val[2];
+
+  // inject first datum (reset reference)
+  curTime                 += 0.01;
   datum.t                  = curTime * 100000;
-  datum.val[0]             = gyro[0];
-  datum.val[1]             = gyro[1];
-  datum.val[2]             = gyro[2];
-  status                   = IMU_engn_datum(0, &datum);
+  status                   = IMU_engn_datum(id, &datum);
   check_status(status, "IMU_engn_datum failure");
   usleep(msg_delay);
+
+  // inject next datum (duration greater than tStable)
+  curTime                 += 0.25;
+  datum.t                  = curTime * 100000;
+  status                   = IMU_engn_datum(id, &datum);
+  check_status(status, "IMU_engn_datum failure");
+  usleep(msg_delay);
+
+  // inject last datum (creates break_motion trigger)
+  curTime                 += 0.01;
+  datum.t                  = curTime * 100000;
+  datum.val[0]             = off[0];
+  datum.val[1]             = off[1];
+  datum.val[2]             = off[2];
+  status                   = IMU_engn_datum(id, &datum);
+  check_status(status, "IMU_engn_datum failure");
+  usleep(2*msg_delay);
 }
