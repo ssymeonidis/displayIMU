@@ -16,7 +16,7 @@
   "mWeight": 0.005,  
   "mMag": 0.0,
   "mMagThresh": 0.0,
-  "mAng": 0.0,
-  "mAngThresh": 0.0,
+  "mDot": 0.0,
+  "mDotThresh": 0.0,
   "posAlpha": 0.0
 }

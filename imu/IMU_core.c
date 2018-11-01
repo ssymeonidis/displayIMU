@@ -517,21 +517,21 @@ int IMU_core_newMagn(
     FOM->magFOM         = IMU_math_calcWeight(FOM->mag, ref, thresh);
     
     // determine angle error
-    ref                 = config[id].mAng;
-    thresh              = config[id].mAngThresh;
+    ref                 = config[id].mDot;
+    thresh              = config[id].mDotThresh;
     float a[3];
     IMU_math_quatToUp(state[id].q, a);
-    FOM->ang            = acosf(a[0]*m[0] + a[1]*m[1] + a[2]*m[2]);
-    FOM->angFOM         = IMU_math_calcWeight(FOM->ang, ref, thresh);
+    FOM->dot            = a[0]*m[0] + a[1]*m[1] + a[2]*m[2];
+    FOM->dotFOM         = IMU_math_calcWeight(FOM->dot, ref, thresh);
 
     // check zero weight conditiond
     pntr->isValid       = 1;
-    if (FOM->magFOM <= 0.0001 || FOM->angFOM <= 0.0001)
+    if (FOM->magFOM <= 0.0001 || FOM->dotFOM <= 0.0001)
       return IMU_core_enum_no_weight;
 
   } else {
     FOM->magFOM         = 1.0f;
-    FOM->angFOM         = 1.0f;
+    FOM->dotFOM         = 1.0f;
   }
   
   // copy internal orientation state
@@ -549,7 +549,7 @@ int IMU_core_newMagn(
   #endif
 
   // update system state (quaternion)
-  float weight = FOM->magFOM * FOM->angFOM * config[id].mWeight;
+  float weight = FOM->magFOM * FOM->dotFOM * config[id].mWeight;
   int   status = IMU_math_estmMagnNorm(q, m, weight, &FOM->delt);
     
   // save results to system state

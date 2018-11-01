@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 #include "IMU_file.h"
 
 // core subsystem parsing inputs
@@ -41,8 +42,8 @@ static const char* IMU_core_config_name[] = {
   "mWeight",
   "mMag",
   "mMagThresh",
-  "mAng",
-  "mAngThresh",
+  "mDot",
+  "mDotThresh",
   "tranAlpha"
 };
 typedef enum {
@@ -61,8 +62,8 @@ typedef enum {
   IMU_core_mWeight      = 12,
   IMU_core_mMag         = 13,
   IMU_core_mMagThresh   = 14,
-  IMU_core_mAng         = 15,
-  IMU_core_mAngThresh   = 16,
+  IMU_core_mDot         = 15,
+  IMU_core_mDotThresh   = 16,
   IMU_core_tranAlpha    = 17
 } IMU_core_config_enum;
 
@@ -215,10 +216,10 @@ int IMU_file_coreLoad(
       sscanf(args, "%f", &config->mMag);
     else if (type == IMU_core_mMagThresh)
       sscanf(args, "%f", &config->mMagThresh);
-    else if (type == IMU_core_mAng)
-      sscanf(args, "%f", &config->mAng);
-    else if (type == IMU_core_mAngThresh)
-      sscanf(args, "%f", &config->mAngThresh);
+    else if (type == IMU_core_mDot)
+      sscanf(args, "%f", &config->mDot);
+    else if (type == IMU_core_mDotThresh)
+      sscanf(args, "%f", &config->mDotThresh);
     else if (type == IMU_core_tranAlpha)
       sscanf(args, "%f", &config->tranAlpha);
   }
@@ -261,8 +262,8 @@ int IMU_file_coreSave(
   fprintf(file, "  \"mWeight\": %0.2f,\n",         config->mWeight);
   fprintf(file, "  \"mMag\": %0.2f,\n",            config->mMag);
   fprintf(file, "  \"mMagThresh\": %0.2f,\n",      config->mMagThresh);
-  fprintf(file, "  \"mAng\": %0.2f,\n",            config->mAng);
-  fprintf(file, "  \"mAngThresh\": %0.2f,\n",      config->mAngThresh);
+  fprintf(file, "  \"mDot\": %0.2f,\n",            config->mDot);
+  fprintf(file, "  \"mDotThresh\": %0.2f,\n",      config->mDotThresh);
   fprintf(file, "  \"tranAlpha\": %0.2f,\n",       config->tranAlpha);
   fprintf(file, "}\n");
 

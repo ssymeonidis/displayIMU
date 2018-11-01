@@ -59,8 +59,8 @@ typedef struct {
   float                mWeight;         // magnetometer IMU weight
   float                mMag;            // magnetic north magn  
   float                mMagThresh;      // magnetic north magn error thres
-  float                mAng;            // magnetic north angle
-  float                mAngThresh;      // magnetic north angle error thresh
+  float                mDot;            // magnetic north angle
+  float                mDotThresh;      // magnetic north angle error thresh
   float                tranAlpha;       // translational accleration alpha
 } IMU_core_config;
 

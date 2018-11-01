@@ -63,8 +63,8 @@ typedef struct {
 typedef struct {
   float                mag;
   float                magFOM;
-  float                ang;
-  float                angFOM;
+  float                dot;
+  float                dotFOM;
   float                delt;
 } IMU_core_FOM_magn; 
 
