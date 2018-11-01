@@ -35,17 +35,19 @@ extern "C" {
 #include "IMU_type.h"
 
 // define status codes
-#define IMU_CALB_FNC_DISABLED            1
-#define IMU_CALB_UPDATED                 2
-#define IMU_CALB_CALBFNC_SAVED           3
-#define IMU_CALB_CALBFNC_REJECTED        4
+#define IMU_CALB_FNC_DISABLED      1
+#define IMU_CALB_UPDATED           2
+#define IMU_CALB_CALBFNC_SAVED     3
+#define IMU_CALB_CALBFNC_REJECTED  4
 
 // define error codes
-#define IMU_CALB_INST_OVERFLOW          -1
-#define IMU_CALB_BAD_INST               -2
-#define IMU_CALB_BAD_MODE               -3
-#define IMU_CALB_BAD_PNTR               -4
+#define IMU_CALB_INST_OVERFLOW     -1
+#define IMU_CALB_BAD_INST          -2
+#define IMU_CALB_BAD_MODE          -3
+#define IMU_CALB_BAD_PNTR          -4
 
+// define callback function args
+#define IMU_CALB_FNC_ARG           uint16_t, IMU_calb_FOM*, void*
 
 // define calibration types
 typedef enum {
@@ -71,7 +73,8 @@ typedef struct  {
   IMU_core_config       *corePntr;
   IMU_calb_FOM          FOM;
   uint16_t              numPnts;
-  int                   (*fnc)(uint16_t, IMU_calb_FOM*);
+  void                  *fncPntr;
+  int                   (*fnc)(IMU_CALB_FNC_ARG);
 } IMU_calb_state;
 
 
@@ -79,7 +82,7 @@ typedef struct  {
 int IMU_calb_init      (uint16_t *id, IMU_calb_config**);
 int IMU_calb_getConfig  (uint16_t id, IMU_calb_config**);
 int IMU_calb_setStruct  (uint16_t id, IMU_rect_config*, IMU_core_config*);
-int IMU_calb_setFnc     (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
+int IMU_calb_setFnc     (uint16_t id, int (*fncCalb)(IMU_CALB_FNC_ARG), void*);
 
 // system access function
 int IMU_calb_reset      (uint16_t id);

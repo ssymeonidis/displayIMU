@@ -37,7 +37,7 @@ extern "C" {
 // define constants
 #define IMU_PNTS_10USEC_TO_SEC   0.00001
 
-// define callback funciton args
+// define callback function args
 #define IMU_PNTS_FNC_ARG         uint16_t, IMU_pnts_entry*, void*
 
 // configuration structure definition

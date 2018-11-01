@@ -569,6 +569,7 @@ void* IMU_pnts_break(
 {
   threadStruct *vals = (threadStruct*)pntr;
   state[vals->id].fncBreak(vals->count, vals->entry, vals->pntr);
+  return NULL;
 }
 
 

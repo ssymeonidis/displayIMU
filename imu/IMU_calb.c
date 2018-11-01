@@ -18,20 +18,30 @@
 */
 
 // include statements 
+#if IMU_USE_PTHREAD
+#include <pthread.h>
+#include <unistd.h>
+#endif
 #include <string.h>           // memcpy
 #include "IMU_calb.h"
 
-// internally managed variables
+// internally defined variables
 static IMU_calb_config  config [IMU_MAX_INST];
 static IMU_calb_state   state  [IMU_MAX_INST];
 static IMU_pnts_entry   table  [IMU_MAX_INST][IMU_CALB_SIZE]; 
-static uint16_t         numInst     = 0;
+static uint16_t         numInst  = 0;
+#if IMU_USE_PTHREAD
+static pthread_t        thrd     [IMU_MAX_INST];
+static pthread_attr_t   thrdAttr [IMU_MAX_INST];
+static uint16_t         thrdVal  [IMU_MAX_INST];
+#endif
 
 // internally defined functions
 static void calb_1pnt_gyro (uint16_t id);
 static void calb_4pnt_magn (uint16_t id);
 static void calb_6pnt_full (uint16_t id);
-int    IMU_calb_defaultFnc (uint16_t id, IMU_calb_FOM*);
+void*  IMU_calb_update     (void    *id);
+int    IMU_calb_defaultFnc (IMU_CALB_FNC_ARG);
 
 
 /******************************************************************************
@@ -48,10 +58,11 @@ int IMU_calb_init(
 
   // assign internal calb function
   state[numInst].fnc      = IMU_calb_defaultFnc;
+  state[numInst].fncPntr  = NULL;
   
   // pass handle and config pointer
-  *id   = numInst; 
-  *pntr = &config[*id];
+  *id                     = numInst; 
+  *pntr                   = &config[*id];
   numInst++;
   
   // exit function (no errors)
@@ -105,14 +116,16 @@ int IMU_calb_setStruct(
 
 int IMU_calb_setFnc(
   uint16_t                id,
-  int                     (*fncCalb)(uint16_t, IMU_calb_FOM*))
+  int                     (*fnc)(IMU_CALB_FNC_ARG),
+  void                    *fncPntr)
 {
   // check device count overflow
-  if (fncCalb == NULL)
+  if (fnc == NULL)
     return IMU_CALB_BAD_PNTR;
 
   // copy rectify and core structures
-  state[id].fnc = fncCalb; 
+  state[id].fnc           = fnc;
+  state[id].fncPntr       = fncPntr;
   
   // exit function (no errors)
   return 0;
@@ -205,24 +218,18 @@ int IMU_calb_pnts(
   state[id].numPnts++;
 
   // determine whether enough points were collected
-  if (state[id].numPnts < IMU_calb_mode_pnts[state[id].mode])
-    return 0;
- 
-  // perform the specified calibration routine
-  if      (state[id].mode == IMU_calb_1pnt_gyro)
-    calb_1pnt_gyro(id);
-  else if (state[id].mode == IMU_calb_4pnt_magn)
-    calb_4pnt_magn(id);
-  else if (state[id].mode == IMU_calb_6pnt_full)
-    calb_6pnt_full(id);
-  else
-    return IMU_CALB_BAD_MODE; 
-
-  // call calibration function
-  state[id].fnc(id, &state[id].FOM);
+  if (state[id].numPnts >= IMU_calb_mode_pnts[state[id].mode]) {
+    thrdVal[id] = id;
+    #if IMU_USE_PTHREAD
+    pthread_create(&thrd[id], &thrdAttr[id], IMU_calb_update, &thrdVal);
+    #else
+    IMU_calb_update(&id);
+    #endif    
+    return IMU_CALB_UPDATED;
+  }
     
-  // exit fuction
-  return IMU_CALB_UPDATED;
+  // exit fuction (no errors)
+  return 0;
 }
 
 
@@ -235,6 +242,32 @@ int IMU_calb_stat(
   IMU_stat_state          *state)
 {
   return 0;
+}
+
+
+/******************************************************************************
+* adds points for calibration
+******************************************************************************/
+
+void* IMU_calb_update(
+  void                    *pntr)
+{
+  // define internal variables
+  int *id                 = (int*)pntr;  
+
+  // perform the specified calibration routine
+  if      (state[*id].mode == IMU_calb_1pnt_gyro)
+    calb_1pnt_gyro(*id);
+  else if (state[*id].mode == IMU_calb_4pnt_magn)
+    calb_4pnt_magn(*id);
+  else if (state[*id].mode == IMU_calb_6pnt_full)
+    calb_6pnt_full(*id);
+
+  // call calibration function
+  state[*id].fnc(*id, &state[*id].FOM, state[*id].fncPntr);
+
+  // exit function (no errors)
+  return NULL;
 }
 
 
@@ -330,10 +363,13 @@ void calb_6pnt_full(
 
 int IMU_calb_defaultFnc(
   uint16_t                id,
-  IMU_calb_FOM            *FOM)
+  IMU_calb_FOM            *FOM,
+  void                    *pntr)
 {
   // check out-of-bounds condition
   if (FOM == NULL)
+    return IMU_CALB_BAD_PNTR;
+  if (pntr != NULL)
     return IMU_CALB_BAD_PNTR;
   
   // verify FOM is above threshold and save
