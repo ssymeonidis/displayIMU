@@ -1,5 +1,5 @@
 CC          = gcc 
-CFLAGS      = -fPIC -Wall -Wextra -O2 -g 
+CFLAGS      = -fPIC -Wno-maybe-uninitialized -Wall -Wextra -O2 -g 
 LDFLAGS     = -shared  
 LIBS        = -lm
 BINDIR      = ../bin

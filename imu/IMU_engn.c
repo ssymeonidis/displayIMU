@@ -53,15 +53,15 @@ static IMU_engn_state    state    [IMU_MAX_INST];
 static IMU_engn_sensor   sensor   [IMU_MAX_INST];
 static uint16_t          numInst = 0;
 #if IMU_ENGN_QUEUE_SIZE
-static IMU_engn_queue    engnQueue;
+static IMU_engn_queue    queue;
 #endif
 #if IMU_USE_PTHREAD
-static useconds_t        engnSleepTime = 20;
-static pthread_mutex_t   engnLock;
-static int               engnThreadID;
-static pthread_t         engnThread;
-static uint8_t           engnExitThread;
-static uint8_t           engnIsExit;
+static useconds_t        sleepTime = 20;
+static pthread_mutex_t   thrdLock;
+static pthread_t         thrd;
+static pthread_attr_t    thrdAttr;
+static uint8_t           thrdExit;
+static uint8_t           thrdIsExit;
 #endif
 
 // internally defined functions
@@ -157,7 +157,7 @@ int IMU_engn_init(
 
   // create pthread mutex
   #if IMU_USE_PTHREAD
-  int err  = IMU_thrd_mutex_init(&engnLock);
+  int err  = IMU_thrd_mutex_init(&thrdLock);
   if (err) return IMU_CORE_FAILED_MUTEX;
   #endif
 
@@ -296,7 +296,32 @@ int IMU_engn_getSensor(
 * function to set calibration callback
 ******************************************************************************/
 
-int IMU_engn_setPntsFnc( 
+int IMU_engn_setCalbFnc( 
+  uint16_t		id,  
+  void                  (*fnc)(IMU_CALB_FNC_ARG),
+  void                  *fncPntr)
+{
+  // check out-of-bounds condition
+  if (id >= numInst)
+    return IMU_ENGN_BAD_INST;
+  if (!config[id].isCalb)
+    return IMU_ENGN_UNINITIALIZE_SYS;
+
+  // pass sensor structure and exit
+  int status = IMU_calb_setFnc(id, fnc, fncPntr);
+  if (status < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+
+  // exit function
+  return 0;
+}
+
+
+/******************************************************************************
+* function to set calibration callback
+******************************************************************************/
+
+int IMU_engn_setStableFnc( 
   uint16_t		id,  
   void                  (*fnc)(IMU_PNTS_FNC_ARG),
   void                  *fncPntr)
@@ -308,7 +333,12 @@ int IMU_engn_setPntsFnc(
     return IMU_ENGN_UNINITIALIZE_SYS;
 
   // pass sensor structure and exit
-  return IMU_pnts_fncBreak(id, fnc, fncPntr);
+  int status = IMU_pnts_fncStable(id, fnc, fncPntr);
+  if (status < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+
+  // exit function
+  return 0;
 }
 
 
@@ -316,9 +346,10 @@ int IMU_engn_setPntsFnc(
 * function to set calibration callback
 ******************************************************************************/
 
-int IMU_engn_setCalbFnc( 
+int IMU_engn_setBreakFnc( 
   uint16_t		id,  
-  int                   (*pntr)(uint16_t, IMU_calb_FOM*))
+  void                  (*fnc)(IMU_PNTS_FNC_ARG),
+  void                  *fncPntr)
 {
   // check out-of-bounds condition
   if (id >= numInst)
@@ -327,7 +358,12 @@ int IMU_engn_setCalbFnc(
     return IMU_ENGN_UNINITIALIZE_SYS;
 
   // pass sensor structure and exit
-  return IMU_calb_setFnc(id, pntr);
+  int status = IMU_pnts_fncBreak(id, fnc, fncPntr);
+  if (status < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+
+  // exit function
+  return 0;
 }
 
 
@@ -351,14 +387,14 @@ int IMU_engn_start()
   #endif
   
   // initialize datum queue
-  engnQueue.first = 0;
-  engnQueue.last  = IMU_ENGN_QUEUE_SIZE - 1;
-  engnQueue.count = 0;
+  queue.first     = 0;
+  queue.last      = IMU_ENGN_QUEUE_SIZE - 1;
+  queue.count     = 0;
   
   // currently supports pthread only
   #if IMU_USE_PTHREAD
-  engnExitThread = 0;
-  return pthread_create(&engnThread, NULL, IMU_engn_run, &engnThreadID);
+  thrdExit        = 0;
+  return pthread_create(&thrd, &thrdAttr, IMU_engn_run, NULL);
   #else
   return 0;
   #endif
@@ -377,10 +413,10 @@ int IMU_engn_stop()
   #endif
   
   #if IMU_USE_PTHREAD
-  engnExitThread = 1;
-  while (!engnIsExit)
-    usleep(engnSleepTime);
-  pthread_join(engnThreadID, NULL);
+  thrdExit = 1;
+  while (!thrdIsExit)
+    usleep(sleepTime);
+  pthread_join(thrd, NULL);
   return 0;
   #else
   return IMU_ENGN_FAILED_THREAD;
@@ -585,8 +621,7 @@ int IMU_engn_calbSave(
     return IMU_ENGN_BAD_INST;
 
   // get current orientation and pass to setRef
-  IMU_engn_state *pntr = &state[id];
-  int status = IMU_calb_save(pntr->idCalb);
+  int status = IMU_calb_save(state[id].idCalb);
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
     
@@ -638,14 +673,14 @@ int IMU_engn_data3(
   
   // process datum by subsystems
   if (config[id].isRect)
-    state[id].rect = IMU_rect_data3  (state[id].idRect, data3);
-  state[id].core   = IMU_core_data3  (state[id].idCore, data3, FOM);
+    state[id].rect = IMU_rect_data3(state[id].idRect, data3);
+  state[id].core   = IMU_core_data3(state[id].idCore, data3, FOM);
   if (config[id].isPnts)
-    state[id].pnts = IMU_pnts_data3  (state[id].idPnts, data3, &pnt);
+    state[id].pnts = IMU_pnts_data3(state[id].idPnts, data3, &pnt);
   if (config[id].isCalb && pnt != NULL)
-    state[id].calb = IMU_calb_pnts   (state[id].idCalb, pnt);
+    state[id].calb = IMU_calb_point(state[id].idCalb, pnt);
   if (config[id].isStat)
-    state[id].stat = IMU_stat_update (state[id].idStat, FOM, 3);
+    state[id].stat = IMU_stat_data3(state[id].idStat, data3, FOM);
   if (state[id].rect < 0 || state[id].pnts < 0 ||
       state[id].core < 0 || state[id].stat < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
@@ -692,36 +727,40 @@ int IMU_engn_getEstm(
 ******************************************************************************/
 
 #if IMU_ENGN_QUEUE_SIZE
-void *IMU_engn_run(
-  void                  *NA)
+void* IMU_engn_run(
+  void                  *pntr)
 {
+  // check input argument
+  if (pntr != NULL)
+    return NULL;
+
   // define local variables
   uint16_t              id;
   IMU_datum             datum;
 
   // main processing loop
-  engnIsExit            = 0;
-  while(!engnExitThread) {
+  thrdIsExit            = 0;
+  while(!thrdExit) {
   
     // wait until queue contains datum
-    while (engnQueue.count == 0)
-      usleep(engnSleepTime);
+    while (queue.count == 0)
+      usleep(sleepTime);
     
     // remove datum from queue
-    IMU_thrd_mutex_lock(&engnLock);
-    id                  = engnQueue.id[engnQueue.first];
-    memcpy(&datum, &engnQueue.datum[engnQueue.first], sizeof(IMU_datum));
-    engnQueue.count     = engnQueue.count - 1;
-    engnQueue.first     = engnQueue.first + 1;
-    if (engnQueue.first >= IMU_ENGN_QUEUE_SIZE)
-      engnQueue.first   = 0;
-    IMU_thrd_mutex_unlock(&engnLock);
+    IMU_thrd_mutex_lock(&thrdLock);
+    id                  = queue.id[queue.first];
+    memcpy(&datum, &queue.datum[queue.first], sizeof(IMU_datum));
+    queue.count         = queue.count - 1;
+    queue.first         = queue.first + 1;
+    if (queue.first >= IMU_ENGN_QUEUE_SIZE)
+      queue.first       = 0;
+    IMU_thrd_mutex_unlock(&thrdLock);
           
     // process datum
     IMU_engn_process(id, &datum);
   }
-  engnIsExit            = 1;
-  return 0;
+  thrdIsExit            = 1;
+  return NULL;
 }
 #endif
 
@@ -739,34 +778,34 @@ int IMU_engn_addQueue(
   int                   status = 0;
 
   // entering critical section
-  IMU_thrd_mutex_lock(&engnLock);
+  IMU_thrd_mutex_lock(&thrdLock);
 
   // check queue overflow
-  if (engnQueue.count >= IMU_ENGN_QUEUE_SIZE) {
-    engnQueue.count     = engnQueue.count - 1;
-    engnQueue.first     = engnQueue.first + 1;
-    if (engnQueue.first >= IMU_ENGN_QUEUE_SIZE)
-      engnQueue.first   = 0; 
+  if (queue.count >= IMU_ENGN_QUEUE_SIZE) {
+    queue.count         = queue.count - 1;
+    queue.first         = queue.first + 1;
+    if (queue.first >= IMU_ENGN_QUEUE_SIZE)
+      queue.first       = 0; 
     status = IMU_ENGN_QUEUE_OVERFLOW;
   }
   
   // add datum to queue
-  engnQueue.count       = engnQueue.count + 1;
-  engnQueue.last        = engnQueue.last  + 1;
-  if (engnQueue.last >= IMU_ENGN_QUEUE_SIZE)
-    engnQueue.last      = 0;
-  int idx               = engnQueue.last;
-  engnQueue.id[idx]     = id;
-  memcpy(&engnQueue.datum[idx], datum, sizeof(IMU_datum));
+  queue.count           = queue.count + 1;
+  queue.last            = queue.last  + 1;
+  if (queue.last >= IMU_ENGN_QUEUE_SIZE)
+    queue.last          = 0;
+  int idx               = queue.last;
+  queue.id[idx]         = id;
+  memcpy(&queue.datum[idx], datum, sizeof(IMU_datum));
   
   // exiting critical section
-  IMU_thrd_mutex_unlock(&engnLock);
+  IMU_thrd_mutex_unlock(&thrdLock);
   
   // exit function (pass error message or queue count)
   if (status < 0)
     return status;
   else 
-    return engnQueue.count;
+    return queue.count;
 }
 #endif
 
@@ -793,14 +832,14 @@ int IMU_engn_process(
   
   // process datum by subsystems
   if (config[id].isRect)
-    state[id].rect = IMU_rect_datum  (state[id].idRect, datum);
-  state[id].core   = IMU_core_datum  (state[id].idCore, datum, FOM);
+    state[id].rect = IMU_rect_datum(state[id].idRect, datum);
+  state[id].core   = IMU_core_datum(state[id].idCore, datum, FOM);
   if (config[id].isPnts)
-    state[id].pnts = IMU_pnts_datum  (state[id].idPnts, datum, &pnt);
+    state[id].pnts = IMU_pnts_datum(state[id].idPnts, datum, &pnt);
   if (config[id].isCalb && pnt != NULL)
-    state[id].calb = IMU_calb_pnts   (state[id].idCalb, pnt);
+    state[id].calb = IMU_calb_point(state[id].idCalb, pnt);
   if (config[id].isStat && FOM != NULL)
-    state[id].stat = IMU_stat_update (state[id].idStat, FOM, 1);
+    state[id].stat = IMU_stat_datum(state[id].idStat, datum, FOM);
   if (state[id].rect < 0 || state[id].core < 0 || state[id].pnts < 0  ||
       state[id].calb < 0 || state[id].stat < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;

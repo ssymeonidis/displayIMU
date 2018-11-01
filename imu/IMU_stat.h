@@ -36,31 +36,33 @@ extern "C" {
 // define configuration structure
 typedef struct {
   unsigned char          enable;          // enable system characterization
-  unsigned char          isGyro;          // process gyroscope data
-  unsigned char          isAccl;          // process accelerometer data
-  unsigned char          isMagn;          // process magnetometer data
-  float                  gAlpha;          // mean/std calc filter value 
-  float                  aAlpha;          // accelerometer filter value
-  float                  mAlpha;          // magnetometer filter value
+  float                  alpha;           // mean/std calc filter value 
 } IMU_stat_config;
 
 // define internal state 
 typedef struct {
-  float                  gFltr;
+  float                  gBias;
   float                  aMag;
-  float                  gMag;
-  float                  gAng;
+  float                  mMag;
+  float                  mDot;
+  uint8_t                gClock;
+  uint8_t                aClock;
+  uint8_t                mClock;
+  uint32_t               tGyro;
+  uint32_t               tAccl;
+  uint32_t               tMagn;
 } IMU_stat_state;
 
 
 // data structure access function
-int IMU_stat_init      (uint16_t *id, IMU_stat_config **config);
-int IMU_stat_getConfig (uint16_t id,  IMU_stat_config **config);
-int IMU_stat_getState  (uint16_t id,  IMU_stat_state  **state);
+int IMU_stat_init     (uint16_t *id, IMU_stat_config **config);
+int IMU_stat_getConfig (uint16_t id, IMU_stat_config **config);
+int IMU_stat_getState  (uint16_t id, IMU_stat_state  **state);
 
 // general operation functions 
-int IMU_stat_reset   (uint16_t id);
-int IMU_stat_update  (uint16_t id, IMU_core_FOM*, uint16_t size);
+int IMU_stat_reset     (uint16_t id);
+int IMU_stat_datum     (uint16_t id, IMU_datum*, IMU_core_FOM*);
+int IMU_stat_data3     (uint16_t id, IMU_data3*, IMU_core_FOM*);
 
 
 #ifdef __cplusplus

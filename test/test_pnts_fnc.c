@@ -78,7 +78,7 @@ int main(void)
   check_status(status, "IMU_engn_load failure");
 
   // set callback function
-  status = IMU_engn_setPntsFnc(id, &test_fnc, &fncVal);
+  status = IMU_engn_setBreakFnc(id, &test_fnc, &fncVal);
   check_status(status, "IMU_engn_setPntsFnc failure");
 
   // start data queue

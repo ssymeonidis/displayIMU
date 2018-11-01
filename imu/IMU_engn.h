@@ -149,33 +149,34 @@ typedef struct {
 
 
 // data structure access functions
-int IMU_engn_init       (IMU_engn_type, uint16_t *id);
-int IMU_engn_getSysID   (uint16_t id, IMU_engn_system, uint16_t *sysID);
-int IMU_engn_getConfig  (uint16_t id, IMU_engn_system, IMU_union_config*);
-int IMU_engn_getState   (uint16_t id, IMU_engn_system, IMU_union_state*);
-int IMU_engn_getSensor  (uint16_t id, IMU_engn_sensor**);
-int IMU_engn_setPntsFnc (uint16_t id, void (*fnc)(IMU_PNTS_FNC_ARG), void*);
-int IMU_engn_setCalbFnc (uint16_t id, int (*fncCalb)(uint16_t, IMU_calb_FOM*));
+int IMU_engn_init         (IMU_engn_type, uint16_t *id);
+int IMU_engn_getSysID     (uint16_t id, IMU_engn_system, uint16_t *sysID);
+int IMU_engn_getConfig    (uint16_t id, IMU_engn_system, IMU_union_config*);
+int IMU_engn_getState     (uint16_t id, IMU_engn_system, IMU_union_state*);
+int IMU_engn_getSensor    (uint16_t id, IMU_engn_sensor**);
+int IMU_engn_setCalbFnc   (uint16_t id, void (*fnc)(IMU_CALB_FNC_ARG), void*);
+int IMU_engn_setStableFnc (uint16_t id, void (*fnc)(IMU_PNTS_FNC_ARG), void*);
+int IMU_engn_setBreakFnc  (uint16_t id, void (*fnc)(IMU_PNTS_FNC_ARG), void*);
 
 // enable/disable queue controls
-int IMU_engn_start      ();
-int IMU_engn_stop       ();
+int IMU_engn_start        ();
+int IMU_engn_stop         ();
 
 // read/write config fimctopms
-int IMU_engn_load       (uint16_t id, const char* filename, IMU_engn_system);
-int IMU_engn_save       (uint16_t id, const char* filename, IMU_engn_system);
+int IMU_engn_load         (uint16_t id, const char* filename, IMU_engn_system);
+int IMU_engn_save         (uint16_t id, const char* filename, IMU_engn_system);
 
 // system control functions
-int IMU_engn_reset      (uint16_t id);
-int IMU_engn_setRef     (uint16_t id, float* ref);
-int IMU_engn_setRefCur  (uint16_t id);
-int IMU_engn_calbStart  (uint16_t id, IMU_calb_mode);
-int IMU_engn_calbSave   (uint16_t id);
+int IMU_engn_reset        (uint16_t id);
+int IMU_engn_setRef       (uint16_t id, float* ref);
+int IMU_engn_setRefCur    (uint16_t id);
+int IMU_engn_calbStart    (uint16_t id, IMU_calb_mode);
+int IMU_engn_calbSave     (uint16_t id);
 
 // state update/estimation functions
-int IMU_engn_datum      (uint16_t id, IMU_datum*);
-int IMU_engn_data3      (uint16_t id, IMU_data3*);
-int IMU_engn_getEstm    (uint16_t id, float t, IMU_engn_estm*);
+int IMU_engn_datum        (uint16_t id, IMU_datum*);
+int IMU_engn_data3        (uint16_t id, IMU_data3*);
+int IMU_engn_getEstm      (uint16_t id, float t, IMU_engn_estm*);
 
 
 #ifdef __cplusplus

@@ -40,8 +40,8 @@ static uint16_t         thrdVal  [IMU_MAX_INST];
 static void calb_1pnt_gyro (uint16_t id);
 static void calb_4pnt_magn (uint16_t id);
 static void calb_6pnt_full (uint16_t id);
-void*  IMU_calb_update     (void    *id);
-int    IMU_calb_defaultFnc (IMU_CALB_FNC_ARG);
+void* IMU_calb_update     (void    *id);
+void  IMU_calb_defaultFnc (IMU_CALB_FNC_ARG);
 
 
 /******************************************************************************
@@ -116,7 +116,7 @@ int IMU_calb_setStruct(
 
 int IMU_calb_setFnc(
   uint16_t                id,
-  int                     (*fnc)(IMU_CALB_FNC_ARG),
+  void                    (*fnc)(IMU_CALB_FNC_ARG),
   void                    *fncPntr)
 {
   // check device count overflow
@@ -202,7 +202,7 @@ int IMU_calb_save(
 * adds points for calibration
 ******************************************************************************/
 
-int IMU_calb_pnts(
+int IMU_calb_point(
   uint16_t                id, 
   IMU_pnts_entry          *pntr)
 {
@@ -298,25 +298,25 @@ void calb_4pnt_magn(
   int i;
 
   // process completed points table
-  rect->gBias[0]     = 0.0f;
-  rect->gBias[1]     = 0.0f;
-  rect->gBias[2]     = 0.0f;
-  rect->mBias[0]     = 0.0f;
-  rect->mBias[1]     = 0.0f;
+  rect->gBias[0]          = 0.0f;
+  rect->gBias[1]          = 0.0f;
+  rect->gBias[2]          = 0.0f;
+  rect->mBias[0]          = 0.0f;
+  rect->mBias[1]          = 0.0f;
   for (i=0; i<4; i++) {
-    rect->gBias[0]  -= table[id][i].gFltr[0];
-    rect->gBias[1]  -= table[id][i].gFltr[1];
-    rect->gBias[2]  -= table[id][i].gFltr[2];
-    rect->mBias[0]  -= table[id][i].mFltr[0];
-    rect->mBias[1]  -= table[id][i].mFltr[1];
+    rect->gBias[0]       -= table[id][i].gFltr[0];
+    rect->gBias[1]       -= table[id][i].gFltr[1];
+    rect->gBias[2]       -= table[id][i].gFltr[2];
+    rect->mBias[0]       -= table[id][i].mFltr[0];
+    rect->mBias[1]       -= table[id][i].mFltr[1];
   }
 
   // convert sums to averages
-  rect->gBias[0]    /= 4.0f;
-  rect->gBias[1]    /= 4.0f;
-  rect->gBias[2]    /= 4.0f;
-  rect->mBias[0]    /= 4.0f;
-  rect->mBias[1]    /= 4.0f;
+  rect->gBias[0]         /= 4.0f;
+  rect->gBias[1]         /= 4.0f;
+  rect->gBias[2]         /= 4.0f;
+  rect->mBias[0]         /= 4.0f;
+  rect->mBias[1]         /= 4.0f;
 }
 
 
@@ -328,32 +328,32 @@ void calb_6pnt_full(
   uint16_t                id)
 { 
   // define internal variables
-  IMU_rect_config *rect = &state[id].rect;
+  IMU_rect_config *rect   = &state[id].rect;
   int i;
 
   // process completed points table
-  rect->gBias[0]     = 0;
-  rect->gBias[1]     = 0;
-  rect->gBias[2]     = 0;
-  rect->aBias[0]     = 0;
-  rect->aBias[1]     = 0;
-  rect->aBias[2]     = 0;
+  rect->gBias[0]          = 0;
+  rect->gBias[1]          = 0;
+  rect->gBias[2]          = 0;
+  rect->aBias[0]          = 0;
+  rect->aBias[1]          = 0;
+  rect->aBias[2]          = 0;
   for (i=0; i<6; i++) {
-    rect->gBias[0]  -= table[id][i].gFltr[0];
-    rect->gBias[1]  -= table[id][i].gFltr[1];
-    rect->gBias[2]  -= table[id][i].gFltr[2];
-    rect->aBias[0]  -= table[id][i].aFltr[0];
-    rect->aBias[1]  -= table[id][i].aFltr[1];
-    rect->aBias[2]  -= table[id][i].aFltr[2];
+    rect->gBias[0]       -= table[id][i].gFltr[0];
+    rect->gBias[1]       -= table[id][i].gFltr[1];
+    rect->gBias[2]       -= table[id][i].gFltr[2];
+    rect->aBias[0]       -= table[id][i].aFltr[0];
+    rect->aBias[1]       -= table[id][i].aFltr[1];
+    rect->aBias[2]       -= table[id][i].aFltr[2];
   }
 
   // convert sums to averages
-  rect->gBias[0]    /= 6.0f;
-  rect->gBias[1]    /= 6.0f;
-  rect->gBias[2]    /= 6.0f;
-  rect->aBias[0]    /= 6.0f;
-  rect->aBias[1]    /= 6.0f;
-  rect->aBias[2]    /= 6.0f;
+  rect->gBias[0]         /= 6.0f;
+  rect->gBias[1]         /= 6.0f;
+  rect->gBias[2]         /= 6.0f;
+  rect->aBias[0]         /= 6.0f;
+  rect->aBias[1]         /= 6.0f;
+  rect->aBias[2]         /= 6.0f;
 }
 
 
@@ -361,18 +361,17 @@ void calb_6pnt_full(
 * function to estimate orientation and acceleration
 ******************************************************************************/
 
-int IMU_calb_defaultFnc(
+void IMU_calb_defaultFnc(
   uint16_t                id,
   IMU_calb_FOM            *FOM,
   void                    *pntr)
 {
   // check out-of-bounds condition
   if (FOM == NULL)
-    return IMU_CALB_BAD_PNTR;
+    return;
   if (pntr != NULL)
-    return IMU_CALB_BAD_PNTR;
+    return;
   
   // verify FOM is above threshold and save
   IMU_calb_save(id);
-  return IMU_CALB_CALBFNC_SAVED;
 }

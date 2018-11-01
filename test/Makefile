@@ -1,5 +1,5 @@
 CC          = gcc 
-CFLAGS      = -fPIC -Wall -Wextra -O2 -g 
+CFLAGS      = -fPIC -Wall -Wextra -O2 -g
 INCLUDE     = -I../imu
 BINDIR      = bin
 OBJDIR      = obj

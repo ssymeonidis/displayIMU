@@ -38,7 +38,10 @@ int IMU_stat_init(
   if (numInst >= IMU_MAX_INST)
     return IMU_STAT_INST_OVERFLOW;
 
-  // return inst handle and config struct
+  // reset instance
+  IMU_stat_reset(*id);
+
+  // pass inst handle and config pointer
   *id   = numInst; 
   *pntr = &config[*id];
   numInst++;
@@ -56,11 +59,11 @@ int IMU_stat_getConfig(
   uint16_t                id,
   IMU_stat_config         **pntr)
 {
-  // check for out-of-bounds condition
-  if (id > numInst-1)
+  // check out-of-bounds condition
+  if (id >= numInst)
     return IMU_STAT_BAD_INST;
 
-  // return state
+  // pass state and exit (no errors)
   *pntr = &config[id];
   return 0;
 }
@@ -74,11 +77,11 @@ int IMU_stat_getState(
   uint16_t                id,  
   IMU_stat_state          **pntr)
 {
-  // check for out-of-bounds condition
-  if (id > numInst-1)
+  // check out-of-bounds condition
+  if (id >= numInst)
     return IMU_STAT_BAD_INST; 
 
-  // return state
+  // pass state and exit (no errors)
   *pntr = &state[id];
   return 0;
 }
@@ -91,18 +94,43 @@ int IMU_stat_getState(
 int IMU_stat_reset(
   uint16_t                id)
 {
+  state[id].gBias         = 0.0f;
+  state[id].aMag          = 0.0f;
+  state[id].mMag          = 0.0f;
+  state[id].mDot          = 0.0f;
+  state[id].gClock        = 1;
+  state[id].aClock        = 1;
+  state[id].mClock        = 1;
+  state[id].tGyro         = 0;
+  state[id].tAccl         = 0;
+  state[id].tMagn         = 0;
+
+  // exit function (no failures)
   return 0;
 }
 
 
 /******************************************************************************
-* process gyroscope, accelerometer, and magnetometer vectors
+* collect statistics on datum
 ******************************************************************************/
 
-int IMU_stat_update(
-  uint16_t                id,  
-  IMU_core_FOM            *FOM,
-  uint16_t                size)
+int IMU_stat_datum(
+  uint16_t                id, 
+  IMU_datum               *datum, 
+  IMU_core_FOM            *FOM)
+{
+  return 0;
+}
+
+
+/******************************************************************************
+* collect statistics on data3
+******************************************************************************/
+
+int IMU_stat_data3(
+  uint16_t                id, 
+  IMU_data3               *data3, 
+  IMU_core_FOM            *FOM)
 {
   return 0;
 }

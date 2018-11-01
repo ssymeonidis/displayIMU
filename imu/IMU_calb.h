@@ -74,7 +74,7 @@ typedef struct  {
   IMU_calb_FOM          FOM;
   uint16_t              numPnts;
   void                  *fncPntr;
-  int                   (*fnc)(IMU_CALB_FNC_ARG);
+  void                  (*fnc)(IMU_CALB_FNC_ARG);
 } IMU_calb_state;
 
 
@@ -82,7 +82,7 @@ typedef struct  {
 int IMU_calb_init      (uint16_t *id, IMU_calb_config**);
 int IMU_calb_getConfig  (uint16_t id, IMU_calb_config**);
 int IMU_calb_setStruct  (uint16_t id, IMU_rect_config*, IMU_core_config*);
-int IMU_calb_setFnc     (uint16_t id, int (*fncCalb)(IMU_CALB_FNC_ARG), void*);
+int IMU_calb_setFnc     (uint16_t id, void (*fnc)(IMU_CALB_FNC_ARG), void*);
 
 // system access function
 int IMU_calb_reset      (uint16_t id);
@@ -90,7 +90,7 @@ int IMU_calb_start      (uint16_t id, IMU_calb_mode);
 int IMU_calb_save       (uint16_t id);
 
 // sensor interface functions
-int IMU_calb_pnts       (uint16_t id, IMU_pnts_entry*);
+int IMU_calb_point      (uint16_t id, IMU_pnts_entry*);
 int IMU_calb_stat       (uint16_t id, IMU_stat_state*);
 
 
