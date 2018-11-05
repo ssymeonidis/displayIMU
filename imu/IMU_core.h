@@ -48,7 +48,6 @@ typedef struct {
   unsigned char        isGyro;          // enable gyroscope data
   unsigned char        isAccl;          // enable accelerometer data
   unsigned char        isMagn;          // enable magnetometer data
-  unsigned char        isStable;        // enable detection of no movement
   unsigned char        isFOM;           // enable weight based on FOM
   unsigned char        isTran;          // enable translational estimate
   unsigned char        isPredict;       // enable extrapolation of estim

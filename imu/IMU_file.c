@@ -177,6 +177,7 @@ static char temp[line_size];
 // internal function defintions
 static int  get_line   (FILE *file, char **field, char **args);
 static int  get_field  (char *field, const char *names[], int size);
+static int  get_string (char *args, char *val);
 static int  get_floats (char *args, float *vals, int size);
 static int  get_bool   (char *args, uint8_t *val);
 static void write_floats (FILE *file, float *vals, int size);
@@ -680,15 +681,15 @@ int IMU_file_engnLoad(
     else if (type == IMU_engn_qRef) 
       get_floats(args, config->qRef, 4);
     else if (type == IMU_engn_configFileCore)
-      sscanf(args, "%s", config->configFileCore);
+      get_string(args, config->configFileCore);
     else if (type == IMU_engn_configFileRect)
-      sscanf(args, "%s", config->configFileRect);
+      get_string(args, config->configFileRect);
     else if (type == IMU_engn_configFilePnts)
-      sscanf(args, "%s", config->configFilePnts);
+      get_string(args, config->configFilePnts);
     else if (type == IMU_engn_configFileStat)
-      sscanf(args, "%s", config->configFileStat);
+      get_string(args, config->configFileStat);
     else if (type == IMU_engn_configFileCalb)
-      sscanf(args, "%s", config->configFileCalb);
+      get_string(args, config->configFileCalb);
   }
 
   // exit function
@@ -784,6 +785,20 @@ int get_field(
   } 
   return IMU_FILE_INVALID_FIELD; 
 }
+
+
+/******************************************************************************
+* utility function - gets a line and seperates field from arguments
+******************************************************************************/
+
+int get_string(
+  char                 *args, 
+  char                 *val)
+{
+  char *tmp = strtok(args, "\" ");
+  strcpy(val, tmp);
+  return 0;
+} 
 
 
 /******************************************************************************

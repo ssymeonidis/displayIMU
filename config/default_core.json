@@ -1,0 +1,19 @@
+{
+  "enable": true,
+  "isGyro": true,
+  "isAccl": true,
+  "isMagn": true,
+  "isFOM": false,
+  "isTran": false,
+  "isPredict": false,
+  "gScale": 0.001,
+  "aWeight": 0.005,
+  "aMag": 0.0,
+  "aMagThresh": 0.0,
+  "mWeight": 0.005,
+  "mMag": 0.0,
+  "mMagThresh": 0.0,
+  "mDot": 0.0,
+  "mDotThresh": 0.0,
+  "tranAlpha": 0.01
+}

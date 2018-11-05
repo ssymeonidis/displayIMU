@@ -1,0 +1,14 @@
+{
+  "enable": false,
+  "isGyro": true,
+  "isAccl": true,
+  "isMagn": true,
+  "tHold": 100,
+  "tStable": 250,
+  "gAlpha": 0.01,
+  "gThresh": 0.0,
+  "aAlpha": 0.01,
+  "aThresh": 0.0,
+  "mAlpha": 0.01,
+  "mThresh": 0.0
+}

@@ -40,7 +40,7 @@ FILE*                    dataIF_file;
 // define internal/utility functions
 void dataIF_error(const char *msg);
 void dataIF_lineUPD(char* line, int line_size);
-void dataIF_lineCSV(char* line, int line_size);
+int  dataIF_lineCSV(char* line, int line_size);
 
 
 /******************************************************************************
@@ -53,22 +53,14 @@ void dataIF_init(IMU_engn_type type)
   state.isFirstFrame     = 1;
   state.isExit           = 1;
   config.isRealtime      = 0;
+  config.isRepeat        = 0;
   
   // intialize the IMU engine
-  int status = IMU_engn_init(type, &state.imuID, &state.imuConfig);
-  if (status < 0)
+  int status = IMU_engn_init(type, &state.imuID);
+  if (status < 0) {
     printf("initialization error #%d\n", status);
-}
-
-
-/******************************************************************************
-* get pointer to sensor structure
-******************************************************************************/
-
-void dataIF_getConfig(
-  dataIF_config          **pntr)
-{
-  *pntr                  = &config;
+    exit(0);
+  }
 }
 
 
@@ -123,9 +115,10 @@ void dataIF_startCSV(
 * main function for receiving/parsing data and updating IMU
 ******************************************************************************/
 
-void dataIF_process()
+int dataIF_process()
 {
   // define the variables
+  int                    status = 0;
   const int              line_size = 256;
   char                   line[line_size];
   int                    datum_type; 
@@ -134,7 +127,7 @@ void dataIF_process()
   if (!state.isCSV)
     dataIF_lineUPD(line, line_size);
   else 
-    dataIF_lineCSV(line, line_size);
+    status = dataIF_lineCSV(line, line_size);
 
   // determine the datum type
   sscanf(line, "%d", &datum_type);
@@ -142,7 +135,7 @@ void dataIF_process()
   // process synced data (all three sensors)
   if (datum_type == 0) {
     IMU_data3    data3;
-    sscanf(line, "%*d, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f", 
+    sscanf(line, "%*d, %u, %hu, %hu, %hu, %hu, %hu, %hu, %hu, %hu, %hu", 
       &data3.t,
       &data3.g[0], &data3.g[1], &data3.g[2], 
       &data3.a[0], &data3.a[1], &data3.a[2],
@@ -153,9 +146,8 @@ void dataIF_process()
   // process sensor datum (asynchrous feeds)
   else if (datum_type < 4) {
     IMU_datum    datum;
-    sscanf(line, "%d, %f, %f, %f, %f", 
-      &datum.type, &datum.t,
-      &datum.val[0], &datum.val[1], &datum.val[2]);
+    sscanf(line, "%d, %u, %hu, %hu, %hu", 
+      &datum.type, &datum.t, &datum.val[0], &datum.val[1], &datum.val[2]);
     IMU_engn_datum(0, &datum);
   }
 }
@@ -224,11 +216,12 @@ void dataIF_lineUPD(
 * extracts CSV line
 ******************************************************************************/
 
-void dataIF_lineCSV(
+int dataIF_lineCSV(
   char                   *line,
   int                    line_size)
 {
   // define local variables
+  int                    status;
   struct timeval         time;
   double                 time_cur       = 0;
   double                 time_delt_sys  = 0;
@@ -238,10 +231,15 @@ void dataIF_lineCSV(
   // extracts one line (repeats when the file ends)
   results = fgets(line, line_size, dataIF_file);
   if (results == NULL) {
-    fseek(dataIF_file, 0, SEEK_SET);
-    state.isFirstFrame = 1;
-    results = fgets(line, line_size, dataIF_file);
-  } 
+    if (config.isRepeat) {
+      fseek(dataIF_file, 0, SEEK_SET);
+      state.isFirstFrame = 1;
+      results = fgets(line, line_size, dataIF_file);
+    }
+    status               = 1;
+  } else {
+    status               = 0;
+  }
 
   // determine the datum type
   float sensor_time;
@@ -268,4 +266,7 @@ void dataIF_lineCSV(
     state.timeInitSen  = sensor_time;
     state.isFirstFrame = 0;
   }
+
+  // exit function
+  return status;
 }

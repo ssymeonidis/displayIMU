@@ -32,6 +32,7 @@ extern "C" {
 // define IMU state structure
 typedef struct {
   uint8_t                isRealtime;
+  uint8_t                isRepeat;
 } dataIF_config;
 
 typedef struct {
@@ -48,12 +49,11 @@ typedef struct {
 
 // initialization function
 void dataIF_init        (IMU_engn_type);
-void dataIF_getConfig   (dataIF_config**);
 
 // access functions
 void dataIF_startUDP    (int         portno);
 void dataIF_startCSV    (const char* filename);
-void dataIF_process     ();
+int  dataIF_process     ();
 void dataIF_exit        ();
 void *dataIF_run        (void* id);
 

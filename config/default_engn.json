@@ -1,0 +1,13 @@
+{
+  "isFOM": false,
+  "isTran": false,
+  "isRef": true,
+  "isAng": true,
+  "isSensorStruct": false,
+  "qRef": [1.0, 0.0, 0.0, 0.0],
+  "configFileCore": "../config/default_core.json",
+  "configFileRect": "../config/default_rect.json",
+  "configFilePnts": "../config/default_pnts.json",
+  "configFileStat": "../config/default_stat.json",
+  "configFileCalb": "../config/default_calb.json",
+}
