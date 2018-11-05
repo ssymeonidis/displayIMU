@@ -97,7 +97,7 @@ int IMU_rect_datum(
 ******************************************************************************/
 
 int IMU_rect_data3(
-  uint16_t              id, 
+  uint16_t              id,
   IMU_data3             *data3)
 {
   // rectify all sensors

@@ -120,35 +120,55 @@ typedef enum {
 } IMU_pnts_config_enum;
 
 // stat subsystem parsing inputs
+static const int   IMU_stat_config_size   = 2;
+static const char* IMU_stat_config_name[] = {
+  "enable",
+  "alpha"
+};
+typedef enum {
+  IMU_stat_enable      = 0,
+  IMU_stat_alpha       = 1
+} IMU_stat_config_enum;
+
+// stat subsystem parsing inputs
 static const int   IMU_calb_config_size   = 1;
 static const char* IMU_calb_config_name[] = {
-  "enable",
+  "enable"
 };
 typedef enum {
   IMU_calb_enable      = 0
 } IMU_calb_config_enum;
 
 // stat subsystem parsing inputs
-static const int   IMU_stat_config_size   = 7;
-static const char* IMU_stat_config_name[] = {
-  "enable",
-  "isGyro",
-  "isAccl",
-  "isMagn",
-  "gAlpha",
-  "aAlpha",
-  "mAlpha"
+static const int   IMU_engn_config_size   = 11;
+static const char* IMU_engn_config_name[] = {
+  "isFOM",
+  "isPos",
+  "isRef",
+  "isAng",
+  "isSensorStruct",
+  "qRef",
+  "configFileCore",
+  "configFileRect",
+  "configFilePnts",
+  "configFileStat",
+  "configFileCalb"
 };
 typedef enum {
-  IMU_stat_enable      = 0,
-  IMU_stat_isGyro      = 0,
-  IMU_stat_isAccl      = 1,
-  IMU_stat_isMagn      = 2,
-  IMU_stat_gAlpha      = 3,
-  IMU_stat_gThresh     = 4,
-  IMU_stat_aAlpha      = 5,
-  IMU_stat_mAlpha      = 6,
-} IMU_stat_config_enum;
+  IMU_engn_isFOM           = 0,
+  IMU_engn_isPos           = 1,
+  IMU_engn_isRef           = 2,
+  IMU_engn_isAng           = 3,
+  IMU_engn_isSensorStruct  = 4,
+  IMU_engn_qRef            = 5,
+  IMU_engn_configFileCore  = 6,
+  IMU_engn_configFileRect  = 7,
+  IMU_engn_configFilePnts  = 8,
+  IMU_engn_configFileStat  = 9,
+  IMU_engn_configFileCalb  = 10
+} IMU_engn_config_enum;
+
+
 
 // parsing line buffers
 #define line_size 128
@@ -480,6 +500,77 @@ int IMU_file_pntsSave(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
+int IMU_file_statLoad(
+  const char            *filename,
+  IMU_stat_config       *config)
+{
+  // define internal variables
+  FILE                  *file;
+  char                  *field;
+  char                  *args;
+  IMU_stat_config_enum  type;     
+  int                   status;
+
+  // open configuration json file 
+  file = fopen(filename, "r");
+  if (file == NULL)
+    return IMU_FILE_INVALID_FILE;
+
+  // main loop that parse json file line by line
+  while (1) {
+    // read line and parse field/args
+    status = get_line(file, &field, &args);
+    if (status == 1)
+      continue;
+    if (status > 1 || status < 0)
+      break;
+
+    // extract specified field arguments  
+    type = get_field(field, IMU_stat_config_name, IMU_stat_config_size);
+    if      (type == IMU_stat_enable)
+      get_bool(args, &config->enable);
+    else if (type == IMU_stat_alpha)
+      sscanf(args, "%f", &config->alpha);
+  }
+
+  // exit function
+  fclose(file);
+  return 0;
+}
+
+
+/******************************************************************************
+* writes configuration structure to a json file
+******************************************************************************/
+
+int IMU_file_statSave(
+  const char           *filename,
+  IMU_stat_config      *config)
+{
+  // define internal variables
+  FILE                 *file;
+
+  // open configuration json file 
+  file = fopen(filename, "w");
+  if (file == NULL)
+    return IMU_FILE_INVALID_FILE;
+
+  // write contents to json file one line at a time
+  fprintf(file, "{\n");
+  fprintf(file, "  \"enable\": ");         write_bool(file, config->enable);
+  fprintf(file, "  \"alpha\": %0.2f,\n",   config->alpha);
+  fprintf(file, "}\n");
+
+  // exit function
+  fclose(file);
+  return 0;
+}
+
+
+/******************************************************************************
+* reads configuration json file into memory (structure)
+******************************************************************************/
+
 int IMU_file_calbLoad(
   const char           *filename, 
   IMU_calb_config      *config)
@@ -548,94 +639,66 @@ int IMU_file_calbSave(
 * reads configuration json file into memory (structure)
 ******************************************************************************/
 
-int IMU_file_statLoad(
-  const char            *filename,
-  IMU_stat_config       *config)
+int IMU_file_engnLoad(
+  const char            *filename, 
+  IMU_engn_config       *config)
 {
   // define internal variables
   FILE                  *file;
   char                  *field;
   char                  *args;
-  IMU_stat_config_enum  type;     
+  IMU_engn_config_enum  type;
   int                   status;
 
-  // open configuration json file 
+  // open configuration json file
   file = fopen(filename, "r");
   if (file == NULL)
     return IMU_FILE_INVALID_FILE;
 
+  // initialize filename to be empty
+  config->configFileCore[0] = '\0';
+  config->configFileRect[0] = '\0';
+  config->configFilePnts[0] = '\0';
+  config->configFileStat[0] = '\0';
+  config->configFileCalb[0] = '\0';
+
   // main loop that parse json file line by line
   while (1) {
+
     // read line and parse field/args
     status = get_line(file, &field, &args);
-    if (status == 1)
-      continue;
     if (status > 1 || status < 0)
       break;
 
     // extract specified field arguments  
-    type = get_field(field, IMU_stat_config_name, IMU_stat_config_size);
-    if      (type == IMU_stat_isGyro)
-      get_bool(args, &config->isGyro);
-    else if (type == IMU_stat_isAccl)
-      get_bool(args, &config->isAccl);
-    else if (type == IMU_stat_isMagn)
-      get_bool(args, &config->isMagn);
-    else if (type == IMU_stat_gAlpha)
-      sscanf(args, "%f", &config->gAlpha);
-    else if (type == IMU_stat_aAlpha)
-      sscanf(args, "%f", &config->aAlpha);
-    else if (type == IMU_stat_mAlpha)
-      sscanf(args, "%f", &config->mAlpha);
+    type = get_field(field, IMU_engn_config_name, IMU_engn_config_size);
+    if      (type == IMU_engn_isFOM)
+      get_bool(args, &config->isFOM);
+    else if (type == IMU_engn_isPos)
+      get_bool(args, &config->isPos);
+    else if (type == IMU_engn_isRef)
+      get_bool(args, &config->isRef);
+    else if (type == IMU_engn_isAng)
+      get_bool(args, &config->isAng);
+    else if (type == IMU_engn_isSensorStruct)
+      get_bool(args, &config->isSensorStruct);
+    else if (type == IMU_engn_qRef) 
+      get_floats(args, config->qRef, 4);
+    else if (type == IMU_engn_configFileCore)
+      sscanf(args, "%s", config->configFileCore);
+    else if (type == IMU_engn_configFileRect)
+      sscanf(args, "%s", config->configFileRect);
+    else if (type == IMU_engn_configFilePnts)
+      sscanf(args, "%s", config->configFilePnts);
+    else if (type == IMU_engn_configFileStat)
+      sscanf(args, "%s", config->configFileStat);
+    else if (type == IMU_engn_configFileCalb)
+      sscanf(args, "%s", config->configFileCalb);
   }
 
   // exit function
   fclose(file);
-  return 0;
-}
-
-
-/******************************************************************************
-* writes configuration structure to a json file
-******************************************************************************/
-
-int IMU_file_statSave(
-  const char           *filename,
-  IMU_stat_config      *config)
-{
-  // define internal variables
-  FILE                 *file;
-
-  // open configuration json file 
-  file = fopen(filename, "w");
-  if (file == NULL)
-    return IMU_FILE_INVALID_FILE;
-
-  // write contents to json file one line at a time
-  fprintf(file, "{\n");
-  fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
-  fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
-  fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
-  fprintf(file, "  \"gAlpha\": %0.2f,\n",          config->gAlpha);
-  fprintf(file, "  \"aAlpha\": %0.2f,\n",          config->aAlpha);
-  fprintf(file, "  \"mAlpha\": %0.2f\n",           config->mAlpha);
-  fprintf(file, "}\n");
-
-  // exit function
-  fclose(file);
-  return 0;
-}
-
-
-/******************************************************************************
-* reads configuration json file into memory (structure)
-******************************************************************************/
-
-int IMU_file_engnLoad(
-  const char           *filename, 
-  IMU_engn_config      *config)
-{
-  return 0;
+  return 0;  
 }
 
 
@@ -644,9 +707,40 @@ int IMU_file_engnLoad(
 ******************************************************************************/
 
 int IMU_file_engnSave(
-  const char           *filename, 
-  IMU_engn_config      *config)
+  const char            *filename, 
+  IMU_engn_config       *config)
 {
+  // define internal variables
+  FILE                  *file;
+
+  // open configuration json file 
+  file = fopen(filename, "w");
+  if (file == NULL)
+    return IMU_FILE_INVALID_FILE;
+
+  // write contents to json file one line at a time
+  uint8_t               isSensor = config->isSensorStruct;
+  fprintf(file, "{\n");
+  fprintf(file, "  \"isFOM\": ");           write_bool  (file, config->isFOM);
+  fprintf(file, "  \"isPos\": ");           write_bool  (file, config->isPos);
+  fprintf(file, "  \"isRef\": ");           write_bool  (file, config->isRef);
+  fprintf(file, "  \"isAng\": ");           write_bool  (file, config->isAng);
+  fprintf(file, "  \"isSensorStruct\": ");  write_bool  (file, isSensor);
+  fprintf(file, "  \"qRef\": ");            write_floats(file, config->qRef, 4);
+  if (config->configFileCore[0] != '\0')
+    fprintf(file, "  \"configFileCore\": %s", config->configFileCore);
+  if (config->configFileRect[0] != '\0')
+    fprintf(file, "  \"configFileRect\": %s", config->configFileRect);
+  if (config->configFilePnts[0] != '\0')
+    fprintf(file, "  \"configFilePnts\": %s", config->configFilePnts);
+  if (config->configFileStat[0] != '\0')
+    fprintf(file, "  \"configFileStat\": %s", config->configFileStat);
+  if (config->configFileCalb[0] != '\0')
+    fprintf(file, "  \"configFileCalb\": %s", config->configFileCalb);
+  fprintf(file, "}\n");
+
+  // exit function
+  fclose(file);
   return 0;
 }
 

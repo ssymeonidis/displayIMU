@@ -124,17 +124,18 @@ int IMU_engn_init(
     return IMU_ENGN_BAD_ENGN_TYPE;
   }
   config[*id].isFOM          = 0;
+  config[*id].isPos          = 0;
+  config[*id].isRef          = 1;
+  config[*id].isAng          = 1;
   config[*id].isSensorStruct = 0;
-  config[*id].q_ref[0]       = 1;
-  config[*id].q_ref[1]       = 0;
-  config[*id].q_ref[2]       = 0;
-  config[*id].q_ref[3]       = 0;
+  config[*id].qRef[0]        = 1;
+  config[*id].qRef[1]        = 0;
+  config[*id].qRef[2]        = 0;
+  config[*id].qRef[3]        = 0;
   state[*id].rect            = 0;
   state[*id].pnts            = 0;
   state[*id].stat            = 0;
   state[*id].calb            = 0;
-  state[*id].quat            = 0;
-  state[*id].tran            = 0;
   
   // create IMU subsystem instances
   IMU_engn_state *cur = &state[*id];
@@ -450,10 +451,22 @@ int IMU_engn_load(
     return IMU_file_statLoad(filename, state[id].configStat);
   else if (system == IMU_engn_calb) 
     return IMU_file_calbLoad(filename, state[id].configCalb);
-  else if (system == IMU_engn_self) 
-    return IMU_file_engnLoad(filename, &config[id]);
-  else
+  else if (system == IMU_engn_self) {
+    int status = IMU_file_engnLoad(filename, &config[id]);
+    if (config[id].configFileCore[0] != '\0')
+      IMU_file_coreLoad(config[id].configFileCore, state[id].configCore);
+    if (config[id].configFileRect[0] != '\0')
+      IMU_file_rectLoad(config[id].configFileRect, state[id].configRect);
+    if (config[id].configFilePnts[0] != '\0')
+      IMU_file_pntsLoad(config[id].configFilePnts, state[id].configPnts);
+    if (config[id].configFileStat[0] != '\0')
+      IMU_file_statLoad(config[id].configFileStat, state[id].configStat);
+    if (config[id].configFileCalb[0] != '\0')
+      IMU_file_calbLoad(config[id].configFileCalb, state[id].configCalb);
+    return status;
+  } else {
     return IMU_ENGN_NONEXISTANT_SYSID;
+  }
 }
 
 
@@ -483,10 +496,22 @@ int IMU_engn_save(
     return IMU_file_statSave(filename, state[id].configStat);
   else if (system == IMU_engn_calb)
     return IMU_file_calbSave(filename, state[id].configCalb);
-  else if (system == IMU_engn_self) 
-    return IMU_file_engnSave(filename, &config[id]);
-  else
+  else if (system == IMU_engn_self) {
+    int status = IMU_file_engnSave(filename, &config[id]);
+    if (config[id].configFileCore[0] != '\0')
+      IMU_file_coreSave(config[id].configFileCore, state[id].configCore);
+    if (config[id].configFileRect[0] != '\0')
+      IMU_file_rectSave(config[id].configFileRect, state[id].configRect);
+    if (config[id].configFilePnts[0] != '\0')
+      IMU_file_pntsSave(config[id].configFilePnts, state[id].configPnts);
+    if (config[id].configFileStat[0] != '\0')
+      IMU_file_statSave(config[id].configFileStat, state[id].configStat);
+    if (config[id].configFileCalb[0] != '\0')
+      IMU_file_calbSave(config[id].configFileCalb, state[id].configCalb);
+    return status;
+  } else {
     return IMU_ENGN_NONEXISTANT_SYSID;
+  }
 }
 
 
@@ -543,10 +568,10 @@ int IMU_engn_setRef(
     return IMU_ENGN_BAD_INST;
 
   // copy contents of input vector
-  config[id].q_ref[0]   = ref[0];
-  config[id].q_ref[1]   = ref[1];
-  config[id].q_ref[2]   = ref[2];
-  config[id].q_ref[3]   = ref[3];
+  config[id].qRef[0]    = ref[0];
+  config[id].qRef[1]    = ref[1];
+  config[id].qRef[2]    = ref[2];
+  config[id].qRef[3]    = ref[3];
   
   // exit function
   return 0;
@@ -574,10 +599,10 @@ int IMU_engn_setRefCur(
     return IMU_ENGN_SUBSYSTEM_FAILURE;
 
   // copy contents of input vector
-  config[id].q_ref[0]   = ref[0];
-  config[id].q_ref[1]   = ref[1];
-  config[id].q_ref[2]   = ref[2];
-  config[id].q_ref[3]   = ref[3];
+  config[id].qRef[0]    = ref[0];
+  config[id].qRef[1]    = ref[1];
+  config[id].qRef[2]    = ref[2];
+  config[id].qRef[3]    = ref[3];
   
   // exit function
   return 0;
@@ -704,21 +729,18 @@ int IMU_engn_getEstm(
   IMU_engn_estm         *estm)
 {
   // get estimates
-  
-  state[id].quat   = IMU_core_estmQuat(state[id].idCore, t, estm->q_org);
-  if (config[id].isEstmAccl)
-    state[id].tran = IMU_core_estmAccl(state[id].idCore, t, estm->pos);
-  else
-    state[id].tran = 0;
-  if (!config[id].isQuatOnly) {
-    IMU_math_quatMultConj(estm->q_org, config[id].q_ref, estm->q);
+  int status = IMU_core_estmQuat(state[id].idCore, t, estm->qOrg);
+  if (config[id].isPos)
+    IMU_core_estmAccl(state[id].idCore, t, estm->pos);
+  if (config[id].isRef)
+    IMU_math_quatMultConj(estm->qOrg, config[id].qRef, estm->q);
+  if (config[id].isAng &&  config[id].isRef)
     IMU_math_quatToEuler(estm->q, estm->ang);
-  }
+  if (config[id].isAng && !config[id].isRef)
+    IMU_math_quatToEuler(estm->qOrg, estm->ang);
   
   // exit function
-  if (state[id].quat < 0 || state[id].tran < 0)
-    return IMU_ENGN_SUBSYSTEM_FAILURE;
-  return 0;
+  return status;
 }
 
 

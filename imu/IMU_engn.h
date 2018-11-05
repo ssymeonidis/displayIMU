@@ -50,47 +50,51 @@ extern "C" {
 
 // configuration structure definition
 typedef struct {
-  uint8_t               isRect;          // enable rectify subsystem
-  uint8_t               isPnts;          // enable stable point collection
-  uint8_t               isStat;          // enable continous metric collection
-  uint8_t               isCalb;          // enable calibration subsystem 
-  uint8_t               isEstmAccl;      // enable accl estm (minus gravity) 
-  uint8_t               isQuatOnly;      // disable conversion to Euler angles
-  uint8_t               isFOM;           // disable calculation of FOMs
-  uint8_t               isSensorStruct;  // enable storage of sensor data
-  float                 q_ref[4];        // quaternion reference
+  uint8_t               isRect;              // enable rectify subsystem
+  uint8_t               isPnts;              // enable stable point collection
+  uint8_t               isStat;              // enable continous metric collect
+  uint8_t               isCalb;              // enable calibration subsystem 
+  uint8_t               isFOM;               // disable calculation of FOMs
+  uint8_t               isPos;               // enable accl estm (minus gravity)
+  uint8_t               isRef;               // disable application of reference
+  uint8_t               isAng;               // disable Euler angles conversion
+  uint8_t               isSensorStruct;      // enable storage of sensor data
+  float                 qRef[4];             // quaternion reference
+  char                  configFileCore[64];  // core config filneame
+  char                  configFileRect[64];  // rect config filename
+  char                  configFilePnts[64];  // pnts config filename
+  char                  configFileStat[64];  // stat config filename
+  char                  configFileCalb[64];  // calb config filename
 } IMU_engn_config;
 
 // system state structure definition
 typedef struct {
-  uint16_t              idCore;          // core subsystem id
-  uint16_t              idRect;          // rect subsystem id
-  uint16_t              idPnts;          // pnts subsystem id
-  uint16_t              idStat;          // stat subsystem id
-  uint16_t              idCalb;          // calb subsystem id
-  IMU_core_config       *configCore;     // core configuration pointer
-  IMU_rect_config       *configRect;     // rect configuration pointer
-  IMU_pnts_config       *configPnts;     // pnts configuration pointer
-  IMU_stat_config       *configStat;     // stat configuration pointer
-  IMU_calb_config       *configCalb;     // calb configuration pointer
-  int                   core;            // status of IMU core
-  int                   quat;            // status of IMU estm
-  int                   tran;            // status of IMU tran
-  int                   rect;            // status of IMU rect
-  int                   pnts;            // status of IMU pnts
-  int                   stat;            // status of IMU stat
-  int                   calb;            // status of IMU calb
-  uint8_t               isExit;          // commands thread to exit
-  uint8_t               exitThread;      // confirms thread has exited 
+  uint16_t              idCore;              // core subsystem id
+  uint16_t              idRect;              // rect subsystem id
+  uint16_t              idPnts;              // pnts subsystem id
+  uint16_t              idStat;              // stat subsystem id
+  uint16_t              idCalb;              // calb subsystem id
+  IMU_core_config       *configCore;         // core configuration pointer
+  IMU_rect_config       *configRect;         // rect configuration pointer
+  IMU_pnts_config       *configPnts;         // pnts configuration pointer
+  IMU_stat_config       *configStat;         // stat configuration pointer
+  IMU_calb_config       *configCalb;         // calb configuration pointer
+  int                   core;                // status of IMU core
+  int                   rect;                // status of IMU rect
+  int                   pnts;                // status of IMU pnts
+  int                   stat;                // status of IMU stat
+  int                   calb;                // status of IMU calb
+  uint8_t               isExit;              // commands thread to exit
+  uint8_t               exitThread;          // confirms thread has exited 
 } IMU_engn_state;
 
 // define which subsystems are running
-typedef enum {                           // input to IMU_engn_init
-  IMU_engn_core_only    = 0,             // core subystem only
-  IMU_engn_rect_core    = 1,             // rect and core
-  IMU_engn_calb_pnts    = 2,             // rect, pnts, calb, and core
-  IMU_engn_calb_stat    = 3,             // rect, stat, calb, and core
-  IMU_engn_calb_full    = 4              // all susbsystems running
+typedef enum {                               // input to IMU_engn_init
+  IMU_engn_core_only    = 0,                 // core subystem only
+  IMU_engn_rect_core    = 1,                 // rect and core
+  IMU_engn_calb_pnts    = 2,                 // rect, pnts, calb, and core
+  IMU_engn_calb_stat    = 3,                 // rect, stat, calb, and core
+  IMU_engn_calb_full    = 4                  // all susbsystems running
 } IMU_engn_type;
 
 // input to multiple functions
@@ -141,7 +145,7 @@ typedef struct {
 
 // estimate data structure
 typedef struct {
-  float                 q_org[4];
+  float                 qOrg[4];
   float                 q[4];
   float                 ang[3];
   float                 pos[3];
