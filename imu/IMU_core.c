@@ -64,6 +64,25 @@ int IMU_core_init(
   if (err) return IMU_CORE_FAILED_MUTEX;
   #endif
 
+  // intialize to known state
+  config[numInst].enable      = 1;
+  config[numInst].isGyro      = 1;
+  config[numInst].isAccl      = 1;
+  config[numInst].isMagn      = 1;
+  config[numInst].isFOM       = 0;
+  config[numInst].isTran      = 0;
+  config[numInst].isPredict   = 0;
+  config[numInst].gScale      = 0.001f;
+  config[numInst].aWeight     = 0.005f;
+  config[numInst].aMag        = 0.0f;
+  config[numInst].aMagThresh  = 0.0f;
+  config[numInst].mWeight     = 0.005f;
+  config[numInst].mMag        = 0.0f;
+  config[numInst].mMagThresh  = 0.0f;
+  config[numInst].mDot        = 0.0f;
+  config[numInst].mDotThresh  = 0.0f;
+  config[numInst].tranAlpha   = 0.01f;
+
   // pass handle and config pointer
   *id      = numInst; 
   *pntr    = &config[*id];
@@ -126,7 +145,7 @@ int IMU_core_reset(
   IMU_thrd_mutex_lock(&lock[id]);
   #endif
 
-  // initialize state to known value
+  // initialize to known state
   state[id].status      = IMU_core_enum_unitialized;
   state[id].q[0]        = 1.0;
   state[id].q[1]        = 0.0;
@@ -362,9 +381,9 @@ int IMU_core_newGyro(
     return IMU_CORE_FNC_DISABLED;
   
   // copy values and calcuate mag 
-  float g[3]            = {(float)g_in[0]/config[id].gScale, 
-                           (float)g_in[1]/config[id].gScale, 
-                           (float)g_in[2]/config[id].gScale};
+  float g[3]            = {(float)g_in[0]*config[id].gScale, 
+                           (float)g_in[1]*config[id].gScale, 
+                           (float)g_in[2]*config[id].gScale};
   FOM->magSqrd          = g[0]*g[0] + g[1]*g[1] + g[2]*g[2];
  
   // lock before modifying state

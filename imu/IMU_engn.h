@@ -55,7 +55,7 @@ typedef struct {
   uint8_t               isStat;              // enable continous metric collect
   uint8_t               isCalb;              // enable calibration subsystem 
   uint8_t               isFOM;               // disable calculation of FOMs
-  uint8_t               isPos;               // enable accl estm (minus gravity)
+  uint8_t               isTran;              // enable accl estm (minus gravity)
   uint8_t               isRef;               // disable application of reference
   uint8_t               isAng;               // disable Euler angles conversion
   uint8_t               isSensorStruct;      // enable storage of sensor data
@@ -84,8 +84,7 @@ typedef struct {
   int                   pnts;                // status of IMU pnts
   int                   stat;                // status of IMU stat
   int                   calb;                // status of IMU calb
-  uint8_t               isExit;              // commands thread to exit
-  uint8_t               exitThread;          // confirms thread has exited 
+  unsigned int          datumCount;          // datum counter
 } IMU_engn_state;
 
 // define which subsystems are running
@@ -148,7 +147,7 @@ typedef struct {
   float                 qOrg[4];
   float                 q[4];
   float                 ang[3];
-  float                 pos[3];
+  float                 tran[3];
 } IMU_engn_estm;
 
 

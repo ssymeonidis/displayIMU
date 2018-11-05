@@ -25,13 +25,12 @@
 #include "IMU_file.h"
 
 // core subsystem parsing inputs
-static const int   IMU_core_config_size   = 18;
+static const int   IMU_core_config_size   = 17;
 static const char* IMU_core_config_name[] = {
   "enable",
   "isGyro", 
   "isAccl",
   "isMagn",
-  "isStable",
   "isFOM",
   "isTran",
   "isPredict",
@@ -51,20 +50,19 @@ typedef enum {
   IMU_core_isGyro       = 1,
   IMU_core_isAccl       = 2,
   IMU_core_isMagn       = 3,
-  IMU_core_isStable     = 4,
-  IMU_core_isFOM        = 5,
-  IMU_core_isTran       = 6,
-  IMU_core_isPredict    = 7,
-  IMU_core_gScale       = 8,
-  IMU_core_aWeight      = 9,
-  IMU_core_aMag         = 10,
-  IMU_core_aMagThresh   = 11,
-  IMU_core_mWeight      = 12,
-  IMU_core_mMag         = 13,
-  IMU_core_mMagThresh   = 14,
-  IMU_core_mDot         = 15,
-  IMU_core_mDotThresh   = 16,
-  IMU_core_tranAlpha    = 17
+  IMU_core_isFOM        = 4,
+  IMU_core_isTran       = 5,
+  IMU_core_isPredict    = 6,
+  IMU_core_gScale       = 7,
+  IMU_core_aWeight      = 8,
+  IMU_core_aMag         = 9,
+  IMU_core_aMagThresh   = 10,
+  IMU_core_mWeight      = 11,
+  IMU_core_mMag         = 12,
+  IMU_core_mMagThresh   = 13,
+  IMU_core_mDot         = 14,
+  IMU_core_mDotThresh   = 15,
+  IMU_core_tranAlpha    = 16
 } IMU_core_config_enum;
 
 // rect subsystem parsing inputs
@@ -143,7 +141,7 @@ typedef enum {
 static const int   IMU_engn_config_size   = 11;
 static const char* IMU_engn_config_name[] = {
   "isFOM",
-  "isPos",
+  "isTran",
   "isRef",
   "isAng",
   "isSensorStruct",
@@ -156,7 +154,7 @@ static const char* IMU_engn_config_name[] = {
 };
 typedef enum {
   IMU_engn_isFOM           = 0,
-  IMU_engn_isPos           = 1,
+  IMU_engn_isTran          = 1,
   IMU_engn_isRef           = 2,
   IMU_engn_isAng           = 3,
   IMU_engn_isSensorStruct  = 4,
@@ -223,8 +221,6 @@ int IMU_file_coreLoad(
       get_bool(args, &config->isAccl);
     else if (type == IMU_core_isMagn)
       get_bool(args, &config->isMagn);
-    else if (type == IMU_core_isStable)
-      get_bool(args, &config->isStable);
     else if (type == IMU_core_isFOM)
       get_bool(args, &config->isFOM);
     else if (type == IMU_core_isTran)
@@ -281,7 +277,6 @@ int IMU_file_coreSave(
   fprintf(file, "  \"isGyro\": ");      write_bool(file, config->isGyro);
   fprintf(file, "  \"isAccl\": ");      write_bool(file, config->isAccl);
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
-  fprintf(file, "  \"isStable\": ");    write_bool(file, config->isStable);
   fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
   fprintf(file, "  \"isTran\": ");      write_bool(file, config->isTran);
   fprintf(file, "  \"gScale\": %0.2f,\n",          config->gScale);
@@ -674,8 +669,8 @@ int IMU_file_engnLoad(
     type = get_field(field, IMU_engn_config_name, IMU_engn_config_size);
     if      (type == IMU_engn_isFOM)
       get_bool(args, &config->isFOM);
-    else if (type == IMU_engn_isPos)
-      get_bool(args, &config->isPos);
+    else if (type == IMU_engn_isTran)
+      get_bool(args, &config->isTran);
     else if (type == IMU_engn_isRef)
       get_bool(args, &config->isRef);
     else if (type == IMU_engn_isAng)
@@ -722,7 +717,7 @@ int IMU_file_engnSave(
   uint8_t               isSensor = config->isSensorStruct;
   fprintf(file, "{\n");
   fprintf(file, "  \"isFOM\": ");           write_bool  (file, config->isFOM);
-  fprintf(file, "  \"isPos\": ");           write_bool  (file, config->isPos);
+  fprintf(file, "  \"isTran\": ");          write_bool  (file, config->isTran);
   fprintf(file, "  \"isRef\": ");           write_bool  (file, config->isRef);
   fprintf(file, "  \"isAng\": ");           write_bool  (file, config->isAng);
   fprintf(file, "  \"isSensorStruct\": ");  write_bool  (file, isSensor);

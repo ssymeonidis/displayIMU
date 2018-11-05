@@ -17,8 +17,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// include statements 
+// include statements
 #include <math.h>
+#include "IMU_type.h"
 #include "IMU_stat.h"
 
 // internally managed structures
@@ -43,6 +44,10 @@ int IMU_stat_init(
   // check for device count overflow
   if (numInst >= IMU_MAX_INST)
     return IMU_STAT_INST_OVERFLOW;
+
+  // initialize to known state
+  config[numInst].enable     = 1;
+  config[numInst].alpha      = 0.0001f;
 
   // reset instance
   IMU_stat_reset(*id);
@@ -135,8 +140,9 @@ int IMU_stat_reset(
 
 int IMU_stat_datum(
   uint16_t                id, 
-  IMU_datum               *datum, 
-  IMU_core_FOM            *FOM)
+  IMU_datum               *datum,
+  IMU_core_FOM            *FOM,
+  IMU_pnts_enum           status)
 {
   // check out-of-bounds condition
   if (id >= numInst)
@@ -164,7 +170,8 @@ int IMU_stat_datum(
 int IMU_stat_data3(
   uint16_t                id, 
   IMU_data3               *data3, 
-  IMU_core_FOM            *FOM)
+  IMU_core_FOM            *FOM,
+  IMU_pnts_enum           status)
 {
   // check out-of-bounds condition
   if (id >= numInst)

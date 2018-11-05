@@ -67,14 +67,14 @@ typedef struct {
 
 
 // data structure access function
-int IMU_stat_init      (uint16_t *id, IMU_stat_config **config);
-int IMU_stat_getConfig  (uint16_t id, IMU_stat_config **config);
-int IMU_stat_getState   (uint16_t id, IMU_stat_state  **state);
+int IMU_stat_init     (uint16_t *id, IMU_stat_config **config);
+int IMU_stat_getConfig (uint16_t id, IMU_stat_config **config);
+int IMU_stat_getState  (uint16_t id, IMU_stat_state  **state);
 
 // general operation functions 
-int IMU_stat_reset      (uint16_t id);
-int IMU_stat_datum      (uint16_t id, IMU_datum*, IMU_core_FOM*);
-int IMU_stat_data3      (uint16_t id, IMU_data3*, IMU_core_FOM*);
+int IMU_stat_reset     (uint16_t id);
+int IMU_stat_datum     (uint16_t id, IMU_datum*, IMU_core_FOM*, IMU_pnts_enum);
+int IMU_stat_data3     (uint16_t id, IMU_data3*, IMU_core_FOM*, IMU_pnts_enum);
 
 
 #ifdef __cplusplus

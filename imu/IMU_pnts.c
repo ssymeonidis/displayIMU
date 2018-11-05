@@ -72,17 +72,31 @@ int IMU_pnts_init(
   if (numInst >= IMU_MAX_INST)
     return IMU_PNTS_INST_OVERFLOW;
 
+  // initialize to known state
+  config[numInst].enable       = 0;
+  config[numInst].isGyro       = 1;
+  config[numInst].isAccl       = 1;
+  config[numInst].isMagn       = 1;
+  config[numInst].tHold        = 10000;
+  config[numInst].tStable      = 25000;
+  config[numInst].gAlpha       = 0.01f;
+  config[numInst].gThresh      = 0.0f;
+  config[numInst].aAlpha       = 0.01f;
+  config[numInst].aThresh      = 0.0f;
+  config[numInst].mAlpha       = 0.01f;
+  config[numInst].mThresh      = 0.0f;
+
+  // initialize the callback fnc
+  state[numInst].fncStable     = NULL;
+  state[numInst].fncBreak      = NULL;
+  state[numInst].fncStablePntr = NULL;
+  state[numInst].fncBreakPntr  = NULL;
+  
   // pass inst handle and config pointer
   *id   = numInst; 
   *pntr = &config[*id];
   numInst++;
 
-  // initialize the callback fnc
-  state[*id].fncStable     = NULL;
-  state[*id].fncBreak      = NULL;
-  state[*id].fncStablePntr = NULL;
-  state[*id].fncBreakPntr  = NULL;
-  
   // initialize instance state
   IMU_pnts_reset(*id);
   

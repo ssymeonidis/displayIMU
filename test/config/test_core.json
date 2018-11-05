@@ -9,7 +9,7 @@
   "isPredict": false,
   "gThreshVal": 0.0,
   "gThreshTime": 0,
-  "gScale": 256,
+  "gScale": 0.00390625,
   "aWeight": 0.005,
   "aMag": 0.0,
   "aMagThresh": 0.0,

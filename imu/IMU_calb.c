@@ -56,6 +56,9 @@ int IMU_calb_init(
   if (numInst >= IMU_MAX_INST)
     return IMU_CALB_INST_OVERFLOW;
 
+  // initialize to known state
+  config[numInst].enable  = 1;
+
   // assign internal calb function
   state[numInst].fnc      = IMU_calb_defaultFnc;
   state[numInst].fncPntr  = NULL;

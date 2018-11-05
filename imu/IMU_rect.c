@@ -24,6 +24,7 @@
     _a > _b ? _a : _b; })
 
 // include statements 
+#include <string.h>
 #include "IMU_rect.h"
 
 // internally managed structures
@@ -43,8 +44,23 @@ int IMU_rect_init(
   if (numInst >= IMU_MAX_INST)
     return IMU_RECT_INST_OVERFLOW;
     
-  // enable subystem
-  config[numInst].enable = 1;
+  // intialize to known state
+  memset(config[numInst].gBias, 0.0f, sizeof config[numInst].gBias);
+  memset(config[numInst].gMult, 0.0f, sizeof config[numInst].gMult);
+  memset(config[numInst].aBias, 0.0f, sizeof config[numInst].aBias);
+  memset(config[numInst].aMult, 0.0f, sizeof config[numInst].aMult);
+  memset(config[numInst].mBias, 0.0f, sizeof config[numInst].mBias);
+  memset(config[numInst].mMult, 0.0f, sizeof config[numInst].mMult);
+  config[numInst].gMult[0]  = 1.0f;
+  config[numInst].gMult[4]  = 1.0f;
+  config[numInst].gMult[8]  = 1.0f;
+  config[numInst].aMult[0]  = 1.0f;
+  config[numInst].aMult[4]  = 1.0f;
+  config[numInst].aMult[8]  = 1.0f;
+  config[numInst].mMult[0]  = 1.0f;
+  config[numInst].mMult[4]  = 1.0f;
+  config[numInst].mMult[8]  = 1.0f;
+  config[numInst].enable    = 1;
 
   // pass handle and config pointer
   *id    = numInst; 

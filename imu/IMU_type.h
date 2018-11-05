@@ -83,6 +83,13 @@ struct IMU_core_FOM{
   }                    FOM;
 };
 
+// point collection internal state
+typedef enum {
+  IMU_pnts_enum_reset    = 0,
+  IMU_pnts_enum_move     = 1,
+  IMU_pnts_enum_hold     = 2,
+  IMU_pnts_enum_stable   = 3
+} IMU_pnts_enum;
 
 // define calibration figure of merit
 typedef struct {

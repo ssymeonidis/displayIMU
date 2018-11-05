@@ -56,14 +56,6 @@ typedef struct {
   float                  mThresh;         // no motion threshold value
 } IMU_pnts_config;
 
-// point collection internal state
-typedef enum {
-  IMU_pnts_enum_reset    = 0,
-  IMU_pnts_enum_move     = 1,
-  IMU_pnts_enum_hold     = 2,
-  IMU_pnts_enum_stable   = 3
-} IMU_pnts_enum;
-
 // subsystem state structure definition
 typedef struct IMU_pnts_entry IMU_pnts_entry;
 typedef struct {
