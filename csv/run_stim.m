@@ -15,22 +15,10 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function display_qorg(filename)
+% process the csv files
+system('./run_stim.sh');
 
-% add matlab directory to path
-addpath('../matlab');
-
-% parse csv file
-file = fopen(filename);
-q    = fscanf(file, '%f, %f, %f, %f\n');
-q    = reshape(q, 4, []);
-fclose(file);
-
-% display each quaternion
-for i=1:size(q,2)
-  plotState(q(:,i));
-  title('display qorg');
-  drawnow;
-end
-
-end
+% display the results
+clear all; close all;
+display_qorg('../results/applyGyroTest.csv');
+display_qorg('../results/applyAcclTest.csv');
