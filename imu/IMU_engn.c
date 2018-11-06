@@ -724,7 +724,7 @@ int IMU_engn_data3(
     IMU_copy_results3(id, data3, FOM);
     
   // exit function
-  return state[id].datumCount;
+  return 0;
 }
 
 
@@ -749,7 +749,10 @@ int IMU_engn_getEstm(
     IMU_math_quatToEuler(estm->qOrg, estm->ang);
   
   // exit function
-  return status;
+  if (status < 0)
+    return status;
+  else
+    return state[id].datumCount;
 }
 
 
@@ -888,7 +891,7 @@ int IMU_engn_process(
     IMU_copy_results1(id, datum, FOM);
     
   // exit function (no errrors)
-  return state[id].datumCount;
+  return 0;
 }
 
 

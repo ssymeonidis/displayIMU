@@ -48,14 +48,14 @@ typedef struct {
 
 
 // initialization function
-void dataIF_init        (IMU_engn_type);
+uint16_t  dataIF_init        (IMU_engn_type);
 
 // access functions
-void dataIF_startUDP    (int         portno);
-void dataIF_startCSV    (const char* filename);
-int  dataIF_process     ();
-void dataIF_exit        ();
-void *dataIF_run        (void* id);
+void      dataIF_startUDP    (int         portno);
+void      dataIF_startCSV    (const char* filename);
+int       dataIF_process     ();
+void      dataIF_exit        ();
+void      *dataIF_run        (void* id);
 
 
 #ifdef __cplusplus

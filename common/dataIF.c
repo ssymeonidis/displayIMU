@@ -47,7 +47,7 @@ int  dataIF_lineCSV(char* line, int line_size);
 * constructor for dataParse functions
 ******************************************************************************/
 
-void dataIF_init(IMU_engn_type type)
+uint16_t dataIF_init(IMU_engn_type type)
 {
   // initialize internal structures
   state.isFirstFrame     = 1;
@@ -61,6 +61,9 @@ void dataIF_init(IMU_engn_type type)
     printf("initialization error #%d\n", status);
     exit(0);
   }
+
+  // exit function
+  return state.imuID;
 }
 
 
@@ -150,6 +153,9 @@ int dataIF_process()
       &datum.type, &datum.t, &datum.val[0], &datum.val[1], &datum.val[2]);
     IMU_engn_datum(0, &datum);
   }
+
+  // exit function
+  return status;
 }
 
 

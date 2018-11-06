@@ -20,6 +20,8 @@
 // include statements
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include "dataIF.h"
 #include "IMU_engn.h"
 #include "IMU_util.h"
 
@@ -36,12 +38,14 @@ int main(
   char               *argv[])
 {
   // define local variable
-  IMU_datum          datum;
-  uint16_t           id;
+  IMU_union_config   config;
+  IMU_engn_estm      estm;
+  float              *v;
+  int                count = 1;
   int                status;
 
   // initialize the IMU and its data parser
-  IMU_engn_init(IMU_engn_calb_full, &id);
+  uint16_t id = dataIF_init(IMU_engn_calb_full);
   
   // verify number of input arguments
   if (argc < 2) {
@@ -60,6 +64,10 @@ int main(
   }
   IMU_util_status(status, "IMU_engn_load failure");
 
+  // get configuration structure
+  status = IMU_engn_getConfig(id, IMU_engn_self, &config);
+  IMU_util_status(status, "IMU_engn_getConfig failure");
+
   // start data queue
   status = IMU_engn_start();
   IMU_util_status(status, "IMU_engn_start failure");
@@ -69,10 +77,42 @@ int main(
 
 
   /****************************************************************************
-  * exit unit test
+  * main processing loop
   ****************************************************************************/
 
-  // exit program
-  printf("pass: test_datum\n\n");
-  return 0;
+  while (1) {
+
+    // add datum from csv file
+    status = dataIF_process();
+    if (status > 0)
+      break;
+ 
+    // get estimate 
+    while (1) {
+      status = IMU_engn_getEstm(id, 0, &estm);
+      printf("status = %d\n", status);
+      if (status >= count)
+        break;
+      usleep(usleep_delay);
+    }
+
+    // print estimate
+    v = estm.qOrg;
+    printf("%0.3f, %0.3f, %0.3f, %0.3f", v[0], v[1], v[2], v[3]);
+    if (config.engn->isRef) {
+      v = estm.q;
+      printf("%0.3f, %0.3f, %0.3f, %0.3f", v[0], v[1], v[2], v[3]);
+    }
+    if (config.engn->isAng) {
+      v = estm.ang;
+      printf("%0.1f, %0.1f, %0.1f", v[0], v[1], v[2]);
+    }
+    if (config.engn->isTran) {
+      v = estm.tran;
+      printf("%0.1f, %0.1f, %0.1f", v[0], v[1], v[2]);
+    }
+
+    // increment count
+    count++;
+  }
 }
