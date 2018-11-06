@@ -326,7 +326,7 @@ moc_glWidget.cpp: ../imu/IMU_engn.h \
 		../imu/IMU_core.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
+		../imu/IMU_stat.h \
 		../imu/IMU_calb.h \
 		glWidget.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/simeon.symeonidis/Projects/displayIMU/display -I/home/simeon.symeonidis/Projects/displayIMU/imu -I/home/simeon.symeonidis/Projects/displayIMU/common -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtOpenGL -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/5 -I/usr/include/x86_64-linux-gnu/c++/5 -I/usr/include/c++/5/backward -I/usr/lib/gcc/x86_64-linux-gnu/5/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include glWidget.h -o moc_glWidget.cpp
@@ -336,7 +336,7 @@ moc_windowGUI.cpp: ../imu/IMU_engn.h \
 		../imu/IMU_core.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
+		../imu/IMU_stat.h \
 		../imu/IMU_calb.h \
 		configGUI.h \
 		windowGUI.h
@@ -354,7 +354,7 @@ ui_windowGUI.h: windowGUI.ui \
 		../imu/IMU_core.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
+		../imu/IMU_stat.h \
 		../imu/IMU_calb.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/uic windowGUI.ui -o ui_windowGUI.h
 
@@ -374,7 +374,7 @@ obj/glWidget.o: glWidget.cpp windowGUI.h \
 		../imu/IMU_core.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
+		../imu/IMU_stat.h \
 		../imu/IMU_calb.h \
 		configGUI.h \
 		glWidget.h
@@ -385,7 +385,7 @@ obj/windowGUI.o: windowGUI.cpp ../imu/IMU_file.h \
 		../imu/IMU_type.h \
 		../imu/IMU_core.h \
 		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
+		../imu/IMU_stat.h \
 		../imu/IMU_calb.h \
 		../imu/IMU_engn.h \
 		windowGUI.h \
@@ -403,7 +403,7 @@ obj/dataIF.o: ../common/dataIF.c ../common/dataIF.h \
 		../imu/IMU_core.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
+		../imu/IMU_stat.h \
 		../imu/IMU_calb.h
 	$(CC) -c $(CFLAGS) $(INCPATH) -o obj/dataIF.o ../common/dataIF.c
 
@@ -413,7 +413,7 @@ obj/main.o: main.cpp ../common/dataIF.h \
 		../imu/IMU_core.h \
 		../imu/IMU_rect.h \
 		../imu/IMU_pnts.h \
-		../imu/IMU_auto.h \
+		../imu/IMU_stat.h \
 		../imu/IMU_calb.h \
 		windowGUI.h \
 		configGUI.h

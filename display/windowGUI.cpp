@@ -38,9 +38,9 @@ windowGUI::windowGUI(QWidget *parent) :
   // get pointers to config and state structures
   IMU_union_config configUnion;
   IMU_engn_getConfig(0, IMU_engn_core, &configUnion);
-  configCore = configUnion.configCore;
+  configCore = configUnion.core;
   IMU_engn_getConfig(0, IMU_engn_rect, &configUnion);
-  configRect = configUnion.configRect;
+  configRect = configUnion.rect;
 
   // initialize display/sensor IF parameters
   glWidget_update();
@@ -81,20 +81,20 @@ void windowGUI::config_write()
   ui->noGyro->setChecked(!configCore->isGyro);
   ui->noAccl->setChecked(!configCore->isAccl);
   ui->noMagn->setChecked(!configCore->isMagn);
-  ui->noStable->setChecked(!configCore->isStable);
+  //ui->noStable->setChecked(!configCore->isStable);
   ui->noFOM->setChecked(!configCore->isFOM);
-  ui->noMove->setChecked(!configCore->isMove);
-  ui->gThresh->setText(QString::number(configCore->gThresh, 'f', 2));
-  ui->gThreshTime->setText(QString::number(configCore->gThreshTime, 'f', 2));
+  //ui->noMove->setChecked(!configCore->isMove);
+  //ui->gThresh->setText(QString::number(configCore->gThresh, 'f', 2));
+  //ui->gThreshTime->setText(QString::number(configCore->gThreshTime, 'f', 2));
   ui->aWeight->setText(QString::number(configCore->aWeight, 'f', 2));
   ui->aMag->setText(QString::number(configCore->aMag, 'f', 2));
   ui->aMagThresh->setText(QString::number(configCore->aMagThresh, 'f', 2));
   ui->mWeight->setText(QString::number(configCore->mWeight, 'f', 2));
   ui->mMag->setText(QString::number(configCore->mMag, 'f', 2));
   ui->mMagThresh->setText(QString::number(configCore->mMagThresh, 'f', 2));
-  ui->mAng->setText(QString::number(configCore->mAng, 'f', 2));
-  ui->mAngThresh->setText(QString::number(configCore->mAngThresh, 'f', 2));
-  ui->moveAlpha->setText(QString::number(configCore->moveAlpha, 'f', 2));
+  //ui->mAng->setText(QString::number(configCore->mAng, 'f', 2));
+  //ui->mAngThresh->setText(QString::number(configCore->mAngThresh, 'f', 2));
+  //ui->moveAlpha->setText(QString::number(configCore->moveAlpha, 'f', 2));
 }
 
 
@@ -107,20 +107,20 @@ void windowGUI::config_read()
   configCore->isGyro       = !ui->noGyro->isChecked();
   configCore->isAccl       = !ui->noAccl->isChecked();
   configCore->isMagn       = !ui->noMagn->isChecked();
-  configCore->isStable     = !ui->noStable->isChecked();
+  //configCore->isStable     = !ui->noStable->isChecked();
   configCore->isFOM        = !ui->noFOM->isChecked();
-  configCore->isMove       = !ui->noMove->isChecked();
-  configCore->gThresh      = ui->gThresh->text().toFloat();
-  configCore->gThreshTime  = ui->gThreshTime->text().toFloat();
+  //configCore->isMove       = !ui->noMove->isChecked();
+  //configCore->gThresh      = ui->gThresh->text().toFloat();
+  //configCore->gThreshTime  = ui->gThreshTime->text().toFloat();
   configCore->aWeight      = ui->aWeight->text().toFloat();
   configCore->aMag         = ui->aMag->text().toFloat();
   configCore->aMagThresh   = ui->aMagThresh->text().toFloat();
   configCore->mWeight      = ui->mWeight->text().toFloat();
   configCore->mMag         = ui->mMag->text().toFloat();
   configCore->mMagThresh   = ui->mMagThresh->text().toFloat();
-  configCore->mAng         = ui->mAng->text().toFloat();
-  configCore->mAngThresh   = ui->mAngThresh->text().toFloat();
-  configCore->moveAlpha    = ui->moveAlpha->text().toFloat();
+  //configCore->mAng         = ui->mAng->text().toFloat();
+  //configCore->mAngThresh   = ui->mAngThresh->text().toFloat();
+  //configCore->moveAlpha    = ui->moveAlpha->text().toFloat();
 }
 
 

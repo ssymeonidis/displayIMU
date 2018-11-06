@@ -63,7 +63,7 @@ GLWidget::GLWidget(QWidget *parent) :
   // get pointer to the sensor data
   IMU_union_config configIMU;
   IMU_engn_getConfig(0, IMU_engn_self, &configIMU);
-  configIMU.configEngn->isSensorStruct = 1;
+  configIMU.engn->isSensorStruct = 1;
   IMU_engn_getSensor(0, &sensor);
 
   // create timer
@@ -134,16 +134,25 @@ void GLWidget::paintGL()
   drawGrid(); 
 
   // draw gyroscope state
-  if (isGyro == true) 
-    drawVector(gyroColor, sensor->gRaw, scaleGyro);
+  if (isGyro == true){
+    float val[3] = {(float)sensor->gRaw[0], (float)sensor->gRaw[1],
+                    (float)sensor->gRaw[2]};
+    drawVector(gyroColor, val, scaleGyro);
+  }
 
   // draw accelerometer state
-  if (isAccl == true) 
-    drawVector(acclColor, sensor->aRaw, scaleAccl);
+  if (isAccl == true) {
+    float val[3] = {(float)sensor->aRaw[0], (float)sensor->aRaw[1],
+                    (float)sensor->aRaw[2]};
+    drawVector(acclColor, val, scaleAccl);
+  }
 
   // draw magnetometer state
-  if (isMagn == true) 
-    drawVector(magnColor, sensor->mRaw, scaleMagn);
+  if (isMagn == true) {
+    float val[3] = {(float)sensor->mRaw[0], (float)sensor->mRaw[1],
+                    (float)sensor->mRaw[2]};
+    drawVector(magnColor, val, scaleMagn);
+  }
 
   // draw imu state
   if (isIMU == true) {
@@ -153,9 +162,9 @@ void GLWidget::paintGL()
     glRotatef(estm.ang[2], 1.0, 0.0, 0.0);
     glRotatef(estm.ang[1], 0.0, 0.0, 1.0);
     glRotatef(estm.ang[0], 0.0, 1.0, 0.0);
-    glTranslatef(estm.move[0]/scaleIMU,
-                 estm.move[2]/scaleIMU,
-                 estm.move[1]/scaleIMU);
+    glTranslatef((float)estm.tran[0]/scaleIMU,
+                 (float)estm.tran[2]/scaleIMU,
+                 (float)estm.tran[1]/scaleIMU);
     GLfloat vector1[3]    = { 0.0,  1.0,  0.0};
     drawVector(gyroColor, vector1, 1.0);
     GLfloat vector2[3]    = {-0.0,  0.0,  1.0};
@@ -241,7 +250,7 @@ void GLWidget::drawArrow(GLfloat faceColor[4], GLfloat scale, GLfloat angles[2])
 * function used to draw a vector (uses draw angle as basis function)
 ******************************************************************************/
 
-void GLWidget::drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale)
+void GLWidget::drawVector(GLfloat faceColor[4], float vector[3], GLfloat scale)
 {
   // extracting the components for readability
   float x =  vector[1]/scale;

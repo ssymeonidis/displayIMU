@@ -33,7 +33,6 @@ configGUI::configGUI(
   FILE*     file;
   char*     field;
   char*     args;
-  float     val;
   int       status;
 
   // open json file containing config struct

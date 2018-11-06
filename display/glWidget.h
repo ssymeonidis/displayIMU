@@ -59,7 +59,7 @@ class GLWidget : public QGLWidget
   private:
     // internal functions
     void   drawArrow(GLfloat faceColor[4], GLfloat scale, GLfloat angles[2]);
-    void   drawVector(GLfloat faceColor[4], GLfloat vector[3], GLfloat scale);
+    void   drawVector(GLfloat faceColor[4], float vector[3], GLfloat scale);
     void   drawGrid();
 
     // internal objects/parameters
