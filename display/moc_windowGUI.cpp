@@ -20,7 +20,7 @@
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_windowGUI_t {
     QByteArrayData data[18];
-    char stringdata0[324];
+    char stringdata0[329];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -36,28 +36,28 @@ QT_MOC_LITERAL(3, 23, 12), // "config_write"
 QT_MOC_LITERAL(4, 36, 10), // "calib_read"
 QT_MOC_LITERAL(5, 47, 11), // "calib_write"
 QT_MOC_LITERAL(6, 59, 15), // "glWidget_update"
-QT_MOC_LITERAL(7, 75, 21), // "on_configOpen_clicked"
-QT_MOC_LITERAL(8, 97, 21), // "on_configSave_clicked"
-QT_MOC_LITERAL(9, 119, 20), // "on_calibOpen_clicked"
-QT_MOC_LITERAL(10, 140, 20), // "on_calibSave_clicked"
-QT_MOC_LITERAL(11, 161, 25), // "on_dispEnableGyro_clicked"
-QT_MOC_LITERAL(12, 187, 25), // "on_dispEnableAccl_clicked"
-QT_MOC_LITERAL(13, 213, 25), // "on_dispEnableMagn_clicked"
-QT_MOC_LITERAL(14, 239, 24), // "on_dispEnableIMU_clicked"
-QT_MOC_LITERAL(15, 264, 17), // "on_viewUp_clicked"
-QT_MOC_LITERAL(16, 282, 20), // "on_viewSide1_clicked"
-QT_MOC_LITERAL(17, 303, 20) // "on_viewSide2_clicked"
+QT_MOC_LITERAL(7, 75, 20), // "on_core_open_clicked"
+QT_MOC_LITERAL(8, 96, 20), // "on_core_save_clicked"
+QT_MOC_LITERAL(9, 117, 20), // "on_rect_open_clicked"
+QT_MOC_LITERAL(10, 138, 20), // "on_rect_save_clicked"
+QT_MOC_LITERAL(11, 159, 26), // "on_disp_enableGyro_clicked"
+QT_MOC_LITERAL(12, 186, 26), // "on_disp_enableAccl_clicked"
+QT_MOC_LITERAL(13, 213, 26), // "on_disp_enableMagn_clicked"
+QT_MOC_LITERAL(14, 240, 25), // "on_disp_enableIMU_clicked"
+QT_MOC_LITERAL(15, 266, 18), // "on_view_up_clicked"
+QT_MOC_LITERAL(16, 285, 21), // "on_view_side1_clicked"
+QT_MOC_LITERAL(17, 307, 21) // "on_view_side2_clicked"
 
     },
     "windowGUI\0config_read\0\0config_write\0"
     "calib_read\0calib_write\0glWidget_update\0"
-    "on_configOpen_clicked\0on_configSave_clicked\0"
-    "on_calibOpen_clicked\0on_calibSave_clicked\0"
-    "on_dispEnableGyro_clicked\0"
-    "on_dispEnableAccl_clicked\0"
-    "on_dispEnableMagn_clicked\0"
-    "on_dispEnableIMU_clicked\0on_viewUp_clicked\0"
-    "on_viewSide1_clicked\0on_viewSide2_clicked"
+    "on_core_open_clicked\0on_core_save_clicked\0"
+    "on_rect_open_clicked\0on_rect_save_clicked\0"
+    "on_disp_enableGyro_clicked\0"
+    "on_disp_enableAccl_clicked\0"
+    "on_disp_enableMagn_clicked\0"
+    "on_disp_enableIMU_clicked\0on_view_up_clicked\0"
+    "on_view_side1_clicked\0on_view_side2_clicked"
 };
 #undef QT_MOC_LITERAL
 
@@ -124,17 +124,17 @@ void windowGUI::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 2: _t->calib_read(); break;
         case 3: _t->calib_write(); break;
         case 4: _t->glWidget_update(); break;
-        case 5: _t->on_configOpen_clicked(); break;
-        case 6: _t->on_configSave_clicked(); break;
-        case 7: _t->on_calibOpen_clicked(); break;
-        case 8: _t->on_calibSave_clicked(); break;
-        case 9: _t->on_dispEnableGyro_clicked(); break;
-        case 10: _t->on_dispEnableAccl_clicked(); break;
-        case 11: _t->on_dispEnableMagn_clicked(); break;
-        case 12: _t->on_dispEnableIMU_clicked(); break;
-        case 13: _t->on_viewUp_clicked(); break;
-        case 14: _t->on_viewSide1_clicked(); break;
-        case 15: _t->on_viewSide2_clicked(); break;
+        case 5: _t->on_core_open_clicked(); break;
+        case 6: _t->on_core_save_clicked(); break;
+        case 7: _t->on_rect_open_clicked(); break;
+        case 8: _t->on_rect_save_clicked(); break;
+        case 9: _t->on_disp_enableGyro_clicked(); break;
+        case 10: _t->on_disp_enableAccl_clicked(); break;
+        case 11: _t->on_disp_enableMagn_clicked(); break;
+        case 12: _t->on_disp_enableIMU_clicked(); break;
+        case 13: _t->on_view_up_clicked(); break;
+        case 14: _t->on_view_side1_clicked(); break;
+        case 15: _t->on_view_side2_clicked(); break;
         default: ;
         }
     }
