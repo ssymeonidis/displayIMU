@@ -17,26 +17,42 @@
 
 % initialize simulation
 clear all; close all;
+global csv_enable csv_magn_scale csv_time_scale csv_file csv_time
 
-% test 0deg-yaw
-euler  = [25, 15, 15];
-magn   = [1, 0, 0];
-run_sim(euler, magn)
+% define simulation parameterse
+csv_enable       = true;
+csv_filename     = '../stim/applyMagnTest.csv';
+csv_magn_scale   = 255;
+csv_time_scale   = 0.00001;
+csv_time         = 0;
 
-% test 90deg-yaw
-euler  = [65, 15, 15];
+% create csv file (used to create stimulus)
+if csv_enable
+  csv_file       = fopen(csv_filename, 'w');
+  fprintf(csv_file, "3, 0, %d, 0, 0\n", csv_magn_scale);
+end
+
+% test 90-deg roll
+euler  = [0, 0, 0];
 magn   = [0, -1, 0];
-run_sim(euler, magn)
+euler  = run_sim(euler, magn)
 
-% test neg90deg-yaw
-euler  = [-65, 15, 15];
-magn   = [0, 1, 0];
-run_sim(euler, magn)
-
-% test 180deg-yaw
-euler  = [-205, 15, 15];
+% test 180-deg roll
 magn   = [-1, 0, 0];
-run_sim(euler, magn)
+euler  = run_sim(euler, magn)
+
+% test neg90-deg roll
+magn   = [0, 1, 0];
+euler  = run_sim(euler, magn)
+
+% test zero-pitch, zero-roll
+magn   = [1, 0, 0];
+euler  = run_sim(euler, magn)
+
+% create csv file (used to create stimulus)
+if csv_enable
+  fclose(csv_file);
+end
 
 
 %% run simulation given specified inputs
@@ -44,42 +60,44 @@ run_sim(euler, magn)
 
 function euler = run_sim(euler, magn)
 
-  % define local constants
-  alpha  = 0.005;
-  iter   = 100;
+  % import global csv parameters
+  global csv_enable csv_magn_scale csv_time_scale csv_file csv_time
 
-  % convert orientation angles to quaternion
+  % define local constants
+  alpha      = 0.005;
+  iter       = 300;
+  method     = "gradient";
+  if csv_enable
+    dt       = 0.1;
+    val      = round(magn*csv_magn_scale);
+    accl_str = sprintf("%d, %d, %d", val(1), val(2), val(3));
+  end
+
+  % main processing loop
+  FOM    = [];
   euler_rad  = pi * euler / 180;
   q          = eulerToQuat(euler_rad);
-  
-  % main processing loop
-  figure(1);
-  FOM    = [];
   for i=1:iter
-    [q, FOM(i)] = applyMagnGradientNorm(q, magn, alpha);
+    [q, FOM(i)] = applyMagnGradientNorm (q, magn, alpha);
     display_state(q);
+    if csv_enable
+      csv_time    = csv_time + dt;
+      val         = round(csv_time/csv_time_scale);
+      fprintf(csv_file, "3, %d, %s\n", val, accl_str);
+    end
   end
-  
-  % print results
+
+  % return final state
   euler_rad  = quatToEuler(q);
   euler      = 180 * euler_rad / pi;
 end
 
 
-%% main function (performs conversion and generates plot)
+%% update the display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function display_state(q)
-  u             = quatRotateForward([0, 0, 1], q, "full");
-  f             = quatRotateForward([1, 0, 0], q, "full");
-  r             = quatRotateForward([0, 1, 0], q, "full");
-  plotVector(u, f, r);
-  title('eulerToQuatTest');
-  delete(findall(gcf,'type','annotation'));
-  loc           = [.75 .67 .6 .3];
-  str{1}        = 'red = up';
-  str{2}        = 'green = forward';
-  str{3}        = 'blue = right';
-  annotation('textbox', loc, 'String', str, 'FitBoxToText', 'on');
+  plotState(q);
+  title('applyMagnTest');
   drawnow;
 end

@@ -22,3 +22,4 @@ system('./run_stim.sh');
 clear all; close all;
 display_qorg('../results/applyGyroTest.csv');
 display_qorg('../results/applyAcclTest.csv');
+display_qorg('../results/applyMagnTest.csv');
