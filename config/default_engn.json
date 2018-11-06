@@ -1,8 +1,8 @@
 {
   "isFOM": false,
   "isTran": false,
-  "isRef": true,
-  "isAng": true,
+  "isRef": false,
+  "isAng": false,
   "isSensorStruct": false,
   "qRef": [1.0, 0.0, 0.0, 0.0],
   "configFileCore": "../config/default_core.json",

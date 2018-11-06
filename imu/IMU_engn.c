@@ -864,9 +864,6 @@ int IMU_engn_process(
   // save data to sensor structure
   if (config[id].isSensorStruct)
     IMU_copy_datumRaw(id, datum);
-
-  // update the datum counter
-  state[id].datumCount++;
   
   // process datum by subsystems
   if (config[id].isRect)
@@ -882,16 +879,20 @@ int IMU_engn_process(
     state[id].calb = IMU_calb_point(state[id].idCalb, pnt);
   if (config[id].isStat && FOM != NULL)
     state[id].stat = IMU_stat_datum(state[id].idStat, datum, FOM, status);
-  if (state[id].rect < 0 || state[id].core < 0 || state[id].pnts < 0 ||
-      state[id].calb < 0 || state[id].stat < 0)
-    return IMU_ENGN_SUBSYSTEM_FAILURE;
     
   // save data to sensor structure
   if (config[id].isSensorStruct)
     IMU_copy_results1(id, datum, FOM);
-    
+
+  // update the datum counter
+  state[id].datumCount++;
+
   // exit function (no errrors)
-  return 0;
+  if (state[id].rect < 0 || state[id].core < 0 || state[id].pnts < 0 ||
+      state[id].calb < 0 || state[id].stat < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+  else
+    return 0;
 }
 
 

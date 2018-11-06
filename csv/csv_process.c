@@ -90,7 +90,7 @@ int main(
     // get estimate 
     while (1) {
       status = IMU_engn_getEstm(id, 0, &estm);
-      printf("status = %d\n", status);
+      // printf("status = %d\n", status);
       if (status >= count)
         break;
       usleep(usleep_delay);
@@ -101,16 +101,17 @@ int main(
     printf("%0.3f, %0.3f, %0.3f, %0.3f", v[0], v[1], v[2], v[3]);
     if (config.engn->isRef) {
       v = estm.q;
-      printf("%0.3f, %0.3f, %0.3f, %0.3f", v[0], v[1], v[2], v[3]);
+      printf(", %0.3f, %0.3f, %0.3f, %0.3f", v[0], v[1], v[2], v[3]);
     }
     if (config.engn->isAng) {
       v = estm.ang;
-      printf("%0.1f, %0.1f, %0.1f", v[0], v[1], v[2]);
+      printf(", %0.1f, %0.1f, %0.1f", v[0], v[1], v[2]);
     }
     if (config.engn->isTran) {
       v = estm.tran;
-      printf("%0.1f, %0.1f, %0.1f", v[0], v[1], v[2]);
+      printf(", %0.1f, %0.1f, %0.1f", v[0], v[1], v[2]);
     }
+    printf("\n");
 
     // increment count
     count++;
