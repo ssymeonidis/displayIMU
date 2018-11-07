@@ -53,6 +53,10 @@ int main(
   }
   IMU_util_status(status, "IMU_engn_load failure");
 
+  // start data queue
+  status = IMU_engn_start();
+  IMU_util_status(status, "IMU_engn_start failure");
+
   // create the display
   QApplication app(argc, argv);
   configGUI config("../config/displayIMU.json");
@@ -65,6 +69,7 @@ int main(
     dataIF_startUDP(config.port);
   else
     dataIF_startCSV(argv[2]);
+  dataIF_setRealtime();
   pthread_create(&dataIF_thread, NULL, dataIF_run, &dataIF_thread_id);
 
   // start the main app

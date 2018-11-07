@@ -85,7 +85,7 @@
      <string>gyroscope</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QCheckBox" name="disp_enableAccl">
@@ -101,7 +101,7 @@
      <string>accelerometer</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="Line" name="line_v1">
@@ -130,10 +130,13 @@
      <string>magnetometer</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QCheckBox" name="disp_enableIMU">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>540</x>
@@ -144,6 +147,9 @@
     </property>
     <property name="text">
      <string>IMU</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label_display">

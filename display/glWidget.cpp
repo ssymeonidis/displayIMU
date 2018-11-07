@@ -58,11 +58,13 @@ GLWidget::GLWidget(QWidget *parent) :
   isIMU      = false;
   scaleAccl  = 1;
   scaleMagn  = 1;
-  scaleGyro  = 1; 
+  scaleGyro  = 1;
   
   // get pointer to the sensor data
   IMU_union_config configIMU;
   IMU_engn_getConfig(0, IMU_engn_self, &configIMU);
+  configIMU.engn->isRef          = 1;
+  configIMU.engn->isAng          = 1;
   configIMU.engn->isSensorStruct = 1;
   IMU_engn_getSensor(0, &sensor);
 
@@ -159,12 +161,12 @@ void GLWidget::paintGL()
     IMU_engn_estm estm;
     IMU_engn_getEstm(0, 0, &estm);
     glPushMatrix();
-    glRotatef(estm.ang[2], 1.0, 0.0, 0.0);
-    glRotatef(estm.ang[1], 0.0, 0.0, 1.0);
-    glRotatef(estm.ang[0], 0.0, 1.0, 0.0);
+    glRotatef(180.0 * estm.ang[2] / M_PI, 1.0, 0.0, 0.0);
+    glRotatef(180.0 * estm.ang[1] / M_PI, 0.0, 0.0, 1.0);
+    glRotatef(180.0 * estm.ang[0] / M_PI, 0.0, 1.0, 0.0);
     glTranslatef((float)estm.tran[0]/scaleIMU,
-                 (float)estm.tran[2]/scaleIMU,
-                 (float)estm.tran[1]/scaleIMU);
+                 (float)estm.tran[1]/scaleIMU,
+                 (float)estm.tran[2]/scaleIMU);
     GLfloat vector1[3]    = { 0.0,  1.0,  0.0};
     drawVector(gyroColor, vector1, 1.0);
     GLfloat vector2[3]    = {-0.0,  0.0,  1.0};

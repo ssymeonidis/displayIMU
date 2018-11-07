@@ -115,6 +115,16 @@ void dataIF_startCSV(
 
 
 /******************************************************************************
+* changes to real-time configuation
+******************************************************************************/
+
+void dataIF_setRealtime()
+{
+  config.isRealtime = 1;
+}
+
+
+/******************************************************************************
 * main function for receiving/parsing data and updating IMU
 ******************************************************************************/
 
@@ -248,8 +258,8 @@ int dataIF_lineCSV(
   }
 
   // determine the datum type
-  float sensor_time;
-  sscanf(line, "%*d, %f", &sensor_time);
+  unsigned int sensor_time;
+  sscanf(line, "%*d, %d", &sensor_time);
 
   // inject csv file delay 
   if (config.isRealtime && !state.isFirstFrame) {
@@ -257,7 +267,7 @@ int dataIF_lineCSV(
       gettimeofday(&time, NULL);
       time_cur         = time.tv_sec * 1000000 + time.tv_usec;
       time_delt_sys    = time_cur - state.timeInitSys;
-      time_delt_sen    = sensor_time - state.timeInitSen;
+      time_delt_sen    = (sensor_time - state.timeInitSen) * 10;
       if (time_delt_sen - time_delt_sys > 0) 
         usleep(time_delt_sen - time_delt_sys); 
       else

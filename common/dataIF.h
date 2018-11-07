@@ -53,6 +53,7 @@ uint16_t  dataIF_init        (IMU_engn_type);
 // access functions
 void      dataIF_startUDP    (int         portno);
 void      dataIF_startCSV    (const char* filename);
+void      dataIF_setRealtime ();
 int       dataIF_process     ();
 void      dataIF_exit        ();
 void      *dataIF_run        (void* id);

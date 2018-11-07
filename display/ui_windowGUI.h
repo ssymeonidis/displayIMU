@@ -211,11 +211,11 @@ public:
         disp_enableGyro = new QCheckBox(centralWidget);
         disp_enableGyro->setObjectName(QStringLiteral("disp_enableGyro"));
         disp_enableGyro->setGeometry(QRect(540, 40, 141, 22));
-        disp_enableGyro->setChecked(true);
+        disp_enableGyro->setChecked(false);
         disp_enableAccl = new QCheckBox(centralWidget);
         disp_enableAccl->setObjectName(QStringLiteral("disp_enableAccl"));
         disp_enableAccl->setGeometry(QRect(540, 80, 141, 22));
-        disp_enableAccl->setChecked(true);
+        disp_enableAccl->setChecked(false);
         line_v1 = new QFrame(centralWidget);
         line_v1->setObjectName(QStringLiteral("line_v1"));
         line_v1->setGeometry(QRect(710, 0, 20, 671));
@@ -224,10 +224,12 @@ public:
         disp_enableMagn = new QCheckBox(centralWidget);
         disp_enableMagn->setObjectName(QStringLiteral("disp_enableMagn"));
         disp_enableMagn->setGeometry(QRect(540, 120, 141, 22));
-        disp_enableMagn->setChecked(true);
+        disp_enableMagn->setChecked(false);
         disp_enableIMU = new QCheckBox(centralWidget);
         disp_enableIMU->setObjectName(QStringLiteral("disp_enableIMU"));
+        disp_enableIMU->setEnabled(true);
         disp_enableIMU->setGeometry(QRect(540, 160, 141, 22));
+        disp_enableIMU->setChecked(true);
         label_display = new QLabel(centralWidget);
         label_display->setObjectName(QStringLiteral("label_display"));
         label_display->setGeometry(QRect(440, 0, 121, 17));
