@@ -180,8 +180,6 @@ int IMU_engn_getSysID(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_ENGN_BAD_INST;
-  if (!IMU_engn_typeCheck(id, system))
-    return IMU_ENGN_UNINITIALIZE_SYS;    
 
   // pass subsystem handle (id)
   if      (system == IMU_engn_core)
@@ -214,8 +212,6 @@ int IMU_engn_getConfig(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_ENGN_BAD_INST; 
-  if (IMU_engn_typeCheck(id, system) != 0)
-    return IMU_ENGN_UNINITIALIZE_SYS;    
 
   // pass subsystem config structure
   if      (system == IMU_engn_core)
@@ -250,8 +246,6 @@ int IMU_engn_getState(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_ENGN_BAD_INST;
-  if (IMU_engn_typeCheck(id, system) != 0)
-    return IMU_ENGN_UNINITIALIZE_SYS;   
 
   // pass subsystem state structure
   if      (system == IMU_engn_core) 
@@ -438,8 +432,6 @@ int IMU_engn_load(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_ENGN_BAD_INST;
-  if (IMU_engn_typeCheck(id, system) != 0)
-    return IMU_ENGN_UNINITIALIZE_SYS;    
     
   // load respective json file
   if      (system == IMU_engn_core)
@@ -483,8 +475,6 @@ int IMU_engn_save(
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_ENGN_BAD_INST;
-  if (IMU_engn_typeCheck(id, system) != 0)
-    return IMU_ENGN_UNINITIALIZE_SYS;    
     
   // load respective json file
   if      (system == IMU_engn_core)

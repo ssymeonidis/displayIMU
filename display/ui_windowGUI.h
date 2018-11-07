@@ -113,7 +113,6 @@ public:
     QLabel *text_mDot;
     QLabel *text_gBias;
     GLWidget *widget;
-    QLabel *label_rect;
     QPushButton *rect_open;
     QPushButton *rect_save;
     QCheckBox *core_isPredict;
@@ -148,7 +147,6 @@ public:
     QCheckBox *pnts_isGyro;
     QCheckBox *pnts_isMagn;
     QCheckBox *pnts_isAccl;
-    QLabel *label_pnts;
     QLineEdit *pnts_tHold;
     QLabel *label_pnts_tHold;
     QLineEdit *pnts_tStable;
@@ -167,9 +165,7 @@ public:
     QLabel *label_pnts_mThresh;
     QPushButton *pnts_save;
     QPushButton *pnts_open;
-    QLabel *label_calb;
     QComboBox *calb_type;
-    QLabel *label_stat;
     QLineEdit *stat_alpha;
     QLabel *label_stat_alpha;
     QPushButton *stat_save;
@@ -177,6 +173,10 @@ public:
     QPushButton *calb_go;
     QLineEdit *pnts_val;
     QLabel *label_calb_val;
+    QCheckBox *pnts_enable;
+    QCheckBox *rect_enable;
+    QCheckBox *stat_enable;
+    QCheckBox *calb_enable;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -227,8 +227,9 @@ public:
         disp_enableIMU->setGeometry(QRect(540, 160, 141, 22));
         label_display = new QLabel(centralWidget);
         label_display->setObjectName(QStringLiteral("label_display"));
-        label_display->setGeometry(QRect(510, 0, 121, 17));
+        label_display->setGeometry(QRect(440, 0, 121, 17));
         QFont font1;
+        font1.setPointSize(12);
         font1.setBold(true);
         font1.setWeight(75);
         label_display->setFont(font1);
@@ -399,7 +400,7 @@ public:
         label_core_gScale->setFont(font);
         label_core = new QLabel(centralWidget);
         label_core->setObjectName(QStringLiteral("label_core"));
-        label_core->setGeometry(QRect(840, 0, 121, 20));
+        label_core->setGeometry(QRect(740, 0, 121, 20));
         label_core->setFont(font1);
         calb_val = new QFrame(centralWidget);
         calb_val->setObjectName(QStringLiteral("calb_val"));
@@ -465,10 +466,6 @@ public:
         widget = new GLWidget(centralWidget);
         widget->setObjectName(QStringLiteral("widget"));
         widget->setGeometry(QRect(10, 0, 411, 411));
-        label_rect = new QLabel(centralWidget);
-        label_rect->setObjectName(QStringLiteral("label_rect"));
-        label_rect->setGeometry(QRect(1190, 0, 151, 20));
-        label_rect->setFont(font1);
         rect_open = new QPushButton(centralWidget);
         rect_open->setObjectName(QStringLiteral("rect_open"));
         rect_open->setGeometry(QRect(1130, 600, 81, 27));
@@ -585,10 +582,6 @@ public:
         pnts_isAccl = new QCheckBox(centralWidget);
         pnts_isAccl->setObjectName(QStringLiteral("pnts_isAccl"));
         pnts_isAccl->setGeometry(QRect(520, 380, 97, 22));
-        label_pnts = new QLabel(centralWidget);
-        label_pnts->setObjectName(QStringLiteral("label_pnts"));
-        label_pnts->setGeometry(QRect(520, 340, 121, 20));
-        label_pnts->setFont(font1);
         pnts_tHold = new QLineEdit(centralWidget);
         pnts_tHold->setObjectName(QStringLiteral("pnts_tHold"));
         pnts_tHold->setGeometry(QRect(430, 440, 131, 27));
@@ -651,17 +644,9 @@ public:
         pnts_open = new QPushButton(centralWidget);
         pnts_open->setObjectName(QStringLiteral("pnts_open"));
         pnts_open->setGeometry(QRect(470, 640, 81, 27));
-        label_calb = new QLabel(centralWidget);
-        label_calb->setObjectName(QStringLiteral("label_calb"));
-        label_calb->setGeometry(QRect(850, 490, 91, 20));
-        label_calb->setFont(font1);
         calb_type = new QComboBox(centralWidget);
         calb_type->setObjectName(QStringLiteral("calb_type"));
         calb_type->setGeometry(QRect(730, 550, 151, 27));
-        label_stat = new QLabel(centralWidget);
-        label_stat->setObjectName(QStringLiteral("label_stat"));
-        label_stat->setGeometry(QRect(130, 420, 181, 20));
-        label_stat->setFont(font1);
         stat_alpha = new QLineEdit(centralWidget);
         stat_alpha->setObjectName(QStringLiteral("stat_alpha"));
         stat_alpha->setGeometry(QRect(30, 640, 121, 27));
@@ -685,6 +670,22 @@ public:
         label_calb_val->setObjectName(QStringLiteral("label_calb_val"));
         label_calb_val->setGeometry(QRect(890, 530, 71, 20));
         label_calb_val->setFont(font);
+        pnts_enable = new QCheckBox(centralWidget);
+        pnts_enable->setObjectName(QStringLiteral("pnts_enable"));
+        pnts_enable->setGeometry(QRect(430, 340, 151, 22));
+        pnts_enable->setFont(font1);
+        rect_enable = new QCheckBox(centralWidget);
+        rect_enable->setObjectName(QStringLiteral("rect_enable"));
+        rect_enable->setGeometry(QRect(1070, 0, 151, 22));
+        rect_enable->setFont(font1);
+        stat_enable = new QCheckBox(centralWidget);
+        stat_enable->setObjectName(QStringLiteral("stat_enable"));
+        stat_enable->setGeometry(QRect(10, 420, 151, 22));
+        stat_enable->setFont(font1);
+        calb_enable = new QCheckBox(centralWidget);
+        calb_enable->setObjectName(QStringLiteral("calb_enable"));
+        calb_enable->setGeometry(QRect(730, 490, 201, 22));
+        calb_enable->setFont(font1);
         windowGUI->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(windowGUI);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -772,6 +773,10 @@ public:
         QObject::connect(pnts_mAlpha, SIGNAL(editingFinished()), windowGUI, SLOT(pnts_read()));
         QObject::connect(pnts_mThresh, SIGNAL(editingFinished()), windowGUI, SLOT(pnts_read()));
         QObject::connect(stat_alpha, SIGNAL(editingFinished()), windowGUI, SLOT(stat_read()));
+        QObject::connect(rect_enable, SIGNAL(clicked()), windowGUI, SLOT(rect_read()));
+        QObject::connect(pnts_enable, SIGNAL(clicked()), windowGUI, SLOT(pnts_read()));
+        QObject::connect(stat_enable, SIGNAL(clicked()), windowGUI, SLOT(stat_read()));
+        QObject::connect(calb_enable, SIGNAL(clicked()), windowGUI, SLOT(calb_read()));
 
         QMetaObject::connectSlotsByName(windowGUI);
     } // setupUi
@@ -854,7 +859,6 @@ public:
         text_mMag->setText(QApplication::translate("windowGUI", "-", 0));
         text_mDot->setText(QApplication::translate("windowGUI", "-", 0));
         text_gBias->setText(QApplication::translate("windowGUI", "-", 0));
-        label_rect->setText(QApplication::translate("windowGUI", "Rect Config", 0));
         rect_open->setText(QApplication::translate("windowGUI", "Open", 0));
         rect_save->setText(QApplication::translate("windowGUI", "Save", 0));
         core_isPredict->setText(QApplication::translate("windowGUI", "predict", 0));
@@ -887,7 +891,6 @@ public:
         pnts_isGyro->setText(QApplication::translate("windowGUI", "gyro", 0));
         pnts_isMagn->setText(QApplication::translate("windowGUI", "magn", 0));
         pnts_isAccl->setText(QApplication::translate("windowGUI", "accl", 0));
-        label_pnts->setText(QApplication::translate("windowGUI", "Pnts Config", 0));
         pnts_tHold->setText(QApplication::translate("windowGUI", "1.0", 0));
         label_pnts_tHold->setText(QApplication::translate("windowGUI", "tHold", 0));
         pnts_tStable->setText(QApplication::translate("windowGUI", "1.0", 0));
@@ -906,7 +909,6 @@ public:
         label_pnts_mThresh->setText(QApplication::translate("windowGUI", "mThresh", 0));
         pnts_save->setText(QApplication::translate("windowGUI", "Save", 0));
         pnts_open->setText(QApplication::translate("windowGUI", "Open", 0));
-        label_calb->setText(QApplication::translate("windowGUI", "Calb Contol", 0));
         calb_type->clear();
         calb_type->insertItems(0, QStringList()
          << QApplication::translate("windowGUI", "1pnt Gyro", 0)
@@ -914,7 +916,6 @@ public:
          << QApplication::translate("windowGUI", "4pnt Magn", 0)
          << QApplication::translate("windowGUI", "6pnt Full", 0)
         );
-        label_stat->setText(QApplication::translate("windowGUI", "Stat Config/Results", 0));
         stat_alpha->setText(QApplication::translate("windowGUI", "1.0", 0));
         label_stat_alpha->setText(QApplication::translate("windowGUI", "alpha", 0));
         stat_save->setText(QApplication::translate("windowGUI", "Save", 0));
@@ -922,6 +923,10 @@ public:
         calb_go->setText(QApplication::translate("windowGUI", "Go", 0));
         pnts_val->setText(QApplication::translate("windowGUI", "0.0", 0));
         label_calb_val->setText(QApplication::translate("windowGUI", "val", 0));
+        pnts_enable->setText(QApplication::translate("windowGUI", "Pnts Config", 0));
+        rect_enable->setText(QApplication::translate("windowGUI", "Rect Config", 0));
+        stat_enable->setText(QApplication::translate("windowGUI", "Stat Config", 0));
+        calb_enable->setText(QApplication::translate("windowGUI", "Calb Config/Control", 0));
         toolBar->setWindowTitle(QApplication::translate("windowGUI", "toolBar", 0));
     } // retranslateUi
 

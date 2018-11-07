@@ -38,7 +38,7 @@ int main(
   pthread_t          dataIF_thread;
 
   // initialize the IMU and its data parser
-  dataIF_init(IMU_engn_rect_core);
+  dataIF_init(IMU_engn_calb_full);
 
   // create the display
   QApplication app(argc, argv);

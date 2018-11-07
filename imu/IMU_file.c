@@ -443,8 +443,8 @@ int IMU_file_pntsLoad(
   }
 
   // scale parameters
-  config->tHold    = config->tHold   * 100;
-  config->tStable  = config->tStable * 100;
+  config->tHold    = (uint32_t)(config->tHold   * 100.0f);
+  config->tStable  = (uint32_t)(config->tStable * 100.0f);
   config->gThresh  = config->gThresh * config->gThresh;
   config->aThresh  = config->aThresh * config->aThresh;
   config->mThresh  = config->mThresh * config->mThresh;
@@ -479,11 +479,11 @@ int IMU_file_pntsSave(
   fprintf(file, "  \"isMagn\": ");    write_bool(file, config->isMagn);
   fprintf(file, "  \"tHold\": %d,\n",                  config->tHold   / 100);
   fprintf(file, "  \"tStable\": %d,\n",                config->tStable / 100);
-  fprintf(file, "  \"gAlpha\": %0.2f,\n",              config->gAlpha);
+  fprintf(file, "  \"gAlpha\": %0.3f,\n",              config->gAlpha);
   fprintf(file, "  \"gThresh\": %0.2f,\n",        sqrt(config->gThresh));
-  fprintf(file, "  \"aAlpha\": %0.2f,\n",              config->aAlpha);
+  fprintf(file, "  \"aAlpha\": %0.3f,\n",              config->aAlpha);
   fprintf(file, "  \"aThresh\": %0.2f,\n",        sqrt(config->aThresh));
-  fprintf(file, "  \"mAlpha\": %0.2f,\n",              config->mAlpha);
+  fprintf(file, "  \"mAlpha\": %0.3f,\n",              config->mAlpha);
   fprintf(file, "  \"mThresh\": %0.2f\n",         sqrt(config->mThresh));
   fprintf(file, "}\n");
 
@@ -555,7 +555,7 @@ int IMU_file_statSave(
   // write contents to json file one line at a time
   fprintf(file, "{\n");
   fprintf(file, "  \"enable\": ");         write_bool(file, config->enable);
-  fprintf(file, "  \"alpha\": %0.2f,\n",   config->alpha);
+  fprintf(file, "  \"alpha\": %0.5f,\n",   config->alpha);
   fprintf(file, "}\n");
 
   // exit function

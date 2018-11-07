@@ -18,6 +18,7 @@
 */
 
 // include statements 
+#include <math.h>
 #include <QFileDialog>
 #include "IMU_file.h"
 #include "windowGUI.h"
@@ -134,6 +135,7 @@ void windowGUI::core_read()
 
 void windowGUI::rect_write()
 {
+  ui->rect_enable->setChecked(configRect->enable);
   ui->rect_gBias0->setText(QString::number(configRect->gBias[0], 'f', 5));
   ui->rect_gBias1->setText(QString::number(configRect->gBias[1], 'f', 5));
   ui->rect_gBias2->setText(QString::number(configRect->gBias[2], 'f', 5));
@@ -179,6 +181,7 @@ void windowGUI::rect_write()
 
 void windowGUI::rect_read()
 {
+  configRect->enable   = ui->rect_enable->isChecked();
   configRect->gBias[0] = ui->rect_gBias0->text().toFloat();
   configRect->gBias[1] = ui->rect_gBias1->text().toFloat();
   configRect->gBias[2] = ui->rect_gBias2->text().toFloat();
@@ -224,17 +227,18 @@ void windowGUI::rect_read()
 
 void windowGUI::pnts_write()
 {
+  ui->pnts_enable->setChecked(configPnts->enable);
   ui->pnts_isGyro->setChecked(configPnts->isGyro);
   ui->pnts_isAccl->setChecked(configPnts->isAccl);
   ui->pnts_isMagn->setChecked(configPnts->isMagn);
-  ui->pnts_tHold->setText(QString::number(configPnts->tHold, 'f', 1));
-  ui->pnts_tStable->setText(QString::number(configPnts->tStable, 'f', 1));
-  ui->pnts_gAlpha->setText(QString::number(configPnts->gAlpha, 'f', 2));
-  ui->pnts_gThresh->setText(QString::number(configPnts->gThresh, 'f', 2));
-  ui->pnts_aAlpha->setText(QString::number(configPnts->aAlpha, 'f', 2));
-  ui->pnts_aThresh->setText(QString::number(configPnts->aThresh, 'f', 2));
-  ui->pnts_mAlpha->setText(QString::number(configPnts->mAlpha, 'f', 2));
-  ui->pnts_mThresh->setText(QString::number(configPnts->mThresh, 'f', 2));
+  ui->pnts_tHold->setText(QString::number(configPnts->tHold/100.0, 'f', 1));
+  ui->pnts_tStable->setText(QString::number(configPnts->tStable/100.0, 'f', 1));
+  ui->pnts_gAlpha->setText(QString::number(configPnts->gAlpha, 'f', 3));
+  ui->pnts_gThresh->setText(QString::number(sqrt(configPnts->gThresh), 'f', 2));
+  ui->pnts_aAlpha->setText(QString::number(configPnts->aAlpha, 'f', 3));
+  ui->pnts_aThresh->setText(QString::number(sqrt(configPnts->aThresh), 'f', 2));
+  ui->pnts_mAlpha->setText(QString::number(configPnts->mAlpha, 'f', 3));
+  ui->pnts_mThresh->setText(QString::number(sqrt(configPnts->mThresh), 'f', 2));
 }
 
 
@@ -244,17 +248,18 @@ void windowGUI::pnts_write()
 
 void windowGUI::pnts_read()
 {
+  configPnts->enable       = ui->pnts_enable->isChecked();
   configPnts->isGyro       = ui->pnts_isGyro->isChecked();
   configPnts->isAccl       = ui->pnts_isAccl->isChecked();
   configPnts->isMagn       = ui->pnts_isMagn->isChecked();
-  configPnts->tHold        = ui->pnts_tHold->text().toFloat();
-  configPnts->tStable      = ui->pnts_tStable->text().toFloat();
+  configPnts->tHold        = 100.0*ui->pnts_tHold->text().toFloat();
+  configPnts->tStable      = 100.0*ui->pnts_tStable->text().toFloat();
   configPnts->gAlpha       = ui->pnts_gAlpha->text().toFloat();
-  configPnts->gThresh      = ui->pnts_gThresh->text().toFloat();
+  configPnts->gThresh      = pow(ui->pnts_gThresh->text().toFloat(),2);
   configPnts->aAlpha       = ui->pnts_aAlpha->text().toFloat();
-  configPnts->aThresh      = ui->pnts_aThresh->text().toFloat();
+  configPnts->aThresh      = pow(ui->pnts_aThresh->text().toFloat(),2);
   configPnts->mAlpha       = ui->pnts_mAlpha->text().toFloat();
-  configPnts->mThresh      = ui->pnts_mThresh->text().toFloat();
+  configPnts->mThresh      = pow(ui->pnts_mThresh->text().toFloat(),2);
 }
 
 
@@ -264,7 +269,8 @@ void windowGUI::pnts_read()
 
 void windowGUI::stat_write()
 {
-  ui->stat_alpha->setText(QString::number(configStat->alpha, 'f', 1));
+  ui->stat_enable->setChecked(configStat->enable);
+  ui->stat_alpha->setText(QString::number(configStat->alpha, 'f', 5));
 }
 
 
@@ -274,6 +280,7 @@ void windowGUI::stat_write()
 
 void windowGUI::stat_read()
 {
+  configStat->enable       = ui->stat_enable->isChecked();
   configStat->alpha        = ui->stat_alpha->text().toFloat();
 }
 
@@ -284,7 +291,7 @@ void windowGUI::stat_read()
 
 void windowGUI::calb_write()
 {
-  // future growth
+  ui->calb_enable->setChecked(configCalb->enable);
 }
 
 
@@ -294,7 +301,7 @@ void windowGUI::calb_write()
 
 void windowGUI::calb_read()
 {
-  // future growth
+  configCalb->enable       = ui->calb_enable->isChecked();
 }
 
 

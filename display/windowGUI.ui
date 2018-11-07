@@ -149,7 +149,7 @@
    <widget class="QLabel" name="label_display">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>440</x>
       <y>0</y>
       <width>121</width>
       <height>17</height>
@@ -157,6 +157,7 @@
     </property>
     <property name="font">
      <font>
+      <pointsize>12</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -886,7 +887,7 @@
    <widget class="QLabel" name="label_core">
     <property name="geometry">
      <rect>
-      <x>840</x>
+      <x>740</x>
       <y>0</y>
       <width>121</width>
       <height>20</height>
@@ -894,6 +895,7 @@
     </property>
     <property name="font">
      <font>
+      <pointsize>12</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -1189,25 +1191,6 @@
       <width>411</width>
       <height>411</height>
      </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_rect">
-    <property name="geometry">
-     <rect>
-      <x>1190</x>
-      <y>0</y>
-      <width>151</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Rect Config</string>
     </property>
    </widget>
    <widget class="QPushButton" name="rect_open">
@@ -1709,25 +1692,6 @@
      <string>accl</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_pnts">
-    <property name="geometry">
-     <rect>
-      <x>520</x>
-      <y>340</y>
-      <width>121</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Pnts Config</string>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="pnts_tHold">
     <property name="geometry">
      <rect>
@@ -2010,25 +1974,6 @@
      <string>Open</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_calb">
-    <property name="geometry">
-     <rect>
-      <x>850</x>
-      <y>490</y>
-      <width>91</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Calb Contol</string>
-    </property>
-   </widget>
    <widget class="QComboBox" name="calb_type">
     <property name="geometry">
      <rect>
@@ -2058,25 +2003,6 @@
       <string>6pnt Full</string>
      </property>
     </item>
-   </widget>
-   <widget class="QLabel" name="label_stat">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>420</y>
-      <width>181</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>Stat Config/Results</string>
-    </property>
    </widget>
    <widget class="QLineEdit" name="stat_alpha">
     <property name="geometry">
@@ -2179,6 +2105,86 @@
     </property>
     <property name="text">
      <string>val</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="pnts_enable">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>340</y>
+      <width>151</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Pnts Config</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="rect_enable">
+    <property name="geometry">
+     <rect>
+      <x>1070</x>
+      <y>0</y>
+      <width>151</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Rect Config</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="stat_enable">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>420</y>
+      <width>151</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Stat Config</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="calb_enable">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>490</y>
+      <width>201</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Calb Config/Control</string>
     </property>
    </widget>
   </widget>
@@ -3360,6 +3366,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rect_enable</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>rect_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1145</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_enable</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>505</x>
+     <y>388</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stat_enable</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>stat_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>85</x>
+     <y>468</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>calb_enable</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>calb_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>830</x>
+     <y>538</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>glWidget_update()</slot>
@@ -3371,5 +3441,7 @@
   <slot>pnts_write()</slot>
   <slot>stat_read()</slot>
   <slot>stat_write()</slot>
+  <slot>calb_read()</slot>
+  <slot>calb_write()</slot>
  </slots>
 </ui>
