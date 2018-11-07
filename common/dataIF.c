@@ -125,6 +125,16 @@ void dataIF_setRealtime()
 
 
 /******************************************************************************
+* changes to real-time configuation
+******************************************************************************/
+
+void dataIF_setRepeat()
+{
+  config.isRepeat = 1;
+}
+
+
+/******************************************************************************
 * main function for receiving/parsing data and updating IMU
 ******************************************************************************/
 
@@ -141,6 +151,10 @@ int dataIF_process()
     dataIF_lineUPD(line, line_size);
   else 
     status = dataIF_lineCSV(line, line_size);
+  if (status > 0) {
+    usleep(250);
+    IMU_engn_reset(state.imuID);
+  }
 
   // determine the datum type
   sscanf(line, "%d", &datum_type);

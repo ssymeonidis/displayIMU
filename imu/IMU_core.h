@@ -70,6 +70,7 @@ typedef struct {
   float                q[4];            // current quaterion
   float                aTran[3];        // last acceleration estimate
   float                mInit[3];        // initial magnetometer value
+  unsigned char        gReset;          // gyroscope reset signal
   unsigned char        aReset;          // accelerometer reset signal
   unsigned char        mReset;          // magnetometer reset signal
 } IMU_core_state;

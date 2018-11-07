@@ -47,7 +47,7 @@ GLWidget::GLWidget(QWidget *parent) :
   parent)
 {
   // initialize internal display variables
-  xRot       = 120;
+  xRot       = 240;
   yRot       = 700;
   zRot       = 0;
 
@@ -161,9 +161,9 @@ void GLWidget::paintGL()
     IMU_engn_estm estm;
     IMU_engn_getEstm(0, 0, &estm);
     glPushMatrix();
-    glRotatef(-180.0 * estm.ang[2] / M_PI, 1.0, 0.0, 0.0);
-    glRotatef(-180.0 * estm.ang[1] / M_PI, 0.0, 0.0, 1.0);
     glRotatef(-180.0 * estm.ang[0] / M_PI, 0.0, 1.0, 0.0);
+    glRotatef(-180.0 * estm.ang[1] / M_PI, 0.0, 0.0, 1.0);
+    glRotatef(-180.0 * estm.ang[2] / M_PI, 1.0, 0.0, 0.0);
     glTranslatef((float)estm.tran[0]/scaleIMU,
                  (float)estm.tran[1]/scaleIMU,
                  (float)estm.tran[2]/scaleIMU);

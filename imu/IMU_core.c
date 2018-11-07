@@ -154,6 +154,7 @@ int IMU_core_reset(
   state[id].aTran[0]    = 0.0;
   state[id].aTran[1]    = 0.0;
   state[id].aTran[2]    = 0.0;
+  state[id].gReset      = config[id].isGyro;
   state[id].aReset      = config[id].isAccl;
   state[id].mReset      = config[id].isMagn;
 
@@ -392,8 +393,12 @@ int IMU_core_newGyro(
   #endif
 
   // update system state with gyro
-  float dt = ((float)t-state[id].t)*IMU_CORE_10USEC_TO_SEC;
-  IMU_math_estmGyro(state[id].q, g, dt);
+  if (!state[id].gReset) {
+    float dt = ((float)t-state[id].t)*IMU_CORE_10USEC_TO_SEC;
+    IMU_math_estmGyro(state[id].q, g, dt);
+  } else {
+    state[id].gReset    = 0;
+  }
   state[id].t           = (float)t;
 
   // unlock mutex and exit (no errors)

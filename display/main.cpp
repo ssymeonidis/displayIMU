@@ -70,6 +70,7 @@ int main(
   else
     dataIF_startCSV(argv[2]);
   dataIF_setRealtime();
+  dataIF_setRepeat();
   pthread_create(&dataIF_thread, NULL, dataIF_run, &dataIF_thread_id);
 
   // start the main app
