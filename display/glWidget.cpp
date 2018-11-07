@@ -144,14 +144,14 @@ void GLWidget::paintGL()
 
   // draw accelerometer state
   if (isAccl == true) {
-    float val[3] = {(float)sensor->aRaw[0], (float)sensor->aRaw[1],
+    float val[3] = {(float)sensor->aRaw[0], -(float)sensor->aRaw[1],
                     (float)sensor->aRaw[2]};
     drawVector(acclColor, val, scaleAccl);
   }
 
   // draw magnetometer state
   if (isMagn == true) {
-    float val[3] = {(float)sensor->mRaw[0], (float)sensor->mRaw[1],
+    float val[3] = {-(float)sensor->mRaw[0], -(float)sensor->mRaw[1],
                     (float)sensor->mRaw[2]};
     drawVector(magnColor, val, scaleMagn);
   }
@@ -161,9 +161,9 @@ void GLWidget::paintGL()
     IMU_engn_estm estm;
     IMU_engn_getEstm(0, 0, &estm);
     glPushMatrix();
-    glRotatef(180.0 * estm.ang[2] / M_PI, 1.0, 0.0, 0.0);
-    glRotatef(180.0 * estm.ang[1] / M_PI, 0.0, 0.0, 1.0);
-    glRotatef(180.0 * estm.ang[0] / M_PI, 0.0, 1.0, 0.0);
+    glRotatef(-180.0 * estm.ang[2] / M_PI, 1.0, 0.0, 0.0);
+    glRotatef(-180.0 * estm.ang[1] / M_PI, 0.0, 0.0, 1.0);
+    glRotatef(-180.0 * estm.ang[0] / M_PI, 0.0, 1.0, 0.0);
     glTranslatef((float)estm.tran[0]/scaleIMU,
                  (float)estm.tran[1]/scaleIMU,
                  (float)estm.tran[2]/scaleIMU);
