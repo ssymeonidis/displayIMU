@@ -10,11 +10,11 @@ LIBS        = -L../bin                   \
               -lm                        \
               -lpthread
 LINKER      = -Wl,-rpath=.
-TARGETS     = $(BINDIR)/csv_process
+TARGETS     = $(BINDIR)/csvProcess
 
 all: ${TARGETS}
 
-$(BINDIR)/csv_process: $(OBJDIR)/csv_process.o $(OBJDIR)/dataIF.o
+$(BINDIR)/csvProcess: $(OBJDIR)/csv_process.o $(OBJDIR)/dataIF.o
 	$(CC) ${DEFINES} ${INCLUDE} -o $@ $^ ${LIBS} ${LINKER}
 
 $(OBJDIR)/csv_process.o: csv_process.c

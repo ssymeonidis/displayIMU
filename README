@@ -43,25 +43,32 @@ To compile the project in Linux perform the following in the root directory:
 
 If changes are made to the GUI, running qmake may be necessary.  This cand be
 done by performing the following:
+- source setenv.sh
 - cd display
 - make clean
 - qmake
 - make
 - cd ..
 
-The IMU shared object and display binary are created in bin.  To run type:
+The IMU shared object and display/csv binaries are created in bin.  To run type:
 - cd bin
 - ./displayIMU
 
+Regression unit testing is available to aid project maintenance.  To test type:
+- make unit_test
+
 The project organization is as follows
-- bin <- stores libIMU.so library and displayIMU executable
-- common <- stores shared c/c++ and header files 
-- config <- stores json configuration and calibration files
-- display <- source code for QT diplay application
-- doc <- support documentation 
-- imu <- source code for IMU library
-- matlab <- algorithm reference design
-- test <- unit test source (regression testing)
+- bin      <- stores libIMU.so library and displayIMU executable
+- common   <- stores shared c/c++ and header files 
+- config   <- stores json configuration and calibration files
+- csv      <- source code for processing csv files
+- display  <- source code for QT diplay application
+- doc      <- support documentation 
+- imu      <- source code for IMU library
+- matlab   <- algorithm reference design
+- results  <- directory for storing csv/misc ouptuts
+- stim     <- csv test stimulus files (system testing)
+- test     <- unit test source (regression testing)
 
 The IMU library is broken down into smaller components to provide flexibility on
 how the code is integrated into a project.  For example, the correction function
