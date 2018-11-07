@@ -1272,7 +1272,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>translate</string>
+     <string>tran</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="core_gScale">
@@ -1593,7 +1593,7 @@
      <string>0.0</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_core_mAng">
+   <widget class="QLabel" name="label_core_mDot">
     <property name="geometry">
      <rect>
       <x>840</x>
@@ -1609,10 +1609,10 @@
      </font>
     </property>
     <property name="text">
-     <string>mAng</string>
+     <string>mDot</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_core_mAngThresh">
+   <widget class="QLabel" name="label_core_mDotThresh">
     <property name="geometry">
      <rect>
       <x>950</x>
@@ -1628,7 +1628,7 @@
      </font>
     </property>
     <property name="text">
-     <string>mAngThresh</string>
+     <string>mDotThresh</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="core_mDotThresh">
@@ -2228,7 +2228,7 @@
    <sender>rect_gBias0</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2244,7 +2244,7 @@
    <sender>rect_gBias1</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2260,7 +2260,7 @@
    <sender>rect_gBias2</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2276,7 +2276,7 @@
    <sender>rect_gMult0</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2292,7 +2292,7 @@
    <sender>rect_gMult1</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2308,7 +2308,7 @@
    <sender>rect_gMult2</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2324,7 +2324,7 @@
    <sender>rect_gMult3</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2340,7 +2340,7 @@
    <sender>rect_gMult4</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2356,7 +2356,7 @@
    <sender>rect_gMult5</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2372,7 +2372,7 @@
    <sender>rect_gMult7</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2388,7 +2388,7 @@
    <sender>rect_gMult6</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2404,7 +2404,7 @@
    <sender>rect_gMult8</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2420,7 +2420,7 @@
    <sender>rect_aBias0</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2436,7 +2436,7 @@
    <sender>rect_aBias1</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2452,7 +2452,7 @@
    <sender>rect_aBias2</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2468,7 +2468,7 @@
    <sender>rect_aMult0</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2484,7 +2484,7 @@
    <sender>rect_aMult1</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2500,7 +2500,7 @@
    <sender>rect_aMult2</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2516,7 +2516,7 @@
    <sender>rect_aMult3</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2532,7 +2532,7 @@
    <sender>rect_aMult4</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2548,7 +2548,7 @@
    <sender>rect_aMult5</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2564,7 +2564,7 @@
    <sender>rect_aMult6</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2580,7 +2580,7 @@
    <sender>rect_aMult7</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2596,7 +2596,7 @@
    <sender>rect_aMult8</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2612,7 +2612,7 @@
    <sender>rect_mBias0</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2628,7 +2628,7 @@
    <sender>rect_mBias1</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2644,7 +2644,7 @@
    <sender>rect_mBias2</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2660,7 +2660,7 @@
    <sender>rect_mMult0</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2676,7 +2676,7 @@
    <sender>rect_mMult1</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2692,7 +2692,7 @@
    <sender>rect_mMult2</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2708,7 +2708,7 @@
    <sender>rect_mMult3</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2724,7 +2724,7 @@
    <sender>rect_mMult4</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2740,7 +2740,7 @@
    <sender>rect_mMult5</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2756,7 +2756,7 @@
    <sender>rect_mMult6</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1120</x>
@@ -2772,7 +2772,7 @@
    <sender>rect_mMult7</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1230</x>
@@ -2788,7 +2788,7 @@
    <sender>rect_mMult8</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>calib_read()</slot>
+   <slot>rect_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>1340</x>
@@ -2804,7 +2804,7 @@
    <sender>core_isGyro</sender>
    <signal>clicked()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>778</x>
@@ -2820,7 +2820,7 @@
    <sender>core_isAccl</sender>
    <signal>clicked()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>888</x>
@@ -2836,7 +2836,7 @@
    <sender>core_isMagn</sender>
    <signal>clicked()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>988</x>
@@ -2852,7 +2852,7 @@
    <sender>core_isPredict</sender>
    <signal>clicked()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>778</x>
@@ -2868,7 +2868,7 @@
    <sender>core_isFOM</sender>
    <signal>clicked()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>888</x>
@@ -2884,7 +2884,7 @@
    <sender>core_isTran</sender>
    <signal>clicked()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>988</x>
@@ -2900,7 +2900,7 @@
    <sender>core_gScale</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>805</x>
@@ -2916,7 +2916,7 @@
    <sender>core_tranAlpha</sender>
    <signal>editingFinished()</signal>
    <receiver>windowGUI</receiver>
-   <slot>config_read()</slot>
+   <slot>core_read()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>975</x>
@@ -3040,12 +3040,336 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>core_aWeight</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>780</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>core_aMag</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>890</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>core_aMagThresh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1000</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>core_mWeight</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>780</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>core_mMag</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>890</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>core_mMagThresh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1000</x>
+     <y>331</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>core_mDot</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>890</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>core_mDotThresh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>core_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1000</x>
+     <y>381</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_isGyro</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>478</x>
+     <y>428</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_isAccl</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>568</x>
+     <y>428</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_isMagn</sender>
+   <signal>clicked()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>668</x>
+     <y>428</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_tHold</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>495</x>
+     <y>491</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_tStable</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>635</x>
+     <y>491</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_gAlpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>495</x>
+     <y>541</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_gThresh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>635</x>
+     <y>541</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_aAlpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>495</x>
+     <y>591</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_aThresh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>635</x>
+     <y>591</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_mAlpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>495</x>
+     <y>641</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnts_mThresh</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>pnts_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>635</x>
+     <y>641</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>stat_alpha</sender>
+   <signal>editingFinished()</signal>
+   <receiver>windowGUI</receiver>
+   <slot>stat_read()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>90</x>
+     <y>691</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>config_read()</slot>
-  <slot>calib_read()</slot>
-  <slot>config_write()</slot>
-  <slot>calib_write()</slot>
   <slot>glWidget_update()</slot>
+  <slot>core_read()</slot>
+  <slot>core_write()</slot>
+  <slot>rect_read()</slot>
+  <slot>rect_write()</slot>
+  <slot>pnts_read()</slot>
+  <slot>pnts_write()</slot>
+  <slot>stat_read()</slot>
+  <slot>stat_write()</slot>
  </slots>
 </ui>

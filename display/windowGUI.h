@@ -38,15 +38,25 @@ public:
   void initIMU(configGUI *config);
 
 private slots:
-  void config_read();
-  void config_write();
-  void calib_read();
-  void calib_write(); 
   void glWidget_update();
+  void core_read();
+  void core_write();
+  void rect_read();
+  void rect_write();
+  void pnts_read();
+  void pnts_write();
+  void stat_read();
+  void stat_write();
+  void calb_read();
+  void calb_write(); 
   void on_core_open_clicked();
   void on_core_save_clicked();
   void on_rect_open_clicked();
   void on_rect_save_clicked();
+  void on_pnts_open_clicked();
+  void on_pnts_save_clicked();
+  void on_stat_open_clicked();
+  void on_stat_save_clicked();
   void on_disp_enableGyro_clicked();
   void on_disp_enableAccl_clicked();
   void on_disp_enableMagn_clicked();
@@ -59,6 +69,9 @@ private:
   // internal structures/classes
   IMU_core_config     *configCore;
   IMU_rect_config     *configRect;
+  IMU_pnts_config     *configPnts;
+  IMU_stat_config     *configStat;
+  IMU_calb_config     *configCalb;
   Ui::windowGUI       *ui;
 };
 

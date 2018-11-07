@@ -280,15 +280,16 @@ int IMU_file_coreSave(
   fprintf(file, "  \"isMagn\": ");      write_bool(file, config->isMagn);
   fprintf(file, "  \"isFOM\": ");       write_bool(file, config->isFOM);
   fprintf(file, "  \"isTran\": ");      write_bool(file, config->isTran);
-  fprintf(file, "  \"gScale\": %0.2f,\n",          config->gScale);
-  fprintf(file, "  \"aWeight\": %0.2f,\n",         config->aWeight);
+  fprintf(file, "  \"isPredict\": ");   write_bool(file, config->isPredict);   
+  fprintf(file, "  \"gScale\": %0.6f,\n",          config->gScale);
+  fprintf(file, "  \"aWeight\": %0.3f,\n",         config->aWeight);
   fprintf(file, "  \"aMag\": %0.2f,\n",            config->aMag);
   fprintf(file, "  \"aMagThresh\": %0.2f,\n",      config->aMagThresh);
-  fprintf(file, "  \"mWeight\": %0.2f,\n",         config->mWeight);
+  fprintf(file, "  \"mWeight\": %0.3f,\n",         config->mWeight);
   fprintf(file, "  \"mMag\": %0.2f,\n",            config->mMag);
   fprintf(file, "  \"mMagThresh\": %0.2f,\n",      config->mMagThresh);
-  fprintf(file, "  \"mDot\": %0.2f,\n",            config->mDot);
-  fprintf(file, "  \"mDotThresh\": %0.2f,\n",      config->mDotThresh);
+  fprintf(file, "  \"mDot\": %0.3f,\n",            config->mDot);
+  fprintf(file, "  \"mDotThresh\": %0.3f,\n",      config->mDotThresh);
   fprintf(file, "  \"tranAlpha\": %0.2f,\n",       config->tranAlpha);
   fprintf(file, "}\n");
 
@@ -856,8 +857,8 @@ void write_floats(
 {
   fprintf(file, "[");
   for (int i=0; i<size-1; i++)
-    fprintf(file, "%0.2f, ", vals[i]);
-  fprintf(file, "%0.2f],\n", vals[size-1]); 
+    fprintf(file, "%0.5f, ", vals[i]);
+  fprintf(file, "%0.5f],\n", vals[size-1]); 
 }
 
 

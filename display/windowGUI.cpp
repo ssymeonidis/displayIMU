@@ -41,6 +41,12 @@ windowGUI::windowGUI(QWidget *parent) :
   configCore = configUnion.core;
   IMU_engn_getConfig(0, IMU_engn_rect, &configUnion);
   configRect = configUnion.rect;
+  IMU_engn_getConfig(0, IMU_engn_pnts, &configUnion);
+  configPnts = configUnion.pnts;
+  IMU_engn_getConfig(0, IMU_engn_stat, &configUnion);
+  configStat = configUnion.stat;
+  IMU_engn_getConfig(0, IMU_engn_calb, &configUnion);
+  configCalb = configUnion.calb;
 
   // initialize display/sensor IF parameters
   glWidget_update();
@@ -76,25 +82,24 @@ void windowGUI::initIMU(configGUI *config)
 * utility function - writes contents of config structure to GUI 
 ******************************************************************************/
 
-void windowGUI::config_write()
+void windowGUI::core_write()
 {
   ui->core_isGyro->setChecked(configCore->isGyro);
   ui->core_isAccl->setChecked(configCore->isAccl);
   ui->core_isMagn->setChecked(configCore->isMagn);
-  //ui->noStable->setChecked(!configCore->isStable);
   ui->core_isFOM->setChecked(configCore->isFOM);
-  //ui->noMove->setChecked(!configCore->isMove);
-  //ui->gThresh->setText(QString::number(configCore->gThresh, 'f', 2));
-  //ui->gThreshTime->setText(QString::number(configCore->gThreshTime, 'f', 2));
-  ui->core_aWeight->setText(QString::number(configCore->aWeight, 'f', 2));
+  ui->core_isTran->setChecked(configCore->isTran);
+  ui->core_isPredict->setChecked(configCore->isPredict);
+  ui->core_gScale->setText(QString::number(configCore->gScale, 'f', 6));
+  ui->core_aWeight->setText(QString::number(configCore->aWeight, 'f', 3));
   ui->core_aMag->setText(QString::number(configCore->aMag, 'f', 2));
   ui->core_aMagThresh->setText(QString::number(configCore->aMagThresh, 'f', 2));
-  ui->core_mWeight->setText(QString::number(configCore->mWeight, 'f', 2));
+  ui->core_mWeight->setText(QString::number(configCore->mWeight, 'f', 3));
   ui->core_mMag->setText(QString::number(configCore->mMag, 'f', 2));
   ui->core_mMagThresh->setText(QString::number(configCore->mMagThresh, 'f', 2));
-  //ui->mAng->setText(QString::number(configCore->mAng, 'f', 2));
-  //ui->mAngThresh->setText(QString::number(configCore->mAngThresh, 'f', 2));
-  //ui->moveAlpha->setText(QString::number(configCore->moveAlpha, 'f', 2));
+  ui->core_mDot->setText(QString::number(configCore->mDot, 'f', 3));
+  ui->core_mDotThresh->setText(QString::number(configCore->mDotThresh, 'f', 3));
+  ui->core_tranAlpha->setText(QString::number(configCore->tranAlpha, 'f', 2));
 }
 
 
@@ -102,25 +107,24 @@ void windowGUI::config_write()
 * utility function - read contents of config structure to GUI 
 ******************************************************************************/
 
-void windowGUI::config_read()
+void windowGUI::core_read()
 {
   configCore->isGyro       = ui->core_isGyro->isChecked();
   configCore->isAccl       = ui->core_isAccl->isChecked();
   configCore->isMagn       = ui->core_isMagn->isChecked();
-  //configCore->isStable     = !ui->noStable->isChecked();
   configCore->isFOM        = ui->core_isFOM->isChecked();
-  //configCore->isMove       = !ui->noMove->isChecked();
-  //configCore->gThresh      = ui->gThresh->text().toFloat();
-  //configCore->gThreshTime  = ui->gThreshTime->text().toFloat();
+  configCore->isTran       = ui->core_isTran->isChecked();
+  configCore->isPredict    = ui->core_isPredict->isChecked();
+  configCore->gScale       = ui->core_gScale->text().toFloat();
   configCore->aWeight      = ui->core_aWeight->text().toFloat();
   configCore->aMag         = ui->core_aMag->text().toFloat();
   configCore->aMagThresh   = ui->core_aMagThresh->text().toFloat();
   configCore->mWeight      = ui->core_mWeight->text().toFloat();
   configCore->mMag         = ui->core_mMag->text().toFloat();
   configCore->mMagThresh   = ui->core_mMagThresh->text().toFloat();
-  //configCore->mAng         = ui->mAng->text().toFloat();
-  //configCore->mAngThresh   = ui->mAngThresh->text().toFloat();
-  //configCore->moveAlpha    = ui->moveAlpha->text().toFloat();
+  configCore->mDot         = ui->core_mDot->text().toFloat();
+  configCore->mDotThresh   = ui->core_mDotThresh->text().toFloat();
+  configCore->tranAlpha    = ui->core_tranAlpha->text().toFloat();
 }
 
 
@@ -128,44 +132,44 @@ void windowGUI::config_read()
 * utility function - writes contents of calib structure to GUI 
 ******************************************************************************/
 
-void windowGUI::calib_write()
+void windowGUI::rect_write()
 {
-  ui->rect_gBias0->setText(QString::number(configRect->gBias[0], 'f', 2));
-  ui->rect_gBias1->setText(QString::number(configRect->gBias[1], 'f', 2));
-  ui->rect_gBias2->setText(QString::number(configRect->gBias[2], 'f', 2));
-  ui->rect_gMult0->setText(QString::number(configRect->gMult[0], 'f', 2));
-  ui->rect_gMult1->setText(QString::number(configRect->gMult[1], 'f', 2));
-  ui->rect_gMult2->setText(QString::number(configRect->gMult[2], 'f', 2));
-  ui->rect_gMult3->setText(QString::number(configRect->gMult[3], 'f', 2));
-  ui->rect_gMult4->setText(QString::number(configRect->gMult[4], 'f', 2));
-  ui->rect_gMult5->setText(QString::number(configRect->gMult[5], 'f', 2));
-  ui->rect_gMult6->setText(QString::number(configRect->gMult[6], 'f', 2));
-  ui->rect_gMult7->setText(QString::number(configRect->gMult[7], 'f', 2));
-  ui->rect_gMult8->setText(QString::number(configRect->gMult[8], 'f', 2));
-  ui->rect_aBias0->setText(QString::number(configRect->aBias[0], 'f', 2));
-  ui->rect_aBias1->setText(QString::number(configRect->aBias[1], 'f', 2));
-  ui->rect_aBias2->setText(QString::number(configRect->aBias[2], 'f', 2));
-  ui->rect_aMult0->setText(QString::number(configRect->aMult[0], 'f', 2));
-  ui->rect_aMult1->setText(QString::number(configRect->aMult[1], 'f', 2));
-  ui->rect_aMult2->setText(QString::number(configRect->aMult[2], 'f', 2));
-  ui->rect_aMult3->setText(QString::number(configRect->aMult[3], 'f', 2));
-  ui->rect_aMult4->setText(QString::number(configRect->aMult[4], 'f', 2));
-  ui->rect_aMult5->setText(QString::number(configRect->aMult[5], 'f', 2));
-  ui->rect_aMult6->setText(QString::number(configRect->aMult[6], 'f', 2));
-  ui->rect_aMult7->setText(QString::number(configRect->aMult[7], 'f', 2));
-  ui->rect_aMult8->setText(QString::number(configRect->aMult[8], 'f', 2));
-  ui->rect_mBias0->setText(QString::number(configRect->mBias[0], 'f', 2));
-  ui->rect_mBias1->setText(QString::number(configRect->mBias[1], 'f', 2));
-  ui->rect_mBias2->setText(QString::number(configRect->mBias[2], 'f', 2));
-  ui->rect_mMult0->setText(QString::number(configRect->mMult[0], 'f', 2));
-  ui->rect_mMult1->setText(QString::number(configRect->mMult[1], 'f', 2));
-  ui->rect_mMult2->setText(QString::number(configRect->mMult[2], 'f', 2));
-  ui->rect_mMult3->setText(QString::number(configRect->mMult[3], 'f', 2));
-  ui->rect_mMult4->setText(QString::number(configRect->mMult[4], 'f', 2));
-  ui->rect_mMult5->setText(QString::number(configRect->mMult[5], 'f', 2));
-  ui->rect_mMult6->setText(QString::number(configRect->mMult[6], 'f', 2));
-  ui->rect_mMult7->setText(QString::number(configRect->mMult[7], 'f', 2));
-  ui->rect_mMult8->setText(QString::number(configRect->mMult[8], 'f', 2));
+  ui->rect_gBias0->setText(QString::number(configRect->gBias[0], 'f', 5));
+  ui->rect_gBias1->setText(QString::number(configRect->gBias[1], 'f', 5));
+  ui->rect_gBias2->setText(QString::number(configRect->gBias[2], 'f', 5));
+  ui->rect_gMult0->setText(QString::number(configRect->gMult[0], 'f', 5));
+  ui->rect_gMult1->setText(QString::number(configRect->gMult[1], 'f', 5));
+  ui->rect_gMult2->setText(QString::number(configRect->gMult[2], 'f', 5));
+  ui->rect_gMult3->setText(QString::number(configRect->gMult[3], 'f', 5));
+  ui->rect_gMult4->setText(QString::number(configRect->gMult[4], 'f', 5));
+  ui->rect_gMult5->setText(QString::number(configRect->gMult[5], 'f', 5));
+  ui->rect_gMult6->setText(QString::number(configRect->gMult[6], 'f', 5));
+  ui->rect_gMult7->setText(QString::number(configRect->gMult[7], 'f', 5));
+  ui->rect_gMult8->setText(QString::number(configRect->gMult[8], 'f', 5));
+  ui->rect_aBias0->setText(QString::number(configRect->aBias[0], 'f', 5));
+  ui->rect_aBias1->setText(QString::number(configRect->aBias[1], 'f', 5));
+  ui->rect_aBias2->setText(QString::number(configRect->aBias[2], 'f', 5));
+  ui->rect_aMult0->setText(QString::number(configRect->aMult[0], 'f', 5));
+  ui->rect_aMult1->setText(QString::number(configRect->aMult[1], 'f', 5));
+  ui->rect_aMult2->setText(QString::number(configRect->aMult[2], 'f', 5));
+  ui->rect_aMult3->setText(QString::number(configRect->aMult[3], 'f', 5));
+  ui->rect_aMult4->setText(QString::number(configRect->aMult[4], 'f', 5));
+  ui->rect_aMult5->setText(QString::number(configRect->aMult[5], 'f', 5));
+  ui->rect_aMult6->setText(QString::number(configRect->aMult[6], 'f', 5));
+  ui->rect_aMult7->setText(QString::number(configRect->aMult[7], 'f', 5));
+  ui->rect_aMult8->setText(QString::number(configRect->aMult[8], 'f', 5));
+  ui->rect_mBias0->setText(QString::number(configRect->mBias[0], 'f', 5));
+  ui->rect_mBias1->setText(QString::number(configRect->mBias[1], 'f', 5));
+  ui->rect_mBias2->setText(QString::number(configRect->mBias[2], 'f', 5));
+  ui->rect_mMult0->setText(QString::number(configRect->mMult[0], 'f', 5));
+  ui->rect_mMult1->setText(QString::number(configRect->mMult[1], 'f', 5));
+  ui->rect_mMult2->setText(QString::number(configRect->mMult[2], 'f', 5));
+  ui->rect_mMult3->setText(QString::number(configRect->mMult[3], 'f', 5));
+  ui->rect_mMult4->setText(QString::number(configRect->mMult[4], 'f', 5));
+  ui->rect_mMult5->setText(QString::number(configRect->mMult[5], 'f', 5));
+  ui->rect_mMult6->setText(QString::number(configRect->mMult[6], 'f', 5));
+  ui->rect_mMult7->setText(QString::number(configRect->mMult[7], 'f', 5));
+  ui->rect_mMult8->setText(QString::number(configRect->mMult[8], 'f', 5));
 }
 
 
@@ -173,7 +177,7 @@ void windowGUI::calib_write()
 * utility function - read contents of calib structure to GUI 
 ******************************************************************************/
 
-void windowGUI::calib_read()
+void windowGUI::rect_read()
 {
   configRect->gBias[0] = ui->rect_gBias0->text().toFloat();
   configRect->gBias[1] = ui->rect_gBias1->text().toFloat();
@@ -215,6 +219,86 @@ void windowGUI::calib_read()
 
 
 /******************************************************************************
+* utility function - writes contents of config structure to GUI 
+******************************************************************************/
+
+void windowGUI::pnts_write()
+{
+  ui->pnts_isGyro->setChecked(configPnts->isGyro);
+  ui->pnts_isAccl->setChecked(configPnts->isAccl);
+  ui->pnts_isMagn->setChecked(configPnts->isMagn);
+  ui->pnts_tHold->setText(QString::number(configPnts->tHold, 'f', 1));
+  ui->pnts_tStable->setText(QString::number(configPnts->tStable, 'f', 1));
+  ui->pnts_gAlpha->setText(QString::number(configPnts->gAlpha, 'f', 2));
+  ui->pnts_gThresh->setText(QString::number(configPnts->gThresh, 'f', 2));
+  ui->pnts_aAlpha->setText(QString::number(configPnts->aAlpha, 'f', 2));
+  ui->pnts_aThresh->setText(QString::number(configPnts->aThresh, 'f', 2));
+  ui->pnts_mAlpha->setText(QString::number(configPnts->mAlpha, 'f', 2));
+  ui->pnts_mThresh->setText(QString::number(configPnts->mThresh, 'f', 2));
+}
+
+
+/******************************************************************************
+* utility function - read contents of config structure to GUI 
+******************************************************************************/
+
+void windowGUI::pnts_read()
+{
+  configPnts->isGyro       = ui->pnts_isGyro->isChecked();
+  configPnts->isAccl       = ui->pnts_isAccl->isChecked();
+  configPnts->isMagn       = ui->pnts_isMagn->isChecked();
+  configPnts->tHold        = ui->pnts_tHold->text().toFloat();
+  configPnts->tStable      = ui->pnts_tStable->text().toFloat();
+  configPnts->gAlpha       = ui->pnts_gAlpha->text().toFloat();
+  configPnts->gThresh      = ui->pnts_gThresh->text().toFloat();
+  configPnts->aAlpha       = ui->pnts_aAlpha->text().toFloat();
+  configPnts->aThresh      = ui->pnts_aThresh->text().toFloat();
+  configPnts->mAlpha       = ui->pnts_mAlpha->text().toFloat();
+  configPnts->mThresh      = ui->pnts_mThresh->text().toFloat();
+}
+
+
+/******************************************************************************
+* utility function - writes contents of config structure to GUI 
+******************************************************************************/
+
+void windowGUI::stat_write()
+{
+  ui->stat_alpha->setText(QString::number(configStat->alpha, 'f', 1));
+}
+
+
+/******************************************************************************
+* utility function - read contents of config structure to GUI 
+******************************************************************************/
+
+void windowGUI::stat_read()
+{
+  configStat->alpha        = ui->stat_alpha->text().toFloat();
+}
+
+
+/******************************************************************************
+* utility function - writes contents of config structure to GUI 
+******************************************************************************/
+
+void windowGUI::calb_write()
+{
+  // future growth
+}
+
+
+/******************************************************************************
+* utility function - read contents of config structure to GUI 
+******************************************************************************/
+
+void windowGUI::calb_read()
+{
+  // future growth
+}
+
+
+/******************************************************************************
 * updates display scale for gyroscope
 ******************************************************************************/
 
@@ -240,7 +324,7 @@ void windowGUI::on_core_open_clicked()
   QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config",
     ("json (*.json)"));
   IMU_engn_load(0, (char *)file.toStdString().c_str(), IMU_engn_core);
-  config_write();
+  core_write();
 }
 
 
@@ -265,7 +349,7 @@ void windowGUI::on_rect_open_clicked()
   QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config", 
     ("json (*.json)"));
   IMU_engn_load(0, (char *)file.toStdString().c_str(), IMU_engn_rect);
-  calib_write();
+  rect_write();
 }
 
 
@@ -278,6 +362,56 @@ void windowGUI::on_rect_save_clicked()
   QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
   IMU_engn_save(0, (char *)file.toStdString().c_str(), IMU_engn_rect);
+}
+
+
+/******************************************************************************
+* loads config structure from json file
+******************************************************************************/
+
+void windowGUI::on_pnts_open_clicked()
+{
+  QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config",
+    ("json (*.json)"));
+  IMU_engn_load(0, (char *)file.toStdString().c_str(), IMU_engn_pnts);
+  pnts_write();
+}
+
+
+/******************************************************************************
+* saves config structure to json file
+******************************************************************************/
+
+void windowGUI::on_pnts_save_clicked()
+{
+  QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
+    ("json (*.json)"));
+  IMU_engn_save(0, (char *)file.toStdString().c_str(), IMU_engn_pnts);
+}
+
+
+/******************************************************************************
+* loads config structure from json file
+******************************************************************************/
+
+void windowGUI::on_stat_open_clicked()
+{
+  QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config",
+    ("json (*.json)"));
+  IMU_engn_load(0, (char *)file.toStdString().c_str(), IMU_engn_stat);
+  stat_write();
+}
+
+
+/******************************************************************************
+* saves config structure to json file
+******************************************************************************/
+
+void windowGUI::on_stat_save_clicked()
+{
+  QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
+    ("json (*.json)"));
+  IMU_engn_save(0, (char *)file.toStdString().c_str(), IMU_engn_stat);
 }
 
 
