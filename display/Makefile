@@ -415,6 +415,7 @@ obj/main.o: main.cpp ../common/dataIF.h \
 		../imu/IMU_pnts.h \
 		../imu/IMU_stat.h \
 		../imu/IMU_calb.h \
+		../common/IMU_util.h \
 		windowGUI.h \
 		configGUI.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/main.o main.cpp

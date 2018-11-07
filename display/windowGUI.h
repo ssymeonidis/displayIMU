@@ -57,6 +57,8 @@ private slots:
   void on_pnts_save_clicked();
   void on_stat_open_clicked();
   void on_stat_save_clicked();
+  void on_calb_open_clicked();
+  void on_calb_save_clicked();
   void on_disp_enableGyro_clicked();
   void on_disp_enableAccl_clicked();
   void on_disp_enableMagn_clicked();

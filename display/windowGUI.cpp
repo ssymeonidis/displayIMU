@@ -70,12 +70,19 @@ windowGUI::~windowGUI()
 
 void windowGUI::initIMU(configGUI *config)
 {
-  // initialize display/sensor IF parameters
+  // initialize display IF parameters
   ui->disp_scaleGyro->setText(QString::number(config->gyro, 'f', 1));
   ui->disp_scaleAccl->setText(QString::number(config->accl, 'f', 1));
   ui->disp_scaleMagn->setText(QString::number(config->magn, 'f', 1));
   ui->disp_scaleIMU->setText (QString::number(config->imu, 'f', 1));
   glWidget_update();
+
+  // update GUI fields
+  core_write();
+  rect_write();
+  pnts_write();
+  stat_write();
+  calb_write();
 }
 
 
@@ -419,6 +426,31 @@ void windowGUI::on_stat_save_clicked()
   QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
     ("json (*.json)"));
   IMU_engn_save(0, (char *)file.toStdString().c_str(), IMU_engn_stat);
+}
+
+
+/******************************************************************************
+* loads config structure from json file
+******************************************************************************/
+
+void windowGUI::on_calb_open_clicked()
+{
+  QString file = QFileDialog::getOpenFileName(this, ("Open File"), "../config",
+    ("json (*.json)"));
+  IMU_engn_load(0, (char *)file.toStdString().c_str(), IMU_engn_calb);
+  calb_write();
+}
+
+
+/******************************************************************************
+* saves config structure to json file
+******************************************************************************/
+
+void windowGUI::on_calb_save_clicked()
+{
+  QString file = QFileDialog::getSaveFileName(this, ("Save File"), "../config",
+    ("json (*.json)"));
+  IMU_engn_save(0, (char *)file.toStdString().c_str(), IMU_engn_calb);
 }
 
 

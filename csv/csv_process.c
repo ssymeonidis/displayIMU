@@ -54,7 +54,7 @@ int main(
     exit(0);
   }
 
-  // read IMU_rect json config file
+  // read json engn config file
   if (argc < 3) {
     printf("warning: config file not specified ");
     printf("(using ../config/default_engn.json)\n");

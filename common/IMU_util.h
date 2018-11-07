@@ -20,8 +20,11 @@
 #ifndef _IMU_UTILS_H
 #define _IMU_UTILS_H
 
+// include statements
+#include <stdio.h>
+
 // function definitions
-void IMU_util_status  (int status, char  *message);
+void IMU_util_status  (int status, const char  *message);
 
 
 /******************************************************************************
@@ -30,7 +33,7 @@ void IMU_util_status  (int status, char  *message);
 
 void IMU_util_status(
   int                      status, 
-  char                     *message)
+  const char               *message)
 {
   if (status < 0) {
     printf("error: %s :%d\n", message, status);
