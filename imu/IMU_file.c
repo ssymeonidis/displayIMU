@@ -129,12 +129,14 @@ typedef enum {
 } IMU_stat_config_enum;
 
 // stat subsystem parsing inputs
-static const int   IMU_calb_config_size   = 1;
+static const int   IMU_calb_config_size   = 2;
 static const char* IMU_calb_config_name[] = {
-  "enable"
+  "enable",
+  "sigma"
 };
 typedef enum {
-  IMU_calb_enable      = 0
+  IMU_calb_enable      = 0,
+  IMU_calb_sigma       = 1
 } IMU_calb_config_enum;
 
 // stat subsystem parsing inputs
@@ -597,6 +599,8 @@ int IMU_file_calbLoad(
     type = get_field(field, IMU_calb_config_name, IMU_calb_config_size);
     if      (type == IMU_calb_enable)
       get_bool(args, &config->enable);
+    else if (type == IMU_calb_sigma)
+      sscanf(args, "%f", &config->sigma);
   }
 
   // exit function
@@ -623,7 +627,8 @@ int IMU_file_calbSave(
 
   // write contents to json file one line at a time
   fprintf(file, "{\n");
-  fprintf(file, "  \"enable\": ");       write_bool(file, config->enable);
+  fprintf(file, "  \"enable\": ");        write_bool(file, config->enable);
+  fprintf(file, "  \"sigma\": %0.2f,\n",  config->sigma);
   fprintf(file, "}\n");
 
   // exit function

@@ -194,9 +194,13 @@ int IMU_calb_stat(
   
   // update core config
   IMU_core_config *core   = &state[id].core;
+  float sigma             = config[id].sigma;
   core->aMag              = stat->aMag;
   core->mMag              = stat->mMag;
   core->mDot              = stat->mDot;
+  core->aMagThresh        = stat->aMagStd * sigma;
+  core->mMagThresh        = stat->mMagStd * sigma;
+  core->mDotThresh        = stat->mDotStd * sigma;
 
   // exit function (no errors)
   return 0;

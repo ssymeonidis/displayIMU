@@ -1,3 +1,4 @@
 {
-  "enable": true
+  "enable": true,
+  "sigma": 3.0
 }

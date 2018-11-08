@@ -366,6 +366,7 @@ void windowGUI::stat_read()
 void windowGUI::calb_write()
 {
   ui->calb_enable->setChecked(configCalb->enable);
+  ui->calb_sigma->setText(QString::number(configCalb->sigma, 'f', 2));
 }
 
 
@@ -376,6 +377,7 @@ void windowGUI::calb_write()
 void windowGUI::calb_read()
 {
   configCalb->enable       = ui->calb_enable->isChecked();
+  configCalb->sigma        = ui->calb_sigma->text().toFloat();
 }
 
 
