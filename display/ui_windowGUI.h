@@ -165,7 +165,7 @@ public:
     QPushButton *stat_save;
     QPushButton *stat_open;
     QPushButton *calb_go;
-    QLineEdit *pnts_val;
+    QLineEdit *calb_val_2;
     QLabel *label_calb_val;
     QCheckBox *pnts_enable;
     QCheckBox *rect_enable;
@@ -188,6 +188,9 @@ public:
     QLabel *label_stat_mDot_2;
     QLabel *text_mDotStd;
     QLabel *label_stat_mDot_3;
+    QPushButton *calb_undo;
+    QLineEdit *calb_sigma;
+    QLabel *label_calb_sigma;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -635,7 +638,7 @@ public:
         pnts_open->setGeometry(QRect(470, 640, 81, 27));
         calb_type = new QComboBox(centralWidget);
         calb_type->setObjectName(QStringLiteral("calb_type"));
-        calb_type->setGeometry(QRect(730, 550, 151, 27));
+        calb_type->setGeometry(QRect(730, 530, 161, 27));
         stat_alpha = new QLineEdit(centralWidget);
         stat_alpha->setObjectName(QStringLiteral("stat_alpha"));
         stat_alpha->setGeometry(QRect(20, 640, 141, 27));
@@ -651,13 +654,13 @@ public:
         stat_open->setGeometry(QRect(200, 640, 81, 27));
         calb_go = new QPushButton(centralWidget);
         calb_go->setObjectName(QStringLiteral("calb_go"));
-        calb_go->setGeometry(QRect(1000, 550, 51, 27));
-        pnts_val = new QLineEdit(centralWidget);
-        pnts_val->setObjectName(QStringLiteral("pnts_val"));
-        pnts_val->setGeometry(QRect(890, 550, 101, 27));
+        calb_go->setGeometry(QRect(900, 530, 71, 27));
+        calb_val_2 = new QLineEdit(centralWidget);
+        calb_val_2->setObjectName(QStringLiteral("calb_val_2"));
+        calb_val_2->setGeometry(QRect(900, 590, 151, 27));
         label_calb_val = new QLabel(centralWidget);
         label_calb_val->setObjectName(QStringLiteral("label_calb_val"));
-        label_calb_val->setGeometry(QRect(890, 530, 71, 20));
+        label_calb_val->setGeometry(QRect(900, 570, 71, 20));
         label_calb_val->setFont(font);
         pnts_enable = new QCheckBox(centralWidget);
         pnts_enable->setObjectName(QStringLiteral("pnts_enable"));
@@ -743,6 +746,16 @@ public:
         label_stat_mDot_3->setObjectName(QStringLiteral("label_stat_mDot_3"));
         label_stat_mDot_3->setGeometry(QRect(210, 560, 81, 20));
         label_stat_mDot_3->setFont(font);
+        calb_undo = new QPushButton(centralWidget);
+        calb_undo->setObjectName(QStringLiteral("calb_undo"));
+        calb_undo->setGeometry(QRect(980, 530, 71, 27));
+        calb_sigma = new QLineEdit(centralWidget);
+        calb_sigma->setObjectName(QStringLiteral("calb_sigma"));
+        calb_sigma->setGeometry(QRect(730, 590, 151, 27));
+        label_calb_sigma = new QLabel(centralWidget);
+        label_calb_sigma->setObjectName(QStringLiteral("label_calb_sigma"));
+        label_calb_sigma->setGeometry(QRect(730, 570, 71, 20));
+        label_calb_sigma->setFont(font);
         windowGUI->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(windowGUI);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -973,7 +986,7 @@ public:
         stat_save->setText(QApplication::translate("windowGUI", "Save", 0));
         stat_open->setText(QApplication::translate("windowGUI", "Open", 0));
         calb_go->setText(QApplication::translate("windowGUI", "Go", 0));
-        pnts_val->setText(QApplication::translate("windowGUI", "0.0", 0));
+        calb_val_2->setText(QApplication::translate("windowGUI", "0.0", 0));
         label_calb_val->setText(QApplication::translate("windowGUI", "val", 0));
         pnts_enable->setText(QApplication::translate("windowGUI", "Pnts Config", 0));
         rect_enable->setText(QApplication::translate("windowGUI", "Rect Config", 0));
@@ -996,6 +1009,9 @@ public:
         label_stat_mDot_2->setText(QApplication::translate("windowGUI", "mDotFOM:", 0));
         text_mDotStd->setText(QApplication::translate("windowGUI", "-", 0));
         label_stat_mDot_3->setText(QApplication::translate("windowGUI", "mDotStd:", 0));
+        calb_undo->setText(QApplication::translate("windowGUI", "Undo", 0));
+        calb_sigma->setText(QApplication::translate("windowGUI", "0.0", 0));
+        label_calb_sigma->setText(QApplication::translate("windowGUI", "sigma", 0));
         toolBar->setWindowTitle(QApplication::translate("windowGUI", "toolBar", 0));
     } // retranslateUi
 

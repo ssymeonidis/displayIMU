@@ -62,6 +62,7 @@ static const uint16_t IMU_calb_mode_pnts[5] = {0, 1, 2, 4, 6};
 // configuration structure definition
 typedef struct  {
   uint8_t               enable;
+  float                 sigma;
 } IMU_calb_config;
 
 // subsystem state structure definition
@@ -89,6 +90,7 @@ int IMU_calb_reset      (uint16_t id);
 int IMU_calb_start      (uint16_t id, IMU_calb_mode);
 int IMU_calb_stat       (uint16_t id, IMU_stat_state*);
 int IMU_calb_save       (uint16_t id);
+int IMU_calb_revert     (uint16_t id);
 
 // sensor interface functions
 int IMU_calb_point      (uint16_t id, IMU_pnts_entry*);

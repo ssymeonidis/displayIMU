@@ -216,6 +216,36 @@ int IMU_calb_save(
   if (!config[id].enable)
     return IMU_CALB_FNC_DISABLED;
 
+  // create temporary swap storage
+  IMU_rect_config          rect;
+  IMU_core_config          core;
+
+  // copy current entry to the IMU rectify config 
+  memcpy(&rect, &state[id].rect, sizeof(IMU_rect_config));
+  memcpy(&core, &state[id].core, sizeof(IMU_core_config));
+  memcpy(&state[id].rect, state[id].rectPntr, sizeof(IMU_rect_config));
+  memcpy(&state[id].core, state[id].corePntr, sizeof(IMU_core_config));
+  memcpy(state[id].rectPntr, &rect, sizeof(IMU_rect_config));
+  memcpy(state[id].corePntr, &core, sizeof(IMU_core_config));
+  
+  // exit function (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* save results to rect and core configuation structures
+******************************************************************************/
+
+int IMU_calb_revert(
+  uint16_t                id)
+{
+  // check out-of-bounds condition
+  if (id >= numInst)
+    return IMU_CALB_BAD_INST;
+  if (!config[id].enable)
+    return IMU_CALB_FNC_DISABLED;
+
   // copy current entry to the IMU rectify config 
   memcpy(state[id].rectPntr, &state[id].rect, sizeof(IMU_rect_config));
   memcpy(state[id].corePntr, &state[id].core, sizeof(IMU_core_config));

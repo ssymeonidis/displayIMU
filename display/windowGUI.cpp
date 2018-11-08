@@ -128,12 +128,25 @@ void windowGUI::stat_update()
 
 
 /******************************************************************************
-* saves config structure to json file
+* updates IMU state using calibration data
 ******************************************************************************/
 
 void windowGUI::on_calb_go_clicked()
 {
   IMU_engn_calbStat(0);
+  rect_write();
+  core_write();
+  pnts_write();
+}
+
+
+/******************************************************************************
+* reverts IMU state to last known state
+******************************************************************************/
+
+void windowGUI::on_calb_undo_clicked()
+{
+  IMU_engn_calbRevert(0);
   rect_write();
   core_write();
   pnts_write();

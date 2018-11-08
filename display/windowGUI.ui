@@ -1870,8 +1870,8 @@
     <property name="geometry">
      <rect>
       <x>730</x>
-      <y>550</y>
-      <width>151</width>
+      <y>530</y>
+      <width>161</width>
       <height>27</height>
      </rect>
     </property>
@@ -1962,9 +1962,9 @@
    <widget class="QPushButton" name="calb_go">
     <property name="geometry">
      <rect>
-      <x>1000</x>
-      <y>550</y>
-      <width>51</width>
+      <x>900</x>
+      <y>530</y>
+      <width>71</width>
       <height>27</height>
      </rect>
     </property>
@@ -1972,12 +1972,12 @@
      <string>Go</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="pnts_val">
+   <widget class="QLineEdit" name="calb_val_2">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>550</y>
-      <width>101</width>
+      <x>900</x>
+      <y>590</y>
+      <width>151</width>
       <height>27</height>
      </rect>
     </property>
@@ -1988,8 +1988,8 @@
    <widget class="QLabel" name="label_calb_val">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>530</y>
+      <x>900</x>
+      <y>570</y>
       <width>71</width>
       <height>20</height>
      </rect>
@@ -2399,6 +2399,51 @@
     </property>
     <property name="text">
      <string>mDotStd:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="calb_undo">
+    <property name="geometry">
+     <rect>
+      <x>980</x>
+      <y>530</y>
+      <width>71</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Undo</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="calb_sigma">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>590</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>0.0</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_calb_sigma">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>570</y>
+      <width>71</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>sigma</string>
     </property>
    </widget>
   </widget>

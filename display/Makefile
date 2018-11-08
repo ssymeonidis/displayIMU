@@ -390,8 +390,7 @@ obj/windowGUI.o: windowGUI.cpp ../imu/IMU_file.h \
 		../imu/IMU_engn.h \
 		windowGUI.h \
 		configGUI.h \
-		ui_windowGUI.h \
-		glWidget.h
+		ui_windowGUI.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o obj/windowGUI.o windowGUI.cpp
 
 obj/configGUI.o: configGUI.cpp configGUI.h
