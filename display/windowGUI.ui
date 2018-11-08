@@ -939,71 +939,14 @@
      </font>
     </property>
     <property name="text">
-     <string>gyro bias:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_stat_gMult">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>480</y>
-      <width>81</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>gyro mult:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_stat_aBias">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>510</y>
-      <width>81</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>accl bias:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_stat_mBias">
-    <property name="geometry">
-     <rect>
-      <x>210</x>
-      <y>460</y>
-      <width>81</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>magn bias:</string>
+     <string>gBias:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_stat_aMag">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>530</y>
+      <y>510</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -1015,14 +958,14 @@
      </font>
     </property>
     <property name="text">
-     <string>accl mag:</string>
+     <string>aMag:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_stat_mMult">
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>480</y>
+      <y>460</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -1034,14 +977,14 @@
      </font>
     </property>
     <property name="text">
-     <string>magn mag:</string>
+     <string>mMag:</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_stat_mDot">
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>500</y>
+      <y>520</y>
       <width>81</width>
       <height>20</height>
      </rect>
@@ -1053,72 +996,15 @@
      </font>
     </property>
     <property name="text">
-     <string>magn dot:</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="text_mBias">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>460</y>
-      <width>111</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>-</string>
+     <string>mDot:</string>
     </property>
    </widget>
    <widget class="QLabel" name="text_aMag">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>530</y>
-      <width>111</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>-</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="text_gMult">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>480</y>
-      <width>111</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <weight>50</weight>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>-</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="text_aBias">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
+      <x>100</x>
       <y>510</y>
-      <width>111</width>
+      <width>101</width>
       <height>20</height>
      </rect>
     </property>
@@ -1135,8 +1021,8 @@
    <widget class="QLabel" name="text_mMag">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>480</y>
+      <x>300</x>
+      <y>460</y>
       <width>111</width>
       <height>20</height>
      </rect>
@@ -1154,8 +1040,8 @@
    <widget class="QLabel" name="text_mDot">
     <property name="geometry">
      <rect>
-      <x>290</x>
-      <y>500</y>
+      <x>300</x>
+      <y>520</y>
       <width>111</width>
       <height>20</height>
      </rect>
@@ -1173,9 +1059,9 @@
    <widget class="QLabel" name="text_gBias">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>100</x>
       <y>460</y>
-      <width>111</width>
+      <width>101</width>
       <height>20</height>
      </rect>
     </property>
@@ -2013,9 +1899,9 @@
    <widget class="QLineEdit" name="stat_alpha">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>10</x>
       <y>640</y>
-      <width>121</width>
+      <width>131</width>
       <height>27</height>
      </rect>
     </property>
@@ -2026,7 +1912,7 @@
    <widget class="QLabel" name="label_stat_alpha">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>10</x>
       <y>620</y>
       <width>121</width>
       <height>20</height>
@@ -2045,7 +1931,7 @@
    <widget class="QPushButton" name="stat_save">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>330</x>
       <y>640</y>
       <width>81</width>
       <height>27</height>
@@ -2058,7 +1944,7 @@
    <widget class="QPushButton" name="stat_open">
     <property name="geometry">
      <rect>
-      <x>190</x>
+      <x>240</x>
       <y>640</y>
       <width>81</width>
       <height>27</height>
@@ -2242,6 +2128,285 @@
     </property>
     <property name="alignment">
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="text_gBiasStd">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>480</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_stat_gBiasStd">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>480</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>gBiasStd:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_stat_aMag_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>530</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>aMagFOM:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="text_aMagFOM">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>530</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_stat_aMag_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>550</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>aMagStd:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="text_aMagStd">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>550</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_stat_mMult_2">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>480</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>mMagFOM:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="text_mMagFOM">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>480</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_stat_mMult_3">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>500</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>mMagStd:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="text_mMagStd">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>500</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="text_mDotFOM">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>540</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_stat_mDot_2">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>540</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>mDotFOM:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="text_mDotStd">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>560</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>-</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_stat_mDot_3">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>560</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <weight>50</weight>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>mDotStd:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stat_update">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>640</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Update</string>
     </property>
    </widget>
   </widget>

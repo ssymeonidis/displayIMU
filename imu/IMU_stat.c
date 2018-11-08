@@ -113,14 +113,15 @@ int IMU_stat_reset(
   state[id].gBias[0]      = 0.0f;
   state[id].gBias[1]      = 0.0f;
   state[id].gBias[2]      = 0.0f;
-  state[id].gBiasStd[0]   = 0.0f;
-  state[id].gBiasStd[1]   = 0.0f;
-  state[id].gBiasStd[2]   = 0.0f;
+  state[id].gBiasStd      = 0.0f;
   state[id].aMag          = 0.0f;
+  state[id].aMagFOM       = 0.0f;
   state[id].aMagStd       = 0.0f;
   state[id].mMag          = 0.0f;
+  state[id].mMagFOM       = 0.0f;
   state[id].mMagStd       = 0.0f;
   state[id].mDot          = 0.0f;
+  state[id].mDotFOM       = 0.0f;
   state[id].mDotStd       = 0.0f;
   state[id].gClock        = 1;
   state[id].aClock        = 1;
@@ -148,7 +149,7 @@ int IMU_stat_datum(
   if (id >= numInst)
     return IMU_STAT_BAD_INST; 
   if (!config[id].enable)
-    return IMU_STAT_FNC_DISABLED;
+    return IMU_STAT_FNC_DISABLED;    
 
   // check sensor type and execute
   if      (datum->type == IMU_gyro)
@@ -199,6 +200,10 @@ int IMU_stat_gyro(
   IMU_TYPE                *g,
   IMU_core_FOM            *FOM)
 {
+  // check FOM valid
+  if (!FOM->isValid)
+    return IMU_STAT_INVALID_FOM;
+
   // first sensor datum
   if (state[id].gClock) {
     state[id].gBias[0]    = g[0];
@@ -211,10 +216,8 @@ int IMU_stat_gyro(
     float dt              = (t-state[id].tGyro) * IMU_STAT_10USEC_TO_SEC;
     float alpha           = dt * config[id].alpha;
     float *gBias          = state[id].gBias;
-    float *prev           = state[id].gBiasStd;
-    state[id].gBiasStd[0] = (1.0f-alpha)*prev[0] + alpha*fabs(gBias[0]-g[0]); 
-    state[id].gBiasStd[1] = (1.0f-alpha)*prev[1] + alpha*fabs(gBias[1]-g[1]); 
-    state[id].gBiasStd[2] = (1.0f-alpha)*prev[2] + alpha*fabs(gBias[2]-g[2]); 
+    float prev            = state[id].gBiasStd;
+    state[id].gBiasStd    = (1.0f-alpha)*prev     + alpha*fabs(gBias[0]-g[0]); 
     state[id].gBias[0]    = (1.0f-alpha)*gBias[0] + alpha*g[0];
     state[id].gBias[1]    = (1.0f-alpha)*gBias[1] + alpha*g[1];
     state[id].gBias[2]    = (1.0f-alpha)*gBias[2] + alpha*g[2];
@@ -236,6 +239,10 @@ int IMU_stat_accl(
   IMU_TYPE                *a,
   IMU_core_FOM            *FOM)
 {
+  // check FOM valid
+  if (!FOM->isValid)
+    return IMU_STAT_INVALID_FOM;
+
   // first sensor datum
   if (state[id].gClock) {
     state[id].aMag        = FOM->FOM.accl.mag;
@@ -272,6 +279,10 @@ int IMU_stat_magn(
   IMU_TYPE                *m,
   IMU_core_FOM            *FOM)
 {
+  // check FOM valid
+  if (!FOM->isValid)
+    return IMU_STAT_INVALID_FOM;
+
   // first sensor datum
   if (state[id].mClock) {
     state[id].mMag        = FOM->FOM.magn.mag;

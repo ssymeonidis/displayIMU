@@ -30,6 +30,7 @@ extern "C" {
 
 // define status codes
 #define IMU_STAT_FNC_DISABLED       1
+#define IMU_STAT_INVALID_FOM        2
 
 // define error codes
 #define IMU_STAT_INST_OVERFLOW      -1
@@ -47,7 +48,7 @@ typedef struct {
 // define internal state 
 typedef struct {
   float                 gBias[3];
-  float                 gBiasStd[3];
+  float                 gBiasStd;
   float                 aMag;
   float                 aMagFOM;
   float                 aMagStd;

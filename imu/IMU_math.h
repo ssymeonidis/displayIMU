@@ -380,6 +380,8 @@ inline float IMU_math_calcWeight(
   float                 ref, 
   float                 thresh)
 {
+  if (thresh < 0.01)
+    return              1.0f;
   float error           = fabs(ref - val) / thresh;
   float result          = 1.0f - error;
   return                (result < 0.0f) ? 0.0f : result;

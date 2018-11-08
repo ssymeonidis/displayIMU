@@ -20,6 +20,7 @@
 // include statements 
 #include <math.h>
 #include <QFileDialog>
+#include <QTimer>
 #include "IMU_file.h"
 #include "windowGUI.h"
 #include "ui_windowGUI.h"
@@ -49,8 +50,16 @@ windowGUI::windowGUI(QWidget *parent) :
   IMU_engn_getConfig(0, IMU_engn_calb, &configUnion);
   configCalb = configUnion.calb;
 
+  // get points to IMU_stat state
+  IMU_union_state stateIMU;
+  IMU_engn_getState(0, IMU_engn_stat, &stateIMU);
+  stat = stateIMU.stat;
+
   // initialize display/sensor IF parameters
   glWidget_update();
+  refresh_timer = new QTimer(this);
+  connect(refresh_timer, SIGNAL(timeout()), this, SLOT(stat_update()));
+  refresh_timer->start(250);
 }
 
 
@@ -83,6 +92,38 @@ void windowGUI::initIMU(configGUI *config)
   pnts_write();
   stat_write();
   calb_write();
+}
+
+
+/******************************************************************************
+* iniatialize IMU structures and GUI elements 
+******************************************************************************/
+
+void windowGUI::stat_update()
+{
+  if (ui->core_isFOM->isChecked()) {
+    ui->text_gBiasStd->setText(QString::number(stat->gBiasStd, 'f', 2));
+    ui->text_aMag->setText(QString::number(stat->aMag, 'f', 1));
+    ui->text_aMagFOM->setText(QString::number(stat->aMagFOM, 'f', 2));
+    ui->text_aMagStd->setText(QString::number(stat->aMagStd, 'f', 2));
+    ui->text_mMag->setText(QString::number(stat->mMag, 'f', 1));
+    ui->text_mMagFOM->setText(QString::number(stat->mMagFOM, 'f', 2));
+    ui->text_mMagStd->setText(QString::number(stat->mMagStd, 'f', 2));
+    ui->text_mDot->setText(QString::number(stat->mDot, 'f', 1));
+    ui->text_mDotFOM->setText(QString::number(stat->mDotFOM, 'f', 2));
+    ui->text_mDotStd->setText(QString::number(stat->mDotStd, 'f', 2));
+  } else {
+    ui->text_gBiasStd->setText("-");
+    ui->text_aMag->setText("-");
+    ui->text_aMagFOM->setText("-");
+    ui->text_aMagStd->setText("-");
+    ui->text_mMag->setText("-");
+    ui->text_mMagFOM->setText("-");
+    ui->text_mMagStd->setText("-");
+    ui->text_mDot->setText("-");
+    ui->text_mDotFOM->setText("-");
+    ui->text_mDotStd->setText("-");
+  }
 }
 
 

@@ -39,6 +39,7 @@ public:
 
 private slots:
   void glWidget_update();
+  void stat_update();
   void core_read();
   void core_write();
   void rect_read();
@@ -74,7 +75,9 @@ private:
   IMU_pnts_config     *configPnts;
   IMU_stat_config     *configStat;
   IMU_calb_config     *configCalb;
+  IMU_stat_state      *stat;
   Ui::windowGUI       *ui;
+  QTimer              *refresh_timer;
 };
 
 #endif // WINDOWGUI_H
