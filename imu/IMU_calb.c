@@ -179,6 +179,30 @@ int IMU_calb_start(
 }
 
 
+
+/******************************************************************************
+* update IMU_correct structure w/ statcal results
+******************************************************************************/
+
+int IMU_calb_stat(
+  uint16_t                id,
+  IMU_stat_state          *stat)
+{
+  // copy current entry to the table
+  memcpy(&state[id].rect, state[id].rectPntr, sizeof(IMU_rect_config));
+  memcpy(&state[id].core, state[id].corePntr, sizeof(IMU_core_config));
+  
+  // update core config
+  IMU_core_config *core   = &state[id].core;
+  core->aMag              = stat->aMag;
+  core->mMag              = stat->mMag;
+  core->mDot              = stat->mDot;
+
+  // exit function (no errors)
+  return 0;
+}
+
+
 /******************************************************************************
 * save results to rect and core configuation structures
 ******************************************************************************/
@@ -234,19 +258,6 @@ int IMU_calb_point(
   // exit fuction (no errors)
   return 0;
 }
-
-
-/******************************************************************************
-* update IMU_correct structure w/ statcal results
-******************************************************************************/
-
-int IMU_calb_stat(
-  uint16_t                id,
-  IMU_stat_state          *state)
-{
-  return 0;
-}
-
 
 /******************************************************************************
 * adds points for calibration

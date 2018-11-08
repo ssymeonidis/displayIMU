@@ -188,7 +188,6 @@ public:
     QLabel *label_stat_mDot_2;
     QLabel *text_mDotStd;
     QLabel *label_stat_mDot_3;
-    QPushButton *stat_update;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -252,7 +251,7 @@ public:
         core_isGyro->setGeometry(QRect(730, 40, 97, 22));
         core_isAccl = new QCheckBox(centralWidget);
         core_isAccl->setObjectName(QStringLiteral("core_isAccl"));
-        core_isAccl->setGeometry(QRect(830, 40, 97, 22));
+        core_isAccl->setGeometry(QRect(840, 40, 91, 22));
         core_isMagn = new QCheckBox(centralWidget);
         core_isMagn->setObjectName(QStringLiteral("core_isMagn"));
         core_isMagn->setGeometry(QRect(940, 40, 97, 22));
@@ -470,7 +469,7 @@ public:
         core_isFOM->setGeometry(QRect(730, 70, 97, 22));
         core_isTran = new QCheckBox(centralWidget);
         core_isTran->setObjectName(QStringLiteral("core_isTran"));
-        core_isTran->setGeometry(QRect(830, 70, 111, 22));
+        core_isTran->setGeometry(QRect(840, 70, 91, 22));
         core_gScale = new QLineEdit(centralWidget);
         core_gScale->setObjectName(QStringLiteral("core_gScale"));
         core_gScale->setGeometry(QRect(730, 140, 151, 27));
@@ -639,17 +638,17 @@ public:
         calb_type->setGeometry(QRect(730, 550, 151, 27));
         stat_alpha = new QLineEdit(centralWidget);
         stat_alpha->setObjectName(QStringLiteral("stat_alpha"));
-        stat_alpha->setGeometry(QRect(10, 640, 131, 27));
+        stat_alpha->setGeometry(QRect(20, 640, 141, 27));
         label_stat_alpha = new QLabel(centralWidget);
         label_stat_alpha->setObjectName(QStringLiteral("label_stat_alpha"));
-        label_stat_alpha->setGeometry(QRect(10, 620, 121, 20));
+        label_stat_alpha->setGeometry(QRect(20, 620, 121, 20));
         label_stat_alpha->setFont(font);
         stat_save = new QPushButton(centralWidget);
         stat_save->setObjectName(QStringLiteral("stat_save"));
-        stat_save->setGeometry(QRect(330, 640, 81, 27));
+        stat_save->setGeometry(QRect(320, 640, 81, 27));
         stat_open = new QPushButton(centralWidget);
         stat_open->setObjectName(QStringLiteral("stat_open"));
-        stat_open->setGeometry(QRect(240, 640, 81, 27));
+        stat_open->setGeometry(QRect(200, 640, 81, 27));
         calb_go = new QPushButton(centralWidget);
         calb_go->setObjectName(QStringLiteral("calb_go"));
         calb_go->setGeometry(QRect(1000, 550, 51, 27));
@@ -744,9 +743,6 @@ public:
         label_stat_mDot_3->setObjectName(QStringLiteral("label_stat_mDot_3"));
         label_stat_mDot_3->setGeometry(QRect(210, 560, 81, 20));
         label_stat_mDot_3->setFont(font);
-        stat_update = new QPushButton(centralWidget);
-        stat_update->setObjectName(QStringLiteral("stat_update"));
-        stat_update->setGeometry(QRect(150, 640, 81, 27));
         windowGUI->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(windowGUI);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -966,6 +962,7 @@ public:
         pnts_open->setText(QApplication::translate("windowGUI", "Open", 0));
         calb_type->clear();
         calb_type->insertItems(0, QStringList()
+         << QApplication::translate("windowGUI", "Stat Touchup", 0)
          << QApplication::translate("windowGUI", "1pnt Gyro", 0)
          << QApplication::translate("windowGUI", "2pnt Gyro", 0)
          << QApplication::translate("windowGUI", "4pnt Magn", 0)
@@ -999,7 +996,6 @@ public:
         label_stat_mDot_2->setText(QApplication::translate("windowGUI", "mDotFOM:", 0));
         text_mDotStd->setText(QApplication::translate("windowGUI", "-", 0));
         label_stat_mDot_3->setText(QApplication::translate("windowGUI", "mDotStd:", 0));
-        stat_update->setText(QApplication::translate("windowGUI", "Update", 0));
         toolBar->setWindowTitle(QApplication::translate("windowGUI", "toolBar", 0));
     } // retranslateUi
 

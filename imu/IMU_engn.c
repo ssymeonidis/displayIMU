@@ -629,6 +629,36 @@ int IMU_engn_calbStart(
 * function to set reference quaternion (current orientation)
 ******************************************************************************/
 
+int IMU_engn_calbStat( 
+  uint16_t		id)
+{
+  // check out-of-bounds condition
+  if (id >= numInst)
+    return IMU_ENGN_BAD_INST;
+  
+  // get pointer to stat state
+  IMU_union_state engn_state;
+  int status = IMU_engn_getState(0, IMU_engn_stat, &engn_state); 
+  if (status < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+
+  // get current orientation and pass to setRef
+  status     = IMU_calb_stat (state[id].idCalb, engn_state.stat);
+  if (status < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+  status     = IMU_calb_save (state[id].idCalb);
+  if (status < 0)
+    return IMU_ENGN_SUBSYSTEM_FAILURE;
+    
+  // exit function (no errors)
+  return 0;
+}
+
+
+/******************************************************************************
+* function to set reference quaternion (current orientation)
+******************************************************************************/
+
 int IMU_engn_calbSave( 
   uint16_t		id)
 {

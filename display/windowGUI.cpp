@@ -128,6 +128,19 @@ void windowGUI::stat_update()
 
 
 /******************************************************************************
+* saves config structure to json file
+******************************************************************************/
+
+void windowGUI::on_calb_go_clicked()
+{
+  IMU_engn_calbStat(0);
+  rect_write();
+  core_write();
+  pnts_write();
+}
+
+
+/******************************************************************************
 * utility function - writes contents of config structure to GUI 
 ******************************************************************************/
 

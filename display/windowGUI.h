@@ -50,6 +50,7 @@ private slots:
   void stat_write();
   void calb_read();
   void calb_write(); 
+  void on_calb_go_clicked();
   void on_core_open_clicked();
   void on_core_save_clicked();
   void on_rect_open_clicked();
