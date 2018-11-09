@@ -96,7 +96,7 @@ int main(void)
   float off1[3]   = { 50.0,  50.0,  50.0};
   float vec1[3]   = { 10.0,  20.0,  30.0};
   float ref1[3]   = {-10.0, -20.0, -30.0};
-  status = IMU_engn_calbStart(id, IMU_calb_1pnt_gyro);
+  status = IMU_engn_calbStart(id, IMU_calb_1pnt_gyro, NULL);
   add_datum(vec1, off1, IMU_gyro);
   print_vect(rect->gBias);
   verify_vect(rect->gBias, ref1);
@@ -112,7 +112,7 @@ int main(void)
   float vec2c[3]   = {  7.0,  28.0,  0.0};
   float vec2d[3]   = {  7.0, -32.0,  0.0};
   float ref2[3]    = { -7.0,   2.0,  0.0};
-  status = IMU_engn_calbStart(id, IMU_calb_4pnt_magn);
+  status = IMU_engn_calbStart(id, IMU_calb_4pnt_magn, NULL);
   add_datum(vec2a, off2, IMU_magn);
   add_datum(vec2b, off2, IMU_magn);
   add_datum(vec2c, off2, IMU_magn);
@@ -133,7 +133,7 @@ int main(void)
   float vec3e[3]   = {  6.0,  -3.0,  34.0};
   float vec3f[3]   = {  6.0,  -3.0, -26.0};
   float ref3[3]    = { -6.0,   3.0,  -4.0};
-  status = IMU_engn_calbStart(id, IMU_calb_6pnt_full);
+  status = IMU_engn_calbStart(id, IMU_calb_6pnt_full, NULL);
   add_datum(vec3a, off3, IMU_accl);
   add_datum(vec3b, off3, IMU_accl);
   add_datum(vec3c, off3, IMU_accl);

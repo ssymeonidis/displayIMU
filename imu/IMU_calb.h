@@ -72,6 +72,7 @@ typedef struct  {
   IMU_core_config       core;
   IMU_rect_config       *rectPntr;
   IMU_core_config       *corePntr;
+  void                  *calbArg;
   IMU_calb_FOM          FOM;
   uint16_t              numPnts;
   void                  *fncPntr;
@@ -87,7 +88,7 @@ int IMU_calb_setFnc     (uint16_t id, void (*fnc)(IMU_CALB_FNC_ARG), void*);
 
 // system access function
 int IMU_calb_reset      (uint16_t id);
-int IMU_calb_start      (uint16_t id, IMU_calb_mode);
+int IMU_calb_start      (uint16_t id, IMU_calb_mode, void *);
 int IMU_calb_stat       (uint16_t id, IMU_stat_state*);
 int IMU_calb_save       (uint16_t id);
 int IMU_calb_revert     (uint16_t id);

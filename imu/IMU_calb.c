@@ -161,7 +161,8 @@ int IMU_calb_reset(
 
 int IMU_calb_start(
   uint16_t                id,
-  IMU_calb_mode           mode)
+  IMU_calb_mode           mode,
+  void                    *pntr)
 {
   // check out-of-bounds condition
   if (id >= numInst)
@@ -172,6 +173,7 @@ int IMU_calb_start(
   // copy current entry to the table
   state[id].numPnts       = 0;
   state[id].mode          = mode;
+  state[id].calbArg       = pntr;
   memcpy(&state[id].rect, state[id].rectPntr, sizeof(IMU_rect_config));
   memcpy(&state[id].core, state[id].corePntr, sizeof(IMU_core_config));
   

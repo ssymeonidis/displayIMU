@@ -606,14 +606,15 @@ int IMU_engn_setRefCur(
 
 int IMU_engn_calbStart( 
   uint16_t		id,
-  IMU_calb_mode         mode)
+  IMU_calb_mode         mode,
+  void                  *pntr)
 {
   // check out-of-bounds condition
   if (id >= numInst)
     return IMU_ENGN_BAD_INST;
   
   // get current orientation and pass to setRef
-  int status = IMU_calb_start (state[id].idCalb, mode);
+  int status = IMU_calb_start (state[id].idCalb, mode, pntr);
   if (status < 0)
     return IMU_ENGN_SUBSYSTEM_FAILURE;
   status     = IMU_pnts_start (state[id].idPnts, status);

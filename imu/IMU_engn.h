@@ -173,7 +173,7 @@ int IMU_engn_save         (uint16_t id, const char* filename, IMU_engn_system);
 int IMU_engn_reset        (uint16_t id);
 int IMU_engn_setRef       (uint16_t id, float* ref);
 int IMU_engn_setRefCur    (uint16_t id);
-int IMU_engn_calbStart    (uint16_t id, IMU_calb_mode);
+int IMU_engn_calbStart    (uint16_t id, IMU_calb_mode, void*);
 int IMU_engn_calbStat     (uint16_t id);
 int IMU_engn_calbSave     (uint16_t id);
 int IMU_engn_calbRevert   (uint16_t id);
