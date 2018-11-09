@@ -37,26 +37,31 @@ typedef struct{
 } threadStruct;
 
 // internally defined variables
-static IMU_pnts_config  config   [IMU_MAX_INST]; 
-static IMU_pnts_state   state    [IMU_MAX_INST];
-static IMU_pnts_entry   table    [IMU_MAX_INST][IMU_PNTS_SIZE];
-static uint16_t         numInst  = 0;
+static IMU_pnts_config  config     [IMU_MAX_INST]; 
+static IMU_pnts_state   state      [IMU_MAX_INST];
+static IMU_pnts_entry   table      [IMU_MAX_INST][IMU_PNTS_SIZE];
+static uint16_t         numInst    = 0;
 #if IMU_USE_PTHREAD
-static pthread_t        thrd     [IMU_MAX_INST];
-static pthread_attr_t   thrdAttr [IMU_MAX_INST];
-static threadStruct     thrdVal  [IMU_MAX_INST];
+static pthread_t        thrd1      [IMU_MAX_INST];
+static pthread_attr_t   thrd1Attr  [IMU_MAX_INST];
+static threadStruct     thrd1Val   [IMU_MAX_INST];
+static pthread_t        thrd2      [IMU_MAX_INST];
+static pthread_attr_t   thrd2Attr  [IMU_MAX_INST];
+static threadStruct     thrd2Val   [IMU_MAX_INST];
 #endif
 
 // internally defined functions
 static inline IMU_pnts_enum   update_state (uint16_t id, uint32_t, uint8_t,
                                             IMU_pnts_entry**);
+static inline void            break_hold   (uint16_t id);
 static inline IMU_pnts_entry* break_stable (uint16_t id);
 static inline float calc_std       (float *val1, IMU_TYPE *val2);
 static inline void  apply_alpha    (float *prev, IMU_TYPE *cur, float alpha);
 static inline void  accum_gyro     (float *prev, IMU_TYPE *cur, IMU_TYPE t);
 static inline void  copy_val       (float *val1, IMU_TYPE *val2);
 #if IMU_USE_PTHREAD
-static inline void* IMU_pnts_break (void*);
+static inline void* fncBreakPntr   (void*);
+static inline void* fncStablePntr  (void*);
 #endif
 
 
@@ -530,12 +535,38 @@ inline IMU_pnts_enum update_state(
   }
 
   // update state based on elapsed stable time
-  if (t - state[id].tStable >= (uint32_t)config[id].tStable)
+  if (t - state[id].tStable >= (uint32_t)config[id].tStable) {
+    if (state[id].state == IMU_pnts_enum_hold)
+      break_hold(id);
     return IMU_pnts_enum_stable;
+  }
   if (t - state[id].tStable >= (uint32_t)config[id].tHold)
     return IMU_pnts_enum_hold;
   else
     return IMU_pnts_enum_move;
+}
+
+
+/******************************************************************************
+* utility function - break hold
+******************************************************************************/
+
+inline void break_hold(
+  uint16_t                id)
+{
+  // update current points count and launch thread
+  if (state[id].curPnts < state[id].numPnts && state[id].fncStable != NULL) {
+    IMU_pnts_entry *entry = state[id].current;
+    #if IMU_USE_PTHREAD
+    thrd1Val[id].id       = id;
+    thrd1Val[id].count    = state[id].curPnts;
+    thrd1Val[id].entry    = entry;
+    thrd1Val[id].pntr     = state[id].fncStablePntr;
+    pthread_create(&thrd1[id], &thrd1Attr[id], fncStablePntr, &thrd1Val[id]);
+    #else
+    state[id].fncStable(state[id].curPnts, entry, state[id].fncStablePntr);
+    #endif
+  }
 }
 
 
@@ -558,11 +589,11 @@ inline IMU_pnts_entry* break_stable(
     state[id].curPnts++;
     if (state[id].fncBreak != NULL) {
       #if IMU_USE_PTHREAD
-      thrdVal[id].id      = id;
-      thrdVal[id].count   = state[id].curPnts-1;
-      thrdVal[id].entry   = entry;
-      thrdVal[id].pntr    = state[id].fncBreakPntr;
-      pthread_create(&thrd[id], &thrdAttr[id], IMU_pnts_break, &thrdVal[id]);
+      thrd2Val[id].id     = id;
+      thrd2Val[id].count  = state[id].curPnts-1;
+      thrd2Val[id].entry  = entry;
+      thrd2Val[id].pntr   = state[id].fncBreakPntr;
+      pthread_create(&thrd2[id], &thrd2Attr[id], fncBreakPntr, &thrd2Val[id]);
       #else
       state[id].fncBreak(state[id].curPnts-1, entry, state[id].fncBreakPntr);
       #endif
@@ -578,8 +609,21 @@ inline IMU_pnts_entry* break_stable(
 * utility function - execute function handle
 ******************************************************************************/
 
-void* IMU_pnts_break(
-  void                     *pntr)
+void* fncStablePntr(
+  void                    *pntr)
+{
+  threadStruct *vals = (threadStruct*)pntr;
+  state[vals->id].fncStable(vals->count, vals->entry, vals->pntr);
+  return NULL;
+}
+
+
+/******************************************************************************
+* utility function - execute function handle
+******************************************************************************/
+
+void* fncBreakPntr(
+  void                    *pntr)
 {
   threadStruct *vals = (threadStruct*)pntr;
   state[vals->id].fncBreak(vals->count, vals->entry, vals->pntr);

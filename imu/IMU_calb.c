@@ -18,11 +18,12 @@
 */
 
 // include statements 
+#include <math.h>             // sqrt
+#include <string.h>           // memcpy
 #if IMU_USE_PTHREAD
 #include <pthread.h>
 #include <unistd.h>
 #endif
-#include <string.h>           // memcpy
 #include "IMU_calb.h"
 
 // internally defined variables
@@ -342,8 +343,12 @@ void calb_4pnt_magn(
   uint16_t                id)
 {
   // define internal variables
-  IMU_rect_config *rect = &state[id].rect;
-  int i;
+  IMU_rect_config *rect   = &state[id].rect;
+  IMU_core_config *core   = &state[id].core;
+  float                   *g;
+  float                   *m;
+  float                   *a;
+  int                     i;
 
   // process completed points table
   rect->gBias[0]          = 0.0f;
@@ -351,12 +356,19 @@ void calb_4pnt_magn(
   rect->gBias[2]          = 0.0f;
   rect->mBias[0]          = 0.0f;
   rect->mBias[1]          = 0.0f;
+  core->mMag              = 0.0f;
+  core->mDot              = 0.0f;
   for (i=0; i<4; i++) {
-    rect->gBias[0]       -= table[id][i].gFltr[0];
-    rect->gBias[1]       -= table[id][i].gFltr[1];
-    rect->gBias[2]       -= table[id][i].gFltr[2];
-    rect->mBias[0]       -= table[id][i].mFltr[0];
-    rect->mBias[1]       -= table[id][i].mFltr[1];
+    g                     = table[id][i].gFltr;
+    a                     = table[id][i].aFltr;
+    m                     = table[id][i].mFltr;
+    rect->gBias[0]       -= g[0];
+    rect->gBias[1]       -= g[1];
+    rect->gBias[2]       -= g[2];
+    rect->mBias[0]       -= m[0];
+    rect->mBias[1]       -= m[1];
+    core->mMag           += sqrt(m[0]*m[0] + m[1]*m[1] + m[2]*m[2]);
+    core->mDot           += a[0]*m[0] + a[1]*m[1] + a[2]*m[2];
   }
 
   // convert sums to averages
@@ -365,6 +377,8 @@ void calb_4pnt_magn(
   rect->gBias[2]         /= 4.0f;
   rect->mBias[0]         /= 4.0f;
   rect->mBias[1]         /= 4.0f;
+  core->mMag             /= 4.0f;
+  core->mDot             /= 4.0f;
 }
 
 
@@ -377,22 +391,29 @@ void calb_6pnt_full(
 { 
   // define internal variables
   IMU_rect_config *rect   = &state[id].rect;
-  int i;
+  IMU_core_config *core   = &state[id].core;
+  float                   *g;
+  float                   *a;
+  int                     i;
 
   // process completed points table
-  rect->gBias[0]          = 0;
-  rect->gBias[1]          = 0;
-  rect->gBias[2]          = 0;
-  rect->aBias[0]          = 0;
-  rect->aBias[1]          = 0;
-  rect->aBias[2]          = 0;
+  rect->gBias[0]          = 0.0f;
+  rect->gBias[1]          = 0.0f;
+  rect->gBias[2]          = 0.0f;
+  rect->aBias[0]          = 0.0f;
+  rect->aBias[1]          = 0.0f;
+  rect->aBias[2]          = 0.0f;
+  core->aMag              = 0.0f;
   for (i=0; i<6; i++) {
-    rect->gBias[0]       -= table[id][i].gFltr[0];
-    rect->gBias[1]       -= table[id][i].gFltr[1];
-    rect->gBias[2]       -= table[id][i].gFltr[2];
-    rect->aBias[0]       -= table[id][i].aFltr[0];
-    rect->aBias[1]       -= table[id][i].aFltr[1];
-    rect->aBias[2]       -= table[id][i].aFltr[2];
+    g                     = table[id][i].gFltr;
+    a                     = table[id][i].aFltr;
+    rect->gBias[0]       -= g[0];
+    rect->gBias[1]       -= g[1];
+    rect->gBias[2]       -= g[2];
+    rect->aBias[0]       -= a[0];
+    rect->aBias[1]       -= a[1];
+    rect->aBias[2]       -= a[2];
+    core->aMag           += sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2]);
   }
 
   // convert sums to averages
@@ -402,6 +423,7 @@ void calb_6pnt_full(
   rect->aBias[0]         /= 6.0f;
   rect->aBias[1]         /= 6.0f;
   rect->aBias[2]         /= 6.0f;
+  core->aMag             /= 6.0f;
 }
 
 
