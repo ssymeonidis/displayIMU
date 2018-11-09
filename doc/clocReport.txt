@@ -1,0 +1,36 @@
+cloc report (manually modified to account for qt generated content) generated 
+for rev_1.0 on 2018-11-09...
+
+
+-------------------------------------------------------------------------------
+Language                     files          blank        comment           code
+-------------------------------------------------------------------------------
+C                               22           1253           1865           4467
+C/C++ Header                    17            280            482           1302
+C++                              4            179            260            651
+MATLAB                          37            262            811            814
+make                             5             78             15            234
+IDL                              1             10              0             26
+Bourne Shell                     2              1              0             10
+-------------------------------------------------------------------------------
+SUM:                            88           2063           3433           7504
+-------------------------------------------------------------------------------
+1 - 25% code efficiency for QT created Makefile (derived from .proj file)
+2 - 25% code efficiency for QT created ui header (derived from windowGUI form)
+3 - moc files removed from loc report
+
+
+
+-------------------------------------------------------------------------------
+Directory                    files          blank        comment           code
+-------------------------------------------------------------------------------
+displayIMU/imu                  19            924           1297           3771
+displayIMU/test                 16            501            817           1460
+displayIMU/display		 8	      277	     348	   1132
+displayIMU/matlab               35            255            774            797
+displayIMU/common                3             73            122            219
+displayIMU/csv                   5             31             75            106
+displayIMU                       2              2              0             19
+-------------------------------------------------------------------------------
+SUM:                            90           2063           3433           7504
+-------------------------------------------------------------------------------
