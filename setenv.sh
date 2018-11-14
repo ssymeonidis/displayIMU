@@ -1,6 +1,6 @@
-export IMU_ENGN_QUEUE_SIZE=5
 export IMU_USE_PTHREAD=1
+export IMU_ENGN_QUEUE_SIZE=5
 export IMU_MAX_INST=2
 export IMU_TYPE=int16_t
 export IMU_PNTS_SIZE=1
-export IMU_CALB_SIZE=20
+export IMU_CALB_SIZE=14
