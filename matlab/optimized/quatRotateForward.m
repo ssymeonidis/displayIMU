@@ -18,28 +18,18 @@
 %%
 % ASSUMPTION - normalized input quaternion (use quatNormalize function)
 
-function out = quatToUp(q, method)
+function v_out = quatRotateForward(v, q)
 
-% check number of arguments
-if (nargin < 2)
-  method = "full";
-end
-
-% uses quaternion base operations
-if (method == "full")
-  up      = [0, 0, 0, 1];
-  tmp     = quatMultiply(q, up);
-  out     = quatMultiply(tmp, quatConjugate(q));
-  out     = out(2:4);
-
-% fully expanded and optimized
-elseif (method == "optimized")
-  out(1)  = 2 * (q(2)*q(4) + q(1)*q(3))
-  out(2)  = 2 * (q(3)*q(4) - q(1)*q(2));
-  out(3)  = 2 * (0.5 - q(2)*q(2) - q(3)*q(3));
-
-else
-  error("invalid method");
-end
+v_out    = [2 * (v(1)*(0.5 - q(3)*q(3) - q(4)*q(4))   ...
+               + v(2)*(q(2)*q(3) - q(1)*q(4))         ...
+               + v(3)*(q(2)*q(4) + q(1)*q(3))),       ...
+                
+            2 * (v(1)*(q(2)*q(3) + q(1)*q(4))         ...
+               + v(2)*(0.5 - q(2)*q(2) - q(4)*q(4))   ...
+               + v(3)*(q(3)*q(4) - q(1)*q(2))),       ...
+                
+            2 * (v(1)*(q(2)*q(4) - q(1)*q(3))         ...
+               + v(2)*(q(3)*q(4) + q(1)*q(2))         ...
+               + v(3)*(0.5 - q(2)*q(2) - q(3)*q(3)))]';
 
 end

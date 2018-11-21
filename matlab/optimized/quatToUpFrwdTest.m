@@ -15,13 +15,13 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function q = quatNormalize(q)
+% initialize environment
+clear all; close all;
+addpath('..');
 
-mag_sq                = sum(q.^2);
-if (abs(mag_sq) > 0.00001) && (abs(mag_sq-1) > 0.00001)
-  mag                 = sqrt(mag_sq);
-  q                   = q ./ mag;
-end
-
-end
+% unit test optimized function
+q  = quat("rand");
+v1 = q.up
+v1 = quatToUp(q(:))
+v2 = q.frwd
+v2 = quatToFrwd(q(:))

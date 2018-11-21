@@ -16,11 +16,12 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-function q = quatMultiply(in1, in2)
+% ASSUMPTION - normalized input quaternion (use quatNormalize function)
 
-q(1) = in2(1)*in1(1) - in2(2)*in1(2) - in2(3)*in1(3) - in2(4)*in1(4);
-q(2) = in2(1)*in1(2) + in2(2)*in1(1) - in2(3)*in1(4) + in2(4)*in1(3);
-q(3) = in2(1)*in1(3) + in2(2)*in1(4) + in2(3)*in1(1) - in2(4)*in1(2);
-q(4) = in2(1)*in1(4) - in2(2)*in1(3) + in2(3)*in1(2) + in2(4)*in1(1);
+function out = quatToUp(q)
+
+out(1)  = 2 * (q(2)*q(4) + q(1)*q(3));
+out(2)  = 2 * (q(3)*q(4) - q(1)*q(2));
+out(3)  = 2 * (0.5 - q(2)*q(2) - q(3)*q(3));
 
 end

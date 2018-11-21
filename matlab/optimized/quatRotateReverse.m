@@ -16,27 +16,18 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-function out = quatMultiplyConj(in1, in2, method)
+function v_out = quatRotateReverse(v, q)
 
-% check number of arguments
-if (nargin < 3)
-  method = "full";
-end
-
-% uses quaternion base operations
-if (method == "full")
-  in2    = quatConjugate(in2);
-  out    = quatMultiply(in1, in2);
-
-% fully expanded and optimized
-elseif (method == "optimized")
-  out(1) = in2(1)*in1(1) + in2(2)*in1(2) + in2(3)*in1(3) + in2(4)*in1(4);
-  out(2) = in2(1)*in1(2) - in2(2)*in1(1) + in2(3)*in1(4) - in2(4)*in1(3);
-  out(3) = in2(1)*in1(3) - in2(2)*in1(4) - in2(3)*in1(1) + in2(4)*in1(2);
-  out(4) = in2(1)*in1(4) + in2(2)*in1(3) - in2(3)*in1(2) - in2(4)*in1(1);
-
-else
-  error("invalid method");
-end
-
+v_out    = [2 * (v(1)*(0.5 - q(3)*q(3) - q(4)*q(4))   ...
+               + v(2)*(q(2)*q(3) + q(1)*q(4))         ...
+               + v(3)*(q(2)*q(4) - q(1)*q(3))),       ...
+                
+            2 * (v(1)*(q(2)*q(3) - q(1)*q(4))         ...
+               + v(2)*(0.5 - q(2)*q(2) - q(4)*q(4))   ...
+               + v(3)*(q(3)*q(4) + q(1)*q(2))),       ...
+                
+            2 * (v(1)*(q(2)*q(4) + q(1)*q(3))         ...
+               + v(2)*(q(3)*q(4) - q(1)*q(2))         ...
+               + v(3)*(0.5 - q(2)*q(2) - q(3)*q(3)))]';
+ 
 end

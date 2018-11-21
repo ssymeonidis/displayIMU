@@ -16,8 +16,12 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-function q = quatConjugate(q)
+% ASSUMPTION - normalized input quaternion (use quatNormalize function)
 
-q          = [q(1), -q(2), -q(3), -q(4)];
+function out = quatToFrwd(q)
+
+out(1)  = 2 * (0.5 - q(3)*q(3) - q(4)*q(4));
+out(2)  = 2 * (q(2)*q(3) + q(1)*q(4));
+out(3)  = 2 * (q(2)*q(4) - q(1)*q(3));
 
 end

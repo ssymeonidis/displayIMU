@@ -16,30 +16,11 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 %%
-% ASSUMPTION - normalized input quaternion (use quatNormalize function)
+function out = quatMultiplyConj2(in1, in2)
 
-function out = quatToForward(q, method)
-
-% check number of arguments
-if (nargin < 2)
-  method = "full";
-end
-
-% uses quaternion base operations
-if (method == "full")
-  forward = [0, 1, 0, 0];
-  tmp     = quatMultiply(q, forward);
-  out     = quatMultiply(tmp, quatConjugate(q));
-  out     = out(2:4);
-
-% fully expanded and optimized
-elseif (method == "optimized")
-  out(1)  = 2 * (0.5 - q(3)*q(3) - q(4)*q(4));
-  out(2)  = 2 * (q(2)*q(3) + q(1)*q(4));
-  out(3)  = 2 * (q(2)*q(4) - q(1)*q(3));
-
-else
-  error("invalid method");
-end
+out(1) = in2(1)*in1(1) + in2(2)*in1(2) + in2(3)*in1(3) + in2(4)*in1(4);
+out(2) = in2(2)*in1(1) - in2(1)*in1(2) + in2(3)*in1(4) - in2(4)*in1(3);
+out(3) = in2(3)*in1(1) - in2(1)*in1(3) - in2(2)*in1(4) + in2(4)*in1(2);
+out(4) = in2(4)*in1(1) - in2(1)*in1(4) + in2(2)*in1(3) - in2(3)*in1(2);
 
 end
