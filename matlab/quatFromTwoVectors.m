@@ -56,7 +56,7 @@ elseif (method == "optimized")
   else
     q   = [real, 0, -u(3), u(2)];
   end
-  q     = q / sqrt(sum(q.^2));    
+  q     = q / sqrt(sum(q.^2)); 
 
 else 
   error("invalid method");

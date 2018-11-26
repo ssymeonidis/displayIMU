@@ -18,40 +18,41 @@
 %% generate input sweeps for unit under test
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% initialize simulation
+addpath('..');
+
 % define simulation inputs
-method          = "optimized";
 step_size_deg   = 2;
 
 % test yaw(positive sweep)
 for i=0:step_size_deg:180
-  process_datum([i, 0, 0], method);
+  process_datum([i, 0, 0]);
 end
 for i=180:-step_size_deg:0
-  process_datum([i, 0, 0], method);
+  process_datum([i, 0, 0]);
 end
 
 % test pitch (positive sweep)
 for i=0:step_size_deg:90
-  process_datum([0, i, 0], method);
+  process_datum([0, i, 0]);
 end
 for i=90:-step_size_deg:0
-  process_datum([0, i, 0], method);
+  process_datum([0, i, 0]);
+end
+
+% test roll (positive sweep)
+for i=0:step_size_deg:90
+  process_datum([0, 0, i]);
+end
+for i=90:-step_size_deg:0
+  process_datum([0, 0, i]);
 end
 
 
 %% main function (performs conversion and generates plot)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function process_datum(euler_deg, method)
-  q             = eulerToQuat(pi*euler_deg/180);
-  u             = quatToForward(q, method);
-  plotVector(u);
-  delete(findall(gcf,'type','annotation'))
-  title('quatToForwardTest');
-  str{1}        = sprintf('y = %0.2f deg', euler_deg(1));
-  str{2}        = sprintf('p = %0.2f deg', euler_deg(2));
-  str{3}        = sprintf('r = %0.2f deg', euler_deg(3));
-  loc           = [.02 .67 .6 .3];
-  annotation('textbox', loc, 'String', str, 'FitBoxToText', 'on');
+function process_datum(euler_deg)
+  plotState(quat("deg", euler_deg));
   drawnow;
 end

@@ -15,21 +15,14 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function q = eulerToQuat(E)
+% initialize environment
+clear all; close all;
+addpath('..');
+addpath('../optimized');
 
-% angle function abreviations
-cy = cos(E(1) * 0.5);
-sy = sin(E(1) * 0.5);
-cr = cos(E(3) * 0.5);
-sr = sin(E(3) * 0.5);
-cp = cos(E(2) * 0.5);
-sp = sin(E(2) * 0.5);
-
-% conversion to quaternion
-q(1) = cy*cr*cp + sy*sr*sp;
-q(2) = cy*sr*cp - sy*cr*sp;
-q(3) = cy*cr*sp + sy*sr*cp;
-q(4) = sy*cr*cp - cy*sr*sp;
-
-end
+% unit test optimized function
+q  = quat("rand");
+v1 = q.up
+v1 = quatToUp(q(:))
+v2 = q.frwd
+v2 = quatToFrwd(q(:))

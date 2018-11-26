@@ -43,7 +43,7 @@ end
 % draw vector(s)
 for i = length(varargin):-1:1
   val = varargin{i};
-  plot3([0, val(1)], [0, val(2)], [0, val(3)], 'LineWidth', 5, 'Color', color{i});
+  plot3([0, val(1)], [0, val(2)], [0, -val(3)], 'LineWidth', 5, 'Color', color{i});
 end
 
 % ensure "zero" will be center of plot

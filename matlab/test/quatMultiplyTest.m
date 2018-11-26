@@ -15,9 +15,15 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function out = quatRotateDiff(q1, q2)
+% initialize environment
+clear all; close all;
+addpath('..');
+addpath('../optimized');
 
-out = quatMultiply(q2, quatConjugate(q1));
-
-end
+% unit test optimized function
+q1 = quat("rand");
+q2 = quat("rand");
+q_conj1_ref = q1 * q2'
+q_conj1_src = quatMultiplyConj1(q1.val, q2.val)
+q_conj2_ref = q1' * q2
+q_conj2_src = quatMultiplyConj2(q1.val, q2.val)

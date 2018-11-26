@@ -17,10 +17,7 @@
 
 function plotState(q)
 
-u             = quatRotateForward([0, 0, 1], q, "full");
-f             = quatRotateForward([1, 0, 0], q, "full");
-r             = quatRotateForward([0, 1, 0], q, "full");
-plotVector(u, f, r);
+plotVector(q.up, q.frwd, q.rght);
 delete(findall(gcf,'type','annotation'));
 loc           = [.75 .67 .6 .3];
 str{1}        = 'red = up';

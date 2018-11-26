@@ -22,7 +22,8 @@ properties
 end
 
 properties (Constant)
-  epsilon = 0.001         % near zero threshold
+  epsilon   = 0.001       % near zero threshold
+  toDeg     = 180 / pi    % rad to degree
 end
 
 methods
@@ -53,6 +54,24 @@ function q   = quat(arg1, arg2, arg3, arg4)
   % random quaternion
   elseif strcmp(arg1, "rand")
     q       = ~quat(rand(1,4));
+  
+  % euler angles
+  elseif strcmp(arg1, "rad")
+    if     (nargin == 2)
+      q     = q.fromEuler(arg2);
+    elseif (nargin == 4)
+      q     = q.fromEuler([arg2, arg3, arg4]);
+    else
+      error("invalid numeric argument(s)");
+    end
+  elseif strcmp(arg1, "deg")
+    if     (nargin == 2)
+      q     = q.fromEuler(arg2 / q.toDeg);
+    elseif (nargin == 4)
+      q     = q.fromEuler([arg2, arg3, arg4] / q.toDeg);
+    else
+      error("invalid numeric argument(s)"); 
+    end
   end
 end
 
@@ -70,6 +89,12 @@ function val = subsref(q, S)
       val      = q.toUp();
     elseif strcmp(S(1).subs, 'frwd')
       val      = q.toFrwd();
+    elseif strcmp(S(1).subs, 'rght')
+      val      = q.toRght();
+    elseif strcmp(S(1).subs, 'rad')
+      val      = q.toEuler();
+    elseif strcmp(S(1).subs, 'deg')
+      val      = q.toEuler() * q.toDeg;
     end
   elseif   strcmp(S(1).type, '()')
     if    (length(S(1).subs) < 1)
@@ -118,16 +143,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = mtimes(q, arg)
-
-  % extract arguments
   q1       = q.val;
-  if isnumeric(arg)
-    q2     = arg;
-  else
-    q2     = arg.val;
-  end
-  
-  % perform the multiplication
+  q2       = arg.val;
   q.val(1) = q2(1)*q1(1) - q2(2)*q1(2) - q2(3)*q1(3) - q2(4)*q1(4);
   q.val(2) = q2(1)*q1(2) + q2(2)*q1(1) - q2(3)*q1(4) + q2(4)*q1(3);
   q.val(3) = q2(1)*q1(3) + q2(2)*q1(4) + q2(3)*q1(1) - q2(4)*q1(2);
@@ -157,7 +174,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toUp(q)
-  v        = q / [0, 0, 1];
+  v        = q / [0, 0, -1];
 end
 
 
@@ -166,6 +183,60 @@ end
 
 function v = toFrwd(q)
   v        = q / [1, 0, 0];
+end
+
+
+%% quaternion forward component
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function v = toRght(q)
+  v        = q / [0, 1, 0];
+end
+
+
+%% quaternion from Euler angles (radians)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromEuler(q, ang)
+  cy = cos(ang(1) * 0.5);
+  sy = sin(ang(1) * 0.5);
+  cr = cos(ang(3) * 0.5);
+  sr = sin(ang(3) * 0.5);
+  cp = cos(ang(2) * 0.5);
+  sp = sin(ang(2) * 0.5);
+
+  % conversion to quaternion
+  q.val(1) = cy*cr*cp + sy*sr*sp;
+  q.val(2) = cy*sr*cp - sy*cr*sp;
+  q.val(3) = cy*cr*sp + sy*sr*cp;
+  q.val(4) = sy*cr*cp - cy*sr*sp;
+end
+
+
+%% quaternion from Euler angles (radians)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function ang = toEuler(q)
+  % extract core vector
+  q         = q.val;
+    
+  % roll (x-axis rotation)
+  sinr_cosp = 2.0 * (q(1)*q(2) + q(3)*q(4));
+  cosr_cosp = 1.0 - 2.0 * (q(2)*q(2) + q(3)*q(3));
+  ang(3)    = atan2(sinr_cosp, cosr_cosp);
+
+  % pitch (y-axis rotation)
+  sinp      = 2.0 * (q(1)*q(3) - q(4)*q(2));
+  if (abs(sinp) >= 1)
+    ang(2)  = sign(sinp) * pi / 2;
+  else
+    ang(2)  = asin(sinp);
+  end
+
+  % yaw (z-axis rotation)
+  siny_cosp = 2.0 * (q(1)*q(4) + q(2)*q(3));
+  cosy_cosp = 1.0 - 2.0 * (q(3)*q(3) + q(4)*q(4));
+  ang(1)    = atan2(siny_cosp, cosy_cosp);
 end
 
 

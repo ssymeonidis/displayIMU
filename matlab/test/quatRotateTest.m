@@ -18,10 +18,12 @@
 % initialize environment
 clear all; close all;
 addpath('..');
+addpath('../optimized');
 
 % unit test optimized function
 q  = quat("rand");
-v1 = q.up
-v1 = quatToUp(q(:))
-v2 = q.frwd
-v2 = quatToFrwd(q(:))
+v  = rand(1,3);
+v1 = q / v
+v1 = quatRotateForward(v, q(:))
+v2 = q \ v
+v2 = quatRotateReverse(v, q(:))
