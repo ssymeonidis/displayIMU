@@ -17,6 +17,7 @@
 
 % initialize simulation
 clear all; close all;
+addpath('..');
 
 % test zero-pitch, zero-roll
 euler  = [25, 15, 15];
@@ -55,28 +56,20 @@ run_sim(euler, accl)
 function euler = run_sim(euler, accl)
 
   % define local constants
-  alpha      = 0.005;
-  iter       = 100;
-  method     = "gradient";
-
-  % convert orientation angles to quaternion
-  euler_rad  = pi * euler / 180;
-  q          = eulerToQuat(euler_rad);
+  imu          = imuGradient;
+  imu.q        = quat("deg", euler);
+  imu.aAlpha   = 0.005;
+  iter         = 100;
   
   % main processing loop
-  FOM    = [];
+  FOM          = [];
   for i=1:iter
-    if     (method == "gradient")
-      [q, FOM(i)] = applyAcclGradient (q, accl, alpha);
-    elseif (method == "rotate")
-      q           = applyAcclRotate   (q, accl, alpha);
-    end
-    display_state(q);
+    FOM(i)     = imu.estmAccl(accl);
+    display_state(imu.q);
   end
 
   % return final state
-  euler_rad  = quatToEuler(q);
-  euler      = 180 * euler_rad / pi;
+  euler         = imu.q.deg;
 end
 
 
@@ -85,6 +78,6 @@ end
 
 function display_state(q)
   plotState(q);
-  title('applyAcclTest');
+  title('estmAcclTest');
   drawnow;
 end

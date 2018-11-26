@@ -17,14 +17,17 @@
 
 % initialize simulation
 clear all; close all;
-global csv_enable csv_magn_scale csv_time_scale csv_file csv_time
+global imu csv_enable csv_magn_scale csv_time_scale csv_file csv_time
+addpath('..');
 
 % define simulation parameterse
 csv_enable       = true;
-csv_filename     = '../stim/applyMagnTest.csv';
+csv_filename     = '../../stim/applyMagnTest.csv';
 csv_magn_scale   = 255;
 csv_time_scale   = 0.00001;
 csv_time         = 0;
+imu              = imuGradient;
+imu.mAlpha       = 0.005;
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -33,21 +36,20 @@ if csv_enable
 end
 
 % test 90-deg roll
-euler  = [0, 0, 0];
 magn   = [0, -1, 0];
-euler  = run_sim(euler, magn)
+euler  = run_sim(magn)
 
 % test 180-deg roll
 magn   = [-1, 0, 0];
-euler  = run_sim(euler, magn)
+euler  = run_sim(magn)
 
 % test neg90-deg roll
 magn   = [0, 1, 0];
-euler  = run_sim(euler, magn)
+euler  = run_sim(magn)
 
 % test zero-pitch, zero-roll
 magn   = [1, 0, 0];
-euler  = run_sim(euler, magn)
+euler  = run_sim(magn)
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -58,15 +60,13 @@ end
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(euler, magn)
+function euler = run_sim(magn)
 
   % import global csv parameters
-  global csv_enable csv_magn_scale csv_time_scale csv_file csv_time
+  global imu csv_enable csv_magn_scale csv_time_scale csv_file csv_time
 
   % define local constants
-  alpha      = 0.005;
   iter       = 300;
-  method     = "gradient";
   if csv_enable
     dt       = 0.1;
     val      = round(magn*csv_magn_scale);
@@ -75,11 +75,9 @@ function euler = run_sim(euler, magn)
 
   % main processing loop
   FOM    = [];
-  euler_rad  = pi * euler / 180;
-  q          = eulerToQuat(euler_rad);
   for i=1:iter
-    [q, FOM(i)] = applyMagnGradientNorm (q, magn, alpha);
-    display_state(q);
+    FOM(i)  = imu.estmMagn(magn);
+    display_state(imu.q);
     if csv_enable
       csv_time    = csv_time + dt;
       val         = round(csv_time/csv_time_scale);
@@ -88,8 +86,7 @@ function euler = run_sim(euler, magn)
   end
 
   % return final state
-  euler_rad  = quatToEuler(q);
-  euler      = 180 * euler_rad / pi;
+  euler           = imu.q.deg;
 end
 
 

@@ -17,6 +17,7 @@
 
 % initialize simulation
 clear all; close all;
+addpath('..');
 
 % test 0deg-yaw
 euler  = [25, 15, 15];
@@ -45,24 +46,20 @@ run_sim(euler, magn)
 function euler = run_sim(euler, magn)
 
   % define local constants
-  alpha  = 0.005;
-  iter   = 100;
-
-  % convert orientation angles to quaternion
-  euler_rad  = pi * euler / 180;
-  q          = eulerToQuat(euler_rad);
+  imu        = imuGradient;
+  imu.q      = quat("deg", euler);
+  imu.mAlpha = 0.005;
+  iter       = 100;
   
   % main processing loop
-  figure(1);
-  FOM    = [];
+  FOM        = [];
   for i=1:iter
-    [q, FOM(i)] = applyMagnGradientNorm(q, magn, alpha);
-    display_state(q);
+    FOM(i)   = imu.estmMagn(magn);
+    display_state(imu.q);
   end
   
   % print results
-  euler_rad  = quatToEuler(q);
-  euler      = 180 * euler_rad / pi;
+  euler      = imu.q.deg;
 end
 
 
@@ -70,16 +67,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function display_state(q)
-  u             = quatRotateForward([0, 0, 1], q, "full");
-  f             = quatRotateForward([1, 0, 0], q, "full");
-  r             = quatRotateForward([0, 1, 0], q, "full");
-  plotVector(u, f, r);
-  title('eulerToQuatTest');
-  delete(findall(gcf,'type','annotation'));
-  loc           = [.75 .67 .6 .3];
-  str{1}        = 'red = up';
-  str{2}        = 'green = forward';
-  str{3}        = 'blue = right';
-  annotation('textbox', loc, 'String', str, 'FitBoxToText', 'on');
+  plotState(q);
+  title('estmMagnTest');
   drawnow;
 end

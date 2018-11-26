@@ -15,32 +15,23 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function q = quatFromUp(u, method)
+% initialize environment
+clear all; close all;
+addpath('..');
+addpath('../utils');
 
-% check number of arguments
-if (nargin < 2)
-  method = "full";
-end
+% create test vector
+u    = 256 * rand(1,3)
+mag  = sqrt(sum(u.^2));
 
-% uses quaternion base operations
-if (method == "full")
-  q = quatFromTwoVectors([0, 0, 1], u);
-    
-% fully expanded and optimized
-elseif (method == "optimized")
-  err   = 0.001;
-  norm  = sqrt(u(1)*u(1) + u(2)*u(2) + u(3)*u(3));
-  real  = norm + u(3);
-  if (real > err * norm)
-    q   = [real, -u(2), u(1), 0];
-    q   = q / sqrt(sum(q.^2)); 
-  else
-    q   = [1, 0, 0, 0];
-  end
+% create quaternion and verify up vector
+q1   = quat("up",     u);
+out1 = mag*q1.up
+q2   = quat("upFast", u);
+out2 = mag*q2.up
 
-else
-  error("invalid method");
-end
- 
-end
+% display the state
+deg1 = q1.deg
+deg2 = q2.deg
+figure(1); plotState(q1);
+figure(2); plotState(q2);

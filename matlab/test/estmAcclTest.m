@@ -17,14 +17,17 @@
 
 % initialize simulation
 clear all; close all;
-global csv_enable csv_accl_scale csv_time_scale csv_file csv_time
+global imu csv_enable csv_accl_scale csv_time_scale csv_file csv_time
+addpath('..');
 
 % define simulation parameterse
-csv_enable       = true;
-csv_filename     = '../stim/applyAcclTest.csv';
+csv_enable       = false;
+csv_filename     = '../../stim/applyAcclTest.csv';
 csv_accl_scale   = 255;
 csv_time_scale   = 0.00001;
 csv_time         = 0;
+imu              = imuGradient;
+imu.aAlpha       = 0.005;
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -33,21 +36,20 @@ if csv_enable
 end
 
 % test 90-deg pitch
-euler  = [0, 0, 0];
 accl   = [-1, 0, 0];
-euler  = run_sim(euler, accl)
+euler  = run_sim(accl)
 
 % test zero-pitch, zero-roll
 accl   = [0, 0, 1];
-euler  = run_sim(euler, accl)
+euler  = run_sim(accl)
 
 % test 90-deg roll
 accl   = [0, 1, 0];
-euler  = run_sim(euler, accl)
+euler  = run_sim(accl)
 
 % test zero-pitch, zero-roll
 accl   = [0, 0, 1];
-euler  = run_sim(euler, accl)
+euler  = run_sim(accl)
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -58,15 +60,13 @@ end
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(euler, accl)
+function euler = run_sim(accl)
 
   % import global csv parameters
-  global csv_enable csv_accl_scale csv_time_scale csv_file csv_time
+  global imu csv_enable csv_accl_scale csv_time_scale csv_file csv_time
 
   % define local constants
-  alpha      = 0.005;
   iter       = 250;
-  method     = "gradient";
   if csv_enable
     dt       = 0.1;
     val      = round(accl*csv_accl_scale);
@@ -74,16 +74,10 @@ function euler = run_sim(euler, accl)
   end
 
   % main processing loop
-  FOM    = [];
-  euler_rad  = pi * euler / 180;
-  q          = eulerToQuat(euler_rad);
+  FOM             = [];
   for i=1:iter
-    if     (method == "gradient")
-      [q, FOM(i)] = applyAcclGradient (q, accl, alpha);
-    elseif (method == "rotate")
-      q           = applyAcclRotate   (q, accl, alpha);
-    end
-    display_state(q);
+    FOM(i)        = imu.estmAccl(accl);
+    display_state(imu.q);
     if csv_enable
       csv_time    = csv_time + dt;
       val         = round(csv_time/csv_time_scale);
@@ -92,8 +86,7 @@ function euler = run_sim(euler, accl)
   end
 
   % return final state
-  euler_rad  = quatToEuler(q);
-  euler      = 180 * euler_rad / pi;
+  euler           = imu.q.deg;
 end
 
 
@@ -102,6 +95,6 @@ end
 
 function display_state(q)
   plotState(q);
-  title('applyAcclTest');
+  title('estmAcclTest');
   drawnow;
 end

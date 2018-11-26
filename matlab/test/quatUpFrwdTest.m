@@ -15,34 +15,25 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-% This function is based off the work performed by Sebastian O.H. Madgwick,
-% documented in the paper "An efficient orientation Filter for inertial and
-% inertial/magnetic sensor arrays. 
+% initialize environment
+clear all; close all;
+addpath('..');
+addpath('../utils');
 
-%%
-% ASSUMPTION - normalized input quaternion (use quatNormalize function)
+% create test vector
+u    = 256 * rand(1,3)
+fOrg = 256 * rand(1,3);
+D1   = dot(fOrg, u);
+D2   = dot(u, u);
+f    = fOrg - (D1/D2)*u
+uMag = sqrt(sum(u.^2));
+fMag = sqrt(sum(f.^2));
 
-function [q, FOM] = applyAcclRotate(q, accl, alpha, method)
+% create quaternion and verify up vector
+q    = quat("upFrwd", u, fOrg);
+u    = uMag*q.up
+f    = fMag*q.frwd
 
-% normalize the acceleration vector
-accl       = accl / sqrt(sum(accl.^2));
-
-% check number of arguments
-if (nargin < 4)
-  method = "full";
-end
-
-if (method == "full")
-  
-  % normalize the acceleration vector
-  mag        = sqrt(sum(accl.^2));
-  if (mag > 0.001)
-    accl     = accl / mag;
-  end
-
-  % find the rotational difference
-  q_delta    = quatRotateDiff(accl, q);
-  q          = qRotate(q, q_delta);
-end
-
-end
+% display the state
+deg  = q.deg
+figure(1); plotState(q);

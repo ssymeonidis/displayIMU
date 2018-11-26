@@ -15,14 +15,29 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
+% initialize environment
 clear all; close all;
+addpath('..');
+addpath('../utils');
 
 % simple forward/up test
-euler  = [360*rand(), 180*rand()-90, 360*rand()-180];
-q1_in  = eulerToQuat(180*euler/pi);
-u1_in  = 255*quatToUp(q1_in)
-f1_in  = 255*quatToForward(q1_in)
-q1_out = quatFromForwardUp(f1_in, u1_in);
-u1_out = 255*quatToUp(q1_out);
-f1_out = 255*quatToForward(q1_out);
+q       = quat("deg", 125, 5, 10)
+u       = q.up;
+f       = q.frwd;
+q1_out  = quat("upFrwd", u, f)
+
+% partial update test #1
+q_init  = quat;
+u       = q.up;
+f       = q_init.frwd;
+q_temp  = quat("upFrwd", u, f);
+f       = q.frwd;
+u       = q_temp.up;
+q2_out  = quat("upFrwd", u, f)
+
+% partial update test #2
+u       = q.up;
+q_temp  = quat("up", u);
+f       = q.frwd;
+u       = q_temp.up;
+q3_out  = quat("upFrwd", u, f)

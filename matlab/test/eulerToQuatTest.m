@@ -20,6 +20,7 @@
 
 % initialize simulation
 addpath('..');
+addpath('../utils');
 
 % define simulation inputs
 step_size_deg   = 2;

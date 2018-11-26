@@ -17,14 +17,16 @@
 
 % initialize environment
 clear all; close all;
-global csv_enable csv_gyro_scale csv_time_scale csv_file csv_time
+addpath('..');
+global imu csv_enable csv_gyro_scale csv_time_scale csv_file csv_time
 
 % define simulation parameterse
-csv_enable       = true;
-csv_filename     = '../stim/applyGyroTest.csv';
+csv_enable       = false;
+csv_filename     = '../../stim/applyGyroTest.csv';
 csv_gyro_scale   = 0.001;
 csv_time_scale   = 0.00001;
 csv_time         = 0;
+imu              = imuGradient;
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -32,41 +34,40 @@ if csv_enable
 end
 
 % rotate test #1
-euler            = [0, 0, 0];
 axis             = [1, 0, 0];
 range            = 90;              % deg
 speed            = 15;              % deg/sec
-euler            = run_sim(euler, axis, range, speed);
+euler            = run_sim(axis, range, speed);
 
 % rotate test #2
 axis             = [-1, 0, 0];
 range            = 90;              % deg
 speed            = 15;              % deg/sec
-euler            = run_sim(euler, axis, range, speed);
+euler            = run_sim(axis, range, speed);
 
 % rotate test #3
 axis             = [0, 1, 0];
 range            = 90;              % deg
 speed            = 15;              % deg/sec
-euler            = run_sim(euler, axis, range, speed);
+euler            = run_sim(axis, range, speed);
 
 % rotate test #4
 axis             = [0, -1, 0];
 range            = 90;              % deg
 speed            = 15;              % deg/sec
-euler            = run_sim(euler, axis, range, speed);
+euler            = run_sim(axis, range, speed);
 
 % rotate test #5
 axis             = [0, 0, 1];
 range            = 90;              % deg
 speed            = 15;              % deg/sec
-euler            = run_sim(euler, axis, range, speed);
+euler            = run_sim(axis, range, speed);
 
 % rotate test #6
 axis             = [0, 0, -1];
 range            = 90;              % deg
 speed            = 15;              % deg/sec
-euler            = run_sim(euler, axis, range, speed);
+euler            = run_sim(axis, range, speed);
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -77,10 +78,10 @@ end
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler   = run_sim(euler, axis, range, speed)
+function euler   = run_sim(axis, range, speed)
 
   % import global csv parameters
-  global csv_enable csv_gyro_scale csv_time_scale csv_file csv_time
+  global imu csv_enable csv_gyro_scale csv_time_scale csv_file csv_time
 
   % define local constants
   dt             = 0.1;
@@ -94,11 +95,9 @@ function euler   = run_sim(euler, axis, range, speed)
   end
   
   % main processing loop
-  euler_rad      = pi * euler / 180;
-  q              = eulerToQuat(euler_rad);
   for i=1:iter
-    q            = applyGyroIntegrate(q, gyro, dt);
-    display_state(q);
+    imu.estmGyro(gyro, dt);
+    display_state(imu.q);
     if csv_enable
       csv_time    = csv_time + dt;
       val         = round(csv_time/csv_time_scale);
@@ -107,8 +106,7 @@ function euler   = run_sim(euler, axis, range, speed)
   end
 
   % return final state
-  euler_rad    = quatToEuler(q);
-  euler        = 180 * euler_rad / pi;
+  euler        = imu.q.deg;
 end
 
 
@@ -117,6 +115,6 @@ end
 
 function display_state(q)
   plotState(q);
-  title('applyGyroTest');
+  title('estmGyroTest');
   drawnow;
 end

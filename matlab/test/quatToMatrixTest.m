@@ -15,12 +15,11 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function q = applyGyroIntegrate(q, gyro, dt)
+% initialize environment
+clear all; close all;
+addpath('..');
 
-tmp(1) =  -0.5 * (q(2)*gyro(1) + q(3)*gyro(2) + q(4)*gyro(3));
-tmp(2) =   0.5 * (q(1)*gyro(1) + q(3)*gyro(3) - q(4)*gyro(2));
-tmp(3) =   0.5 * (q(1)*gyro(2) - q(2)*gyro(3) + q(4)*gyro(1));
-tmp(4) =   0.5 * (q(1)*gyro(3) + q(2)*gyro(2) - q(3)*gyro(1));
-q      =   q + dt*tmp;
-
-end
+% check reversibility
+q1 = quat('rand')
+M  = q1.matrix;
+q2 = quat('matrix', M)

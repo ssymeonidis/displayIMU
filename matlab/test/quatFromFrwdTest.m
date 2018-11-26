@@ -15,23 +15,23 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-function q = quatFromForwardUp(f,u)
+% initialize environment
+clear all; close all;
+addpath('..');
+addpath('../utils');
 
-% normalize reference (up) vector
-u = u./norm(u);
+% create test vector
+f    = 256 * rand(1,3)
+mag  = sqrt(sum(f.^2));
 
-% ortho normalize forward vector 
-D = dot(f, u);
-f = f - D*u; 
-f = f./norm(f);
+% create quaternion and verify up vector
+q1   = quat("frwd",     f);
+out1 = mag*q1.frwd
+q2   = quat("frwdFast", f);
+out2 = mag*q2.frwd
 
-% calculate right vector
-r = cross(u, f);
-
-% calcuate the quaternion
-M = [f(1), r(1), u(1); ...
-     f(2), r(2), u(2); ...
-     f(3), r(3), u(3)];
-q = matrixToQuat(M);
-
-end
+% display the state
+deg1 = q1.deg
+deg2 = q2.deg
+figure(1); plotState(q1);
+figure(2); plotState(q2);

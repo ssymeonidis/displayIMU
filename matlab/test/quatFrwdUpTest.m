@@ -15,15 +15,25 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function M = quatToMatrix(q)
+% initialize environment
+clear all; close all;
+addpath('..');
+addpath('../utils');
 
-q = quatNormalize(q);
-w = q(1);
-x = q(2);
-y = q(3);
-z = q(4);
+% create test vector
+f    = 256 * rand(1,3)
+uOrg = 256 * rand(1,3);
+D1   = dot(uOrg, f);
+D2   = dot(f, f);
+u    = uOrg - (D1/D2)*f
+fMag = sqrt(sum(f.^2));
+uMag = sqrt(sum(u.^2));
 
-M = [1-2*y*y-2*z*z,    2*x*y-2*w*z,    2*x*z+2*w*y;
-       2*x*y+2*w*z,  1-2*x*x-2*z*z,    2*y*z-2*w*x;
-       2*x*z-2*w*y,    2*y*z+2*w*x,  1-2*x*x-2*y*y];
+% create quaternion and verify up vector
+q    = quat("frwdUp", f, uOrg);
+f    = fMag*q.frwd
+u    = uMag*q.up
+
+% display the state
+deg  = q.deg
+figure(1); plotState(q);
