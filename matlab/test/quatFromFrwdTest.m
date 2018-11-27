@@ -21,7 +21,7 @@ addpath('..');
 addpath('../utils');
 
 % create test vector
-f    = 256 * rand(1,3)
+f    = 512 * rand(1,3) - 256
 mag  = sqrt(sum(f.^2));
 
 % create quaternion and verify up vector

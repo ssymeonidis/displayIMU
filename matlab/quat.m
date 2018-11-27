@@ -53,7 +53,7 @@ function q   = quat(arg1, arg2, arg3, arg4)
 
   % random quaternion
   elseif strcmp(arg1, "rand")
-    q       = ~quat(rand(1,4));
+    q       = ~quat(2*rand(1,4)-1);
   
   % euler angles
   elseif strcmp(arg1, "rad")
@@ -199,14 +199,17 @@ end
 %% quaternion addition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = plus(q, q2)
-  if isobject(q2)
-    q2     = q2.val;
+function q = plus(q1, q2)
+  % extract values
+  if isobject(q1)
+    q1       = q1.val;
   end
-  q.val(1) = q.val(1) + q2(1);
-  q.val(2) = q.val(2) + q2(2);
-  q.val(3) = q.val(3) + q2(3);
-  q.val(4) = q.val(4) + q2(4);
+  if isobject(q2)
+    q2       = q2.val;
+  end
+  
+  % perform operation
+  q.val      = q1 + q2;
 end
 
 
@@ -214,26 +217,41 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = minus(q, q2)
-  if isobject(q2)
-    q2     = q2.val;
+  % extract values
+  if isobject(q1)
+    q1       = q1.val;
   end
-  q.val(1) = q.val(1) - q2(1);
-  q.val(2) = q.val(2) - q2(2);
-  q.val(3) = q.val(3) - q2(3);
-  q.val(4) = q.val(4) - q2(4);
+  if isobject(q2)
+    q2       = q2.val;
+  end
+  
+  % perform operation
+  q.val      = q1 + q2;
 end
 
 
 %% quaternion multiply
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = mtimes(q, arg)
-  q1       = q.val;
-  q2       = arg.val;
-  q.val(1) = q2(1)*q1(1) - q2(2)*q1(2) - q2(3)*q1(3) - q2(4)*q1(4);
-  q.val(2) = q2(1)*q1(2) + q2(2)*q1(1) - q2(3)*q1(4) + q2(4)*q1(3);
-  q.val(3) = q2(1)*q1(3) + q2(2)*q1(4) + q2(3)*q1(1) - q2(4)*q1(2);
-  q.val(4) = q2(1)*q1(4) - q2(2)*q1(3) + q2(3)*q1(2) + q2(4)*q1(1);
+function q   = mtimes(q1, q2)
+  % extract values
+  if isobject(q1)
+    q1       = q1.val;
+  end
+  if isobject(q2)
+    q2       = q2.val;
+  end
+  
+  % check for scalar; if not perform quaternion multiplication
+  if (length(q1) == 1) || (length(q2) == 1)
+    q.val    = q1 * q2;  
+  else 
+    q(1)     = q2(1)*q1(1) - q2(2)*q1(2) - q2(3)*q1(3) - q2(4)*q1(4);
+    q(2)     = q2(1)*q1(2) + q2(2)*q1(1) - q2(3)*q1(4) + q2(4)*q1(3);
+    q(3)     = q2(1)*q1(3) + q2(2)*q1(4) + q2(3)*q1(1) - q2(4)*q1(2);
+    q(4)     = q2(1)*q1(4) - q2(2)*q1(3) + q2(3)*q1(2) + q2(4)*q1(1);
+    q        = quat(q);
+  end
 end
 
 
@@ -373,7 +391,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromFrwdSafe(q, f)
-  q        = q.fromFwrdUp(f, [0, 0, 1]);
+  yaw      = atan2(f(2), f(1));
+  pitch    = asin(-f(3)/sqrt(sum(f.^2)));
+  roll     = 0;
+  q        = q.fromEuler([yaw, pitch, roll]);
 end
 
 
@@ -396,7 +417,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromUpSafe(q, u)
-  q        = q.fromUpFwrd(u, [1, 0, 0]);
+%   mag      = sqrt(sum(u.^2));
+%   yaw      = 0;
+%   pitch    = atan2(-u(1), -u(3));
+%   roll     = asin(u(2)/mag);
+%   q        = q.fromEuler([yaw, pitch, roll]);
+  mag      = sqrt(sum(u.^2));
+  yaw      = 0;
+  pitch    = atan2(-u(1),-u(3));
+  roll     = asin(u(2)/mag);
+  180 * [yaw, pitch, roll] / pi
+  q        = q.fromEuler([yaw, pitch, roll]);
+  q        = q;
 end
 
 
@@ -421,10 +453,10 @@ end
 function q = fromEuler(q, ang)
   cy = cos(ang(1) * 0.5);
   sy = sin(ang(1) * 0.5);
-  cr = cos(ang(3) * 0.5);
-  sr = sin(ang(3) * 0.5);
   cp = cos(ang(2) * 0.5);
   sp = sin(ang(2) * 0.5);
+  cr = cos(ang(3) * 0.5);
+  sr = sin(ang(3) * 0.5);
 
   % conversion to quaternion
   q.val(1) = cy*cr*cp + sy*sr*sp;
