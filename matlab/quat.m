@@ -96,6 +96,14 @@ function q   = quat(arg1, arg2, arg3, arg4)
     else
       error("invalid numeric argument(s)");
     end
+  elseif strcmp(arg1, "frwdNorm")
+    if     (nargin == 2)
+      q     = q.fromFrwdNorm(arg2);
+    elseif (nargin == 4)
+      q     = q.fromFrwdNorm([arg2, arg3, arg4]);
+    else
+      error("invalid numeric argument(s)");
+    end
   elseif strcmp(arg1, "frwdFast")
     if     (nargin == 2)
       q     = q.fromFrwdFast(arg2);
@@ -406,6 +414,17 @@ function q = fromFrwdSafe(q, f)
 end
 
 
+%% quaternion from forward vector (tries to constrain up component)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromFrwdNorm(q, f)
+  yaw      = atan2(f(2), f(1));
+  pitch    = 0;
+  roll     = 0;
+  q        = q.fromEuler([yaw, pitch, roll]);
+end
+
+
 %% quaternion from forward vector (optimized for number of operations)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -425,10 +444,9 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromUpSafe(q, u)
-  mag      = sqrt(sum(u.^2));
-  yaw      = 0;
+  yaw      = 0;  
   pitch    = atan2(-u(1),-u(3));
-  roll     = asin(u(2)/mag);
+  roll     = asin(u(2)/sqrt(sum(u.^2)));
   q        = q.fromEuler([yaw, pitch, roll]);
 end
 
@@ -500,26 +518,26 @@ function q = fromMatrix(q, M)
     S      = sqrt(tr+1.0) * 2; 
     v(1)   = 0.25 * S;
     v(2)   = (M(3,2) - M(2,3)) / S;
-    v(3)   = (M(1,3) - M(3,1)) / S; 
-    v(4)   = (M(2,1) - M(1,2)) / S; 
+    v(3)   = (M(1,3) - M(3,1)) / S;
+    v(4)   = (M(2,1) - M(1,2)) / S;
   elseif ((M(1,1) > M(2,2)) && (M(1,1) > M(3,3))) 
-    S    = sqrt(1.0 + M(1,1) - M(2,2) - M(3,3)) * 2; 
-    v(1) = (M(3,2) - M(2,3)) / S;
-    v(2) = 0.25 * S;
-    v(3) = (M(1,2) + M(2,1)) / S; 
-    v(4) = (M(1,3) + M(3,1)) / S; 
+    S      = sqrt(1.0 + M(1,1) - M(2,2) - M(3,3)) * 2; 
+    v(1)   = (M(3,2) - M(2,3)) / S;
+    v(2)   = 0.25 * S;
+    v(3)   = (M(1,2) + M(2,1)) / S; 
+    v(4)   = (M(1,3) + M(3,1)) / S; 
   elseif (M(2,2) > M(3,3))  
-    S    = sqrt(1.0 + M(2,2) - M(1,1) - M(3,3)) * 2;
-    v(1) = (M(1,3) - M(3,1)) / S;
-    v(2) = (M(1,2) + M(2,1)) / S; 
-    v(3) = 0.25 * S;
-    v(4) = (M(2,3) + M(3,2)) / S; 
+    S      = sqrt(1.0 + M(2,2) - M(1,1) - M(3,3)) * 2;
+    v(1)   = (M(1,3) - M(3,1)) / S;
+    v(2)   = (M(1,2) + M(2,1)) / S; 
+    v(3)   = 0.25 * S;
+    v(4)   = (M(2,3) + M(3,2)) / S; 
   else 
-    S    = sqrt(1.0 + M(3,3) - M(1,1) - M(2,2)) * 2;
-    v(1) = (M(2,1) - M(1,2)) / S;
-    v(2) = (M(1,3) + M(3,1)) / S;
-    v(3) = (M(2,3) + M(3,2)) / S;
-    v(4) = 0.25 * S;
+    S      = sqrt(1.0 + M(3,3) - M(1,1) - M(2,2)) * 2;
+    v(1)   = (M(2,1) - M(1,2)) / S;
+    v(2)   = (M(1,3) + M(3,1)) / S;
+    v(3)   = (M(2,3) + M(3,2)) / S;
+    v(4)   = 0.25 * S;
   end
 
   % create the quat objection

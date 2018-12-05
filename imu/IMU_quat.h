@@ -27,7 +27,7 @@ extern "C" {
 // include statements 
 #include <math.h>            // sqrt/trig
 
-// basic quaternion operators
+// quaternion basic "math" operators
 static inline float  IMU_quat_mag           (float *q);
 static inline float* IMU_quat_norm          (float *q,  float *out);
 static inline float* IMU_quat_conj          (float *q,  float *out);
@@ -35,7 +35,7 @@ static inline float* IMU_quat_mult          (float *q1, float *q2, float *out);
 static inline float* IMU_quat_multConj      (float *q1, float *q2, float *out);
 static inline float* IMU_quat_conjMult      (float *q1, float *q2, float *out);
 
-// vector rotation operators
+// quaternion vector rotation operators
 static inline float* IMU_quat_rotateFrwd    (float *v,  float *q,  float *out);
 static inline float* IMU_quat_rotateRvrs    (float *v,  float *q,  float *out);
 static inline float* IMU_quat_toFrwd        (float *q,  float *v);
@@ -43,15 +43,24 @@ static inline float* IMU_quat_toUp          (float *q,  float *v);
 static inline float* IMU_quat_toRght        (float *q,  float *v);
 
 // converting between quaternions and pointing vectors
-static inline float* IMU_quat_fromUp        (float *u,  float *q);
+static inline float* IMU_quat_fromFrwdSafe  (float *f,  float *q);
+static inline float* IMU_quat_fromFrwdNorm  (float *f,  float *q);
+static inline float* IMU_quat_fromFrwdFast  (float *f,  float *q);
+static inline float* IMU_quat_fromUpFast    (float *u,  float *q);
+static inline float* IMU_quat_fromUpSafe    (float *u,  float *q);
+static inline float* IMU_quat_fromFrwdUp    (float *f,  float *u,  float *q);
 static inline float* IMU_quat_fromUpFrwd    (float *u,  float *f,  float *q);
-static inline float* IMU_quat_fromVect      (float *u,  float *v,  float *q);
+static inline float* IMU_quat_fromVec       (float *u,  float *v,  float *q);
 
 // converting between quaternions and Euler angles
-static inline float* IMU_quat_toEuler       (float *q,  float *E);
-static inline float* IMU_quat_fromEuler     (float *E,  float *q);
-static inline float* IMU_quat_radToDeg      (float *r,  float *d);
-static inline float* IMU_quat_degToRad      (float *d,  float *r);
+static inline float* IMU_quat_toRad         (float *q,  float *E);
+static inline float* IMU_quat_toDeg         (float *q,  float *E);
+static inline float* IMU_quat_fromRad       (float *E,  float *q);
+static inline float* IMU_quat_fromDeg       (float *E,  float *q);
+
+// converting between quaternions and rotation matricies
+static inline float* IMU_quat_fromMatrix    (float *M,  float *q);
+static inline float* IMU_quat_toMatrix      (float *q,  float *M);
 
 
 /******************************************************************************
@@ -239,20 +248,91 @@ inline float* IMU_quat_toRght(
 
 
 /******************************************************************************
-* get up component from quaternion
+* set quaternion from forward vector (constrains roll)
 ******************************************************************************/
 
-inline float* IMU_quat_fromUp(
-  float       *u,
+inline float* IMU_quat_fromFrwdSafe(
+  float       *v,
   float       *q)
 {
-  float norm  = sqrtf(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
-  q[0]        = norm + u[2];
+  float norm  = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  float E[3]  = {atan2f(v[1], v[0]), asin(-v[2] / norm), 0.0f};
+  return IMU_quat_fromRad(E, q);
+}
+
+
+/******************************************************************************
+* set quaternion from forward vector (ignores pitch and roll)
+******************************************************************************/
+
+inline float* IMU_quat_fromFrwdNorm(
+  float       *v,
+  float       *q)
+{
+  float ang   = 0.5f * atan2f(v[1], v[0]);
+  q[0]        = cosf(ang);
+  q[1]        = 0.0f;
+  q[2]        = 0.0f;
+  q[3]        = sinf(ang);
+  return q;
+}
+
+
+/******************************************************************************
+* set quaternion from forward vector (optimized for speed)
+******************************************************************************/
+
+inline float* IMU_quat_fromFrwdFast(
+  float       *v,
+  float       *q)
+{
+  float norm  = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  q[0]        = norm + v[0];
   if (q[0] > 0.001f * norm) {
-    norm      = sqrtf(q[0]*q[0] + u[0]*u[0] + u[1]*u[1]);
+    norm      = sqrtf(q[0]*q[0] + v[1]*v[1] + v[2]*v[2]);
     q[0]      =  q[0] / norm;
-    q[1]      = -u[1] / norm;
-    q[2]      =  u[0] / norm;
+    q[1]      =  0.0f;
+    q[2]      = -v[2] / norm;
+    q[3]      =  v[1] / norm;
+  } else {
+    q[0]      =  1.0f;
+    q[1]      =  0.0f;
+    q[2]      =  0.0f;
+    q[3]      =  0.0f;
+  }
+  return q;
+}
+
+
+/******************************************************************************
+* set quaternion from up vector (constrains azimuth)
+******************************************************************************/
+
+inline float* IMU_quat_fromUpSafe(
+  float       *v,
+  float       *q)
+{
+  float norm  = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  float E[3]  = {0.0f, atan2f(-v[0], -v[2]), asin(v[1] / norm)};
+  return IMU_quat_fromRad(E, q);
+}
+
+
+/******************************************************************************
+* set quaternion from up vector (optimized for speed)
+******************************************************************************/
+
+inline float* IMU_quat_fromUpFast(
+  float       *v,
+  float       *q)
+{
+  float norm  = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+  q[0]        = norm - v[2];
+  if (q[0] > 0.001f * norm) {
+    norm      = sqrtf(q[0]*q[0] + v[0]*v[0] + v[1]*v[1]);
+    q[0]      =  q[0] / norm;
+    q[1]      =  v[1] / norm;
+    q[2]      = -v[0] / norm;
     q[3]      =  0.0f;
   } else {
     q[0]      =  1.0f;
@@ -265,57 +345,116 @@ inline float* IMU_quat_fromUp(
 
 
 /******************************************************************************
-* get quaternion from forward and up vectors
+* get quaternion from forward and up vectors (ortho-normalize up)
+******************************************************************************/
+
+inline float* IMU_quat_fromFrwdUp(
+  float       *f_in,
+  float       *u_in,
+  float       *q)
+{
+  // normalize forward vector
+  float n     = sqrtf(f_in[0]*f_in[0] + f_in[1]*f_in[1] + f_in[2]*f_in[2]);
+  float f[3]  = {f_in[0]/n, f_in[1]/n, f_in[2]/n};
+
+  // ortho-normalize forward vector 
+  n           = f[0]*u_in[0] + f[1]*u_in[1] + f[2]*u_in[2];
+  float u[3]  = {u_in[0] - n*f[0], u_in[1] - n*f[1], u_in[2] - n*f[2]};
+  n           = sqrtf(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+  u[0]        = -u[0] / n;
+  u[1]        = -u[1] / n;
+  u[2]        = -u[2] / n;
+
+  // calcuate the right vector (cross product)
+  float r[3]  = {u[1]*f[2] - u[2]*f[1],
+                 u[2]*f[0] - u[0]*f[2],
+                 u[0]*f[1] - u[1]*f[0]};
+
+  // calculate the quaternion
+  n           = f[0]+r[1]+u[2];
+  if (n > 0) {
+    n         = sqrtf(1.0+n)*2;
+    q[0]      = 0.25f*n;
+    q[1]      = (r[2]-u[1])/n;
+    q[2]      = (u[0]-f[2])/n;
+    q[3]      = (f[1]-r[0])/n;
+  } else if (f[0] > r[1] && f[0] > u[2]) {
+    n         = sqrtf(1.0+f[0]-r[1]-u[2])*2;
+    q[0]      = (r[2]-u[1])/n;
+    q[1]      = 0.25f*n;
+    q[2]      = (r[0]+f[1])/n;
+    q[3]      = (u[0]+f[2])/n;
+  } else if (r[1] > u[2]) {
+    n         = sqrtf(1.0+r[1]-f[0]-u[2])*2;
+    q[0]      = (u[0]-f[2])/n;
+    q[1]      = (r[0]+f[1])/n;
+    q[2]      = 0.25f*n;
+    q[3]      = (u[1]+r[2])/n;
+  } else {
+    n         = sqrtf(1.0+u[2]-f[0]-r[1])*2;
+    q[0]      = (f[1]-r[0])/n;
+    q[1]      = (u[0]+f[2])/n;
+    q[2]      = (u[1]+r[2])/n;
+    q[3]      = 0.25f*n;
+  }
+
+  // exit function (allows function to be used as function argument)
+  return q;
+}
+
+
+/******************************************************************************
+* get quaternion from forward and up vectors (ortho-normalize forward)
 ******************************************************************************/
 
 inline float* IMU_quat_fromUpFrwd(
-  float                 *u_in,
-  float                 *f_in,
-  float                 *q)
+  float       *u_in,
+  float       *f_in,
+  float       *q)
 {
   // normalize up vector
-  float n       = sqrtf(u_in[0]*u_in[0] + u_in[1]*u_in[1] + u_in[2]*u_in[2]);
-  float u[3]    = {u_in[0]/n, u_in[1]/n, u_in[2]/n};
+  float n     = sqrtf(u_in[0]*u_in[0] + u_in[1]*u_in[1] + u_in[2]*u_in[2]);
+  float u[3]  = {-u_in[0]/n, -u_in[1]/n, -u_in[2]/n};
 
   // ortho-normalize forward vector 
-  n             = u[0]*f_in[0] + u[1]*f_in[1] + u[2]*f_in[2];
-  float f[3]    = {f_in[0] - n*u[0], f_in[1] - n*u[1], f_in[2] - n*u[2]};
-  n             = sqrtf(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]);
-  f[0]          = f[0] / n;
-  f[1]          = f[1] / n;
-  f[2]          = f[2] / n;
+  n           = u[0]*f_in[0] + u[1]*f_in[1] + u[2]*f_in[2];
+  float f[3]  = {f_in[0] - n*u[0], f_in[1] - n*u[1], f_in[2] - n*u[2]};
+  n           = sqrtf(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]);
+  f[0]        = f[0] / n;
+  f[1]        = f[1] / n;
+  f[2]        = f[2] / n;
 
   // calcuate the right vector (cross product)
-  float r[3]    = {u[1]*f[2] - u[2]*f[1],
-                   u[2]*f[0] - u[0]*f[2],
-                   u[0]*f[1] - u[1]*f[0]};
+  float r[3]  = {u[1]*f[2] - u[2]*f[1],
+                 u[2]*f[0] - u[0]*f[2],
+                 u[0]*f[1] - u[1]*f[0]};
 
   // calculate the quaternion
-  n             = f[0]+r[1]+u[2];
+  n           = f[0]+r[1]+u[2];
   if (n > 0) {
-    n           = sqrtf(1.0+n)*2;
-    q[0]        = 0.25f*n;
-    q[1]        = (r[2]-u[1])/n;
-    q[2]        = (u[0]-f[2])/n;
-    q[3]        = (f[1]-r[0])/n;
+    n         = sqrtf(1.0+n)*2;
+    q[0]      = 0.25f*n;
+    q[1]      = (r[2]-u[1])/n;
+    q[2]      = (u[0]-f[2])/n;
+    q[3]      = (f[1]-r[0])/n;
   } else if (f[0] > r[1] && f[0] > u[2]) {
-    n           = sqrtf(1.0+f[0]-r[1]-u[2])*2;
-    q[0]        = (r[2]-u[1])/n;
-    q[1]        = 0.25f*n;
-    q[2]        = (r[0]+f[1])/n;
-    q[3]        = (u[0]+f[2])/n;
+    n         = sqrtf(1.0+f[0]-r[1]-u[2])*2;
+    q[0]      = (r[2]-u[1])/n;
+    q[1]      = 0.25f*n;
+    q[2]      = (r[0]+f[1])/n;
+    q[3]      = (u[0]+f[2])/n;
   } else if (r[1] > u[2]) {
-    n           = sqrtf(1.0+r[1]-f[0]-u[2])*2;
-    q[0]        = (u[0]-f[2])/n;
-    q[1]        = (r[0]+f[1])/n;
-    q[2]        = 0.25f*n;
-    q[3]        = (u[1]+r[2])/n;
+    n         = sqrtf(1.0+r[1]-f[0]-u[2])*2;
+    q[0]      = (u[0]-f[2])/n;
+    q[1]      = (r[0]+f[1])/n;
+    q[2]      = 0.25f*n;
+    q[3]      = (u[1]+r[2])/n;
   } else {
-    n           = sqrtf(1.0+u[2]-f[0]-r[1])*2;
-    q[0]        = (f[1]-r[0])/n;
-    q[1]        = (u[0]+f[2])/n;
-    q[2]        = (u[1]+r[2])/n;
-    q[3]        = 0.25f*n;
+    n         = sqrtf(1.0+u[2]-f[0]-r[1])*2;
+    q[0]      = (f[1]-r[0])/n;
+    q[1]      = (u[0]+f[2])/n;
+    q[2]      = (u[1]+r[2])/n;
+    q[3]      = 0.25f*n;
   }
 
   // exit function (allows function to be used as function argument)
@@ -327,61 +466,61 @@ inline float* IMU_quat_fromUpFrwd(
 * get forward component from quaternion
 ******************************************************************************/
 
-inline float* IMU_quat_fromVect(
-  float                 *u, 
-  float                 *v,
-  float                 *q)
+inline float* IMU_quat_fromVec(
+  float       *u, 
+  float       *v,
+  float       *q)
 {
-  float norm            = sqrt ((u[0]*u[0] + u[1]*u[1] + u[2]*u[2]) *
-                                (v[0]*v[0] + v[1]*v[1] + v[2]*v[2]));
-  q[0]                  = norm + u[0]*v[0] + u[1]*v[1] + u[2]*u[2];
+  float norm  = sqrtf((u[0]*u[0] + u[1]*u[1] + u[2]*u[2]) *
+                      (v[0]*v[0] + v[1]*v[1] + v[2]*v[2]));
+  q[0]        = norm + u[0]*v[0] + u[1]*v[1] + u[2]*v[2];
   if (q[0] > 0.001f * norm) {
-    q[1]                = u[1]*v[2] - u[2]*v[1];
-    q[2]                = u[2]*v[0] - u[0]*v[2];
-    q[3]                = u[0]*v[1] - u[1]*v[0];
+    q[1]      = u[1]*v[2] - u[2]*v[1];
+    q[2]      = u[2]*v[0] - u[0]*v[2];
+    q[3]      = u[0]*v[1] - u[1]*v[0];
   } else if (fabs(u[0]) > fabs(u[2])) {
-    q[1]                = -u[1];
-    q[2]                = u[0];
-    q[3]                = 0.0f;
+    q[1]      = -u[1];
+    q[2]      =  u[0];
+    q[3]      =  0.0f;
   } else {
-    q[1]                = 0.0f;
-    q[2]                = -u[2];
-    q[3]                = u[1];
+    q[1]      =  0.0f;
+    q[2]      = -u[2];
+    q[3]      =  u[1];
   }
-  norm                  = sqrt(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
-  q[0]                  = q[0] / norm;
-  q[1]                  = q[1] / norm;
-  q[2]                  = q[2] / norm;
-  q[3]                  = q[3] / norm;
+  norm        = sqrtf(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]);
+  q[0]        = q[0] / norm;
+  q[1]        = q[1] / norm;
+  q[2]        = q[2] / norm;
+  q[3]        = q[3] / norm;
   return q;
 }
 
 
 /******************************************************************************
-* convert quaternion to Euler angles
+* convert quaternion to Euler angles (radians)
 * https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 ******************************************************************************/
 
-inline float* IMU_quat_toEuler(
-  float                 *q, 
-  float                 *E)
+inline float* IMU_quat_toRad(
+  float       *q, 
+  float       *E)
 {
   // roll (x-axis rotation)
   float sinr_cosp = 2.0f * (q[0]*q[1] + q[2]*q[3]);
   float cosr_cosp = 1.0f - 2.0f * (q[1]*q[1] + q[2]*q[2]);
-  E[2]  = atan2(sinr_cosp, cosr_cosp);
+  E[2]            = atan2(sinr_cosp, cosr_cosp);
 
   // pitch (y-axis rotation)
-  float sinp = 2.0f * (q[0]*q[2] - q[3]*q[1]);
+  float sinp      = 2.0f * (q[0]*q[2] - q[3]*q[1]);
   if (fabs(sinp) >= 1)
-    E[1] = copysign(M_PI/2, sinp);
+    E[1]          = copysign(M_PI/2, sinp);
   else
-    E[1] = asin(sinp);
+    E[1]          = asin(sinp);
 
   // yaw (z-axis rotation)
   float siny_cosp = 2.0f * (q[0]*q[3] + q[1]*q[2]);
   float cosy_cosp = 1.0f - 2.0f * (q[2]*q[2] + q[3]*q[3]);
-  E[0]  = atan2(siny_cosp, cosy_cosp);
+  E[0]            = atan2(siny_cosp, cosy_cosp);
   
   // pass Euler angle
   return E; 
@@ -389,27 +528,44 @@ inline float* IMU_quat_toEuler(
 
 
 /******************************************************************************
-* convert Euler angles to quaternion
+* convert quaternion to Euler angles (degrees)
+******************************************************************************/
+
+inline float* IMU_quat_toDeg(
+  float       *q, 
+  float       *E)
+{
+  float scale = 180.0f / M_PI;
+  IMU_quat_toRad(q, E);
+  E[0]        = scale * E[0];
+  E[1]        = scale * E[1];
+  E[2]        = scale * E[2];
+  return E;
+}
+
+
+/******************************************************************************
+* convert Euler angles to quaternion (radians)
 * https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 ******************************************************************************/
 
-inline float* IMU_quat_fromEuler(
-  float                 *E, 
-  float                 *q)
+inline float* IMU_quat_fromRad(
+  float       *E, 
+  float       *q)
 {
   // angle function abreviations
-  float cy = cos(E[0] * 0.5f);
-  float sy = sin(E[0] * 0.5f);
-  float cr = cos(E[2] * 0.5f);
-  float sr = sin(E[2] * 0.5f);
-  float cp = cos(E[1] * 0.5f);
-  float sp = sin(E[1] * 0.5f);
+  float cy    = cos(E[0] * 0.5f);
+  float sy    = sin(E[0] * 0.5f);
+  float cr    = cos(E[2] * 0.5f);
+  float sr    = sin(E[2] * 0.5f);
+  float cp    = cos(E[1] * 0.5f);
+  float sp    = sin(E[1] * 0.5f);
 
   // conversion to quaternion
-  q[0] = cy*cr*cp + sy*sr*sp;
-  q[1] = cy*sr*cp - sy*cr*sp;
-  q[2] = cy*cr*sp + sy*sr*cp;
-  q[3] = sy*cr*cp - cy*sr*sp;
+  q[0]        = cy*cr*cp + sy*sr*sp;
+  q[1]        = cy*sr*cp - sy*cr*sp;
+  q[2]        = cy*cr*sp + sy*sr*cp;
+  q[3]        = sy*cr*cp - cy*sr*sp;
   return q;
 }
 
@@ -418,15 +574,14 @@ inline float* IMU_quat_fromEuler(
 * convert radians to degrees
 ******************************************************************************/
 
-inline float* IMU_quat_radToDeg(
-  float                 *r, 
-  float                 *d)
+inline float* IMU_quat_fromDeg(
+  float       *E, 
+  float       *q)
 {
-  float scale           = 180.0f / M_PI;
-  d[0]                  = scale * r[0];
-  d[1]                  = scale * r[1];
-  d[2]                  = scale * r[2];
-  return d;
+  float scale = M_PI / 180.0f;
+  float r[3]  = {scale * E[0], scale * E[1], scale * E[2]};
+  IMU_quat_fromRad(r, q);
+  return q;
 }
 
 
@@ -434,15 +589,58 @@ inline float* IMU_quat_radToDeg(
 * convert radians to degrees
 ******************************************************************************/
 
-inline float* IMU_quat_degToRad(
-  float                 *d, 
-  float                 *r)
+inline float* IMU_quat_fromMatrix(
+  float       *M, 
+  float       *q)
 {
-  float scale           = M_PI / 180.0f;
-  r[0]                  = scale * d[0];
-  r[1]                  = scale * d[1];
-  r[2]                  = scale * d[2];
-  return r;
+  float n     = M[0]+M[4]+M[8];
+  if (n > 0) {
+    n         = sqrtf(1.0+n)*2.0f;
+    q[0]      = 0.25f*n;
+    q[1]      = (M[5]-M[7])/n;
+    q[2]      = (M[6]-M[2])/n;
+    q[3]      = (M[1]-M[3])/n;
+  } else if (M[0] > M[4] && M[0] > M[8]) {
+    n         = sqrtf(1.0+M[0]-M[4]-M[8])*2.0f;
+    q[0]      = (M[5]-M[7])/n;
+    q[1]      = 0.25f*n;
+    q[2]      = (M[3]+M[1])/n;
+    q[3]      = (M[6]+M[2])/n;
+  } else if (M[4] > M[8]) {
+    n         = sqrtf(1.0+M[4]-M[0]-M[8])*2.0f;
+    q[0]      = (M[6]-M[2])/n;
+    q[1]      = (M[3]+M[1])/n;
+    q[2]      = 0.25f*n;
+    q[3]      = (M[7]+M[5])/n;
+  } else {
+    n         = sqrtf(1.0+M[8]-M[0]-M[4])*2.0f;
+    q[0]      = (M[1]-M[3])/n;
+    q[1]      = (M[6]+M[2])/n;
+    q[2]      = (M[7]+M[5])/n;
+    q[3]      = 0.25f*n;
+  }
+  return M;
+}
+
+
+/******************************************************************************
+* convert radians to degrees
+******************************************************************************/
+
+inline float* IMU_quat_toMatrix(
+  float       *q, 
+  float       *M)
+{
+  M[0]        = 1.0f - 2.0f * (q[2]*q[2] + q[3]*q[3]);
+  M[1]        = 2.0f * (q[1]*q[2] + q[0]*q[3]);
+  M[2]        = 2.0f * (q[1]*q[3] - q[0]*q[2]);
+  M[3]        = 2.0f * (q[1]*q[2] - q[0]*q[3]);
+  M[4]        = 1.0f - 2.0f * (q[1]*q[1] + q[3]*q[3]);
+  M[5]        = 2.0f * (q[2]*q[3] + q[0]*q[1]);
+  M[6]        = 2.0f * (q[1]*q[3] + q[0]*q[2]);
+  M[7]        = 2.0f * (q[2]*q[3] - q[0]*q[1]);
+  M[8]        = 1.0f - 2.0f * (q[1]*q[1] + q[2]*q[2]);
+  return M;
 }
 
 

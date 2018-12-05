@@ -15,23 +15,14 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-% initialize environment
-clear all; % close all;
-addpath('..');
-addpath('../utils');
+%% matlab reference
+addpath('../..');
+q    = quat('rand');
+q.rad
 
-% create test vector
-u    = 256 * rand(1,3) - 128;
-mag  = sqrt(sum(u.^2));
-
-% create quaternion and verify up vector
-q1   = quat("up",     u);
-out1 = mag*q1.up
-q2   = quat("upFast", u);
-out2 = mag*q2.up
-
-% display the state
-deg1 = q1.deg
-deg2 = q2.deg
-figure(1); plotState(q1);
-figure(2); plotState(q2);
+%% optimized C lib
+loadlibrary('../IMU_quat.so', '../IMU_quat.c', 'alias', 'IMU_quat');
+q    = single(q.val);
+out  = single(zeros(1,3));
+[~, ~, out] = calllib('IMU_quat', 'IMU_quat_toRad', q, out)
+unloadlibrary IMU_quat;
