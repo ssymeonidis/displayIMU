@@ -82,12 +82,12 @@ float* IMU_quat_norm(
   float       *q,
   float       *out)
 {
-  float mag = IMU_quat_mag(q);
-  out[0]    = q[0] / mag;
-  out[1]    = q[1] / mag;
-  out[2]    = q[2] / mag;
-  out[3]    = q[3] / mag;
-  return out;  // allows function to be used as function argument
+  float mag   = IMU_quat_mag(q);
+  out[0]      = q[0] / mag;
+  out[1]      = q[1] / mag;
+  out[2]      = q[2] / mag;
+  out[3]      = q[3] / mag;
+  return out; // allows function to be used as function argument
 }
 
 
@@ -99,11 +99,11 @@ float* IMU_quat_conj(
   float       *q, 
   float       *out)
 {
-  out[0] =  q[0];
-  out[1] = -q[1];
-  out[2] = -q[2];
-  out[3] = -q[3];
-  return out;  // allows function to be used as function argument
+  out[0]      =  q[0];
+  out[1]      = -q[1];
+  out[2]      = -q[2];
+  out[3]      = -q[3];
+  return out; // allows function to be used as function argument
 }
 
 
@@ -116,11 +116,11 @@ float* IMU_quat_mult(
   float       *q2,
   float       *out)
 {
-  out[0] = q2[0]*q1[0] - q2[1]*q1[1] - q2[2]*q1[2] - q2[3]*q1[3];
-  out[1] = q2[0]*q1[1] + q2[1]*q1[0] - q2[2]*q1[3] + q2[3]*q1[2];
-  out[2] = q2[0]*q1[2] + q2[1]*q1[3] + q2[2]*q1[0] - q2[3]*q1[1];
-  out[3] = q2[0]*q1[3] - q2[1]*q1[2] + q2[2]*q1[1] + q2[3]*q1[0];
-  return out;  // allows function to be used as function argument
+  out[0]      = q2[0]*q1[0] - q2[1]*q1[1] - q2[2]*q1[2] - q2[3]*q1[3];
+  out[1]      = q2[0]*q1[1] + q2[1]*q1[0] - q2[2]*q1[3] + q2[3]*q1[2];
+  out[2]      = q2[0]*q1[2] + q2[1]*q1[3] + q2[2]*q1[0] - q2[3]*q1[1];
+  out[3]      = q2[0]*q1[3] - q2[1]*q1[2] + q2[2]*q1[1] + q2[3]*q1[0];
+  return out; // allows function to be used as function argument
 }
 
 
@@ -133,11 +133,11 @@ float* IMU_quat_multConj(
   float       *q2,
   float       *out)
 {
-  out[0] = q2[0]*q1[0] + q2[1]*q1[1] + q2[2]*q1[2] + q2[3]*q1[3];
-  out[1] = q2[0]*q1[1] - q2[1]*q1[0] + q2[2]*q1[3] - q2[3]*q1[2];
-  out[2] = q2[0]*q1[2] - q2[1]*q1[3] - q2[2]*q1[0] + q2[3]*q1[1];
-  out[3] = q2[0]*q1[3] + q2[1]*q1[2] - q2[2]*q1[1] - q2[3]*q1[0];
-  return out;  // allows function to be used as function argument
+  out[0]      = q2[0]*q1[0] + q2[1]*q1[1] + q2[2]*q1[2] + q2[3]*q1[3];
+  out[1]      = q2[0]*q1[1] - q2[1]*q1[0] + q2[2]*q1[3] - q2[3]*q1[2];
+  out[2]      = q2[0]*q1[2] - q2[1]*q1[3] - q2[2]*q1[0] + q2[3]*q1[1];
+  out[3]      = q2[0]*q1[3] + q2[1]*q1[2] - q2[2]*q1[1] - q2[3]*q1[0];
+  return out; // allows function to be used as function argument
 }
 
 
@@ -150,11 +150,11 @@ float* IMU_quat_conjMult(
   float       *q2,
   float       *out)
 {
-  out[0] = q2[0]*q1[0] + q2[1]*q1[1] + q2[2]*q1[2] + q2[3]*q1[3];
-  out[1] = q2[1]*q1[0] - q2[0]*q1[1] + q2[2]*q1[3] - q2[3]*q1[2];
-  out[2] = q2[2]*q1[0] - q2[0]*q1[2] - q2[1]*q1[3] + q2[3]*q1[1];
-  out[3] = q2[3]*q1[0] - q2[0]*q1[3] + q2[1]*q1[2] - q2[2]*q1[1];
-  return out;  // allows function to be used as function argument
+  out[0]      = q2[0]*q1[0] + q2[1]*q1[1] + q2[2]*q1[2] + q2[3]*q1[3];
+  out[1]      = q2[1]*q1[0] - q2[0]*q1[1] + q2[2]*q1[3] - q2[3]*q1[2];
+  out[2]      = q2[2]*q1[0] - q2[0]*q1[2] - q2[1]*q1[3] + q2[3]*q1[1];
+  out[3]      = q2[3]*q1[0] - q2[0]*q1[3] + q2[1]*q1[2] - q2[2]*q1[1];
+  return out; // allows function to be used as function argument
 }
 
 
@@ -167,15 +167,15 @@ float* IMU_quat_rotateFrwd(
   float       *q,
   float       *out)
 {
-  out[0] = 2.0f * (v[0] * (0.5f - q[2]*q[2] - q[3]*q[3])
-                 + v[1] * (q[1]*q[2] - q[0]*q[3]) 
-                 + v[2] * (q[1]*q[3] + q[0]*q[2]));
-  out[1] = 2.0f * (v[0] * (q[1]*q[2] + q[0]*q[3])
-                 + v[1] * (0.5f - q[1]*q[1] - q[3]*q[3])
-                 + v[2] * (q[2]*q[3] - q[0]*q[1]));
-  out[2] = 2.0f * (v[0] * (q[1]*q[3] - q[0]*q[2])
-                 + v[1] * (q[2]*q[3] + q[0]*q[1])
-                 + v[2] * (0.5f - q[1]*q[1] - q[2]*q[2]));
+  out[0]      = 2.0f * (v[0] * (0.5f - q[2]*q[2] - q[3]*q[3])
+                      + v[1] * (q[1]*q[2] - q[0]*q[3]) 
+                      + v[2] * (q[1]*q[3] + q[0]*q[2]));
+  out[1]      = 2.0f * (v[0] * (q[1]*q[2] + q[0]*q[3])
+                      + v[1] * (0.5f - q[1]*q[1] - q[3]*q[3])
+                      + v[2] * (q[2]*q[3] - q[0]*q[1]));
+  out[2]      = 2.0f * (v[0] * (q[1]*q[3] - q[0]*q[2])
+                      + v[1] * (q[2]*q[3] + q[0]*q[1])
+                      + v[2] * (0.5f - q[1]*q[1] - q[2]*q[2]));
   return out;
 }
 
@@ -189,15 +189,15 @@ float* IMU_quat_rotateRvrs(
   float       *q,
   float       *out)
 {
-  out[0] = 2.0f * (v[0] * (0.5f - q[2]*q[2] - q[3]*q[3])
-                 + v[1] * (q[1]*q[2] + q[0]*q[3]) 
-                 + v[2] * (q[1]*q[3] - q[0]*q[2]));
-  out[1] = 2.0f * (v[0] * (q[1]*q[2] - q[0]*q[3])
-                 + v[1] * (0.5f - q[1]*q[1] - q[3]*q[3])
-                 + v[2] * (q[2]*q[3] + q[0]*q[1]));
-  out[2] = 2.0f * (v[0] * (q[1]*q[3] + q[0]*q[2])
-                 + v[1] * (q[2]*q[3] - q[0]*q[1])
-                 + v[2] * (0.5f - q[1]*q[1] - q[2]*q[2]));
+  out[0]      = 2.0f * (v[0] * (0.5f - q[2]*q[2] - q[3]*q[3])
+                      + v[1] * (q[1]*q[2] + q[0]*q[3]) 
+                      + v[2] * (q[1]*q[3] - q[0]*q[2]));
+  out[1]      = 2.0f * (v[0] * (q[1]*q[2] - q[0]*q[3])
+                      + v[1] * (0.5f - q[1]*q[1] - q[3]*q[3])
+                      + v[2] * (q[2]*q[3] + q[0]*q[1]));
+  out[2]      = 2.0f * (v[0] * (q[1]*q[3] + q[0]*q[2])
+                      + v[1] * (q[2]*q[3] - q[0]*q[1])
+                      + v[2] * (0.5f - q[1]*q[1] - q[2]*q[2]));
   return out;
 }
 
@@ -349,57 +349,37 @@ float* IMU_quat_fromUpFast(
 ******************************************************************************/
 
 float* IMU_quat_fromFrwdUp(
-  float       *f_in,
-  float       *u_in,
+  float       *f,
+  float       *u,
   float       *q)
 {
-  // normalize forward vector
-  float n     = sqrtf(f_in[0]*f_in[0] + f_in[1]*f_in[1] + f_in[2]*f_in[2]);
-  float f[3]  = {f_in[0]/n, f_in[1]/n, f_in[2]/n};
+  // define internal variables
+  float       M[9];
+  float       n;
 
-  // ortho-normalize forward vector 
-  n           = f[0]*u_in[0] + f[1]*u_in[1] + f[2]*u_in[2];
-  float u[3]  = {u_in[0] - n*f[0], u_in[1] - n*f[1], u_in[2] - n*f[2]};
-  n           = sqrtf(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
-  u[0]        = -u[0] / n;
-  u[1]        = -u[1] / n;
-  u[2]        = -u[2] / n;
+  // normalize forward vector
+  n           = sqrtf(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]);
+  M[0]        = f[0]/n;
+  M[1]        = f[1]/n;
+  M[2]        = f[2]/n;
+
+  // ortho-normalize up vector 
+  n           = M[0]*u[0] + M[1]*u[1] + M[2]*u[2];
+  M[6]        = u[0] - n*M[0];
+  M[7]        = u[1] - n*M[1];
+  M[8]        = u[2] - n*M[2];
+  n           = sqrtf(M[6]*M[6] + M[7]*M[7] + M[8]*M[8]);
+  M[6]        = -M[6] / n;
+  M[7]        = -M[7] / n;
+  M[8]        = -M[8] / n;
 
   // calcuate the right vector (cross product)
-  float r[3]  = {u[1]*f[2] - u[2]*f[1],
-                 u[2]*f[0] - u[0]*f[2],
-                 u[0]*f[1] - u[1]*f[0]};
+  M[3]        = M[7]*M[2] - M[8]*M[1];
+  M[4]        = M[8]*M[0] - M[6]*M[2];
+  M[5]        = M[6]*M[1] - M[7]*M[0];
 
   // calculate the quaternion
-  n           = f[0]+r[1]+u[2];
-  if (n > 0) {
-    n         = sqrtf(1.0+n)*2;
-    q[0]      = 0.25f*n;
-    q[1]      = (r[2]-u[1])/n;
-    q[2]      = (u[0]-f[2])/n;
-    q[3]      = (f[1]-r[0])/n;
-  } else if (f[0] > r[1] && f[0] > u[2]) {
-    n         = sqrtf(1.0+f[0]-r[1]-u[2])*2;
-    q[0]      = (r[2]-u[1])/n;
-    q[1]      = 0.25f*n;
-    q[2]      = (r[0]+f[1])/n;
-    q[3]      = (u[0]+f[2])/n;
-  } else if (r[1] > u[2]) {
-    n         = sqrtf(1.0+r[1]-f[0]-u[2])*2;
-    q[0]      = (u[0]-f[2])/n;
-    q[1]      = (r[0]+f[1])/n;
-    q[2]      = 0.25f*n;
-    q[3]      = (u[1]+r[2])/n;
-  } else {
-    n         = sqrtf(1.0+u[2]-f[0]-r[1])*2;
-    q[0]      = (f[1]-r[0])/n;
-    q[1]      = (u[0]+f[2])/n;
-    q[2]      = (u[1]+r[2])/n;
-    q[3]      = 0.25f*n;
-  }
-
-  // exit function (allows function to be used as function argument)
-  return q;
+  return IMU_quat_fromMatrix(M, q);
 }
 
 
@@ -408,57 +388,37 @@ float* IMU_quat_fromFrwdUp(
 ******************************************************************************/
 
 float* IMU_quat_fromUpFrwd(
-  float       *u_in,
-  float       *f_in,
+  float       *u,
+  float       *f,
   float       *q)
 {
+  // define internal variables
+  float       M[9];
+  float       n;
+
   // normalize up vector
-  float n     = sqrtf(u_in[0]*u_in[0] + u_in[1]*u_in[1] + u_in[2]*u_in[2]);
-  float u[3]  = {-u_in[0]/n, -u_in[1]/n, -u_in[2]/n};
+  n           = sqrtf(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+  M[6]        = -u[0]/n;
+  M[7]        = -u[1]/n;
+  M[8]        = -u[2]/n;
 
   // ortho-normalize forward vector 
-  n           = u[0]*f_in[0] + u[1]*f_in[1] + u[2]*f_in[2];
-  float f[3]  = {f_in[0] - n*u[0], f_in[1] - n*u[1], f_in[2] - n*u[2]};
-  n           = sqrtf(f[0]*f[0] + f[1]*f[1] + f[2]*f[2]);
-  f[0]        = f[0] / n;
-  f[1]        = f[1] / n;
-  f[2]        = f[2] / n;
+  n           = M[6]*f[0] + M[7]*f[1] + M[8]*f[2];
+  M[0]        = f[0] - n*M[6];
+  M[1]        = f[1] - n*M[7];
+  M[2]        = f[2] - n*M[8];
+  n           = sqrtf(M[0]*M[0] + M[1]*M[1] + M[2]*M[2]);
+  M[0]        = M[0] / n;
+  M[1]        = M[1] / n;
+  M[2]        = M[2] / n;
 
   // calcuate the right vector (cross product)
-  float r[3]  = {u[1]*f[2] - u[2]*f[1],
-                 u[2]*f[0] - u[0]*f[2],
-                 u[0]*f[1] - u[1]*f[0]};
+  M[3]        = M[7]*M[2] - M[8]*M[1];
+  M[4]        = M[8]*M[0] - M[6]*M[2];
+  M[5]        = M[6]*M[1] - M[7]*M[0];
 
   // calculate the quaternion
-  n           = f[0]+r[1]+u[2];
-  if (n > 0) {
-    n         = sqrtf(1.0+n)*2;
-    q[0]      = 0.25f*n;
-    q[1]      = (r[2]-u[1])/n;
-    q[2]      = (u[0]-f[2])/n;
-    q[3]      = (f[1]-r[0])/n;
-  } else if (f[0] > r[1] && f[0] > u[2]) {
-    n         = sqrtf(1.0+f[0]-r[1]-u[2])*2;
-    q[0]      = (r[2]-u[1])/n;
-    q[1]      = 0.25f*n;
-    q[2]      = (r[0]+f[1])/n;
-    q[3]      = (u[0]+f[2])/n;
-  } else if (r[1] > u[2]) {
-    n         = sqrtf(1.0+r[1]-f[0]-u[2])*2;
-    q[0]      = (u[0]-f[2])/n;
-    q[1]      = (r[0]+f[1])/n;
-    q[2]      = 0.25f*n;
-    q[3]      = (u[1]+r[2])/n;
-  } else {
-    n         = sqrtf(1.0+u[2]-f[0]-r[1])*2;
-    q[0]      = (f[1]-r[0])/n;
-    q[1]      = (u[0]+f[2])/n;
-    q[2]      = (u[1]+r[2])/n;
-    q[3]      = 0.25f*n;
-  }
-
-  // exit function (allows function to be used as function argument)
-  return q;
+  return IMU_quat_fromMatrix(M, q);
 }
 
 
@@ -506,21 +466,21 @@ float* IMU_quat_toRad(
   float       *E)
 {
   // roll (x-axis rotation)
-  float sinr_cosp = 2.0f * (q[0]*q[1] + q[2]*q[3]);
-  float cosr_cosp = 1.0f - 2.0f * (q[1]*q[1] + q[2]*q[2]);
-  E[2]            = atan2(sinr_cosp, cosr_cosp);
+  float sinr  = 2.0f * (q[0]*q[1] + q[2]*q[3]);
+  float cosr  = 1.0f - 2.0f * (q[1]*q[1] + q[2]*q[2]);
+  E[2]        = atan2(sinr, cosr);
 
   // pitch (y-axis rotation)
-  float sinp      = 2.0f * (q[0]*q[2] - q[3]*q[1]);
+  float sinp  = 2.0f * (q[0]*q[2] - q[3]*q[1]);
   if (fabs(sinp) >= 1)
-    E[1]          = copysign(M_PI/2, sinp);
+    E[1]      = copysign(M_PI/2, sinp);
   else
-    E[1]          = asin(sinp);
+    E[1]      = asin(sinp);
 
   // yaw (z-axis rotation)
-  float siny_cosp = 2.0f * (q[0]*q[3] + q[1]*q[2]);
-  float cosy_cosp = 1.0f - 2.0f * (q[2]*q[2] + q[3]*q[3]);
-  E[0]            = atan2(siny_cosp, cosy_cosp);
+  float siny  = 2.0f * (q[0]*q[3] + q[1]*q[2]);
+  float cosy  = 1.0f - 2.0f * (q[2]*q[2] + q[3]*q[3]);
+  E[0]        = atan2(siny, cosy);
   
   // pass Euler angle
   return E; 
