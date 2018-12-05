@@ -26,6 +26,7 @@
 
 // include statements 
 #include <math.h>            // sqrt/trig
+#include "IMU_quat.h"
 #include "IMU_math.h"
 
 
@@ -79,7 +80,7 @@ int IMU_math_estmMagnNorm(
 {
   // orthonormalize the magnetomter
   float u[3];           
-  IMU_math_quatToUp(q, u);
+  IMU_quat_toUp(q, u);
   float n               = u[0]*m_in[0] + u[1]*m_in[1] + u[2]*m_in[2];
   float m[3]            = {m_in[0]-n*u[0], m_in[1]-n*u[1], m_in[2]-n*u[2]};
   norm3(m);

@@ -22,7 +22,7 @@ addpath('../optimized');
 
 % unit test optimized function
 q  = quat("rand");
-v  = rand(1,3);
+v  = rand(1,3)
 v1 = q / v
 v1 = quatRotateForward(v, q(:))
 v2 = q \ v

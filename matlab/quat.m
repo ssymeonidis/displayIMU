@@ -123,6 +123,14 @@ function q   = quat(arg1, arg2, arg3, arg4)
       error("invalid numeric argument(s)");
     end
   
+  % rotation between two vectors
+  elseif strcmp(arg1, "vec")
+    if     (nargin == 3)
+      q     = q.fromVectors(arg2, arg3);
+    else
+      error("invalid numeric argument(s)");
+    end
+  
   % rotation matrix
   elseif strcmp(arg1, "matrix")
     q       = q.fromMatrix(arg2);
@@ -417,18 +425,11 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromUpSafe(q, u)
-%   mag      = sqrt(sum(u.^2));
-%   yaw      = 0;
-%   pitch    = atan2(-u(1), -u(3));
-%   roll     = asin(u(2)/mag);
-%   q        = q.fromEuler([yaw, pitch, roll]);
   mag      = sqrt(sum(u.^2));
   yaw      = 0;
   pitch    = atan2(-u(1),-u(3));
   roll     = asin(u(2)/mag);
-  180 * [yaw, pitch, roll] / pi
   q        = q.fromEuler([yaw, pitch, roll]);
-  q        = q;
 end
 
 
@@ -444,6 +445,27 @@ function q = fromUpFast(q, u)
   else
     q.val  = [1, 0, 0, 0];
   end
+end
+
+
+%% quaternion rotation between two vectors
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromVectors(q, u, v)
+  norm     = sqrt ((u(1)*u(1) + u(2)*u(2) + u(3)*u(3)) *   ...
+                   (v(1)*v(1) + v(2)*v(2) + v(3)*v(3)));
+  real     = norm + u(1)*v(1) + u(2)*v(2) + u(3)*v(3);
+  if (real > q.epsilon * norm)
+    q.val  = [real                 ,   ...
+              u(2)*v(3) - u(3)*v(2),   ...
+              u(3)*v(1) - u(1)*v(3),   ...
+              u(1)*v(2) - u(2)*v(1)];
+  elseif abs(u(1)) > abs(u(3))
+    q.val  = [real, -u(2), u(1), 0];
+  else
+    q.val  = [real, 0, -u(3), u(2)];
+  end
+  q        = ~q; 
 end
 
 

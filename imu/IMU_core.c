@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "IMU_thrd.h"
+#include "IMU_quat.h"
 #include "IMU_math.h"
 #include "IMU_core.h"
 
@@ -205,7 +206,7 @@ int IMU_core_zero(
 
     // synced sensor data (datum3)
     if        (a_in!=NULL && m_in!=NULL) {
-      IMU_math_upFrwdToQuat(a, m, state[id].q);
+      IMU_quat_fromUpFrwd(a, m, state[id].q);
       state[id].aReset  = 0;
       state[id].mReset  = 0;
       status            = IMU_core_enum_zeroed_both;
@@ -213,10 +214,10 @@ int IMU_core_zero(
     // asynchnous accelerometer vector
     } else if (a_in!=NULL && m_in==NULL) {
       if (state[id].mReset) {
-        IMU_math_upToQuat(a, state[id].q);
+        IMU_quat_fromUp(a, state[id].q);
         status          = IMU_core_enum_zeroed_accl;
       } else {
-        IMU_math_upFrwdToQuat(a, state[id].mInit, state[id].q);
+        IMU_quat_fromUpFrwd(a, state[id].mInit, state[id].q);
         status          = IMU_core_enum_zeroed_both;
       }
       state[id].aReset  = 0;
@@ -227,12 +228,12 @@ int IMU_core_zero(
         a[0]            = 0.0f;
         a[1]            = 0.0f;
         a[2]            = 1.0f;
-        IMU_math_upFrwdToQuat(a, m, state[id].q);
+        IMU_quat_fromUpFrwd(a, m, state[id].q);
         memcpy(state[id].mInit, m, sizeof(m));
         status          = IMU_core_enum_zeroed_save;
       } else {
-        IMU_math_quatToUp(state[id].q, a);
-        IMU_math_upFrwdToQuat(a, m, state[id].q);
+        IMU_quat_toUp(state[id].q, a);
+        IMU_quat_fromUpFrwd(a, m, state[id].q);
         status          = IMU_core_enum_zeroed_magn;
       }
       state[id].mReset  = 0;
@@ -247,7 +248,7 @@ int IMU_core_zero(
     if (a==NULL || !state[id].aReset) {
       status            = IMU_CORE_FNC_DISABLED;
     } else {
-      IMU_math_upToQuat(a, state[id].q);
+      IMU_quat_fromUp(a, state[id].q);
       state[id].aReset  = 0;
       status            = IMU_core_enum_zeroed_accl;
     }
@@ -260,7 +261,7 @@ int IMU_core_zero(
       a[0]              = 0.0f;
       a[1]              = 0.0f;
       a[2]              = 1.0f;
-      IMU_math_upFrwdToQuat(a, m, state[id].q);
+      IMU_quat_fromUpFrwd(a, m, state[id].q);
       state[id].mReset  = 0;
       status            = IMU_core_enum_zeroed_magn;
     }
@@ -472,7 +473,7 @@ int IMU_core_newAccl(
   // save accelerometer data
   if (config[id].isTran) {
     float   G[3];       
-    scale(IMU_math_quatToUp(state[id].q, G), config[id].aMag);
+    scale(IMU_quat_toUp(state[id].q, G), config[id].aMag);
     float alpha  = config[id].tranAlpha;
     aTran[0]     = alpha*aTran[0] + (1.0f-alpha)*((float)a_in[0]-G[0]);
     aTran[1]     = alpha*aTran[1] + (1.0f-alpha)*((float)a_in[1]-G[1]);
@@ -544,7 +545,7 @@ int IMU_core_newMagn(
     ref                 = config[id].mDot;
     thresh              = config[id].mDotThresh;
     float a[3];
-    IMU_math_quatToUp(state[id].q, a);
+    IMU_quat_toUp(state[id].q, a);
     FOM->dot            = a[0]*m[0] + a[1]*m[1] + a[2]*m[2];
     FOM->dotFOM         = IMU_math_calcWeight(FOM->dot, ref, thresh);
 
@@ -653,7 +654,7 @@ int IMU_core_estmAccl(
   #endif
 
   // apply rotation to acceleration vector
-  IMU_math_rotateForward(aTran, q, estm);
+  IMU_quat_rotateForward(aTran, q, estm);
   
   // exit function (no errors)
   return 0;

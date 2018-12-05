@@ -32,7 +32,7 @@
 #include <string.h>
 #include "IMU_file.h"
 #include "IMU_thrd.h"
-#include "IMU_math.h"
+#include "IMU_quat.h"
 #include "IMU_engn.h"
 
 // internally defined types
@@ -784,11 +784,11 @@ int IMU_engn_getEstm(
   if (config[id].isTran)
     IMU_core_estmAccl(state[id].idCore, t, estm->tran);
   if (config[id].isRef)
-    IMU_math_quatMultConj(estm->qOrg, config[id].qRef, estm->q);
+    IMU_quat_multConj(estm->qOrg, config[id].qRef, estm->q);
   if (config[id].isAng &&  config[id].isRef)
-    IMU_math_quatToEuler(estm->q, estm->ang);
+    IMU_quat_toEuler(estm->q, estm->ang);
   if (config[id].isAng && !config[id].isRef)
-    IMU_math_quatToEuler(estm->qOrg, estm->ang);
+    IMU_quat_toEuler(estm->qOrg, estm->ang);
   
   // exit function
   if (status < 0)
