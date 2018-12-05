@@ -15,13 +15,18 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-% ASSUMPTION - normalized input quaternion (use quatNormalize function)
+%% matlab reference
+addpath('../..');
+q    = quat('rand');
+out  = q.up
 
-function out = quatToFrwd(q)
+%% optimized matlab
+addpath('../optimized');
+out  = toUp(q.val)
 
-out(1)  = 2 * (0.5 - q(3)*q(3) - q(4)*q(4));
-out(2)  = 2 * (q(2)*q(3) + q(1)*q(4));
-out(3)  = 2 * (q(2)*q(4) - q(1)*q(3));
-
-end
+%% optimized C lib
+loadlibrary('../IMU_quat.so', '../IMU_quat.c', 'alias', 'IMU_quat');
+q    = single(q.val);
+out  = single(zeros(1,3));
+[~, ~, out] = calllib('IMU_quat', 'IMU_quat_toUp', q, out)
+unloadlibrary IMU_quat;

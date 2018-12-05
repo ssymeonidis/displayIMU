@@ -15,14 +15,12 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-% initialize environment
-clear all; close all;
-addpath('..');
-addpath('../optimized');
+%%
+function out = multConj(in1, in2)
 
-% unit test optimized function
-q  = quat("rand");
-v1 = q.up
-v1 = quatToUp(q(:))
-v2 = q.frwd
-v2 = quatToFrwd(q(:))
+out(1) = in2(1)*in1(1) + in2(2)*in1(2) + in2(3)*in1(3) + in2(4)*in1(4);
+out(2) = in2(1)*in1(2) - in2(2)*in1(1) + in2(3)*in1(4) - in2(4)*in1(3);
+out(3) = in2(1)*in1(3) - in2(2)*in1(4) - in2(3)*in1(1) + in2(4)*in1(2);
+out(4) = in2(1)*in1(4) + in2(2)*in1(3) - in2(3)*in1(2) - in2(4)*in1(1);
+
+end

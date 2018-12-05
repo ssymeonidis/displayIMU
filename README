@@ -82,7 +82,8 @@ along with their descriptions are captured below:
 - IMU_auto <- functions that generates calibration data continously
 - IMU_calb <- functions that generates correct structures from pnts/auto
 - IMU_file <- functions for reading/writting structs to json files 
-- IMU_math <- functions for converting/orienting quaternion IMU states
+- IMU_math <- functions for filtering/accumulating sensor measurements
+- IMU_quat <- functions for converting/orienting quaternion states
 - IMU_thrd <- functions for managing critical sections of code (mutex)
 - IMU_type <- type definitions for sensor data and figure of merits
 

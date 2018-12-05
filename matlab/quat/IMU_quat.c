@@ -28,14 +28,21 @@ extern "C" {
 #include <math.h>            // sqrt/trig
 
 // basic quaternion operators
+float  IMU_quat_mag           (float *q);
+float* IMU_quat_norm          (float *q,  float *out);
+float* IMU_quat_conj          (float *q,  float *out);
 float* IMU_quat_mult          (float *q1, float *q2, float *out);
 float* IMU_quat_multConj      (float *q1, float *q2, float *out);
-float* IMU_quat_rotateForward (float *v,  float *q,  float *out);
-float* IMU_quat_rotateReverse (float *v,  float *q,  float *out);
+float* IMU_quat_conjMult      (float *q1, float *q2, float *out);
 
-// converting between quaternions and pointing vectors
+// vector rotation operators
+float* IMU_quat_rotateFrwd    (float *v,  float *q,  float *out);
+float* IMU_quat_rotateRvrs    (float *v,  float *q,  float *out);
 float* IMU_quat_toUp          (float *q,  float *v);
 float* IMU_quat_toFrwd        (float *q,  float *v);
+float* IMU_quat_toRght        (float *q,  float *v);
+
+// converting between quaternions and pointing vectors
 float* IMU_quat_fromUp        (float *u,  float *q);
 float* IMU_quat_fromUpFrwd    (float *u,  float *f,  float *q);
 float* IMU_quat_fromVect      (float *u,  float *v,  float *q);
@@ -48,13 +55,57 @@ float* IMU_quat_degToRad      (float *d,  float *r);
 
 
 /******************************************************************************
+* quaternion magnitude
+******************************************************************************/
+
+float  IMU_quat_mag(
+  float       *q)
+{
+  return sqrtf(q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3]); 
+}
+
+
+/******************************************************************************
+* quaternion magnitude
+******************************************************************************/
+
+float* IMU_quat_norm(
+  float       *q,
+  float       *out)
+{
+  float mag = IMU_quat_mag(q);
+  out[0]    = q[0] / mag;
+  out[1]    = q[1] / mag;
+  out[2]    = q[2] / mag;
+  out[3]    = q[3] / mag;
+  return out;  // allows function to be used as function argument
+}
+
+
+/******************************************************************************
+* quaternion conjugate
+******************************************************************************/
+
+float* IMU_quat_conj(
+  float       *q, 
+  float       *out)
+{
+  out[0] =  q[0];
+  out[1] = -q[1];
+  out[2] = -q[2];
+  out[3] = -q[3];
+  return out;  // allows function to be used as function argument
+}
+
+
+/******************************************************************************
 * quaternion multiplication 
 ******************************************************************************/
 
 float* IMU_quat_mult(
-  float                 *q1, 
-  float                 *q2,
-  float                 *out)
+  float       *q1, 
+  float       *q2,
+  float       *out)
 {
   out[0] = q2[0]*q1[0] - q2[1]*q1[1] - q2[2]*q1[2] - q2[3]*q1[3];
   out[1] = q2[0]*q1[1] + q2[1]*q1[0] - q2[2]*q1[3] + q2[3]*q1[2];
@@ -65,13 +116,13 @@ float* IMU_quat_mult(
 
 
 /******************************************************************************
-* quaternion multiplication w/ conjugagte
+* quaternion multiplication w/ conjugagte (q * q')
 ******************************************************************************/
 
 float* IMU_quat_multConj(
-  float                 *q1, 
-  float                 *q2,
-  float                 *out)
+  float       *q1, 
+  float       *q2,
+  float       *out)
 {
   out[0] = q2[0]*q1[0] + q2[1]*q1[1] + q2[2]*q1[2] + q2[3]*q1[3];
   out[1] = q2[0]*q1[1] - q2[1]*q1[0] + q2[2]*q1[3] - q2[3]*q1[2];
@@ -82,13 +133,30 @@ float* IMU_quat_multConj(
 
 
 /******************************************************************************
+* quaternion multiplication w/ conjugagte (q' * q)
+******************************************************************************/
+
+float* IMU_quat_conjMult(
+  float       *q1, 
+  float       *q2,
+  float       *out)
+{
+  out[0] = q2[0]*q1[0] + q2[1]*q1[1] + q2[2]*q1[2] + q2[3]*q1[3];
+  out[1] = q2[1]*q1[0] - q2[0]*q1[1] + q2[2]*q1[3] - q2[3]*q1[2];
+  out[2] = q2[2]*q1[0] - q2[0]*q1[2] - q2[1]*q1[3] + q2[3]*q1[1];
+  out[3] = q2[3]*q1[0] - q2[0]*q1[3] + q2[1]*q1[2] - q2[2]*q1[1];
+  return out;  // allows function to be used as function argument
+}
+
+
+/******************************************************************************
 * rotate vector by quaternion (forward)
 ******************************************************************************/
 
-float* IMU_quat_rotateForward(
-  float                 *v, 
-  float                 *q,
-  float                 *out)
+float* IMU_quat_rotateFrwd(
+  float       *v, 
+  float       *q,
+  float       *out)
 {
   out[0] = 2.0f * (v[0] * (0.5f - q[2]*q[2] - q[3]*q[3])
                  + v[1] * (q[1]*q[2] - q[0]*q[3]) 
@@ -107,10 +175,10 @@ float* IMU_quat_rotateForward(
 * rotate vector by quaternion (reverse)
 ******************************************************************************/
 
-float* IMU_quat_rotateReverse(
-  float                 *v, 
-  float                 *q,
-  float                 *out)
+float* IMU_quat_rotateRvrs(
+  float       *v, 
+  float       *q,
+  float       *out)
 {
   out[0] = 2.0f * (v[0] * (0.5f - q[2]*q[2] - q[3]*q[3])
                  + v[1] * (q[1]*q[2] + q[0]*q[3]) 
@@ -130,12 +198,12 @@ float* IMU_quat_rotateReverse(
 ******************************************************************************/
 
 float* IMU_quat_toUp(
-  float                 *q,
-  float                 *v)
+  float       *q,
+  float       *v)
 {
-  v[0]                  =  2.0f * (q[1]*q[3] + q[0]*q[2]);
-  v[1]                  =  2.0f * (q[2]*q[3] - q[0]*q[1]);
-  v[2]                  =  2.0f * (0.5f - q[1]*q[1] - q[2]*q[2]);
+  v[0]        = -2.0f * (q[1]*q[3] + q[0]*q[2]);
+  v[1]        = -2.0f * (q[2]*q[3] - q[0]*q[1]);
+  v[2]        = -2.0f * (0.5f - q[1]*q[1] - q[2]*q[2]);
   return v;
 }
 
@@ -145,12 +213,27 @@ float* IMU_quat_toUp(
 ******************************************************************************/
 
 float* IMU_quat_toFrwd(
-  float                 *q, 
-  float                 *v)
+  float       *q, 
+  float       *v)
 {
-  v[0]                  =  2.0f * (0.5f - q[2]*q[2] - q[3]*q[3]);
-  v[1]                  =  2.0f * (q[1]*q[2] + q[0]*q[3]);
-  v[2]                  =  2.0f * (q[1]*q[3] - q[0]*q[2]);
+  v[0]        =  2.0f * (0.5f - q[2]*q[2] - q[3]*q[3]);
+  v[1]        =  2.0f * (q[1]*q[2] + q[0]*q[3]);
+  v[2]        =  2.0f * (q[1]*q[3] - q[0]*q[2]);
+  return v;
+}
+
+
+/******************************************************************************
+* get right component from quaternion
+******************************************************************************/
+
+float* IMU_quat_toRght(
+  float       *q, 
+  float       *v)
+{
+  v[0]        =  2.0f * (q[1]*q[2] - q[0]*q[3]);
+  v[1]        =  2.0f * (0.5f - q[1]*q[1] - q[3]*q[3]);
+  v[2]        =  2.0f * (q[2]*q[3] + q[0]*q[1]);
   return v;
 }
 
@@ -160,22 +243,22 @@ float* IMU_quat_toFrwd(
 ******************************************************************************/
 
 float* IMU_quat_fromUp(
-  float                 *u,
-  float                 *q)
+  float       *u,
+  float       *q)
 {
-  float norm            = sqrtf(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
-  q[0]                  = norm + u[2];
+  float norm  = sqrtf(u[0]*u[0] + u[1]*u[1] + u[2]*u[2]);
+  q[0]        = norm + u[2];
   if (q[0] > 0.001f * norm) {
-    norm                = sqrtf(q[0]*q[0] + u[0]*u[0] + u[1]*u[1]);
-    q[0]                =  q[0] / norm;
-    q[1]                = -u[1] / norm;
-    q[2]                =  u[0] / norm;
-    q[3]                =  0.0f;
+    norm      = sqrtf(q[0]*q[0] + u[0]*u[0] + u[1]*u[1]);
+    q[0]      =  q[0] / norm;
+    q[1]      = -u[1] / norm;
+    q[2]      =  u[0] / norm;
+    q[3]      =  0.0f;
   } else {
-    q[0]                =  1.0f;
-    q[1]                =  0.0f;
-    q[2]                =  0.0f;
-    q[3]                =  0.0f;
+    q[0]      =  1.0f;
+    q[1]      =  0.0f;
+    q[2]      =  0.0f;
+    q[3]      =  0.0f;
   }
   return q;
 }

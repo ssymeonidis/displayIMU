@@ -17,16 +17,12 @@
 
 %% matlab reference
 addpath('../..');
-val1 = quat('rand');
-val2 = quat('rand');
-out  = val1 * val2;
-out.val
+q     = 5 * quat('rand');
+out   = ~q
 
 %% optimized C lib
 loadlibrary('../IMU_quat.so', '../IMU_quat.c', 'alias', 'IMU_quat');
-val1 = single(val1.val);
-val2 = single(val2.val);
+q    = single(q.val);
 out  = single(zeros(1,4));
-[~, ~, ~, out] = calllib('IMU_quat', 'IMU_quat_mult', val1, val2, out);
-out
+[~, ~, out] = calllib('IMU_quat', 'IMU_quat_norm', q, out)
 unloadlibrary IMU_quat;

@@ -15,15 +15,19 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-% initialize environment
-clear all; close all;
-addpath('..');
-addpath('../optimized');
+%%
+function v_out = rotateRvrs(v, q)
 
-% unit test optimized function
-q1 = quat("rand");
-q2 = quat("rand");
-q_conj1_ref = q1 * q2'
-q_conj1_src = quatMultiplyConj1(q1.val, q2.val)
-q_conj2_ref = q1' * q2
-q_conj2_src = quatMultiplyConj2(q1.val, q2.val)
+v_out    = [2 * (v(1)*(0.5 - q(3)*q(3) - q(4)*q(4))   ...
+               + v(2)*(q(2)*q(3) + q(1)*q(4))         ...
+               + v(3)*(q(2)*q(4) - q(1)*q(3))),       ...
+                
+            2 * (v(1)*(q(2)*q(3) - q(1)*q(4))         ...
+               + v(2)*(0.5 - q(2)*q(2) - q(4)*q(4))   ...
+               + v(3)*(q(3)*q(4) + q(1)*q(2))),       ...
+                
+            2 * (v(1)*(q(2)*q(4) + q(1)*q(3))         ...
+               + v(2)*(q(3)*q(4) - q(1)*q(2))         ...
+               + v(3)*(0.5 - q(2)*q(2) - q(3)*q(3)))]';
+ 
+end

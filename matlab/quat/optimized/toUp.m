@@ -15,15 +15,13 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-% initialize environment
-clear all; close all;
-addpath('..');
-addpath('../optimized');
+%%
+% ASSUMPTION - normalized input quaternion (use quatNormalize function)
 
-% unit test optimized function
-q  = quat("rand");
-v  = rand(1,3)
-v1 = q / v
-v1 = quatRotateForward(v, q(:))
-v2 = q \ v
-v2 = quatRotateReverse(v, q(:))
+function out = toUp(q)
+
+out(1)  = -2 * (q(2)*q(4) + q(1)*q(3));
+out(2)  = -2 * (q(3)*q(4) - q(1)*q(2));
+out(3)  = -2 * (0.5 - q(2)*q(2) - q(3)*q(3));
+
+end

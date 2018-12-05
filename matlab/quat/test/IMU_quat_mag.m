@@ -15,12 +15,13 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function out = quatMultiplyConj1(in1, in2)
+%% matlab reference
+addpath('../..');
+q     = 5 * quat('rand');
+q.mag
 
-out(1) = in2(1)*in1(1) + in2(2)*in1(2) + in2(3)*in1(3) + in2(4)*in1(4);
-out(2) = in2(1)*in1(2) - in2(2)*in1(1) + in2(3)*in1(4) - in2(4)*in1(3);
-out(3) = in2(1)*in1(3) - in2(2)*in1(4) - in2(3)*in1(1) + in2(4)*in1(2);
-out(4) = in2(1)*in1(4) + in2(2)*in1(3) - in2(3)*in1(2) - in2(4)*in1(1);
-
-end
+%% optimized C lib
+loadlibrary('../IMU_quat.so', '../IMU_quat.c', 'alias', 'IMU_quat');
+q    = single(q.val);
+out  = calllib('IMU_quat', 'IMU_quat_mag', q)
+unloadlibrary IMU_quat;

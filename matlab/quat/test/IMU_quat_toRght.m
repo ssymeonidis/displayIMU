@@ -15,19 +15,18 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%%
-function v_out = quatRotateReverse(v, q)
+%% matlab reference
+addpath('../..');
+q    = quat('rand');
+out  = q.rght
 
-v_out    = [2 * (v(1)*(0.5 - q(3)*q(3) - q(4)*q(4))   ...
-               + v(2)*(q(2)*q(3) + q(1)*q(4))         ...
-               + v(3)*(q(2)*q(4) - q(1)*q(3))),       ...
-                
-            2 * (v(1)*(q(2)*q(3) - q(1)*q(4))         ...
-               + v(2)*(0.5 - q(2)*q(2) - q(4)*q(4))   ...
-               + v(3)*(q(3)*q(4) + q(1)*q(2))),       ...
-                
-            2 * (v(1)*(q(2)*q(4) + q(1)*q(3))         ...
-               + v(2)*(q(3)*q(4) - q(1)*q(2))         ...
-               + v(3)*(0.5 - q(2)*q(2) - q(3)*q(3)))]';
- 
-end
+%% optimized matlab
+addpath('../optimized');
+out  = toRght(q.val)
+
+%% optimized C lib
+loadlibrary('../IMU_quat.so', '../IMU_quat.c', 'alias', 'IMU_quat');
+q    = single(q.val);
+out  = single(zeros(1,3));
+[~, ~, out] = calllib('IMU_quat', 'IMU_quat_toRght', q, out)
+unloadlibrary IMU_quat;
