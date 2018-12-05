@@ -15,6 +15,18 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-loadlibrary('./IMU_quat.so', 'IMU_quat.c', 'alias', 'IMU_quat');
-libfunctions  IMU_quat;
+%% matlab reference
+addpath('../..');
+val1 = quat('rand');
+val2 = quat('rand');
+out  = val1 * val2;
+out.val
+
+%% optimized C lib
+loadlibrary('../IMU_quat.so', '../IMU_quat.c', 'alias', 'IMU_quat');
+val1 = single(val1.val);
+val2 = single(val2.val);
+out  = single(zeros(1,4));
+[~, ~, ~, out] = calllib('IMU_quat', 'IMU_quat_mult', val1, val2, out);
+out
 unloadlibrary IMU_quat;
