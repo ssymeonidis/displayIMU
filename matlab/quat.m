@@ -32,7 +32,7 @@ methods
 %% quaternion constructor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q   = quat(arg1, arg2, arg3, arg4)
+function q   = quat(arg1, arg2, arg3, arg4, arg5)
   % default argument
   if (nargin < 1)
     q.val    = [1, 0, 0, 0];
@@ -138,12 +138,19 @@ function q   = quat(arg1, arg2, arg3, arg4)
     else
       error("invalid numeric argument(s)");
     end
+    
+  % axis angle to quaternion
+  elseif strcmp(arg1, "axisAngle")
+    if     (nargin == 2)
+      q     = q.fromAxisAngle(arg2);
+    elseif (nargin == 5)
+      q     = q.fromAxisAngle([arg2, arg3, arg4, arg5]);
+    end
   
   % rotation matrix
   elseif strcmp(arg1, "matrix")
     q       = q.fromMatrix(arg2);
   end
-  
 end
 
 
@@ -166,6 +173,8 @@ function val = subsref(q, S)
       val      = q.toEuler();
     elseif strcmp(S(1).subs, 'deg')
       val      = q.toEuler() * q.toDeg;
+    elseif strcmp(S(1).subs, 'axisAngle')
+      val      = q.toAxisAngle();
     elseif strcmp(S(1).subs, 'matrix')
       val      = q.toMatrix();
     end
@@ -195,11 +204,11 @@ end
 %% quaternion normalize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q   = not(q)
-  mag_sq     = sum(q.val.^2);
+function q = not(q)
+  mag_sq   = sum(q.val.^2);
   if (mag_sq > q.epsilon) && (q.epsilon)
-    mag      = sqrt(mag_sq);
-    q.val    = q.val ./ mag;
+    mag    = sqrt(mag_sq);
+    q.val  = q.val ./ mag;
   end
 end
 
@@ -225,14 +234,14 @@ function q = plus(q1, q2)
   end
   
   % perform operation
-  q.val      = q1 + q2;
+  q          = quat(q1 + q2);
 end
 
 
 %% quaternion subtraction
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = minus(q, q2)
+function q = minus(q1, q2)
   % extract values
   if isobject(q1)
     q1       = q1.val;
@@ -242,14 +251,14 @@ function q = minus(q, q2)
   end
   
   % perform operation
-  q.val      = q1 + q2;
+  q          = quat(q1 - q2);
 end
 
 
-%% quaternion multiply
+%% quaternion element-wise multiplication
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q   = mtimes(q1, q2)
+function q = times(q1, q2)
   % extract values
   if isobject(q1)
     q1       = q1.val;
@@ -258,34 +267,121 @@ function q   = mtimes(q1, q2)
     q2       = q2.val;
   end
   
-  % check for scalar; if not perform quaternion multiplication
-  if (length(q1) == 1) || (length(q2) == 1)
-    q        = quat(q1 * q2);
-  else 
-    q(1)     = q2(1)*q1(1) - q2(2)*q1(2) - q2(3)*q1(3) - q2(4)*q1(4);
-    q(2)     = q2(1)*q1(2) + q2(2)*q1(1) - q2(3)*q1(4) + q2(4)*q1(3);
-    q(3)     = q2(1)*q1(3) + q2(2)*q1(4) + q2(3)*q1(1) - q2(4)*q1(2);
-    q(4)     = q2(1)*q1(4) - q2(2)*q1(3) + q2(3)*q1(2) + q2(4)*q1(1);
-    q        = quat(q);
+  % perform operation
+  q          = quat(q1 .* q2);
+end
+
+
+%% quaternion element-wise division
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = rdivide(q1, q2)
+  % extract values
+  if isobject(q1)
+    q1       = q1.val;
+  end
+  if isobject(q2)
+    q2       = q2.val;
+  end
+  
+  % perform operation
+  q          = quat(q1 ./ q2);
+end
+
+
+%% quaternion multiply
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q   = mtimes(q1, q2)
+  % use axis-angle scale provided scalar input
+  if     ~isobject(q1) && (lenght(q1) == 1)
+    ang      = q2.toAxisAngle();
+    ang(1)   = q1 * ang(1);
+    q        = quat("axisAngle", ang);  
+  elseif ~isobject(q2) && (length(q2) == 1)
+    ang      = q1.toAxisAngle();
+    ang(1)   = q1 * ang(1);
+    q        = quat("axisAngle", ang);
+
+  % multiply two quaternions (no scalars vals)
+  else
+    % extract values
+    if ~isobject(q1)
+      q1     = quat(q1);
+    end
+    if ~isobject(q2)
+      q2     = quat(q2);
+    end
+    q        = q1.mult(q2);
   end
 end
 
 
-%% quaternion rotate vector (forward)
+%% quaternion divide (forward)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function v = mrdivide(q, v)
-  v        = q * quat(v) * q';
-  v        = v.val(2:4);
+function out = mrdivide(q, arg)
+  % check for quaternions object
+  if     isobject(arg)
+    out      = q * arg';
+    
+  % check for quaternion array
+  elseif (length(arg) == 4)
+    arg      = quat(arg);
+    out      = q * arg';
+
+  % check for vector (rotate forward)
+  elseif (length(arg) == 3)
+    out      = q * quat(arg) * q';
+    out      = out.val(2:4);
+    
+  % check for scalar
+  elseif (length(arg) == 1)
+    ang      = q2.toAxisAngle();
+    ang(1)   = ang(1) / arg;
+    out      = quat("axisAngle", ang);  
+  end
 end
 
 
-%% quaternion rotate vector (reverse)
+%% quaternion divide (reverse)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function v = mldivide(q, v)
-  v        = q' * quat(v) * q;
-  v        = v.val(2:4);
+function out = mldivide(q, arg)
+  % check for quaternions object
+  if     isobject(arg)
+    out      = q' * arg;
+    
+  % check for quaternion array
+  elseif (length(arg) == 4)
+    arg      = quat(arg);
+    out      = q' * arg;
+
+  % check for vector (rotate reverse)
+  elseif (length(arg) == 3)
+    out      = q' * quat(arg) * q;
+    out      = out.val(2:4);
+    
+  % check for scalar
+  elseif (length(arg) == 1)
+    ang      = q2.toAxisAngle();
+    ang(1)   = ang(1) / arg;
+    out      = quat("axisAngle", ang);  
+  end
+end
+
+
+%% quaternion forward component
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = mult(q1, q2)
+  q1       = q1.val;
+  q2       = q2.val;
+  q(1)     = q2(1)*q1(1) - q2(2)*q1(2) - q2(3)*q1(3) - q2(4)*q1(4);
+  q(2)     = q2(1)*q1(2) + q2(2)*q1(1) - q2(3)*q1(4) + q2(4)*q1(3);
+  q(3)     = q2(1)*q1(3) + q2(2)*q1(4) + q2(3)*q1(1) - q2(4)*q1(2);
+  q(4)     = q2(1)*q1(4) - q2(2)*q1(3) + q2(3)*q1(2) + q2(4)*q1(1);
+  q        = quat(q);
 end
 
 
@@ -310,96 +406,6 @@ end
 
 function v = toRght(q)
   v        = q / [0, 1, 0];
-end
-
-
-%% quaternion to Euler angles (radians)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function ang = toEuler(q)
-  % extract core vector
-  q         = q.val;
-    
-  % roll (x-axis rotation)
-  sinr_cosp = 2.0 * (q(1)*q(2) + q(3)*q(4));
-  cosr_cosp = 1.0 - 2.0 * (q(2)*q(2) + q(3)*q(3));
-  ang(3)    = atan2(sinr_cosp, cosr_cosp);
-
-  % pitch (y-axis rotation)
-  sinp      = 2.0 * (q(1)*q(3) - q(4)*q(2));
-  if (abs(sinp) >= 1)
-    ang(2)  = sign(sinp) * pi / 2;
-  else
-    ang(2)  = asin(sinp);
-  end
-
-  % yaw (z-axis rotation)
-  siny_cosp = 2.0 * (q(1)*q(4) + q(2)*q(3));
-  cosy_cosp = 1.0 - 2.0 * (q(3)*q(3) + q(4)*q(4));
-  ang(1)    = atan2(siny_cosp, cosy_cosp);
-end
-
-
-%% quaternion forward component
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function M = toMatrix(q)
-  % extract components
-  w = q.val(1);
-  x = q.val(2);
-  y = q.val(3);
-  z = q.val(4);
-
-  % calculate the matrix
-  M = [1-2*y*y-2*z*z,    2*x*y-2*w*z,    2*x*z+2*w*y;
-         2*x*y+2*w*z,  1-2*x*x-2*z*z,    2*y*z-2*w*x;
-         2*x*z-2*w*y,    2*y*z+2*w*x,  1-2*x*x-2*y*y];
-end
-
-
-%% quaternion from forward up (up vector get projected onto forward)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function q = fromFwrdUp(q, f, u)
-  % normalize reference (up) vector
-  f        = f./norm(f);
-
-  % ortho normalize forward vector
-  D        = dot(u, f);
-  u        = u - D*f;
-  u        = -u./norm(u);
-
-  % calculate right vector
-  r        = cross(u, f);
-
-  % calcuate the quaternion
-  M        = [f(1), r(1), u(1);  ...
-              f(2), r(2), u(2);  ...
-              f(3), r(3), u(3)];
-  q        = q.fromMatrix(M);
-end
-
-
-%% quaternion from up forward (forward vector get projected onto up)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function q = fromUpFwrd(q, u, f)
-  % normalize reference (up) vector
-  u        = -u./norm(u);
-
-  % ortho normalize forward vector
-  D        = dot(f, u);
-  f        = f - D*u;
-  f        = f./norm(f);
-
-  % calculate right vector
-  r        = cross(u, f);
-
-  % calcuate the quaternion
-  M        = [f(1), r(1), u(1);  ...
-              f(2), r(2), u(2);  ...
-              f(3), r(3), u(3)];
-  q        = q.fromMatrix(M);
 end
 
 
@@ -466,6 +472,52 @@ function q = fromUpFast(q, u)
 end
 
 
+%% quaternion from forward up (up vector get projected onto forward)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromFwrdUp(q, f, u)
+  % normalize reference (up) vector
+  f        = f./norm(f);
+
+  % ortho normalize forward vector
+  D        = dot(u, f);
+  u        = u - D*f;
+  u        = -u./norm(u);
+
+  % calculate right vector
+  r        = cross(u, f);
+
+  % calcuate the quaternion
+  M        = [f(1), r(1), u(1);  ...
+              f(2), r(2), u(2);  ...
+              f(3), r(3), u(3)];
+  q        = q.fromMatrix(M);
+end
+
+
+%% quaternion from up forward (forward vector get projected onto up)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromUpFwrd(q, u, f)
+  % normalize reference (up) vector
+  u        = -u./norm(u);
+
+  % ortho normalize forward vector
+  D        = dot(f, u);
+  f        = f - D*u;
+  f        = f./norm(f);
+
+  % calculate right vector
+  r        = cross(u, f);
+
+  % calcuate the quaternion
+  M        = [f(1), r(1), u(1);  ...
+              f(2), r(2), u(2);  ...
+              f(3), r(3), u(3)];
+  q        = q.fromMatrix(M);
+end
+
+
 %% quaternion rotation between two vectors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -484,6 +536,30 @@ function q = fromVectors(q, u, v)
     q.val  = [real, 0, -u(3), u(2)];
   end
   q        = ~q; 
+end
+
+
+%% quaternion from axis angle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromAxisAngle(q, axisAngle)
+  angle    = sin(axisAngle(1)/2);
+  q.val(1) = cos(axisAngle(1)/2);
+  q.val(2) = angle * axisAngle(2);
+  q.val(3) = angle * axisAngle(3);
+  q.val(4) = angle * axisAngle(4);
+end
+
+
+%% quaternion to axis angle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function out = toAxisAngle(q)
+  scale    = 1 / sqrt(1 - q.val(1) * q.val(1));
+  out(1)   = 2 * acos(q.val(1));
+  out(2)   = scale * q.val(2);
+  out(3)   = scale * q.val(3);
+  out(4)   = scale * q.val(4);
 end
 
 
@@ -506,7 +582,34 @@ function q = fromEuler(q, ang)
 end
 
 
-%% quaternion from Euler angles (radians)
+%% quaternion to Euler angles (radians)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function ang = toEuler(q)
+  % extract core vector
+  q         = q.val;
+    
+  % roll (x-axis rotation)
+  sinr_cosp = 2.0 * (q(1)*q(2) + q(3)*q(4));
+  cosr_cosp = 1.0 - 2.0 * (q(2)*q(2) + q(3)*q(3));
+  ang(3)    = atan2(sinr_cosp, cosr_cosp);
+
+  % pitch (y-axis rotation)
+  sinp      = 2.0 * (q(1)*q(3) - q(4)*q(2));
+  if (abs(sinp) >= 1)
+    ang(2)  = sign(sinp) * pi / 2;
+  else
+    ang(2)  = asin(sinp);
+  end
+
+  % yaw (z-axis rotation)
+  siny_cosp = 2.0 * (q(1)*q(4) + q(2)*q(3));
+  cosy_cosp = 1.0 - 2.0 * (q(3)*q(3) + q(4)*q(4));
+  ang(1)    = atan2(siny_cosp, cosy_cosp);
+end
+
+
+%% quaternion from rotation matrix
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromMatrix(q, M)
@@ -542,6 +645,23 @@ function q = fromMatrix(q, M)
 
   % create the quat objection
   q.val  = v;
+end
+
+
+%% quaternion forward component
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function M = toMatrix(q)
+  % extract components
+  w = q.val(1);
+  x = q.val(2);
+  y = q.val(3);
+  z = q.val(4);
+
+  % calculate the matrix
+  M = [1-2*y*y-2*z*z,    2*x*y-2*w*z,    2*x*z+2*w*y;
+         2*x*y+2*w*z,  1-2*x*x-2*z*z,    2*y*z-2*w*x;
+         2*x*z-2*w*y,    2*y*z+2*w*x,  1-2*x*x-2*y*y];
 end
 
 
