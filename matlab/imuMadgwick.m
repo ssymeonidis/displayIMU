@@ -15,7 +15,7 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-classdef imuGradient < handle
+classdef imuMadgwick < handle
     
 properties                % config structure
   aAlpha                  % accelerometer weight
@@ -36,7 +36,7 @@ methods
 %% constructor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function obj   = imuGradient()
+function obj   = imuMadgwick()
   % initialize state
   obj.q        = quat;
   obj.aReset   = true;

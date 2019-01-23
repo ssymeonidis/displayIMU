@@ -22,7 +22,7 @@ properties
 end
 
 properties (Constant)
-  epsilon   = 0.001       % near zero threshold
+  epsilon   = 0.00001     % near zero threshold
   toDeg     = 180 / pi    % rad to degree
 end
 
@@ -193,6 +193,22 @@ function val = subsref(q, S)
 end
 
 
+%% quaternion subscript reference
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = subsasgn(q, S, val)
+  if       strcmp(S(1).type, '()')
+    if strcmp(S(1).subs{1},':')
+      q.val    = val;
+    else
+      for i=1:length(S(1).subs{1})
+        q.val(S(1).subs{1}(i)) = val(i);
+      end
+    end
+  end
+end
+
+    
 %% quaternion magnitude
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -294,13 +310,13 @@ end
 
 function q   = mtimes(q1, q2)
   % use axis-angle scale provided scalar input
-  if     ~isobject(q1) && (lenght(q1) == 1)
+  if     ~isobject(q1) && (length(q1) == 1)
     ang      = q2.toAxisAngle();
     ang(1)   = q1 * ang(1);
     q        = quat("axisAngle", ang);  
   elseif ~isobject(q2) && (length(q2) == 1)
     ang      = q1.toAxisAngle();
-    ang(1)   = q1 * ang(1);
+    ang(1)   = q2 * ang(1);
     q        = quat("axisAngle", ang);
 
   % multiply two quaternions (no scalars vals)
@@ -555,11 +571,15 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function out = toAxisAngle(q)
-  scale    = 1 / sqrt(1 - q.val(1) * q.val(1));
-  out(1)   = 2 * acos(q.val(1));
-  out(2)   = scale * q.val(2);
-  out(3)   = scale * q.val(3);
-  out(4)   = scale * q.val(4);
+  if q.val(1) > 1.0 - q.epsilon
+    out    = [0.0, 1.0, 0.0, 0.0];
+  else
+    scale  = 1 / sqrt(1 - q.val(1) * q.val(1));
+    out(1) = 2 * acos(q.val(1));
+    out(2) = scale * q.val(2);
+    out(3) = scale * q.val(3);
+    out(4) = scale * q.val(4);
+  end
 end
 
 

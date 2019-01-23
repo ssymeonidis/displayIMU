@@ -256,7 +256,7 @@ inline float* IMU_quat_fromFrwdSafe(
   float       *q)
 {
   float norm  = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-  float E[3]  = {atan2f(v[1], v[0]), asin(-v[2] / norm), 0.0f};
+  float E[3]  = {atan2f(v[1], v[0]), asinf(-v[2] / norm), 0.0f};
   return IMU_quat_fromRad(E, q);
 }
 
@@ -313,7 +313,7 @@ inline float* IMU_quat_fromUpSafe(
   float       *q)
 {
   float norm  = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-  float E[3]  = {0.0f, atan2f(-v[0], -v[2]), asin(v[1] / norm)};
+  float E[3]  = {0.0f, atan2f(-v[0], -v[2]), asinf(v[1] / norm)};
   return IMU_quat_fromRad(E, q);
 }
 
