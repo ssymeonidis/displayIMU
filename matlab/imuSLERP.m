@@ -18,8 +18,8 @@
 classdef imuSLERP < handle
     
 properties                % config structure
-  qAlpha
-  qFstEn  
+  gAlpha
+  gFstEn  
   aAlpha                  % accelerometer weight
   mAlpha                  % magnetometer weight
   mNrmEn
@@ -32,6 +32,7 @@ properties                % state structure
   tGyro                   % last gyro sample time
   qSys                    % last quaternion value
   qGyro                   % last qyto quaternion value
+  qVel
   xVel                    % angualr velocity
   gFltr 
   aReset                  % acceleromter reset
@@ -50,13 +51,16 @@ methods
 function obj     = imuSLERP()
   obj.aAlpha     = 0.1;
   obj.mAlpha     = 0.1;
+  obj.gAlpha     = 0.5;
   obj.mDot       = -0.5547;
-  obj.qFstEn     = false;
+  obj.gFstEn     = false;
   obj.vAlpha     = 0.5;
   obj.qSys       = quat;
   obj.xVel       = quat;
+  obj.qVel       = quat;
   obj.tSys       = 0;
   obj.tGyro      = 0;
+  obj.qGyro      = quat;
   obj.aReset     = true;
   obj.mReset     = true;
   obj.gReset     = true;
@@ -68,14 +72,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function FOM       = updateGyro(obj, gyro, t)
-  
+
+  % inialize figure-of-merit
+  FOM              = 0;
+
+    
   % check for velocity reset
   if obj.vReset
-    if obj.qFstEn
+    if obj.gFstEn
       obj.gFltr    = gyro;
     else
-      obj.xVel     = quat(0.5 * gyro);
-      obj.xVel(1)  = sqrt(1.0 - sum(obj.xVel(2:4).^2));
+      obj.qVel     = quat(0.5 * gyro);
+      obj.qVel(1)  = sqrt(1.0 - sum(obj.qVel(2:4).^2));
     end
     obj.vReset     = false;
   end
@@ -84,12 +92,13 @@ function FOM       = updateGyro(obj, gyro, t)
   if obj.gReset
     obj.tSys       = t;
     obj.tGyro      = t;
+    obj.qGyro      = obj.qSys;
     obj.gReset     = false;
     return
   end
   
   % fast gyroscope update
-  if obj.qFstEn
+  if obj.gFstEn
   
     % calcuate time delta and update time state
     dt             = t - obj.tSys;
@@ -108,22 +117,30 @@ function FOM       = updateGyro(obj, gyro, t)
     qVel(3)        =  0.5 * (q(1)*gyro(2) - q(2)*gyro(3) + q(4)*gyro(1));
     qVel(4)        =  0.5 * (q(1)*gyro(3) + q(2)*gyro(2) - q(3)*gyro(1));
     obj.qSys       =  obj.qSys + dt * qVel;
-    FOM            =  0;
  
   else
      
-    % calcuate time delta and update time state
+    % update quaternion based on current datum
     dt             = t - obj.tGyro;
+    qShift         = quat(0.5 * gyro * dt);
+    qShift(1)      = sqrt(1.0 - sum(qShift(2:4).^2));
+    qDatum         = obj.qGyro * qShift;
+    
+    % calculate angular difference between estm
+    qEstm          = obj.estmState(t);
+    qDiff          = qEstm / qDatum;
+    xDiff          = qDiff.axisAngle;
+    FOM            = xDiff(1);
+ 
+    % update system quaternion
+    xShift         = [obj.gAlpha * xDiff(1), xDiff(2:4)];
+    qShift         = quat("axisAngle", xShift);
+    obj.qSys       = qEstm * qShift;
+    
+    % update internal state
+    obj.qGyro      = obj.qSys;
     obj.tSys       = t;
     obj.tGyro      = t;
-   
-    % update using SLERP
-    qGyro          = quat(0.5 * gyro);
-    qGyro(1)       = sqrt(1.0 - sum(qGyro(2:4).^2));
-    xGyro          = qGyro.axisAngle;
-    xDiff          = [dt * xGyro(1), xGyro(2:4)];
-    qDiff          = quat("axisAngle", xDiff);
-    obj.qSys       = obj.qSys * qDiff;
   end
 end
 
@@ -143,6 +160,7 @@ function FOM    = updateAccl(obj, accl, t, weight)
     obj.qSys    = quat("up", accl);
     obj.tSys    = t;
     obj.aReset  = false;
+    FOM         = 0;
     return
   end
       
@@ -162,7 +180,7 @@ function FOM    = updateAccl(obj, accl, t, weight)
   obj.tSys      = t;
 
   % check for accl velocity enable
-  if obj.qFstEn
+  if obj.gFstEn
     return
   end
 
@@ -182,12 +200,13 @@ function FOM = updateMagn(obj, magn, t, weight)
   if nargin < 4
     weight      = 1;
   end
-
+  
   % check for reset condition
   if obj.mReset
     obj.qSys    = quat;
     obj.tSys    = t;
     obj.mReset  = false;
+    FOM         = 0;
     return
   end
 
