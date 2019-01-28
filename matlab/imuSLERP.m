@@ -39,6 +39,7 @@ properties         % state structure
   qMagn            % last magn state
   qVel             % last velocity state
   gFltr            % filtered gyro vals
+  mInit            % magn init vector
   aReset           % accl reset
   mReset           % magn reset
   gReset           % gyro reset
@@ -160,7 +161,11 @@ function FOM       = updateAccl(obj, accl, t, weight)
 
   % check for reset condition
   if obj.aReset
-    obj.qSys       = quat("up", accl);
+    if obj.mReset 
+      obj.qSys     = quat("up", accl);
+    else
+      obj.qSys     = quat("upFrwd", accl, obj.mInit);
+    end
     obj.qAccl      = obj.qSys;
     obj.tSys       = t;
     obj.tAccl      = t;
@@ -189,21 +194,26 @@ function FOM       = updateAccl(obj, accl, t, weight)
     return
   end
 
-  % calcuate rotational difference
+  % calcuate rotational velocity
   dt               = t - obj.tAccl;
   aEstm            = obj.qAccl.up;
   qDiff            = quat("vec", aEstm, accl);
   xDiff            = qDiff.axisAngle;
+  xVel             = [xDiff(1) / dt, xDiff(2:4)];
+  qVel             = quat("axisAngle", xVel);
   
   % initialize velocity estimate
   if obj.vReset
-    xVel           = [xDiff(1) / dt, xDiff(2:4)];
-    obj.qVel       = quat("axisAngle", xVel);
+    obj.qVel       = qVel;
     obj.vReset     = false;
     
   % update velocity estimate
   else
-    % TBD
+    qDiff          = obj.qVel / qVel;
+    xDiff          = qDiff.axisAngle;
+    xShift         = [obj.vAlpha * xDiff(1), xDiff(2:4)];
+    qShift         = quat("axisAngle", xShift);
+    obj.qSys       = obj.qVel * qShift;
   end
   
   % udpate system quaternion
@@ -222,6 +232,11 @@ function FOM       = updateMagn(obj, magn, t, weight)
   % used defaults for unspecified params
   if nargin < 4
     weight         = 1;
+  end
+  
+  % save magnetometer vector
+  if ~obj.aReset
+    obj.mInit      = magn;
   end
   
   % check for reset condition
@@ -267,16 +282,21 @@ function FOM       = updateMagn(obj, magn, t, weight)
   mEstm            = obj.estmMagn(obj.qMagn);
   qDiff            = quat("vec", mEstm, magn);
   xDiff            = qDiff.axisAngle;
+  xVel             = [xDiff(1) / dt, xDiff(2:4)];
+  qVel             = quat("axisAngle", xVel);
   
-  % initialize velocity estimate
+  % initialize rotational velocity
   if obj.vReset
-    xVel           = [xDiff(1) / dt, xDiff(2:4)];
-    obj.qVel       = quat("axisAngle", xVel);
+    obj.qVel       = qVel;
     obj.vReset     = false;
     
   % update velocity estimate
   else
-    % TBD
+    qDiff          = obj.qVel / qVel;
+    xDiff          = qDiff.axisAngle;
+    xShift         = [obj.vAlpha * xDiff(1), xDiff(2:4)];
+    qShift         = quat("axisAngle", xShift);
+    obj.qSys       = obj.qVel * qShift;
   end
   
   % udpate system quaternion
