@@ -17,28 +17,32 @@
 
 classdef imuSLERP < handle
     
-properties                % config structure
-  gAlpha
-  gFstEn  
-  aAlpha                  % accelerometer weight
-  mAlpha                  % magnetometer weight
-  mNrmEn
-  mDot
-  vAlpha                  % velocity weight
+properties         % config structure
+  gAlpha           % gyro weight
+  gFstEn           % fast gyro enable
+  aAlpha           % accl weight
+  mAlpha           % magn weight
+  mDot             % magn dot product
+  mNrmEn           % ortho-normalize enable
+  vAlpha           % velocity weight
+  vEn              % velocity enable
 end
 
-properties                % state structure
-  tSys                    % last sample time
-  tGyro                   % last gyro sample time
-  qSys                    % last quaternion value
-  qGyro                   % last qyto quaternion value
-  qVel
-  xVel                    % angualr velocity
-  gFltr 
-  aReset                  % acceleromter reset
-  mReset                  % magnetometer reset
-  gReset                  % gyroscope reset
-  vReset                  % velocity reset
+properties         % state structure
+  tSys             % last system time
+  tGyro            % last gyro sample time
+  tAccl            % last accl sample time
+  tMagn            % last magn sample time
+  qSys             % last system state
+  qGyro            % last gyro state
+  qAccl            % last accl state
+  qMagn            % last magn state
+  qVel             % last velocity state
+  gFltr            % filtered gyro vals
+  aReset           % accl reset
+  mReset           % magn reset
+  gReset           % gyro reset
+  vReset           % velocity reset
 end
 
 
@@ -48,23 +52,23 @@ methods
 %% constructor
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function obj     = imuSLERP()
-  obj.aAlpha     = 0.1;
-  obj.mAlpha     = 0.1;
-  obj.gAlpha     = 0.5;
-  obj.mDot       = -0.5547;
-  obj.gFstEn     = false;
-  obj.vAlpha     = 0.5;
-  obj.qSys       = quat;
-  obj.xVel       = quat;
-  obj.qVel       = quat;
-  obj.tSys       = 0;
-  obj.tGyro      = 0;
-  obj.qGyro      = quat;
-  obj.aReset     = true;
-  obj.mReset     = true;
-  obj.gReset     = true;
-  obj.vReset     = true;
+function obj       = imuSLERP()
+  obj.aAlpha       = 0.1;
+  obj.mAlpha       = 0.1;
+  obj.gAlpha       = 0.5;
+  obj.mDot         = -0.5547;
+  obj.gFstEn       = false;
+  obj.vAlpha       = 0.5;
+  obj.vEn          = true;
+  obj.qSys         = quat;
+  obj.qVel         = quat;
+  obj.tSys         = 0;
+  obj.tGyro        = 0;
+  obj.qGyro        = quat;
+  obj.aReset       = true;
+  obj.mReset       = true;
+  obj.gReset       = true;
+  obj.vReset       = true;
 end
 
 
@@ -76,7 +80,6 @@ function FOM       = updateGyro(obj, gyro, t)
   % inialize figure-of-merit
   FOM              = 0;
 
-    
   % check for velocity reset
   if obj.vReset
     if obj.gFstEn
@@ -148,105 +151,172 @@ end
 %% apply acclerometer datum (lowest level function)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function FOM    = updateAccl(obj, accl, t, weight)
+function FOM       = updateAccl(obj, accl, t, weight)
 
   % used defaults for unspecified params
   if nargin < 4
-    weight      = 1;
+    weight         = 1;
   end
 
   % check for reset condition
   if obj.aReset
-    obj.qSys    = quat("up", accl);
-    obj.tSys    = t;
-    obj.aReset  = false;
-    FOM         = 0;
+    obj.qSys       = quat("up", accl);
+    obj.qAccl      = obj.qSys;
+    obj.tSys       = t;
+    obj.tAccl      = t;
+    obj.aReset     = false;
+    FOM            = 0;
     return
   end
       
-  % estimate current state
-  qEstm         = obj.estmState(t);
-  
+  % estimate current state and reference vector
+  qEstm            = obj.estmState(t);
+  aEstm            = qEstm.up;
+ 
   % calcuate axis-angle shift
-  aEstm         = qEstm.up;
-  qDiff         = quat("vec", aEstm, accl);
-  xDiff         = qDiff.axisAngle;
-  FOM           = xDiff(1);
+  qDiff            = quat("vec", aEstm, accl);
+  xDiff            = qDiff.axisAngle;
+  FOM              = xDiff(1);
     
   % update system quaternion
-  xShift        = [weight * obj.aAlpha * xDiff(1), xDiff(2:4)];
-  qShift        = quat("axisAngle", xShift);
-  obj.qSys      = obj.qSys * qShift;
-  obj.tSys      = t;
+  xShift           = [weight * obj.aAlpha * xDiff(1), xDiff(2:4)];
+  qShift           = quat("axisAngle", xShift);
+  obj.qSys         = obj.qSys * qShift;
+  obj.tSys         = t;
 
   % check for accl velocity enable
-  if obj.gFstEn
+  if obj.gFstEn || ~obj.vEn 
     return
   end
 
-  % calcuate anglar velocity
-%   dt            = t - obj.tSys;
-%   q_rate        = [q_ang(1) / dt, q_ang(2:4)];
+  % calcuate rotational difference
+  dt               = t - obj.tAccl;
+  aEstm            = obj.qAccl.up;
+  qDiff            = quat("vec", aEstm, accl);
+  xDiff            = qDiff.axisAngle;
+  
+  % initialize velocity estimate
+  if obj.vReset
+    xVel           = [xDiff(1) / dt, xDiff(2:4)];
+    obj.qVel       = quat("axisAngle", xVel);
+    obj.vReset     = false;
+    
+  % update velocity estimate
+  else
+    % TBD
+  end
+  
+  % udpate system quaternion
+  obj.qAccl        = obj.qSys;
+  obj.tAccl        = t;
+
 end
 
 
 
-%% apply acclerometer datum (lowest level function)
+%% apply magn datum (lowest level function)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function FOM = updateMagn(obj, magn, t, weight)
+function FOM       = updateMagn(obj, magn, t, weight)
   
   % used defaults for unspecified params
   if nargin < 4
-    weight      = 1;
+    weight         = 1;
   end
   
   % check for reset condition
   if obj.mReset
-    obj.qSys    = quat;
-    obj.tSys    = t;
-    obj.mReset  = false;
-    FOM         = 0;
+    obj.qSys       = quat;
+    obj.qMagn      = obj.qSys;
+    obj.tSys       = t;
+    obj.tMagn      = t;
+    obj.mReset     = false;
+    FOM            = 0;
     return
   end
 
-  % estimate current state
-  qEstm         = obj.estmState(t);
-  
-  % create reference vector (non-orthonormalize)
-  if ~obj.mNrmEn
-    mRef        = [sqrt(1 - obj.mDot.^2), 0, obj.mDot];
-    mEstm       = qEstm / mRef;
-    
-  % orthonormlimize and create reference vector
-  else
-    mEstm       = obj.qSys.frwd;
-    aEstm       = obj.qSys.up;
-    n           = dot(magn, aEstm);
-    magn        = magn - n * aEstm;
+  % estimate current state and refernce vector
+  qEstm            = obj.estmState(t);
+  mEstm            = obj.estmMagn(qEstm);
+ 
+  % normalize magnetometer (if configured so)
+  if obj.mNrmEn
+    aEstm          = obj.qSys.up;
+    n              = dot(magn, aEstm);
+    magn           = magn - n * aEstm;
   end
   
   % calcuate axis-angle shift
-  qDiff         = quat("vec", mEstm, magn);
-  xDiff         = qDiff.axisAngle;
-  FOM           = xDiff(1);
+  qDiff            = quat("vec", mEstm, magn);
+  xDiff            = qDiff.axisAngle;
+  FOM              = xDiff(1);
     
   % update system quaternion
-  xShift        = [weight * obj.mAlpha * xDiff(1), xDiff(2:4)];
-  qShfit        = quat("axisAngle", xShift);
-  obj.qSys      = obj.qSys * qShfit;
-  obj.tSys      = t;
+  xShift           = [weight * obj.mAlpha * xDiff(1), xDiff(2:4)];
+  qShfit           = quat("axisAngle", xShift);
+  obj.qSys         = obj.qSys * qShfit;
+  obj.tSys         = t;
 
+  % check for accl velocity enable
+  if obj.gFstEn || ~obj.vEn 
+    return
+  end
+
+  % calcuate rotational difference
+  dt               = t - obj.tMagn;
+  mEstm            = obj.estmMagn(obj.qMagn);
+  qDiff            = quat("vec", mEstm, magn);
+  xDiff            = qDiff.axisAngle;
+  
+  % initialize velocity estimate
+  if obj.vReset
+    xVel           = [xDiff(1) / dt, xDiff(2:4)];
+    obj.qVel       = quat("axisAngle", xVel);
+    obj.vReset     = false;
+    
+  % update velocity estimate
+  else
+    % TBD
+  end
+  
+  % udpate system quaternion
+  obj.qMagn        = obj.qSys;
+  obj.tMagn        = t;
 end
 
 
 %% estimate current orientation state (quaternion)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function qEstm  = estmState(obj, t)
-  dt            = t - obj.tSys;
-  qDist         = dt * obj.qVel;
-  qEstm         = obj.qSys * qDist;
+function qEstm     = estmState(obj, t)
+
+  % check for velocity disable
+  if ~obj.vEn
+    qEstm          = obj.qSys;
+    return
+  end
+
+  % estimate state (apply velocity)
+  dt               = t - obj.tSys;
+  qDist            = dt * obj.qVel;
+  qEstm            = obj.qSys * qDist;
+end
+
+
+%% estimate current orientation state (quaternion)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function mEstm     = estmMagn(obj, q)
+
+  % create reference vector (non-orthonormalized)
+  if ~obj.mNrmEn
+    mRef           = [sqrt(1 - obj.mDot.^2), 0, obj.mDot];
+    mEstm          = q / mRef;
+    
+  % create reference vector (orthonormalized)
+  else
+    mEstm          = q.frwd;
+  end
 end
 
 
