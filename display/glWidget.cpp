@@ -32,10 +32,10 @@ static const float coneRadius     = 0.03;
 static const float cylinderRadius = 0.012;
 
 // colors for GUI elements
-static GLfloat acclColor[4] = {1.0, 0.0, 0.0, 1.0};
-static GLfloat magnColor[4] = {0.0, 1.0, 0.0, 1.0};
-static GLfloat gyroColor[4] = {0.0, 0.0, 1.0, 1.0};
-static GLfloat gridColor[4] = {1.0, 0.0, 1.0, 1.0}; 
+static GLfloat acclColor[4]       = {1.0, 0.0, 0.0, 1.0};
+static GLfloat magnColor[4]       = {0.0, 1.0, 0.0, 1.0};
+static GLfloat gyroColor[4]       = {0.0, 0.0, 1.0, 1.0};
+static GLfloat gridColor[4]       = {1.0, 0.0, 1.0, 1.0}; 
 
 
 /******************************************************************************

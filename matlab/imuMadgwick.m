@@ -61,6 +61,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function FOM = estmAccl(obj, accl)
+
   % normalize the acceleration vector
   mag        = sqrt(sum(accl.^2));
   if (mag > 0.001)
@@ -92,6 +93,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function FOM  = estmMagn(obj, magn)
+
   % normalize the magnetometer vector
   magn        = magn / sqrt(sum(magn.^2));
   u           = obj.q.up;
