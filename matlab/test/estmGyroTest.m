@@ -18,15 +18,18 @@
 % initialize environment
 clear all; close all;
 addpath('..');
-global imu csv_enable csv_gyro_scale csv_time_scale csv_file csv_time
+addpath('../utils');
+global csv_enable csv_file imu datum dt
 
 % define simulation parameterse
-csv_enable       = false;
 csv_filename     = '../../stim/applyGyroTest.csv';
-csv_gyro_scale   = 0.001;
-csv_time_scale   = 0.00001;
-csv_time         = 0;
-imu              = imuGradient;
+csv_enable       = false;
+csv_file         = [];
+imu              = imuCore("madgwick");
+datum.type       = 'gyro';
+datum.t          = 0;
+datum.val        = [0, 0, 0];
+dt               = 0.1;
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -81,32 +84,31 @@ end
 function euler   = run_sim(axis, range, speed)
 
   % import global csv parameters
-  global imu csv_enable csv_gyro_scale csv_time_scale csv_file csv_time
+  global csv_enable csv_file imu datum dt
 
   % define local constants
-  dt             = 0.1;
   time           = range / speed;
   iter           = time  / dt;
   speed_rad      = pi * speed / 180;
-  gyro           = axis * speed_rad;
+  datum.val      = round(axis * speed_rad / imu.gScale);
   if csv_enable
-    val          = round(gyro/csv_gyro_scale);
+    val          = datum.val;
     gyro_str     = sprintf("%d, %d, %d", val(1), val(2), val(3));
   end
   
   % main processing loop
   for i=1:iter
-    imu.estmGyro(gyro, dt);
-    display_state(imu.q);
+    FOM(i)       = imu.update(datum);
+    q            = imu.estmQuat(datum.t);
+    datum.t      = round(datum.t + dt / imu.tScale);
+    display_state(q);
     if csv_enable
-      csv_time    = csv_time + dt;
-      val         = round(csv_time/csv_time_scale);
-      fprintf(csv_file, "1, %d, %s\n", val, gyro_str);
+      fprintf(csv_file, "1, %d, %s\n", datum.t, gyro_str);
     end
   end
 
   % return final state
-  euler        = imu.q.deg;
+  euler          = q.deg;
 end
 
 

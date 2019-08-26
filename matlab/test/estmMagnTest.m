@@ -17,39 +17,51 @@
 
 % initialize simulation
 clear all; close all;
-global imu csv_enable csv_magn_scale csv_time_scale csv_file csv_time
 addpath('..');
+addpath('../utils');
+global csv_enable csv_magn_scale csv_file imu datum dt iter
 
 % define simulation parameterse
-csv_enable       = true;
 csv_filename     = '../../stim/applyMagnTest.csv';
+csv_enable       = false;
 csv_magn_scale   = 255;
-csv_time_scale   = 0.00001;
-csv_time         = 0;
-imu              = imuGradient;
-imu.mAlpha       = 0.005;
+csv_file         = [];
+imu              = imuCore("madgwick");
+imu.imu.mAlpha   = 0.075;
+datum.type       = 'magn';
+dt               = 0.1;
+iter             = 250;
 
 % create csv file (used to create stimulus)
 if csv_enable
   csv_file       = fopen(csv_filename, 'w');
-  fprintf(csv_file, "3, 0, %d, 0, 0\n", csv_magn_scale);
 end
 
+% initialize imu
+datum.t          = 0;
+datum.val        = [1, 0, 0];
+imu.update(datum);
+datum.t          = round(datum.t + dt / imu.tScale);
+if csv_enable
+  fprintf(csv_file, "3, 0, %d, 0, 0", csv_magn_scale);
+end
+
+
 % test 90-deg roll
-magn   = [0, -1, 0];
-euler  = run_sim(magn)
+magn             = [0, -1, 0];
+euler            = run_sim(magn)
 
 % test 180-deg roll
-magn   = [-1, 0, 0];
-euler  = run_sim(magn)
+magn             = [-1, 0, 0];
+euler            = run_sim(magn)
 
 % test neg90-deg roll
-magn   = [0, 1, 0];
-euler  = run_sim(magn)
+magn             = [0, 1, 0];
+euler            = run_sim(magn)
 
 % test zero-pitch, zero-roll
-magn   = [1, 0, 0];
-euler  = run_sim(magn)
+magn             = [1, 0, 0];
+euler            = run_sim(magn)
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -60,33 +72,31 @@ end
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(magn)
+function euler   = run_sim(magn)
 
   % import global csv parameters
-  global imu csv_enable csv_magn_scale csv_time_scale csv_file csv_time
+  global csv_enable csv_magn_scale csv_file imu datum dt iter
 
   % define local constants
-  iter       = 300;
   if csv_enable
-    dt       = 0.1;
-    val      = round(magn*csv_magn_scale);
-    accl_str = sprintf("%d, %d, %d", val(1), val(2), val(3));
+    val          = round(magn*csv_magn_scale);
+    magn_str     = sprintf("%d, %d, %d", val(1), val(2), val(3));
   end
 
   % main processing loop
-  FOM    = [];
+  datum.val      = magn;
   for i=1:iter
-    FOM(i)  = imu.estmMagn(magn);
-    display_state(imu.q);
+    FOM(i)       = imu.update(datum);
+    q            = imu.estmQuat(datum.t);
+    datum.t      = round(datum.t + dt / imu.tScale);
+    display_state(q);
     if csv_enable
-      csv_time    = csv_time + dt;
-      val         = round(csv_time/csv_time_scale);
-      fprintf(csv_file, "3, %d, %s\n", val, accl_str);
+      fprintf(csv_file, "3, %d, %s\n", datum.t, magn_str);
     end
   end
 
   % return final state
-  euler           = imu.q.deg;
+  euler          = q.deg;
 end
 
 

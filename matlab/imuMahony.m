@@ -17,6 +17,7 @@
 
 % https://github.com/PaulStoffregen/MahonyAHRS/blob/master/src/MahonyAHRS.cpp
 
+
 classdef imuMahony < handle
     
 properties                % config structure
@@ -27,8 +28,6 @@ end
 properties                % state structure
   t                       % last sample time
   qSys                    % quaternion value
-  aReset                  % acceleromter reset
-  mReset                  % magnetometer weight
 end
 
 
@@ -39,12 +38,9 @@ methods
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function obj   = imuMahony()
-  % initialize state
   obj.qSys     = quat;
   obj.aAlpha   = 0.2;
-  obj.mAlpha   = 1.0;
-  obj.aReset   = true;
-  obj.mReset   = true;
+  obj.mAlpha   = 0.1;
 end
 
 
@@ -64,7 +60,7 @@ end
 %% apply acclerometer datum (lowest level function)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function FOM = updateAccl(obj, accl, t)
+function FOM = updateAccl(obj, t, accl)
 
   % normalize acceleration vector
   mag        = sqrt(sum(accl.^2));
@@ -76,6 +72,7 @@ function FOM = updateAccl(obj, accl, t)
   q          =  obj.qSys.val;
   halfv      = [q(2)*q(4) - q(1)*q(3),                ...
                 q(1)*q(2) + q(3)*q(4),                ...
+                % q(1)*q(1) - q(2)*q(2) - q(3)*q(3) + q(4)*q(4)];
                 q(1)*q(1) + q(4)*q(4) - 0.5];
 
   % calculate the error (cross product)
@@ -84,7 +81,7 @@ function FOM = updateAccl(obj, accl, t)
                 accl(1)*halfv(2) - accl(2)*halfv(1)]; 
 
   % apply proportional feedback
-  obj.qSys   = obj.qSys + obj.aAlpha*[0, halfe];
+  obj.qSys   = obj.qSys + 2*obj.aAlpha*[0, halfe];
   obj.qSys   = ~obj.qSys;
   FOM        = 0;
 end
@@ -93,7 +90,7 @@ end
 %% apply magnetometer datum (lowest level function)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function FOM = updateMagn(obj, magn, t)
+function FOM = updateMagn(obj, t, magn)
 
   % normalize magnetometer vector
   mag        = sqrt(sum(magn.^2));

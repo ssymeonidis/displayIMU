@@ -18,48 +18,61 @@
 % initialize simulation
 clear all; close all;
 addpath('..');
+addpath('../utils');
 
 % test 0deg-yaw
-euler  = [25, 15, 15];
-magn   = [1, 0, 0];
+euler             = [25, 15, 15];
+magn              = [1, 0, 0];
 run_sim(euler, magn)
 
 % test 90deg-yaw
-euler  = [65, 15, 15];
-magn   = [0, -1, 0];
+euler             = [65, 15, 15];
+magn              = [0, -1, 0];
 run_sim(euler, magn)
 
 % test neg90deg-yaw
-euler  = [-65, 15, 15];
-magn   = [0, 1, 0];
+euler             = [-65, 15, 15];
+magn              = [0, 1, 0];
 run_sim(euler, magn)
 
 % test 180deg-yaw
-euler  = [-205, 15, 15];
-magn   = [-1, 0, 0];
+euler             = [-205, 15, 15];
+magn              = [-1, 0, 0];
 run_sim(euler, magn)
 
 
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(euler, magn)
+function euler    = run_sim(euler, magn)
 
   % define local constants
-  imu        = imuGradient;
-  imu.q      = quat("deg", euler);
-  imu.mAlpha = 0.005;
-  iter       = 100;
+  imu             = imuCore("madgwick");
+  imu.imu.qSys    = quat("deg", euler);
+  imu.imu.mTime   = 0;
+  imu.imu.time    = 0;
+  imu.imu.mReset  = false;
+  imu.imu.mAlpha  = 0.075;
+  iter            = 100;
+  dt              = 0.1;
+
+  % plot the initial state
+  q               = imu.estmQuat(0);
+  display_state(q);
   
   % main processing loop
-  FOM        = [];
+  datum.type      = 'magn';
+  datum.t         = dt / imu.tScale;
+  datum.val       = magn;
   for i=1:iter
-    FOM(i)   = imu.estmMagn(magn);
-    display_state(imu.q);
+    FOM(i)        = imu.update(datum);
+    q             = imu.estmQuat(datum.t);
+    datum.t       = datum.t + dt/imu.tScale;
+    display_state(q);
   end
   
   % print results
-  euler      = imu.q.deg;
+  euler           = q.deg;
 end
 
 

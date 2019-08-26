@@ -18,58 +18,71 @@
 % initialize simulation
 clear all; close all;
 addpath('..');
+addpath('../utils');
 
 % test zero-pitch, zero-roll
-euler  = [25, 15, 15];
-accl   = [0, 0, 1];
+euler             = [25, 15, 15];
+accl              = [0, 0, 1];
 run_sim(euler, accl)
 
 % test 90deg-pitch
-euler  = [15, 65, 15];
-accl   = [-1, 0, 0];
+euler             = [15, 65, 15];
+accl              = [-1, 0, 0];
 run_sim(euler, accl)
 
 % test 90deg-roll
-euler  = [15, 15, 65];
-accl   = [0, 1, 0];
+euler             = [15, 15, 65];
+accl              = [0, 1, 0];
 run_sim(euler, accl)
 
 % test 180deg-roll
-euler  = [15, 15, 155];
-accl   = [0, 0, -1];
+euler             = [15, 15, 155];
+accl              = [0, 0, -1];
 run_sim(euler, accl)
 
 % test neg90-pitch
-euler  = [-15, -65, -15];
-accl   = [1, 0, 0];
+euler             = [-15, -65, -15];
+accl              = [1, 0, 0];
 run_sim(euler, accl)
 
 % test neg90-roll
-euler  = [-15, -15, -65];
-accl   = [0, -1, 0];
+euler             = [-15, -15, -65];
+accl              = [0, -1, 0];
 run_sim(euler, accl)
 
 
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(euler, accl)
+function euler    = run_sim(euler, accl)
 
   % define local constants
-  imu          = imuGradient;
-  imu.q        = quat("deg", euler);
-  imu.aAlpha   = 0.005;
-  iter         = 100;
+  imu             = imuCore("madgwick");
+  imu.imu.qSys    = quat("deg", euler);
+  imu.imu.aTime   = 0;
+  imu.imu.time    = 0;
+  imu.imu.aReset  = false;
+  imu.imu.aAlpha  = 0.075;
+  iter            = 100;
+  dt              = 0.1;
+  
+  % plot the initial state
+  q               = imu.estmQuat(0);
+  display_state(q);
   
   % main processing loop
-  FOM          = [];
+  datum.type      = 'accl';
+  datum.t         = dt / imu.tScale;
+  datum.val       = accl;
   for i=1:iter
-    FOM(i)     = imu.estmAccl(accl);
-    display_state(imu.q);
+    FOM(i)        = imu.update(datum);
+    q             = imu.estmQuat(datum.t);
+    datum.t       = datum.t + dt/imu.tScale;
+    display_state(q);
   end
 
   % return final state
-  euler         = imu.q.deg;
+  euler           = q.deg;
 end
 
 

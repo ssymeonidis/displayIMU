@@ -17,39 +17,50 @@
 
 % initialize simulation
 clear all; close all;
-global imu csv_enable csv_accl_scale csv_time_scale csv_file csv_time
 addpath('..');
+addpath('../utils');
+global csv_enable csv_accl_scale csv_file imu datum dt iter
 
 % define simulation parameterse
-csv_enable       = false;
 csv_filename     = '../../stim/applyAcclTest.csv';
+csv_enable       = false;
 csv_accl_scale   = 255;
-csv_time_scale   = 0.00001;
-csv_time         = 0;
-imu              = imuGradient;
-imu.aAlpha       = 0.005;
+csv_file         = [];
+imu              = imuCore("madgwick");
+imu.imu.aAlpha   = 0.075;
+datum.type       = 'accl';
+dt               = 0.1;
+iter             = 250;
 
 % create csv file (used to create stimulus)
 if csv_enable
   csv_file       = fopen(csv_filename, 'w');
-  fprintf(csv_file, "2, 0, 0, 0, %d\n", csv_accl_scale);
+end
+
+% initialize imu
+datum.t          = 0;
+datum.val        = [0, 0, 1];
+imu.update(datum);
+datum.t          = round(datum.t + dt / imu.tScale);
+if csv_enable
+  fprintf(csv_file, "2, 0, 0, 0, %d", csv_accl_scale);
 end
 
 % test 90-deg pitch
-accl   = [-1, 0, 0];
-euler  = run_sim(accl)
+accl             = [-1, 0, 0];
+euler            = run_sim(accl)
 
 % test zero-pitch, zero-roll
-accl   = [0, 0, 1];
-euler  = run_sim(accl)
+accl             = [0, 0, 1];
+euler            = run_sim(accl)
 
 % test 90-deg roll
-accl   = [0, 1, 0];
-euler  = run_sim(accl)
+accl             = [0, 1, 0];
+euler            = run_sim(accl)
 
 % test zero-pitch, zero-roll
-accl   = [0, 0, 1];
-euler  = run_sim(accl)
+accl             = [0, 0, 1];
+euler            = run_sim(accl)
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -60,33 +71,31 @@ end
 %% run simulation given specified inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function euler = run_sim(accl)
+function euler   = run_sim(accl)
 
   % import global csv parameters
-  global imu csv_enable csv_accl_scale csv_time_scale csv_file csv_time
+  global csv_enable csv_accl_scale csv_file imu datum dt iter
 
   % define local constants
-  iter       = 250;
   if csv_enable
-    dt       = 0.1;
-    val      = round(accl*csv_accl_scale);
-    accl_str = sprintf("%d, %d, %d", val(1), val(2), val(3));
+    val          = round(accl*csv_accl_scale);
+    accl_str     = sprintf("%d, %d, %d", val(1), val(2), val(3));
   end
 
   % main processing loop
-  FOM             = [];
+  datum.val      = accl;
   for i=1:iter
-    FOM(i)        = imu.estmAccl(accl);
-    display_state(imu.q);
+    FOM(i)       = imu.update(datum);
+    q            = imu.estmQuat(datum.t);
+    datum.t      = round(datum.t + dt / imu.tScale);
+    display_state(q);
     if csv_enable
-      csv_time    = csv_time + dt;
-      val         = round(csv_time/csv_time_scale);
-      fprintf(csv_file, "2, %d, %s\n", val, accl_str);
+      fprintf(csv_file, "2, %d, %s\n", datum.t, accl_str);
     end
   end
 
   % return final state
-  euler           = imu.q.deg;
+  euler          = q.deg;
 end
 
 

@@ -387,7 +387,7 @@ function out = mldivide(q, arg)
 end
 
 
-%% quaternion forward component
+%% quaternion multiply
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = mult(q1, q2)
@@ -493,7 +493,8 @@ end
 
 function q = fromFwrdUp(q, f, u)
   % normalize reference (up) vector
-  f        = f./norm(f);
+  f        = f(:)./norm(f);
+  u        = u(:);
 
   % ortho normalize forward vector
   D        = dot(u, f);
@@ -516,7 +517,8 @@ end
 
 function q = fromUpFwrd(q, u, f)
   % normalize reference (up) vector
-  u        = -u./norm(u);
+  u        = -u(:)./norm(u);
+  f        = f(:);
 
   % ortho normalize forward vector
   D        = dot(f, u);
