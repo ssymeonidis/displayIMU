@@ -91,14 +91,7 @@ function FOM     = updateGyro(obj, t, g, weight)
   obj.gFltr2     = obj.gAlpha2 * g(:) + (1 - obj.gAlpha2) * obj.gFltr2;
   
   % apply gyroscope rates
-  g              = obj.gFltr1;
-  q              = obj.qSys.val;
-  dq             = [-q(2)*g(1) - q(3)*g(2) - q(4)*g(3),     ...
-                     q(1)*g(1) + q(3)*g(3) - q(4)*g(2),     ...
-                     q(1)*g(2) - q(2)*g(3) + q(4)*g(1),     ...
-                     q(1)*g(3) + q(2)*g(2) - q(3)*g(1)];
-  delta          = 0.5 * weight * (t - obj.gTime);
-  obj.qSys       = obj.qSys + delta .* dq;
+  obj.qSys       = obj.qSys.addRate(obj.gFltr1, weight * (t - obj.gTime));
   obj.gTime      = t;
   obj.time       = t;
   FOM            = NaN;

@@ -177,6 +177,8 @@ function val = subsref(q, S)
       val      = q.toAxisAngle();
     elseif strcmp(S(1).subs, 'matrix')
       val      = q.toMatrix();
+    elseif strcmp(S(1).subs, 'addRate')
+      val      = q.addRate(S(2).subs{:});
     end
   elseif   strcmp(S(1).type, '()')
     if    (length(S(1).subs) < 1)
@@ -398,6 +400,22 @@ function q = mult(q1, q2)
   q(3)     = q2(1)*q1(3) + q2(2)*q1(4) + q2(3)*q1(1) - q2(4)*q1(2);
   q(4)     = q2(1)*q1(4) - q2(2)*q1(3) + q2(3)*q1(2) + q2(4)*q1(1);
   q        = quat(q);
+end
+
+
+%% quaternion integrate
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = addRate(q, g, scalar)
+   q1      = q.val;
+   dq      = [-q1(2)*g(1) - q1(3)*g(2) - q1(4)*g(3),     ...
+               q1(1)*g(1) + q1(3)*g(3) - q1(4)*g(2),     ...
+               q1(1)*g(2) - q1(2)*g(3) + q1(4)*g(1),     ...
+               q1(1)*g(3) + q1(2)*g(2) - q1(3)*g(1)];
+   if nargin > 2
+     dq    = dq * scalar;
+   end
+   q       = q + 0.5 * dq;
 end
 
 
