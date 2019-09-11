@@ -87,11 +87,13 @@ function FOM     = updateGyro(obj, t, g, weight)
   end
   
   % filter gyroscope data
-  obj.gFltr1     = obj.gAlpha1 * g(:) + (1 - obj.gAlpha1) * obj.gFltr1;
-  obj.gFltr2     = obj.gAlpha2 * g(:) + (1 - obj.gAlpha2) * obj.gFltr2;
+  alpha1         = weight * obj.gAlpha1;
+  alpha2         = weight * obj.gAlpha2;
+  obj.gFltr1     = alpha1 * g(:) + (1 - alpha1) * obj.gFltr1;
+  obj.gFltr2     = alpha2 * g(:) + (1 - alpha2) * obj.gFltr2;
   
   % apply gyroscope rates
-  obj.qSys       = obj.qSys.addRate(obj.gFltr1, weight * (t - obj.gTime));
+  obj.qSys       = obj.qSys.addRate(obj.gFltr1, (t - obj.gTime));
   obj.gTime      = t;
   obj.time       = t;
   FOM            = NaN;
@@ -105,12 +107,10 @@ function FOM     = updateAccl(obj, t, a, weight)
     
   % initialize state after reset
   if obj.aReset == true
-    a            = a(:);
     if obj.mReset == true
-      obj.qSys   = quat("up", a);
+      obj.qSys   = quat("up", a(:));
     else
-      m          = obj.qSys.frwd;
-      obj.qSys   = quat("upFrwd", a, m);
+      obj.qSys   = quat("upFrwd", a(:), obj.qSys.frwd);
     end
     obj.aReset   = false;
     obj.aTime    = t;
@@ -156,9 +156,7 @@ function FOM     = updateMagn(obj, t, m, weight)
 
   % initialize state after reset
   if obj.mReset == true
-    m            = m(:);
-    a            = obj.qSys.up;
-    obj.qSys     = quat("upFrwd", a, m);
+    obj.qSys     = quat("upFrwd", obj.qSys.up, m(:));
     obj.mReset   = false;
     obj.mTime    = t;
     obj.time     = t;
@@ -230,14 +228,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function qEstm   = estmQuat(obj, t)
-  g              = obj.gFltr2;
-  q              = obj.qSys.val;
-  dq             = [-q(2)*g(1) - q(3)*g(2) - q(4)*g(3),     ...
-                     q(1)*g(1) + q(3)*g(3) - q(4)*g(2),     ...
-                     q(1)*g(2) - q(2)*g(3) + q(4)*g(1),     ...
-                     q(1)*g(3) + q(2)*g(2) - q(3)*g(1)];
-  delta          = 0.5 * (t - obj.time);
-  qEstm          = obj.qSys + delta .* dq;
+  qEstm          = obj.qSys.addRate(obj.gFltr2, (t - obj.time));
 end
 
 

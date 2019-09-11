@@ -150,6 +150,10 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
   % rotation matrix
   elseif strcmp(arg1, "matrix")
     q       = q.fromMatrix(arg2);
+    
+  % error message
+  else
+    error("invalid argument");
   end
 end
 
@@ -177,6 +181,14 @@ function val = subsref(q, S)
       val      = q.toAxisAngle();
     elseif strcmp(S(1).subs, 'matrix')
       val      = q.toMatrix();
+    elseif strcmp(S(1).subs, 'dist')
+      val      = q.toDist();
+    elseif strcmp(S(1).subs, 'rate')
+      if length(S) > 1
+        val    = q.toRate(S(2).subs{:});
+      else
+        val    = q.toRate();
+      end
     elseif strcmp(S(1).subs, 'addRate')
       val      = q.addRate(S(2).subs{:});
     end
@@ -600,6 +612,27 @@ function out = toAxisAngle(q)
     out(3) = scale * q.val(3);
     out(4) = scale * q.val(4);
   end
+end
+
+
+%% quaternion to angle rate
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function out = toRate(q, weight)
+  temp       = q.toAxisAngle();
+  if nargin > 1
+    temp(1)  = temp(1) * weight;
+  end
+  out        = temp(1) * temp(2:4);
+end
+
+
+%% quaternion to angle rate
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function out = toDist(q)
+  temp       = q.toAxisAngle();
+  out        = temp(1);
 end
 
 
