@@ -496,7 +496,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromUpSafe(q, u)
-  yaw      = 0;  
+  yaw      = 0;
   pitch    = atan2(-u(1),-u(3));
   roll     = asin(u(2)/sqrt(sum(u.^2)));
   q        = q.fromEuler([yaw, pitch, roll]);
@@ -522,15 +522,29 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromFwrdUp(q, f, u)
-  % normalize reference (up) vector
-  f        = f(:)./norm(f);
-  u        = u(:);
+  % normalize reference (forward) vector
+  mag      = norm(f);
+  f        = f(:)./mag;
 
-  % ortho normalize forward vector
+  % check up magnitude
+  if mag < q.epsilon
+    q      = quat;
+    return
+  end
+
+  % ortho normalize up vector
+  u        = u(:);
   D        = dot(u, f);
   u        = u - D*f;
-  u        = -u./norm(u);
+  mag      = norm(u);
+  u        = -u./mag;
 
+  % check forward magnitude
+  if mag < q.epsilon
+    q      = quat("frwd", f);
+    return
+  end
+  
   % calculate right vector
   r        = cross(u, f);
 
@@ -547,14 +561,28 @@ end
 
 function q = fromUpFwrd(q, u, f)
   % normalize reference (up) vector
-  u        = -u(:)./norm(u);
-  f        = f(:);
+  mag      = norm(u);
+  u        = -u(:)./mag;
+
+  % check up magnitude
+  if mag < q.epsilon
+    q      = quat;
+    return
+  end
 
   % ortho normalize forward vector
+  f        = f(:);
   D        = dot(f, u);
   f        = f - D*u;
-  f        = f./norm(f);
+  mag      = norm(f);
+  f        = f./mag;
 
+  % check forward magnitude
+  if mag < q.epsilon
+    q      = quat("up", u);
+    return
+  end
+  
   % calculate right vector
   r        = cross(u, f);
 
@@ -583,7 +611,7 @@ function q = fromVectors(q, u, v)
   else
     q.val  = [real, 0, -u(3), u(2)];
   end
-  q        = ~q; 
+  q        = ~q;
 end
 
 

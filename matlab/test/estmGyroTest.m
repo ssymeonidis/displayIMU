@@ -25,7 +25,7 @@ global csv_enable csv_file imu datum dt
 csv_filename     = '../../stim/applyGyroTest.csv';
 csv_enable       = false;
 csv_file         = [];
-imu              = imuCore("madgwick");
+imu              = imuCore("SLERP");
 datum.type       = 'gyro';
 datum.t          = 0;
 datum.val        = [0, 0, 0];

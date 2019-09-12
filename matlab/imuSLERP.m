@@ -65,7 +65,6 @@ function obj       = imuSLERP()
   obj.aAlpha       = 0.1;
   obj.mAlpha       = 0.1;
   obj.vAlpha       = 0.1;
-  obj.qGyro        = quat;
   obj.aReset       = true;
   obj.mReset       = true;
   obj.gReset       = true;
@@ -82,8 +81,8 @@ function FOM       = updateGyro(obj, t, g, weight)
   if obj.gReset
     obj.qGyro      = obj.qSys;
     obj.vFltr      = g(:);
-    obj.gTime      = t;
-    obj.time       = t;
+    obj.tGyro      = t;
+    obj.tSys       = t;
     obj.gReset     = false;
     obj.vReset     = false;
     FOM            = NaN;
@@ -92,24 +91,29 @@ function FOM       = updateGyro(obj, t, g, weight)
   
   % calculate datum weight (function needs to asymptoic to one)
   if obj.isGyroFltr
-    alpha          = obj.gFltr * (t - obj.gTime);
+    alpha          = obj.Alpha * (t - obj.tGyro);
     alpha          = alpha / (1 + alpha);
   else
     alpha          = 1.0;
   end
-  if nargin < 4
+  if nargin > 3
     alpha          = weight * alpha;
   end
 
-  % update system orientation and update velocity
-  qEstm            = obj.estmState(t);
-  qMeas            = obj.gGyro.addRate(g(:), (t - obj.gTime));
-  qDiff            = gEstm'*qMeas;
-  gDiff            = qDiff.rate();
-  obj.qSys         = qEstm.addRate(gDiff(:), alpha);
-  obj.gGyro        = obj.qSys;
-  obj.vFltr        = alpha * g(:) + (1-alpha) * obj.gFltr;
+  % update system orientation
+  qEstm            = obj.estmQuat(t);
+  qMeas            = obj.qGyro.addRate(g(:), (t - obj.tGyro));
+  qDiff            = qEstm'*qMeas;
+  vDiff            = qDiff.rate();
+  obj.qSys         = qEstm.addRate(vDiff(:), alpha);
+  obj.qGyro        = obj.qSys;
+  obj.tSys         = t;
+  obj.tGyro        = t;
   FOM              = qDiff.dist();
+  
+  % update velocity estimate
+  alpha            = alpha * obj.vAlpha;
+  obj.vFltr        = alpha * g(:) + (1-alpha) * obj.vFltr;
 end
 
 
@@ -135,35 +139,36 @@ function FOM       = updateAccl(obj, t, a, weight)
   end
       
   % calculate datum weight (function needs to asymptoic to one)
-  alpha            = obj.aFltr * (t - obj.aTime);
+  alpha            = obj.aAlpha * (t - obj.tAccl);
   alpha            = alpha / (1 + alpha);
-  if nargin < 4
+  if nargin > 3
     alpha          = weight * alpha;
   end
   
   % estimate current state
-  qEstm            = obj.estmState(t);
+  qEstm            = obj.estmQuat(t);
   qMeas            = quat("upFrwd", a, qEstm.frwd);
-  qDiff            = gEstm'*qMeas;
-  gDiff            = qDiff.rate();
-  obj.qSys         = qEstm.addRate(gDiff(:), alpha);
+  qDiff            = qEstm'*qMeas;
+  vDiff            = qDiff.rate();
+  obj.qSys         = qEstm.addRate(vDiff, alpha);
   obj.tSys         = t;
+  FOM              = qDiff.dist();
 
   % update current velocity
   qDist            = obj.qAccl'*qMeas;
-  vDist            = qDist.rate(t - obj.aTime);
+  vDist            = qDist.rate(t - obj.tAccl);
   if obj.vReset
     obj.vFltr      = vDist;
     obj.qAccl      = obj.qAccl;
     obj.qGyro      = obj.qSys;
-    obj.aTime      = t;
-    obj.gTime      = t;
+    obj.tAccl      = t;
+    obj.tGyro      = t;
     obj.vReset     = false;
   else
-    alpha          = alpha * obj.vFltr;
+    alpha          = alpha * obj.vAlpha;
     obj.vFltr      = alpha * vDist + (1-alpha) * obj.vFltr;
     obj.qAccl      = obj.qSys;
-    obj.aTime      = t;
+    obj.tAccl      = t;
   end
 end
 
@@ -187,17 +192,17 @@ function FOM       = updateMagn(obj, t, m, weight)
   end
   
   % calculate datum weight (function needs to asymptoic to one)
-  alpha            = obj.mFltr * (t - obj.aTime);
+  alpha            = obj.mAlpha * (t - obj.aTime);
   alpha            = alpha / (1 + alpha);
-  if nargin < 4
+  if nargin > 3
     alpha          = weight * alpha;
   end
   
   % estimate current state
-  qEstm            = obj.estmState(t);
+  qEstm            = obj.estmQuat(t);
   qMeas            = quat("upFrwd", qEstm.up, m);
-  qDiff            = gEstm'*qMeas;
-  gDiff            = qDiff.rate();
+  vDiff            = qEstm'*qMeas;
+  gDiff            = vDiff.rate();
   obj.qSys         = qEstm.addRate(gDiff(:), alpha);
   obj.tSys         = t;
 
@@ -223,7 +228,7 @@ end
 %% estimate current orientation state (quaternion)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function qEstm     = estmState(obj, t)
+function qEstm     = estmQuat(obj, t)
   qEstm            = obj.qSys.addRate(obj.vFltr, (t - obj.tSys));
 end
 

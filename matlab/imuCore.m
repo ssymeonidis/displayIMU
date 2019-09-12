@@ -53,6 +53,11 @@ function obj = imuCore(imuType)
    elseif strcmp(imuType, 'mahony')
      obj.imuType = 'mahony';
      obj.imu     = imuMahony;
+   
+   % SLERP imu type
+   elseif strcmp(imuType, 'SLERP')
+     obj.imuType = 'SLERP';
+     obj.imu     = imuSLERP;
      
    % unidentified imu type
    else
