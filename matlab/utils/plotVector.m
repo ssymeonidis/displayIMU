@@ -37,13 +37,13 @@ end
 % draw shadows(s)
 for i = length(varargin):-1:1
   val = varargin{i};
-  plot3([0, val(1)], [0, val(2)], [0, 0],      'LineWidth', 2, 'Color', color{i});
+  plot3([0, val(1)], [0, val(2)], [0, 0],      'LineWidth', 2, 'Color', color{mod(i-1, length(color))+1});
 end
 
 % draw vector(s)
 for i = length(varargin):-1:1
   val = varargin{i};
-  plot3([0, val(1)], [0, val(2)], [0, val(3)], 'LineWidth', 5, 'Color', color{i});
+  plot3([0, val(1)], [0, val(2)], [0, val(3)], 'LineWidth', 5, 'Color', color{mod(i-1, length(color))+1});
 end
 
 % ensure "zero" will be center of plot

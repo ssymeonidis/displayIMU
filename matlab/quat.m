@@ -251,6 +251,14 @@ function q = ctranspose(q)
 end
 
 
+%% urinary minus
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = uminus(q)
+  q.val    = [-q.val(1), -q.val(2), -q.val(3), -q.val(4)];
+end
+
+
 %% quaternion addition
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -354,6 +362,9 @@ function out = mrdivide(q, arg)
   % check for quaternions object
   if     isobject(arg)
     out      = q * arg';
+    if (out.val(1) < 0)
+      out    = -out;
+    end
     
   % check for quaternion array
   elseif (length(arg) == 4)
@@ -381,6 +392,9 @@ function out = mldivide(q, arg)
   % check for quaternions object
   if     isobject(arg)
     out      = q' * arg;
+    if (out.val(1) < 0)
+      out    = -out;
+    end
     
   % check for quaternion array
   elseif (length(arg) == 4)
