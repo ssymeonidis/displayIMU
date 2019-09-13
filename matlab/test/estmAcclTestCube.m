@@ -57,12 +57,12 @@ run_sim(euler, accl)
 function euler    = run_sim(euler, accl)
 
   % define local constants
-  imu             = imuCore("madgwick");
+  imu             = imuCore("SLERP");
   imu.imu.qSys    = quat("deg", euler);
-  imu.imu.aTime   = 0;
-  imu.imu.time    = 0;
+  imu.imu.tAccl   = 0;
+  imu.imu.tSys    = 0;
   imu.imu.aReset  = false;
-  imu.imu.aAlpha  = 0.075;
+  imu.imu.aAlpha  = 0.5;
   iter            = 100;
   dt              = 0.1;
   

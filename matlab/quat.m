@@ -23,6 +23,7 @@ end
 
 properties (Constant)
   epsilon   = 0.00001     % near zero threshold
+  magThresh = 0.35;       % threshod to use "right" vector
   toDeg     = 180 / pi    % rad to degree
 end
 
@@ -77,12 +78,16 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
   elseif strcmp(arg1, "frwdUp")
     if     (nargin == 3)
       q     = q.fromFwrdUp(arg2, arg3);
+    elseif (nargin == 4)
+      q     = q.fromFwrdUp(arg2, arg3, arg4);
     else
       error("invalid numeric argument(s)");
     end
   elseif strcmp(arg1, "upFrwd")
     if     (nargin == 3)
       q     = q.fromUpFwrd(arg2, arg3);
+    elseif (nargin == 4)
+      q     = q.fromUpFwrd(arg2, arg3, arg4);
     else
       error("invalid numeric argument(s)");
     end
@@ -535,12 +540,12 @@ end
 %% quaternion from forward up (up vector get projected onto forward)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = fromFwrdUp(q, f, u)
+function q = fromFwrdUp(q, f, u, r)
   % normalize reference (forward) vector
   mag      = norm(f);
   f        = f(:)./mag;
 
-  % check up magnitude
+  % check frwd magnitude
   if mag < q.epsilon
     q      = quat;
     return
@@ -550,18 +555,27 @@ function q = fromFwrdUp(q, f, u)
   u        = u(:);
   D        = dot(u, f);
   u        = u - D*f;
-  mag      = norm(u);
-  u        = -u./mag;
+  u_mag    = norm(u);
+  u        = -u./u_mag;
 
-  % check forward magnitude
-  if mag < q.epsilon
+  % check up magnitude
+  if u_mag < q.epsilon && nargin < 3
     q      = quat("frwd", f);
     return
   end
+    
+  % ortho normalize rght vector
+  if nargin < 3 || u_mag < q.magThresh
+    r      = cross(u, f);
+  else
+    r      = r(:);
+    D      = dot(r, f);
+    r      = r - D*f;
+    r_mag  = norm(r);
+    r      = r./r_mag;
+    f      = cross(f, r);
+  end
   
-  % calculate right vector
-  r        = cross(u, f);
-
   % calcuate the quaternion
   M        = [f(1), r(1), u(1);  ...
               f(2), r(2), u(2);  ...
@@ -573,7 +587,7 @@ end
 %% quaternion from up forward (forward vector get projected onto up)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = fromUpFwrd(q, u, f)
+function q = fromUpFwrd(q, u, f, r)
   % normalize reference (up) vector
   mag      = norm(u);
   u        = -u(:)./mag;
@@ -584,21 +598,30 @@ function q = fromUpFwrd(q, u, f)
     return
   end
 
-  % ortho normalize forward vector
+  % ortho normalize frwd vector
   f        = f(:);
   D        = dot(f, u);
   f        = f - D*u;
-  mag      = norm(f);
-  f        = f./mag;
-
+  f_mag    = norm(f);
+  f        = f./f_mag;
+  
   % check forward magnitude
-  if mag < q.epsilon
+  if f_mag < q.epsilon && nargin < 3
     q      = quat("up", u);
     return
   end
   
-  % calculate right vector
-  r        = cross(u, f);
+  % ortho normalize right vector
+  if nargin < 3 || f_mag < q.magThresh
+    r      = r(:);
+    D      = dot(r, u);
+    r      = r - D*u;
+    r_mag  = norm(r);
+    r      = r./r_mag;
+    f      = cross(r, u); 
+  else
+    r      = cross(u, f);        
+  end
 
   % calcuate the quaternion
   M        = [f(1), r(1), u(1);  ...

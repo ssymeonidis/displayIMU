@@ -125,7 +125,7 @@ function FOM       = updateAccl(obj, t, a, weight)
    % check for reset condition
   if obj.aReset
     if obj.mReset 
-      obj.qSys     = quat("up", a(:));
+      obj.qSys     = quat("upFrwd", a(:), obj.qSys.frwd, obj.qSys.rght);
     else
       obj.qSys     = quat("upFrwd", a(:), obj.qSys.frwd);
     end
@@ -147,15 +147,15 @@ function FOM       = updateAccl(obj, t, a, weight)
   
   % estimate current state
   qEstm            = obj.estmQuat(t);
-  qMeas            = quat("upFrwd", a, qEstm.frwd);
-  qDiff            = qEstm'*qMeas;
-  vDiff            = qDiff.rate();
-  obj.qSys         = qEstm.addRate(vDiff, alpha);
+  qMeas            = quat("upFrwd", a(:), qEstm.frwd, qEstm.rght);
+  qDiff            = qEstm \ qMeas;
+  qShift           = alpha * qDiff;
+  obj.qSys         = obj.qSys * qShift;
   obj.tSys         = t;
   FOM              = qDiff.dist();
 
   % update current velocity
-  qDist            = obj.qAccl'*qMeas;
+  qDist            = obj.qAccl \ qMeas;
   vDist            = qDist.rate(t - obj.tAccl);
   if obj.vReset
     obj.vFltr      = vDist;
@@ -181,7 +181,11 @@ function FOM       = updateMagn(obj, t, m, weight)
   
    % check for reset condition
   if obj.mReset
-    obj.qSys       = quat("upFrwd", obj.qSys.up, m(:));
+    if obj.aReset 
+      obj.qSys     = quat("upFrwd", obj.qSys.up, m(:), obj.qSys.rght);
+    else
+      obj.qSys     = quat("upFrwd", obj.qSys.up, m(:));
+    end
     obj.qMagn      = obj.qSys;
     obj.qGyro      = obj.qSys;
     obj.tSys       = t;
@@ -192,7 +196,7 @@ function FOM       = updateMagn(obj, t, m, weight)
   end
   
   % calculate datum weight (function needs to asymptoic to one)
-  alpha            = obj.mAlpha * (t - obj.aTime);
+  alpha            = obj.mAlpha * (t - obj.tMagn);
   alpha            = alpha / (1 + alpha);
   if nargin > 3
     alpha          = weight * alpha;
@@ -200,27 +204,28 @@ function FOM       = updateMagn(obj, t, m, weight)
   
   % estimate current state
   qEstm            = obj.estmQuat(t);
-  qMeas            = quat("upFrwd", qEstm.up, m);
-  vDiff            = qEstm'*qMeas;
-  gDiff            = vDiff.rate();
-  obj.qSys         = qEstm.addRate(gDiff(:), alpha);
+  qMeas            = quat("upFrwd", qEstm.up, m(:));
+  qDiff            = qEstm \ qMeas;
+  qShift           = alpha * qDiff;
+  obj.qSys         = obj.qSys * qShift;
   obj.tSys         = t;
+  FOM              = qDiff.dist();
 
   % update current velocity
-  qDist            = obj.qAccl'*qMeas;
-  vDist            = qDist.rate(t - obj.aTime);
+  qDist            = obj.qAccl \ qMeas;
+  vDist            = qDist.rate(t - obj.tMagn);
   if obj.vReset
     obj.vFltr      = vDist;
     obj.qAccl      = obj.qAccl;
     obj.qGyro      = obj.qSys;
-    obj.aTime      = t;
-    obj.gTime      = t;
+    obj.tMagn      = t;
+    obj.tGyro      = t;
     obj.vReset     = false;
   else
-    alpha          = alpha * obj.vFltr;
+    alpha          = alpha * obj.vAlpha;
     obj.vFltr      = alpha * vDist + (1-alpha) * obj.vFltr;
     obj.qAccl      = obj.qSys;
-    obj.aTime      = t;
+    obj.tMagn      = t;
   end
 end
 

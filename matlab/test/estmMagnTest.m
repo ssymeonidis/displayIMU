@@ -26,11 +26,11 @@ csv_filename     = '../../stim/applyMagnTest.csv';
 csv_enable       = false;
 csv_magn_scale   = 255;
 csv_file         = [];
-imu              = imuCore("madgwick");
-imu.imu.mAlpha   = 0.075;
+imu              = imuCore("SLERP");
+imu.imu.mAlpha   = 0.5;
 datum.type       = 'magn';
 dt               = 0.1;
-iter             = 250;
+iter             = 100;
 
 % create csv file (used to create stimulus)
 if csv_enable
