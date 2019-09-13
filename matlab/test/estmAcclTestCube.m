@@ -68,7 +68,7 @@ function euler    = run_sim(euler, accl)
   
   % plot the initial state
   q               = imu.estmQuat(0);
-  display_state(q);
+  display_state(q, accl);
   
   % main processing loop
   datum.type      = 'accl';
@@ -78,7 +78,7 @@ function euler    = run_sim(euler, accl)
     FOM(i)        = imu.update(datum);
     q             = imu.estmQuat(datum.t);
     datum.t       = datum.t + dt/imu.tScale;
-    display_state(q);
+    display_state(q, accl);
   end
 
   % return final state
@@ -89,8 +89,8 @@ end
 %% update the display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function display_state(q)
-  plotState(q);
+function display_state(q, up)
+  plotVector(q.up, q.frwd, q.rght, up);
   title('estmAcclTest');
   drawnow;
 end
