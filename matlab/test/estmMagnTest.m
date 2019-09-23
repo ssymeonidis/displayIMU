@@ -16,10 +16,11 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 % initialize simulation
-clear all; close all;
+clear all;
 addpath('..');
 addpath('../utils');
 global csv_enable csv_magn_scale csv_file imu datum dt iter
+imu_config       = "SLERP";
 
 % define simulation parameterse
 csv_filename     = '../../stim/applyMagnTest.csv';
@@ -27,10 +28,16 @@ csv_enable       = false;
 csv_magn_scale   = 255;
 csv_file         = [];
 imu              = imuCore("SLERP");
-imu.imu.mAlpha   = 0.5;
 datum.type       = 'magn';
 dt               = 0.1;
 iter             = 100;
+
+% force the alpha to a known value
+if     strcmp(imu_config, "madgwick")
+  imu.imu.mAlpha = 0.45;
+elseif strcmp(imu_config, "SLERP")
+  imu.imu.mAlpha = 0.5;
+end
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -89,7 +96,7 @@ function euler   = run_sim(magn)
     FOM(i)       = imu.update(datum);
     q            = imu.estmQuat(datum.t);
     datum.t      = round(datum.t + dt / imu.tScale);
-    display_state(q);
+    display_state(q, magn);
     if csv_enable
       fprintf(csv_file, "3, %d, %s\n", datum.t, magn_str);
     end
@@ -103,8 +110,8 @@ end
 %% update the display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function display_state(q)
-  plotState(q);
+function display_state(q, magn)
+  plotVector(q.up, q.frwd, q.rght, [0,0,0], magn);
   title('applyMagnTest');
   drawnow;
 end

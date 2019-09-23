@@ -16,21 +16,28 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 % initialize simulation
-clear all; % close all;
+clear all;
 addpath('..');
 addpath('../utils');
 global csv_enable csv_accl_scale csv_file imu datum dt iter
+imu_config       = "SLERP";
 
 % define simulation parameterse
 csv_filename     = '../../stim/applyAcclTest.csv';
 csv_enable       = false;
 csv_accl_scale   = 255;
 csv_file         = [];
-imu              = imuCore("SLERP");
-imu.imu.aAlpha   = 0.5;
+imu              = imuCore(imu_config);
 datum.type       = 'accl';
 dt               = 0.1;
 iter             = 100;
+
+% force the alpha to a known value
+if     strcmp(imu_config, "madgwick")
+  imu.imu.aAlpha = 0.15;
+elseif strcmp(imu_config, "SLERP")
+  imu.imu.aAlpha = 0.5;
+end
 
 % create csv file (used to create stimulus)
 if csv_enable
@@ -88,7 +95,7 @@ function euler   = run_sim(accl)
     FOM(i)       = imu.update(datum);
     q            = imu.estmQuat(datum.t);
     datum.t      = round(datum.t + dt / imu.tScale);
-    display_state(q);
+    display_state(q, accl);
     if csv_enable
       fprintf(csv_file, "2, %d, %s\n", datum.t, accl_str);
     end
@@ -102,8 +109,8 @@ end
 %% update the display
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function display_state(q)
-  plotState(q);
+function display_state(q, accl)
+  plotVector(q.up, q.frwd, q.rght, accl);
   title('estmAcclTest');
   drawnow;
 end

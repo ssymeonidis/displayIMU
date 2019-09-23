@@ -20,9 +20,6 @@ function plotState(q)
 up            = q.up;
 frwd          = q.frwd;
 rght          = q.rght;
-up            = [up(1),   up(2),   -up(3)];
-frwd          = [frwd(1), frwd(2), -frwd(3)];
-rght          = [rght(1), rght(2), -rght(3)];
 plotVector(up, frwd, rght);
 delete(findall(gcf,'type','annotation'));
 loc           = [.75 .67 .6 .3];

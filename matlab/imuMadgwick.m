@@ -128,8 +128,8 @@ function FOM     = updateAccl(obj, t, a, weight)
   a              = a(:) / sqrt(sum(a(:).^2));
   q              = obj.qSys.val;
   q2             = 2.*q;
-  f1             = -a(1) - q2(1)*q(3) + q2(2)*q(4);
-  f2             = -a(2) + q2(1)*q(2) + q2(3)*q(4);
+  f1             = a(1) - q2(1)*q(3) + q2(2)*q(4);
+  f2             = a(2) + q2(1)*q(2) + q2(3)*q(4);
   f3             = -a(3) - q2(2)*q(2) - q2(3)*q(3) + 1;
 
   % calculate the gradient

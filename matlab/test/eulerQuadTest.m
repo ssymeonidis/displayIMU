@@ -218,6 +218,16 @@ a  = q1.deg;
 q2 = quat("deg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
+% test 20
+disp('#20');
+disp('test: f = 0, 1, 0')
+disp('      u = -1, 0, 0');
+f1 = [0, 1, 0];
+u1 = [-1, 0, 0];
+q1 = quat("upFrwd", u1, f1);
+a  = q1.deg;
+q2 = quat("deg", a);
+disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 
 %% print function
