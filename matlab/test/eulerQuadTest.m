@@ -23,8 +23,7 @@ clear all; close all;
 addpath('..');
 disp(' ');
 
-
-% test 18
+% test 1
 disp('#1');
 disp('test: f = 1, 0, 0')
 disp('      u = 0, 0, -1');

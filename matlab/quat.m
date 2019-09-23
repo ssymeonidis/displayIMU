@@ -479,7 +479,7 @@ end
 
 function q = fromFrwdSafe(q, f)
   yaw      = atan2(f(2), f(1));
-  pitch    = asin(-f(3)/sqrt(sum(f.^2)));
+  pitch    = asin(f(3)/sqrt(sum(f.^2)));
   roll     = 0;
   q        = q.fromEuler([yaw, pitch, roll]);
 end
@@ -563,13 +563,13 @@ function q = fromFwrdUp(q, f, u, r)
   u        = u./u_mag;
 
   % check up magnitude
-  if u_mag < q.epsilon && nargin < 3
+  if u_mag < q.epsilon && nargin < 4
     q      = quat("frwd", f);
     return
   end
     
   % ortho normalize rght vector
-  if nargin < 3 || u_mag < q.magThresh
+  if nargin < 4 || u_mag >= q.magThresh
     r      = cross(u, f);
   else
     r      = r(:);
@@ -591,10 +591,10 @@ end
 %% quaternion from up forward (forward vector get projected onto up)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = fromUpFwrd(q, u, f, r)
+function q = fromUpFwrd(q, u_org, f_org, r)
   % normalize reference (up) vector
-  mag      = norm(u);
-  u        = u(:)./mag;
+  mag      = norm(u_org);
+  u        = u_org(:)./mag;
 
   % check up magnitude
   if mag < q.epsilon
@@ -603,28 +603,34 @@ function q = fromUpFwrd(q, u, f, r)
   end
 
   % ortho normalize frwd vector
-  f        = f(:);
+  f        = f_org(:);
   D        = dot(f, u);
   f        = f - D*u;
   f_mag    = norm(f);
   f        = f./f_mag;
   
   % check forward magnitude
-  if f_mag < q.epsilon && nargin < 3
-    q      = quat("up", u);
+  if f_mag < q.epsilon && (nargin < 4 || isstring(r))
+    if     nargin < 4 || strcmp(r, "up")
+      q    = quat("up",   u);
+    elseif strcmp(r, "frwd")
+      q    = quat("frwd", f_org);
+    else
+      error("problem with last argument");
+    end
     return
   end
   
   % ortho normalize right vector
-  if nargin < 3 || f_mag < q.magThresh
+  if (nargin < 4 || isstring(r)) || f_mag >= q.magThresh
+    r      = cross(u, f);     
+  else
     r      = r(:);
     D      = dot(r, u);
     r      = r - D*u;
     r_mag  = norm(r);
     r      = r./r_mag;
     f      = cross(r, u); 
-  else
-    r      = cross(u, f);        
   end
 
   % calcuate the quaternion

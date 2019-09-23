@@ -28,16 +28,16 @@ properties       % config structure
 end
 
 properties       % state structure
+  qSys           % quaternion value
   gFltr1         % filtered gyro data (cur state)
   gFltr2         % filtered gyro data (est state)
   gReset         % gyro reset flag
   aReset         % accl reset flag
   mReset         % magn reset flag
-  gTime          % last gyro sample time
-  aTime          % last accl sample time
-  mTime          % last magn sample time
-  time           % last sample time
-  qSys           % quaternion value
+  tSys           % last sample time
+  tGyro          % last gyro sample time
+  tAccl          % last accl sample time
+  tMagn          % last magn sample time
 end
 
 properties (Constant)
@@ -75,8 +75,8 @@ function FOM     = updateGyro(obj, t, g, weight)
     obj.gFltr1   = g(:);
     obj.gFltr2   = g(:);
     obj.gReset   = false;
-    obj.gTime    = t;
-    obj.time     = t;
+    obj.tSys     = t;
+    obj.tGyro    = t;
     FOM          = NaN;
     return
   end
@@ -93,9 +93,9 @@ function FOM     = updateGyro(obj, t, g, weight)
   obj.gFltr2     = alpha2 * g(:) + (1 - alpha2) * obj.gFltr2;
   
   % apply gyroscope rates
-  obj.qSys       = obj.qSys.addRate(obj.gFltr1, (t - obj.gTime));
-  obj.gTime      = t;
-  obj.time       = t;
+  obj.qSys       = obj.qSys.addRate(obj.gFltr1, (t - obj.tGyro));
+  obj.tSys       = t;
+  obj.tGyro      = t;
   FOM            = NaN;
 end
 
@@ -113,8 +113,8 @@ function FOM     = updateAccl(obj, t, a, weight)
       obj.qSys   = quat("upFrwd", a(:), obj.qSys.frwd);
     end
     obj.aReset   = false;
-    obj.aTime    = t;
-    obj.time     = t;
+    obj.tAccl    = t;
+    obj.tSys     = t;
     FOM          = NaN;
     return
   end
@@ -140,11 +140,11 @@ function FOM     = updateAccl(obj, t, a, weight)
   qHatDot        = ~quat(qHatDot);
 
   % apply the gradient to q
-  alpha          = weight * obj.aAlpha * (t - obj.aTime);
+  alpha          = weight * obj.aAlpha * (t - obj.tAccl);
   obj.qSys       = obj.qSys - alpha * qHatDot.val;
   obj.qSys       = ~obj.qSys;
-  obj.aTime      = t;
-  obj.time       = t;
+  obj.tSys       = t;
+  obj.tAccl      = t;
   FOM            = qHatDot(1);
 end
 
@@ -158,8 +158,8 @@ function FOM     = updateMagn(obj, t, m, weight)
   if obj.mReset == true
     obj.qSys     = quat("upFrwd", obj.qSys.up, m(:));
     obj.mReset   = false;
-    obj.mTime    = t;
-    obj.time     = t;
+    obj.tSys     = t;
+    obj.tMagn    = t;
     FOM          = NaN;
     return
   end
@@ -184,8 +184,8 @@ function FOM     = updateMagn(obj, t, m, weight)
   q2             = 2.*q;
   if obj.isOrtho == true
     f1           = -m(1) - q2(3)*q(3) - q2(4)*q(4) + 1;
-    f2           = -m(2) + q2(2)*q(3) - q2(1)*q(4);
-    f3           = -m(3) + q2(1)*q(3) + q2(2)*q(4);
+    f2           = m(2) + q2(2)*q(3) - q2(1)*q(4);
+    f3           = m(3) + q2(1)*q(3) + q2(2)*q(4);
   else
     vX           = obj.RefX;
     vZ           = obj.RefZ;
@@ -215,11 +215,11 @@ function FOM     = updateMagn(obj, t, m, weight)
   qHatDot        = ~quat(qHatDot);
 
   % apply the gradient to q
-  alpha          = weight * obj.mAlpha * (t - obj.mTime);
+  alpha          = weight * obj.mAlpha * (t - obj.tMagn);
   obj.qSys       = obj.qSys - alpha * qHatDot.val;
   obj.qSys       = ~obj.qSys;
-  obj.mTime      = t;
-  obj.time       = t;
+  obj.tSys       = t;
+  obj.tMagn      = t;
   FOM            = qHatDot(1);
 end
 
@@ -228,7 +228,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function qEstm   = estmQuat(obj, t)
-  qEstm          = obj.qSys.addRate(obj.gFltr2, (t - obj.time));
+  qEstm          = obj.qSys.addRate(obj.gFltr2, (t - obj.tSys));
 end
 
 

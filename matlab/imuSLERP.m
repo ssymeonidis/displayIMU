@@ -204,7 +204,7 @@ function FOM       = updateMagn(obj, t, m, weight)
   
   % estimate current state
   qEstm            = obj.estmQuat(t);
-  qMeas            = quat("upFrwd", qEstm.up, m(:));
+  qMeas            = quat("upFrwd", qEstm.up, m(:), "frwd");
   qDiff            = qEstm \ qMeas;
   qShift           = alpha * qDiff;
   obj.qSys         = obj.qSys * qShift;

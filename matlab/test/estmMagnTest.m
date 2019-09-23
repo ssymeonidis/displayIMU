@@ -27,14 +27,14 @@ csv_filename     = '../../stim/applyMagnTest.csv';
 csv_enable       = false;
 csv_magn_scale   = 255;
 csv_file         = [];
-imu              = imuCore("SLERP");
+imu              = imuCore(imu_config);
 datum.type       = 'magn';
 dt               = 0.1;
 iter             = 100;
 
 % force the alpha to a known value
 if     strcmp(imu_config, "madgwick")
-  imu.imu.mAlpha = 0.45;
+  imu.imu.mAlpha = 0.15;
 elseif strcmp(imu_config, "SLERP")
   imu.imu.mAlpha = 0.5;
 end
@@ -53,17 +53,32 @@ if csv_enable
   fprintf(csv_file, "3, 0, %d, 0, 0", csv_magn_scale);
 end
 
-
-% test 90-deg roll
+% test 90-deg yaw
 magn             = [0, -1, 0];
 euler            = run_sim(magn)
 
-% test 180-deg roll
+% test 180-deg yaw
 magn             = [-1, 0, 0];
 euler            = run_sim(magn)
 
-% test neg90-deg roll
+% test neg90-deg yaw
 magn             = [0, 1, 0];
+euler            = run_sim(magn)
+
+% test zero-pitch, zero-roll
+magn             = [1, 0, 0];
+euler            = run_sim(magn)
+
+% test 90-deg pitch
+magn             = [0, 0, 1];
+euler            = run_sim(magn)
+
+% test zero-pitch, zero-roll
+magn             = [1, 0, 0];
+euler            = run_sim(magn)
+
+% test neg90-deg pitch
+magn             = [0, 0, -1];
 euler            = run_sim(magn)
 
 % test zero-pitch, zero-roll
