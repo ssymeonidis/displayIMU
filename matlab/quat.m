@@ -462,7 +462,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toUp(q)
-  v        = q / [0, 0, -1];
+  v        = q / [0, 0, 1];
 end
 
 
@@ -515,9 +515,13 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = fromUpSafe(q, u)
-  yaw      = 0;
-  pitch    = atan2(-u(1),-u(3));
+  pitch    = atan2(-u(1),u(3));
   roll     = asin(u(2)/sqrt(sum(u.^2)));
+  if abs(pitch) <= pi/2 + q.epsilon
+    yaw    = 0;
+  else
+    yaw    = pi;
+  end
   q        = q.fromEuler([yaw, pitch, roll]);
 end
 
@@ -527,7 +531,7 @@ end
 
 function q = fromUpFast(q, u)
   norm     = sqrt(u(1)*u(1) + u(2)*u(2) + u(3)*u(3));
-  real     = norm - u(3);
+  real     = norm + u(3);
   if (real > q.epsilon * norm)
     q.val  = [real, u(2), -u(1), 0];
     q.val  = q.val / sqrt(sum(q.val.^2)); 
@@ -556,7 +560,7 @@ function q = fromFwrdUp(q, f, u, r)
   D        = dot(u, f);
   u        = u - D*f;
   u_mag    = norm(u);
-  u        = -u./u_mag;
+  u        = u./u_mag;
 
   % check up magnitude
   if u_mag < q.epsilon && nargin < 3
@@ -590,7 +594,7 @@ end
 function q = fromUpFwrd(q, u, f, r)
   % normalize reference (up) vector
   mag      = norm(u);
-  u        = -u(:)./mag;
+  u        = u(:)./mag;
 
   % check up magnitude
   if mag < q.epsilon
@@ -707,10 +711,10 @@ end
 function q = fromEuler(q, ang)
   cy = cos(ang(1) * 0.5);
   sy = sin(ang(1) * 0.5);
-  cp = cos(ang(2) * 0.5);
-  sp = sin(ang(2) * 0.5);
-  cr = cos(ang(3) * 0.5);
-  sr = sin(ang(3) * 0.5);
+  cp = cos(-ang(2) * 0.5);
+  sp = sin(-ang(2) * 0.5);
+  cr = cos(-ang(3) * 0.5);
+  sr = sin(-ang(3) * 0.5);
 
   % conversion to quaternion
   q.val(1) = cy*cr*cp + sy*sr*sp;
@@ -730,14 +734,14 @@ function ang = toEuler(q)
   % roll (x-axis rotation)
   sinr_cosp = 2.0 * (q(1)*q(2) + q(3)*q(4));
   cosr_cosp = 1.0 - 2.0 * (q(2)*q(2) + q(3)*q(3));
-  ang(3)    = atan2(sinr_cosp, cosr_cosp);
+  ang(3)    = -atan2(sinr_cosp, cosr_cosp);
 
   % pitch (y-axis rotation)
   sinp      = 2.0 * (q(1)*q(3) - q(4)*q(2));
   if (abs(sinp) >= 1)
-    ang(2)  = sign(sinp) * pi / 2;
+    ang(2)  = -sign(sinp) * pi / 2;
   else
-    ang(2)  = asin(sinp);
+    ang(2)  = -asin(sinp);
   end
 
   % yaw (z-axis rotation)
