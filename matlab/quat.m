@@ -551,26 +551,22 @@ end
 
 function q = fromFrwdUp(q, f_org, u_org, mode)
   % normalize reference (forward) vector
-  mag      = norm(f_org);
-  f        = f_org(:)./mag;
+  m        = norm(f_org);
+  f        = f_org(:)./m;
 
   % check frwd magnitude
-  if mag < q.epsilon
+  if m < q.epsilon
     q      = quat;
     return
   end
 
   % ortho normalize up vector
-  u        = u_org(:);
-  D        = dot(u, f);
-  u        = u - D*f;
-  u_mag    = norm(u);
-  u        = u./u_mag;
+  [u, m]   = orthonorm(u_org, f);
 
   % check forward magnitude
-  if u_mag < q.epsilon
+  if m < q.epsilon
     if     nargin < 4 || strcmp(mode, "up")
-      q    = quat("up",   u);
+      q    = quat("up",   u_org);
     elseif strcmp(mode, "frwd")
       q    = quat("frwd", f_org);
     else
@@ -593,32 +589,29 @@ end
 
 function q = fromFrwdUpRght(q, f, u, r)
   % normalize reference (forward) vector
-  mag      = norm(f);
-  f        = f(:)./mag;
+  m        = norm(f);
+  f        = f(:)./m;
 
   % check frwd magnitude
-  if mag < q.epsilon
+  if m < q.epsilon
     q      = quat;
     return
   end
 
   % ortho normalize up vector
-  u        = u(:);
-  D        = dot(u, f);
-  u        = u - D*f;
-  u_mag    = norm(u);
-  u        = u./u_mag;
+  [u, m]   = orthonorm(u, f);
 
-  % ortho normalize rght vector
-  if u_mag >= q.magThresh
+  % calulate right vector 
+  if m >= q.magThresh
     r      = cross(u, f);
   else
-    r      = r(:);
-    D      = dot(r, f);
-    r      = r - D*f;
-    r_mag  = norm(r);
-    r      = r./r_mag;
-    f      = cross(f, r);
+    [r, m] = orthonorm(r, f);
+    if m >= q.magThresh
+      u    = cross(f, r);
+    else
+      q    = quat("frwd", f);
+      return
+    end
   end
   
   % calcuate the quaternion
@@ -634,24 +627,20 @@ end
 
 function q = fromUpFrwd(q, u_org, f_org, mode)
   % normalize reference (up) vector
-  mag      = norm(u_org);
-  u        = u_org(:)./mag;
+  m        = norm(u_org);
+  u        = u_org(:)./m;
 
   % check up magnitude
-  if mag < q.epsilon
+  if m < q.epsilon
     q      = quat;
     return
   end
 
   % ortho normalize frwd vector
-  f        = f_org(:);
-  D        = dot(f, u);
-  f        = f - D*u;
-  f_mag    = norm(f);
-  f        = f./f_mag;
+  [f, m]   = orthonorm(f_org, u);
   
   % check forward magnitude
-  if f_mag < q.epsilon
+  if m < q.epsilon
     if     nargin < 4 || strcmp(mode, "up")
       q    = quat("up",   u);
     elseif strcmp(mode, "frwd")
@@ -676,32 +665,30 @@ end
 
 function q = fromUpFrwdRght(q, u, f, r)
   % normalize reference (up) vector
-  mag      = norm(u);
-  u        = u(:)./mag;
+  m        = norm(u);
+  u        = u(:)./m;
 
   % check up magnitude
-  if mag < q.epsilon
+  if m < q.epsilon
     q      = quat;
     return
   end
 
   % ortho normalize frwd vector
-  f        = f(:);
-  D        = dot(f, u);
-  f        = f - D*u;
-  f_mag    = norm(f);
-  f        = f./f_mag;
+  [f, m]   = orthonorm(f, u);
   
-  % ortho normalize right vector
-  if  f_mag >= q.magThresh
-    r      = cross(u, f);     
+  % calculuate right vector
+  if  m >= q.magThresh
+    r      = cross(u, f);
   else
-    r      = r(:);
-    D      = dot(r, u);
-    r      = r - D*u;
-    r_mag  = norm(r);
-    r      = r./r_mag;
-    f      = cross(r, u); 
+      
+    [r, m] = orthonorm(r, u);
+    if m >= q.magThresh
+      f    = cross(r, u);
+    else
+      q    = quat("up", u);
+      return
+    end
   end
 
   % calcuate the quaternion
@@ -931,3 +918,16 @@ end
 end % methods
 
 end % classdef
+
+
+%% orthonormalize vector
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [v, mag] = orthonorm(v, ref)
+  v        = v(:);
+  ref      = ref(:);
+  D        = dot(v, ref);
+  v        = v - D * ref;
+  mag      = norm(v);
+  v        = v./mag;
+end
