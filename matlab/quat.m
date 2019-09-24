@@ -24,7 +24,6 @@ end
 properties (Constant)
   epsilon   = 0.00001     % near zero threshold
   magThresh = 0.35;       % threshod to use "right" vector
-  toDeg     = 180 / pi    % rad to degree
 end
 
 methods
@@ -67,29 +66,11 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
     end
   elseif strcmp(arg1, "deg")
     if     (nargin == 2)
-      q     = q.fromEuler(arg2 / q.toDeg);
+      q     = q.fromEuler(pi * arg2 / 180);
     elseif (nargin == 4)
-      q     = q.fromEuler([arg2, arg3, arg4] / q.toDeg);
+      q     = q.fromEuler(pi * [arg2, arg3, arg4] / 180);
     else
       error("invalid numeric argument(s)"); 
-    end
-  
-  % up-forward vector
-  elseif strcmp(arg1, "frwdUp")
-    if     (nargin == 3)
-      q     = q.fromFwrdUp(arg2, arg3);
-    elseif (nargin == 4)
-      q     = q.fromFwrdUp(arg2, arg3, arg4);
-    else
-      error("invalid numeric argument(s)");
-    end
-  elseif strcmp(arg1, "upFrwd")
-    if     (nargin == 3)
-      q     = q.fromUpFwrd(arg2, arg3);
-    elseif (nargin == 4)
-      q     = q.fromUpFwrd(arg2, arg3, arg4);
-    else
-      error("invalid numeric argument(s)");
     end
   
   % forward vector
@@ -98,14 +79,6 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
       q     = q.fromFrwdSafe(arg2);
     elseif (nargin == 4)
       q     = q.fromFrwdSafe([arg2, arg3, arg4]);
-    else
-      error("invalid numeric argument(s)");
-    end
-  elseif strcmp(arg1, "frwdNorm")
-    if     (nargin == 2)
-      q     = q.fromFrwdNorm(arg2);
-    elseif (nargin == 4)
-      q     = q.fromFrwdNorm([arg2, arg3, arg4]);
     else
       error("invalid numeric argument(s)");
     end
@@ -132,6 +105,38 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
       q     = q.fromUpFast(arg2);
     elseif (nargin == 4)
       q     = q.fromUpFast([arg2, arg3, arg4]);
+    else
+      error("invalid numeric argument(s)");
+    end
+  
+  % forward-up vector
+  elseif strcmp(arg1, "frwdUp")
+    if     (nargin == 3)
+      q     = q.fromFrwdUp(arg2, arg3);
+    elseif (nargin == 4)
+      q     = q.fromFrwdUp(arg2, arg3, arg4);
+    else
+      error("invalid numeric argument(s)");
+    end
+  elseif strcmp(arg1, "frwdUpRght")
+    if     (nargin == 4)
+      q     = q.fromFrwdUpRght(arg2, arg3, arg4);
+    else
+      error("invalid numeric argument(s)");
+    end
+  
+  % up-forward vector
+  elseif strcmp(arg1, "upFrwd")
+    if     (nargin == 3)
+      q     = q.fromUpFrwd(arg2, arg3);
+    elseif (nargin == 4)
+      q     = q.fromUpFrwd(arg2, arg3, arg4);
+    else
+      error("invalid numeric argument(s)");
+    end
+  elseif strcmp(arg1, "upFrwdRght")
+    if     (nargin == 4)
+      q     = q.fromUpFrwdRght(arg2, arg3, arg4);
     else
       error("invalid numeric argument(s)");
     end
@@ -181,7 +186,7 @@ function val = subsref(q, S)
     elseif strcmp(S(1).subs, 'rad')
       val      = q.toEuler();
     elseif strcmp(S(1).subs, 'deg')
-      val      = q.toEuler() * q.toDeg;
+      val      = 180 * q.toEuler() / pi;
     elseif strcmp(S(1).subs, 'axisAngle')
       val      = q.toAxisAngle();
     elseif strcmp(S(1).subs, 'matrix')
@@ -451,6 +456,7 @@ end
 
 
 %% quaternion forward component
+%  need to optimize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toFrwd(q)
@@ -459,6 +465,7 @@ end
 
 
 %% quaternion up component
+%  need to optimize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toUp(q)
@@ -467,6 +474,7 @@ end
 
 
 %% quaternion right component
+%  need to optimize
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toRght(q)
@@ -480,17 +488,6 @@ end
 function q = fromFrwdSafe(q, f)
   yaw      = atan2(f(2), f(1));
   pitch    = asin(f(3)/sqrt(sum(f.^2)));
-  roll     = 0;
-  q        = q.fromEuler([yaw, pitch, roll]);
-end
-
-
-%% quaternion from forward vector (tries to constrain up component)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function q = fromFrwdNorm(q, f)
-  yaw      = atan2(f(2), f(1));
-  pitch    = 0;
   roll     = 0;
   q        = q.fromEuler([yaw, pitch, roll]);
 end
@@ -544,7 +541,49 @@ end
 %% quaternion from forward up (up vector get projected onto forward)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = fromFwrdUp(q, f, u, r)
+function q = fromFrwdUp(q, f_org, u_org, mode)
+  % normalize reference (forward) vector
+  mag      = norm(f_org);
+  f        = f_org(:)./mag;
+
+  % check frwd magnitude
+  if mag < q.epsilon
+    q      = quat;
+    return
+  end
+
+  % ortho normalize up vector
+  u        = u_org(:);
+  D        = dot(u, f);
+  u        = u - D*f;
+  u_mag    = norm(u);
+  u        = u./u_mag;
+
+  % check forward magnitude
+  if u_mag < q.epsilon
+    if     nargin < 4 || strcmp(mode, "up")
+      q    = quat("up",   u);
+    elseif strcmp(mode, "frwd")
+      q    = quat("frwd", f_org);
+    else
+      error("problem with mode argument");
+    end
+    return
+  end
+    
+  % calcuate the quaternion
+  r        = cross(u, f);
+  M        = [f(1), r(1), u(1);  ...
+              f(2), r(2), u(2);  ...
+              f(3), r(3), u(3)];
+  q        = q.fromMatrix(M);
+end
+
+
+%% quaternion from forward up (up vector get projected onto forward)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromFrwdUpRght(q, f, u, r)
   % normalize reference (forward) vector
   mag      = norm(f);
   f        = f(:)./mag;
@@ -562,14 +601,8 @@ function q = fromFwrdUp(q, f, u, r)
   u_mag    = norm(u);
   u        = u./u_mag;
 
-  % check up magnitude
-  if u_mag < q.epsilon && nargin < 4
-    q      = quat("frwd", f);
-    return
-  end
-    
   % ortho normalize rght vector
-  if nargin < 4 || u_mag >= q.magThresh
+  if u_mag >= q.magThresh
     r      = cross(u, f);
   else
     r      = r(:);
@@ -591,7 +624,7 @@ end
 %% quaternion from up forward (forward vector get projected onto up)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = fromUpFwrd(q, u_org, f_org, r)
+function q = fromUpFrwd(q, u_org, f_org, mode)
   % normalize reference (up) vector
   mag      = norm(u_org);
   u        = u_org(:)./mag;
@@ -610,19 +643,49 @@ function q = fromUpFwrd(q, u_org, f_org, r)
   f        = f./f_mag;
   
   % check forward magnitude
-  if f_mag < q.epsilon && (nargin < 4 || isstring(r))
-    if     nargin < 4 || strcmp(r, "up")
+  if f_mag < q.epsilon
+    if     nargin < 4 || strcmp(mode, "up")
       q    = quat("up",   u);
-    elseif strcmp(r, "frwd")
+    elseif strcmp(mode, "frwd")
       q    = quat("frwd", f_org);
     else
-      error("problem with last argument");
+      error("problem with mode argument");
     end
     return
   end
   
+  % calcuate the quaternion
+  r        = cross(u, f);     
+  M        = [f(1), r(1), u(1);  ...
+              f(2), r(2), u(2);  ...
+              f(3), r(3), u(3)];
+  q        = q.fromMatrix(M);
+end
+
+
+%% quaternion from up forward (forward vector get projected onto up)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = fromUpFrwdRght(q, u, f, r)
+  % normalize reference (up) vector
+  mag      = norm(u);
+  u        = u(:)./mag;
+
+  % check up magnitude
+  if mag < q.epsilon
+    q      = quat;
+    return
+  end
+
+  % ortho normalize frwd vector
+  f        = f(:);
+  D        = dot(f, u);
+  f        = f - D*u;
+  f_mag    = norm(f);
+  f        = f./f_mag;
+  
   % ortho normalize right vector
-  if (nargin < 4 || isstring(r)) || f_mag >= q.magThresh
+  if  f_mag >= q.magThresh
     r      = cross(u, f);     
   else
     r      = r(:);

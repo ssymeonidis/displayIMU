@@ -125,9 +125,9 @@ function FOM       = updateAccl(obj, t, a, weight)
    % check for reset condition
   if obj.aReset
     if obj.mReset 
-      obj.qSys     = quat("upFrwd", a(:), obj.qSys.frwd, obj.qSys.rght);
+      obj.qSys     = quat("upFrwdRght", a(:), obj.qSys.frwd, obj.qSys.rght);
     else
-      obj.qSys     = quat("upFrwd", a(:), obj.qSys.frwd);
+      obj.qSys     = quat("upFrwd",     a(:), obj.qSys.frwd, "up");
     end
     obj.qAccl      = obj.qSys;
     obj.qGyro      = obj.qSys;
@@ -147,7 +147,7 @@ function FOM       = updateAccl(obj, t, a, weight)
   
   % estimate current state
   qEstm            = obj.estmQuat(t);
-  qMeas            = quat("upFrwd", a(:), qEstm.frwd, qEstm.rght);
+  qMeas            = quat("upFrwdRght", a(:), qEstm.frwd, qEstm.rght);
   qDiff            = qEstm \ qMeas;
   qShift           = alpha * qDiff;
   obj.qSys         = obj.qSys * qShift;
@@ -182,9 +182,9 @@ function FOM       = updateMagn(obj, t, m, weight)
    % check for reset condition
   if obj.mReset
     if obj.aReset 
-      obj.qSys     = quat("upFrwd", obj.qSys.up, m(:), obj.qSys.rght);
+      obj.qSys     = quat("upFrwdRght", obj.qSys.up, m(:), obj.qSys.rght);
     else
-      obj.qSys     = quat("upFrwd", obj.qSys.up, m(:));
+      obj.qSys     = quat("upFrwd",     obj.qSys.up, m(:), "frwd");
     end
     obj.qMagn      = obj.qSys;
     obj.qGyro      = obj.qSys;
@@ -204,7 +204,7 @@ function FOM       = updateMagn(obj, t, m, weight)
   
   % estimate current state
   qEstm            = obj.estmQuat(t);
-  qMeas            = quat("upFrwd", qEstm.up, m(:), "frwd");
+  qMeas            = quat("upFrwdRght", qEstm.up, m(:), qEstm.frwd);
   qDiff            = qEstm \ qMeas;
   qShift           = alpha * qDiff;
   obj.qSys         = obj.qSys * qShift;
