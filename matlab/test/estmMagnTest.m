@@ -20,7 +20,7 @@ clear all;
 addpath('..');
 addpath('../utils');
 global csv_enable csv_magn_scale csv_file imu datum dt iter
-imu_config       = "madgwick";
+imu_config       = "SLERP";
 
 % define simulation parameterse
 csv_filename     = '../../stim/applyMagnTest.csv';

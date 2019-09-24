@@ -191,6 +191,14 @@ function val = subsref(q, S)
       val      = q.toAxisAngle();
     elseif strcmp(S(1).subs, 'matrix')
       val      = q.toMatrix();
+    elseif strcmp(S(1).subs, 'forceFrwd')
+      val      = q.forceFrwd(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'forceUp')
+      val      = q.forceUp(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'diffFrwd')
+      val      = q.diffFrwd(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'diffUp')
+      val      = q.diffUp(S(2).subs{:});
     elseif strcmp(S(1).subs, 'dist')
       val      = q.toDist();
     elseif strcmp(S(1).subs, 'rate')
@@ -649,7 +657,7 @@ function q = fromUpFrwd(q, u_org, f_org, mode)
     elseif strcmp(mode, "frwd")
       q    = quat("frwd", f_org);
     else
-      error("problem with mode argument");
+      error("invalid mode");
     end
     return
   end
@@ -722,6 +730,50 @@ function q = fromVectors(q, u, v)
     q.val  = [real, 0, -u(3), u(2)];
   end
   q        = ~q;
+end
+
+
+%% quaternion difference between up vector
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = forceFrwd(q_in, frwd, mode)
+  if nargin < 2 || strcmp(mode, "frwd")
+    q      = quat("frwdUpRght", frwd, q_in.toUp(), q_in.toRght());
+  elseif strcmp(mode, "up")
+    q      = quat("upFrwdRght", q_in.toUp(), frwd, q_in.toRght());
+  else
+    error("invalid mode");
+  end
+end
+
+
+%% quaternion difference between up vector
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = forceUp(q_in, up, mode)
+  if nargin < 2 || strcmp(mode, "up")
+    q      = quat("upFrwdRght", up, q_in.toFrwd(), q_in.toRght());
+  elseif strcmp(mode, "frwd")
+    q      = quat("frwdUpRght", q_in.toFrwd(), up, q_in.toRght());
+  else
+    error("invalid mode");
+  end
+end
+
+
+%% quaternion difference between up vector
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = diffFrwd(q_in, frwd, mode)
+  q        = q_in \ q_in.forceFrwd(frwd,  mode);
+end
+
+
+%% quaternion difference between up vector
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = diffUp(q_in, up, mode)
+  q        = q_in \ q_in.forceUp(up, mode);
 end
 
 
