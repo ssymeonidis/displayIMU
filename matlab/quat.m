@@ -22,7 +22,7 @@ properties
 end
 
 properties (Constant)
-  epsilon   = 0.00001     % near zero threshold
+  epsilon   = 0.00001;    % near zero threshold
   magThresh = 0.35;       % threshod to use "right" vector
 end
 
@@ -51,12 +51,12 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
       error("invalid numeric argument(s)");
     end
 
-  % random quaternion
+  % random quaternion (Matlab only)
   elseif strcmp(arg1, "rand")
     q       = ~quat(2*rand(1,4)-1);
   
   % euler angles
-  elseif strcmp(arg1, "rad")
+  elseif strcmp(arg1, "eulerRad")
     if     (nargin == 2)
       q     = q.fromEuler(arg2);
     elseif (nargin == 4)
@@ -64,7 +64,7 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
     else
       error("invalid numeric argument(s)");
     end
-  elseif strcmp(arg1, "deg")
+  elseif strcmp(arg1, "eulerDeg")
     if     (nargin == 2)
       q     = q.fromEuler(pi * arg2 / 180);
     elseif (nargin == 4)
@@ -140,9 +140,9 @@ function q   = quat(arg1, arg2, arg3, arg4, arg5)
     else
       error("invalid numeric argument(s)");
     end
-  
+
   % rotation between two vectors
-  elseif strcmp(arg1, "vec")
+  elseif strcmp(arg1, "diffVect")
     if     (nargin == 3)
       q     = q.fromVectors(arg2, arg3);
     else
@@ -173,16 +173,73 @@ end
 
 function val = subsref(q, S)
   if       strcmp(S(1).type, '.')
+    % basic operations
     if     strcmp(S(1).subs, 'val')
       val      = q.val;
     elseif strcmp(S(1).subs, 'mag')
       val      = q.mag();
+    elseif strcmp(S(1).subs, 'norm')
+      val      = q.not();
+    elseif strcmp(S(1).subs, 'conj')
+      val      = q.ctranspose();
+    elseif strcmp(S(1).subs, 'mult')
+      val      = q.mult(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'multConj')
+      val      = q.multConj(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'conjMult')
+      val      = q.conjMult(S(2).subs{:});
+
+    % components
     elseif strcmp(S(1).subs, 'frwd')
       val      = q.toFrwd();
     elseif strcmp(S(1).subs, 'up')
       val      = q.toUp();
     elseif strcmp(S(1).subs, 'rght')
       val      = q.toRght();
+    elseif strcmp(S(1).subs, 'dist')
+      val      = q.toDist();
+    % elseif strcmp(S(1).subs, 'rollRad')
+    %   val      = q.toRoll();
+    % elseif strcmp(S(1).subs, 'rollRad')
+    %   val      = 180 * q.toRoll() / pi;
+    elseif strcmp(S(1).subs, 'rate')
+      if length(S) > 1
+        val    = q.toRate(S(2).subs{:});
+      else
+        val    = q.toRate();
+      end
+    
+    % forcing (zeroing) operations
+    elseif strcmp(S(1).subs, 'forceFrwd')
+      val      = q.forceFrwd(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'forceUp')
+      val      = q.forceUp(S(2).subs{:}); 
+    % elseif strcmp(S(1).subs, 'forceRollRad')
+    %   val      = q.forceRoll(S(2).subs{:});
+    % elseif strcmp(S(1).subs, 'forceRollDeg')
+    %   val      = q.forceRoll(pi * S(2).subs{:} / 180);
+
+    % calculating "shift" quaternions
+    elseif strcmp(S(1).subs, 'diffQuat')
+      val      = q.diffQuatFrwd(S(2).subs{:});    
+    elseif strcmp(S(1).subs, 'diffVectFrwd')
+      val      = q.diffVectFrwd(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'diffVectUp')
+      val      = q.diffVectUp(S(2).subs{:});
+  
+    % quaternion modifiers
+    elseif strcmp(S(1).subs, 'scale')
+      val      = q.scale(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'addRate')
+      val      = q.addRate(S(2).subs{:});
+ 
+    % vector operaitons
+    elseif strcmp(S(1).subs, 'rotateVectFrwd')
+      val      = q.rotateFrwd(S(2).subs{:});
+    elseif strcmp(S(1).subs, 'rotateVectRvrs')
+      val      = q.rotateRvrs(S(2).subs{:});
+    
+    % rotation state conversions 
     elseif strcmp(S(1).subs, 'rad')
       val      = q.toEuler();
     elseif strcmp(S(1).subs, 'deg')
@@ -191,25 +248,9 @@ function val = subsref(q, S)
       val      = q.toAxisAngle();
     elseif strcmp(S(1).subs, 'matrix')
       val      = q.toMatrix();
-    elseif strcmp(S(1).subs, 'forceFrwd')
-      val      = q.forceFrwd(S(2).subs{:});
-    elseif strcmp(S(1).subs, 'forceUp')
-      val      = q.forceUp(S(2).subs{:});
-    elseif strcmp(S(1).subs, 'diffFrwd')
-      val      = q.diffFrwd(S(2).subs{:});
-    elseif strcmp(S(1).subs, 'diffUp')
-      val      = q.diffUp(S(2).subs{:});
-    elseif strcmp(S(1).subs, 'dist')
-      val      = q.toDist();
-    elseif strcmp(S(1).subs, 'rate')
-      if length(S) > 1
-        val    = q.toRate(S(2).subs{:});
-      else
-        val    = q.toRate();
-      end
-    elseif strcmp(S(1).subs, 'addRate')
-      val      = q.addRate(S(2).subs{:});
     end
+
+  % direct access to "val" property
   elseif   strcmp(S(1).type, '()')
     if    (length(S(1).subs) < 1)
       val      = q.val;
@@ -221,31 +262,19 @@ function val = subsref(q, S)
         val(i) = q.val(S(1).subs{1}(i));
       end
     end
-  end
-end
-
-
-%% quaternion subscript reference
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function q = subsasgn(q, S, val)
-  if       strcmp(S(1).type, '()')
-    if strcmp(S(1).subs{1},':')
-      q.val    = val;
-    else
-      for i=1:length(S(1).subs{1})
-        q.val(S(1).subs{1}(i)) = val(i);
-      end
-    end
-  end
-end
-
     
+  % unable to process operation
+  else
+    error("unsupported function");
+  end
+end
+
+
 %% quaternion magnitude
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function val = mag(q)
-  val        = sqrt(sum(q.val.^2));
+  val        = norm(q.val);
 end
 
 
@@ -253,9 +282,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = not(q)
-  mag_sq   = sum(q.val.^2);
-  if (mag_sq > q.epsilon) && (q.epsilon)
-    mag    = sqrt(mag_sq);
+  mag      = norm(q.val);
+  if mag > q.epsilon
     q.val  = q.val ./ mag;
   end
 end
@@ -351,17 +379,12 @@ end
 function q   = mtimes(q1, q2)
   % use axis-angle scale provided scalar input
   if     ~isobject(q1) && (length(q1) == 1)
-    ang      = q2.toAxisAngle();
-    ang(1)   = q1 * ang(1);
-    q        = quat("axisAngle", ang);  
+    q        = q2.scale(q1);
   elseif ~isobject(q2) && (length(q2) == 1)
-    ang      = q1.toAxisAngle();
-    ang(1)   = q2 * ang(1);
-    q        = quat("axisAngle", ang);
+    q        = q1.scale(q2);
 
   % multiply two quaternions (no scalars vals)
   else
-    % extract values
     if ~isobject(q1)
       q1     = quat(q1);
     end
@@ -379,26 +402,19 @@ end
 function out = mrdivide(q, arg)
   % check for quaternions object
   if     isobject(arg)
-    out      = q * arg';
-    if (out.val(1) < 0)
-      out    = -out;
-    end
+    out      = q.diffQuatFrwd(arg);
     
   % check for quaternion array
   elseif (length(arg) == 4)
-    arg      = quat(arg);
-    out      = q * arg';
-
+    out      = q.diffQuatFrwd(quat(arg));
+    
   % check for vector (rotate forward)
   elseif (length(arg) == 3)
-    out      = q * quat(arg) * q';
-    out      = out.val(2:4);
+    out      = q.rotateFrwd(arg);
     
   % check for scalar
   elseif (length(arg) == 1)
-    ang      = q2.toAxisAngle();
-    ang(1)   = ang(1) / arg;
-    out      = quat("axisAngle", ang);  
+    out      = q.scale(1/arg);
   end
 end
 
@@ -409,31 +425,25 @@ end
 function out = mldivide(q, arg)
   % check for quaternions object
   if     isobject(arg)
-    out      = q' * arg;
-    if (out.val(1) < 0)
-      out    = -out;
-    end
+    out      = q.diffQuatRvrs(arg);
     
   % check for quaternion array
   elseif (length(arg) == 4)
-    arg      = quat(arg);
-    out      = q' * arg;
+    out      = q.diffQuatRvrs(quat(arg));
 
   % check for vector (rotate reverse)
   elseif (length(arg) == 3)
-    out      = q' * quat(arg) * q;
-    out      = out.val(2:4);
+    out      = q.rotateRvrs(arg);
     
   % check for scalar
   elseif (length(arg) == 1)
-    ang      = q2.toAxisAngle();
-    ang(1)   = ang(1) / arg;
-    out      = quat("axisAngle", ang);  
+    out      = q.scale(1/arg);
   end
 end
 
 
 %% quaternion multiply
+%  q = q1 * q2
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = mult(q1, q2)
@@ -447,7 +457,87 @@ function q = mult(q1, q2)
 end
 
 
-%% quaternion integrate
+%% quaternion multiply
+%  q = q1 * q2'
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = multConj(q1, q2)
+  q1       = q1.val;
+  q2       = q2.val;
+  q(1)     = q2(1)*q1(1) + q2(2)*q1(2) + q2(3)*q1(3) + q2(4)*q1(4);
+  q(2)     = q2(1)*q1(2) - q2(2)*q1(1) + q2(3)*q1(4) - q2(4)*q1(3);
+  q(3)     = q2(1)*q1(3) - q2(2)*q1(4) - q2(3)*q1(1) + q2(4)*q1(2);
+  q(4)     = q2(1)*q1(4) + q2(2)*q1(3) - q2(3)*q1(2) - q2(4)*q1(1);
+  q        = quat(q);
+end
+
+
+%% quaternion multiply
+%  q = q1' * q2
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = conjMult(q1, q2)
+  q1       = q1.val;
+  q2       = q2.val;
+  q(1)     = q2(1)*q1(1) + q2(2)*q1(2) + q2(3)*q1(3) + q2(4)*q1(4);
+  q(2)     = q2(2)*q1(1) - q2(1)*q1(2) + q2(3)*q1(4) - q2(4)*q1(3);
+  q(3)     = q2(3)*q1(1) - q2(1)*q1(3) - q2(2)*q1(4) + q2(4)*q1(2);
+  q(4)     = q2(4)*q1(1) - q2(1)*q1(4) + q2(2)*q1(3) - q2(3)*q1(2);
+  q        = quat(q);
+end
+
+
+%% quaternion scale 
+%  1 - converts to axis-angle value 
+%  2 - applies scale to magnitude
+%  3 - converts back to quaternion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = scale(q, scalar)
+  ang      = q.toAxisAngle();
+  ang(1)   = scalar * ang(1);
+  q        = quat("axisAngle", ang);  
+end
+
+
+%% vector rotate forward
+%  v = q * [0, v] * q'
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function out = rotateFrwd(q, v)
+  q          = q.val;
+  out(1)     = 2.0 * (v(1) * (0.5 - q(3)*q(3) - q(4)*q(4))    ...
+                    + v(2) * (q(2)*q(3) - q(1)*q(4))          ...
+                    + v(3) * (q(2)*q(4) + q(1)*q(3)));
+  out(2)     = 2.0 * (v(1) * (q(2)*q(3) + q(1)*q(4))          ...
+                    + v(2) * (0.5 - q(2)*q(2) - q(4)*q(4))    ...
+                    + v(3) * (q(3)*q(4) - q(1)*q(2)));
+  out(3)     = 2.0 * (v(1) * (q(2)*q(4) - q(1)*q(3))          ...
+                    + v(2) * (q(3)*q(4) + q(1)*q(2))          ...
+                    + v(3) * (0.5 - q(2)*q(2) - q(3)*q(3)));
+end
+
+
+%% vector rotate reverse
+%  v = q' * [0, v] * q
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function out = rotateRvrs(q, v)
+  q          = q.val;
+  out(1)     = 2.0 * (v(1) * (0.5 - q(3)*q(3) - q(4)*q(4))    ...
+                    + v(2) * (q(2)*q(3) + q(1)*q(4))          ...
+                    + v(3) * (q(2)*q(4) - q(1)*q(3)));
+  out(2)     = 2.0 * (v(1) * (q(2)*q(3) - q(1)*q(4))          ...
+                    + v(2) * (0.5 - q(2)*q(2) - q(4)*q(4))    ...
+                    + v(3) * (q(3)*q(4) + q(1)*q(2)));
+  out(3)     = 2.0 * (v(1) * (q(2)*q(4) + q(1)*q(3))          ...
+                      + v(2) * (q(3)*q(4) - q(1)*q(2))          ...
+                  + v(3) * (0.5 - q(2)*q(2) - q(3)*q(3)));
+end
+
+
+%% quaternion add rate
+%  q = q + scalar * 0.5 * [0, g] * q
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function q = addRate(q, g, scalar)
@@ -464,29 +554,38 @@ end
 
 
 %% quaternion forward component
-%  need to optimize
+%  v = q / [1, 0, 0]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toFrwd(q)
-  v        = q / [1, 0, 0];
+  q        = q.val;
+  v        = [2.0 * (0.5 - q(3)*q(3) - q(4)*q(4)),       ...
+              2.0 * (q(2)*q(3) + q(1)*q(4)),             ...
+              2.0 * (q(2)*q(4) - q(1)*q(3))];
 end
 
 
 %% quaternion up component
-%  need to optimize
+%  v = q / [0, 0, 1]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toUp(q)
-  v        = q / [0, 0, 1];
+  q        = q.val;
+  v        = [2.0 * (q(2)*q(4) + q(1)*q(3)),             ...
+              2.0 * (q(3)*q(4) - q(1)*q(2)),             ...
+              2.0 * (0.5 - q(2)*q(2) - q(3)*q(3))];
 end
 
 
 %% quaternion right component
-%  need to optimize
+%  v = q / [0, 1, 0]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function v = toRght(q)
-  v        = q / [0, 1, 0];
+  q        = q.val;
+  v        = [2.0 * (q(2)*q(3) - q(1)*q(4)),             ...
+              2.0 * (0.5 - q(2)*q(2) - q(4)*q(4)),       ...
+              2.0 * (q(3)*q(4) + q(1)*q(2))];
 end
 
 
@@ -748,19 +847,47 @@ function q = forceUp(q_in, up, mode)
 end
 
 
-%% quaternion difference between up vector
+%% quaternion difference
+%  q = q1' * q2
+%  if q(1) < 0
+%    q = -q
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = diffFrwd(q_in, frwd, mode)
-  q        = q_in \ q_in.forceFrwd(frwd,  mode);
+function q = diffQuatFrwd(q1, q2)
+  q        = q1.conjMult(q2);
+  if (q.val(1) < 0)
+    q      = -q;
+  end  
+end
+
+
+%% quaternion difference
+%  q = q2' * q1
+%  if q(1) < 0
+%    q = -q
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = diffQuatRvrs(q1, q2)
+  q        = q2.conjMult(q1);
+  if (q.val(1) < 0)
+    q      = -q;
+  end  
+end
+
+
+%% quaternion difference between forward vector
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function q = diffVectFrwd(q_in, frwd, mode)
+  q        = q_in / q_in.forceFrwd(frwd,  mode);
 end
 
 
 %% quaternion difference between up vector
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function q = diffUp(q_in, up, mode)
-  q        = q_in \ q_in.forceUp(up, mode);
+function q = diffVectUp(q_in, up, mode)
+  q        = q_in / q_in.forceUp(up, mode);
 end
 
 
@@ -914,6 +1041,9 @@ function M = toMatrix(q)
          2*x*z-2*w*y,    2*y*z+2*w*x,  1-2*x*x-2*y*y];
 end
 
+
+%% end of class definition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 end % methods
 

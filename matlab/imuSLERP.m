@@ -147,9 +147,9 @@ function FOM       = updateAccl(obj, t, a, weight)
   
   % estimate current state
   qEstm            = obj.estmQuat(t);
-  qDiff            = qEstm.diffUp(a, "up");
+  qDiff            = qEstm.diffVectUp(a, "up");
   % qMeas            = quat("upFrwdRght", a(:), qEstm.frwd, qEstm.rght);
-  % qDiff            = qEstm \ qMeas;
+  % qDiff            = qEstm / qMeas;
   qShift           = alpha * qDiff;
   obj.qSys         = obj.qSys * qShift;
   obj.tSys         = t;
@@ -157,7 +157,7 @@ function FOM       = updateAccl(obj, t, a, weight)
 
   % update current velocity
   qMeas            = quat("upFrwdRght", a(:), qEstm.frwd, qEstm.rght);
-  qDist            = obj.qAccl \ qMeas;
+  qDist            = obj.qAccl / qMeas;
   vDist            = qDist.rate(t - obj.tAccl);
   if obj.vReset
     obj.vFltr      = vDist;
@@ -207,8 +207,8 @@ function FOM       = updateMagn(obj, t, m, weight)
   % estimate current state
   qEstm            = obj.estmQuat(t);
   %qMeas            = quat("upFrwdRght", qEstm.up, m(:), qEstm.frwd);
-  %qDiff            = qEstm \ qMeas;
-  qDiff            = qEstm.diffFrwd(m, "frwd");
+  %qDiff            = qEstm / qMeas;
+  qDiff            = qEstm.diffVectFrwd(m, "frwd");
   qShift           = alpha * qDiff;
   obj.qSys         = obj.qSys * qShift;
   obj.tSys         = t;
@@ -216,7 +216,7 @@ function FOM       = updateMagn(obj, t, m, weight)
 
   % update current velocity
   qMeas            = quat("upFrwdRght", qEstm.up, m(:), qEstm.frwd);
-  qDist            = obj.qAccl \ qMeas;
+  qDist            = obj.qAccl / qMeas;
   vDist            = qDist.rate(t - obj.tMagn);
   if obj.vReset
     obj.vFltr      = vDist;

@@ -143,7 +143,7 @@ for i=1:length(u1)
   q2{i}   = quat("upFrwd", u2{i}, f2{i});
   q       = q1{i};
   for j=1:iter
-    d     = q \ q2{i};
+    d     = q / q2{i};
     d     = alpha * d;
     q     = q * d;
     plotVector(q2{i}.up, q2{i}.frwd, q2{i}.rght, q.up, q.frwd, q.rght);
