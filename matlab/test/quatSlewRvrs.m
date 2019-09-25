@@ -141,14 +141,17 @@ clear v1 v2 v3 v4
 
 % test axis-angle compliment
 for i=1:length(u1)
-  q1{i}   = quat("upFrwd", u1{i}, f1{i});
-  q2{i}   = quat("upFrwd", u2{i}, f2{i});
-  q       = q1{i};
+  q1{i}    = quat("upFrwd", u1{i}, f1{i});
+  q2{i}    = quat("upFrwd", u2{i}, f2{i});
+  q        = q1{i};
+  figure(1);
   for j=1:iter
-    d     = q2{i} \ q;
-    d     = alpha * d;
-    q     = q * d;
+    d      = q2{i} \ q;
+    FOM(j) = d.distDeg;
+    d      = alpha * d;
+    q      = q * d;
     plotVector(q2{i}.up, q2{i}.frwd, q2{i}.rght, q.up, q.frwd, q.rght);
     drawnow;
-  end 
+  end
+  figure(2); plot(FOM); title('FOM (deg)'); drawnow;
 end
