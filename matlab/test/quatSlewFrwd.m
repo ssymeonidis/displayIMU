@@ -15,6 +15,8 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+% last run on 11/25/19
+
 % initialize environment
 clear all; %close all;
 addpath('..');
@@ -120,7 +122,7 @@ clear    f1a  f1b  f1c  f1d  f1e  f1f  f1g  f1h  f1i  f1j  f1k  f1l  f1m  f1n  f
 clear    u2a  u2b  u2c  u2d  u2e  u2f  u2g  u2h  u2i  u2j  u2k  u2l  u2m  u2n  u2o  u2p  u2q
 clear    f2a  f2b  f2c  f2d  f2e  f2f  f2g  f2h  f2i  f2j  f2k  f2l  f2m  f2n  f2o  f2p  f2q
 
-% % add random vectors
+% add random vectors
 for i=1:nRand
   v1  = 512 * rand(1,3) - 256;
   v2  = 512 * rand(1,3) - 256;
