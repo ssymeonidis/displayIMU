@@ -15,6 +15,8 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+% last run on 11/25/19
+
 % initialize environment
 clear all; %close all;
 addpath('..');
@@ -139,14 +141,18 @@ clear v1 v2 v3 v4
 
 % test axis-angle compliment
 for i=1:length(u1)
-  q1{i}   = quat("upFrwd", u1{i}, f1{i});
-  q2{i}   = quat("upFrwd", u2{i}, f2{i});
-  q       = q1{i};
-  d       = q1{i} \ q2{i};
-  r       = d.rate(alpha);
+  q1{i}    = quat("upFrwd", u1{i}, f1{i});
+  q2{i}    = quat("upFrwd", u2{i}, f2{i});
+  q        = q1{i};
+  d        = q1{i} / q2{i};
+  r        = d.rate(alpha);
+  figure(1);
   for j=1:iter
-    q     = q.addRate(r);
+    q      = q.addRate(r);
+    d      = q / q2{i};
+    FOM(j) = d.distDeg;
     plotVector(q2{i}.up, q2{i}.frwd, q2{i}.rght, q.up, q.frwd, q.rght);
     drawnow;
-  end 
+  end
+  figure(2); plot(FOM); title('FOM (deg)'); drawnow;
 end

@@ -15,8 +15,7 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%% generate input sweeps for unit under test
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% last run on 11/25/19
 
 % initialize simulation
 addpath('..');
@@ -25,35 +24,35 @@ addpath('../utils');
 % define simulation inputs
 step_size_deg   = 2;
 
-% test yaw(positive sweep)
+% test yaw
 for i=0:step_size_deg:180
-  process_datum([i, 0, 0]);
+  process_datum([i, 0, 0], "positive yaw");
 end
 for i=180:-step_size_deg:0
-  process_datum([i, 0, 0]);
+  process_datum([i, 0, 0], "negative yaw");
 end
 
-% test pitch (positive sweep)
+% test pitch
 for i=0:step_size_deg:90
-  process_datum([0, i, 0]);
+  process_datum([0, i, 0], "positive pitch");
 end
 for i=90:-step_size_deg:0
-  process_datum([0, i, 0]);
+  process_datum([0, i, 0], "negative pitch");
 end
 
-% test roll (positive sweep)
+% test roll
 for i=0:step_size_deg:90
-  process_datum([0, 0, i]);
+  process_datum([0, 0, i], "positive roll");
 end
 for i=90:-step_size_deg:0
-  process_datum([0, 0, i]);
+  process_datum([0, 0, i], "negative roll");
 end
 
 
 %% main function (performs conversion and generates plot)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function process_datum(euler_deg)
-  plotState(quat("deg", euler_deg));
+function process_datum(euler_deg, name)
+  plotState(quat("eulerDeg", euler_deg)); title(name);
   drawnow;
 end

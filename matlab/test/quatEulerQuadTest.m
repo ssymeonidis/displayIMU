@@ -15,8 +15,7 @@
 % You should have received a copy of the GNU General Public License
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-%% generate input sweeps for unit under test
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% last run on 11/25/19
 
 % initialize simulation
 clear all; close all;
@@ -26,17 +25,12 @@ disp(' ');
 % test 1
 disp('#1');
 disp('test: f = 1, 0, 0')
-disp('      u = 0, 0, -1');
-f1 = [1, 0, 0];
-u1 = [0, 0, -1];
-q1 = quat("upFrwd", u1, f1);% test 1
-disp('test: f = 1, 0, 0')
 disp('      u = 0, 0, 1');
 f1 = [1, 0, 0];
 u1 = [0, 0, 1];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 2
@@ -44,8 +38,8 @@ disp('#2');
 disp('test: u = 0, 0, 1')
 u1 = [0, 0, 1];
 q1 = quat("up", u1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 3
@@ -53,8 +47,8 @@ disp('#3');
 disp('test: f = 1, 0, 0')
 f1 = [1, 0, 0];
 q1 = quat("frwd", f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 4
@@ -64,8 +58,8 @@ disp('      u = 0, 0, 1');
 f1 = [0, 1, 0];
 u1 = [0, 0, 1];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 5
@@ -73,8 +67,8 @@ disp('#5');
 disp('test: f = 0, 1, 0')
 f1 = [0, 1, 0];
 q1 = quat("frwd", f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 6
@@ -84,8 +78,8 @@ disp('      u = 0, 0, 1');
 f1 = [0, -1, 0];
 u1 = [0, 0, 1];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 7
@@ -93,8 +87,8 @@ disp('#7');
 disp('test: f = 0, -1, 0')
 f1 = [0, -1, 0];
 q1 = quat("frwd", f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 8
@@ -104,8 +98,8 @@ disp('      u = 0, 0, 1');
 f1 = [-1, 0, 0];
 u1 = [0, 0, 1];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 9
@@ -113,8 +107,8 @@ disp('#9');
 disp('test: f = -1, 0, 0')
 f1 = [-1, 0, 0];
 q1 = quat("frwd", f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 10
@@ -124,8 +118,8 @@ disp('      u = -1, 0, 0');
 f1 = [0, 0, 1];
 u1 = [-1, 0, 0];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 11
@@ -133,8 +127,8 @@ disp('#11');
 disp('test: u = -1, 0, 0')
 u1 = [-1, 0, 0];
 q1 = quat("up", u1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 12
@@ -144,8 +138,8 @@ disp('      u = 1, 0, 0');
 f1 = [0, 0, -1];
 u1 = [1, 0, 0];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 13
@@ -153,8 +147,8 @@ disp('#13');
 disp('test: u = 1, 0, 0')
 u1 = [1, 0, 0];
 q1 = quat("up", u1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 14
@@ -164,8 +158,8 @@ disp('      u = 0, 1, 0');
 f1 = [1, 0, 0];
 u1 = [0, 1, 0];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 15
@@ -173,8 +167,8 @@ disp('#15');
 disp('test: u = 0, 1, 0')
 u1 = [0, 1, 0];
 q1 = quat("up", u1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 16
@@ -184,8 +178,8 @@ disp('      u = 0, -1, 0');
 f1 = [1, 0, 0];
 u1 = [0, -1, 0];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 17
@@ -193,8 +187,8 @@ disp('#17');
 disp('test: u = 0, -1, 0')
 u1 = [0, -1, 0];
 q1 = quat("up", u1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 18
@@ -204,8 +198,8 @@ disp('      u = 0, 0, -1');
 f1 = [1, 0, 0];
 u1 = [0, 0, -1];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 19
@@ -213,8 +207,8 @@ disp('#19');
 disp('test: u = 0, 0, -1')
 u1 = [0, 0, -1];
 q1 = quat("up", u1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 % test 20
@@ -224,8 +218,8 @@ disp('      u = -1, 0, 0');
 f1 = [0, 1, 0];
 u1 = [-1, 0, 0];
 q1 = quat("upFrwd", u1, f1);
-a  = q1.deg;
-q2 = quat("deg", a);
+a  = q1.eulerDeg;
+q2 = quat("eulerDeg", a);
 disp_results(q1.frwd, q1.up, q1.rght, a, q2);
 
 

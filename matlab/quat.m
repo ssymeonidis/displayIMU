@@ -18,12 +18,13 @@
 classdef quat
     
 properties
-  val                     % quaternion value
+  val                       % quaternion value
 end
 
 properties (Constant)
-  epsilon   = 0.00001;    % near zero threshold
-  magThresh = 0.35;       % threshod to use "right" vector
+  epsilon     = 0.00001;    % near zero threshold
+  magThresh   = 0.35;       % threshod to use "right" vector
+  isRateNorm  = true;
 end
 
 methods
@@ -636,7 +637,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function out = toDist(q)
-  out        = 2 * acos(q.val(1));
+  out        = 2 * acos(min(q.val(1), 1));
 end
 
 
@@ -737,6 +738,9 @@ function q = addRate(q, g, scalar)
      dq    = dq * scalar;
    end
    q       = q + 0.5 * dq;
+   if q.isRateNorm
+     q.val = q.val ./ norm(q.val);
+   end
 end
 
 
@@ -1078,7 +1082,7 @@ function out = mrdivide(q, arg)
     
   % check for vector (rotate forward)
   elseif (length(arg) == 3)
-    out      = q.rotateFrwd(arg);
+    out      = q.rotateVectFrwd(arg);
     
   % check for scalar
   elseif (length(arg) == 1)
@@ -1101,7 +1105,7 @@ function out = mldivide(q, arg)
 
   % check for vector (rotate reverse)
   elseif (length(arg) == 3)
-    out      = q.rotateRvrs(arg);
+    out      = q.rotateVectRvrs(arg);
     
   % check for scalar
   elseif (length(arg) == 1)

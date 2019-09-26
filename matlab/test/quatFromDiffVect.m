@@ -54,7 +54,9 @@ clear t1 t2
 
 % test quaternion function
 for i=1:length(v1)
-  q1{i}   = quat("vec", v1{i}, v2{i});
+  q1{i}   = quat("diffVect", v1{i}, v2{i});
+  a       = round(q1{i}.eulerDeg, 1);
+  display(['a = ', num2str(a(1)), ', ', num2str(a(2)), ', ', num2str(a(3))]);
   v3{i}   = q1{i} / v1{i};
   tmp     = v3{i} - v2{i};
   df(i)   = sqrt(sum((tmp).^2));
@@ -67,7 +69,7 @@ end
 for i=1:length(v1)
   v       = v1{i};
   for j=1:iter
-    q     = quat("vec", v, v2{i});
+    q     = quat("diffVect", v, v2{i});
     a     = q.axisAngle();
     a(1)  = a(1) * alpha;
     q     = quat("axisAngle", a);
